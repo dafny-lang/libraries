@@ -97,32 +97,19 @@ module Demo {
     }
   }
 
-  method TestMyFilesystem() {
+  method TestMyFilesystem() returns (r: Result<()>) {
     var fs := new MyFilesystem();
-    // Note: these verbose "outcome.Failure?" patterns will soon
-    // not be needed any more, see https://github.com/dafny-lang/rfcs/pull/1
-    var outcome: Result<()> := fs.CreateFile("test.txt");
-    if outcome.Failure? {
-      print outcome.error, "\n";
-      return;
-    }
-    outcome := fs.WriteFile("test.txt", "Test dummy file");
-    if outcome.Failure? {
-      print outcome.error, "\n";
-      return;
-    }
-    var fileResult: Result<string> := fs.ReadFile("test.txt");
-    if outcome.Failure? {
-      print fileResult.error, "\n";
-      return;
-    }
-    if fileResult.Success? {
-      print fileResult.value, "\n";
-    }
+    var _ :- fs.CreateFile("test.txt");
+    var _ :- fs.WriteFile("test.txt", "Test dummy file");
+    var contents: string :- fs.ReadFile("test.txt");
+    print contents, "\n";
   }
 
   method Main() {
     TestMyMap();
-    TestMyFilesystem();
+    var outcome: Result<()> := TestMyFilesystem();
+    if outcome.Failure? {
+      print outcome.error, "\n";
+    }
   }
 }
