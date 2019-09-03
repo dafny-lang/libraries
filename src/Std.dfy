@@ -30,6 +30,19 @@ module Std {
     | Success(value: T)
     | Failure(error: string)
   {
+    predicate method IsFailure() {
+      Failure?
+    }
+    function method PropagateFailure<U>(): Result<U>
+      requires Failure?
+    {
+      Failure(this.error)
+    }
+    function method Extract(): T
+      requires Success?
+    {
+      value
+    }
     function method ToOption(): Option<T> {
       match this
       case Success(s) => Some(s)
