@@ -1,15 +1,18 @@
 include "../../src/Base64.dfy"
 
 module Demo {
+    import opened Std
+    import opened Base64
+    
     method TestBase64(msg: string, expected: string)
          requires forall k :: 0 <= k < |msg| ==> 0 <= msg[k] as int < 0x100
      {
          print "The message is: ", msg, "\n";
 
-         var byteMsg: seq<byte> := [];
+         var byteMsg: seq<uint8> := [];
          var i := 0;
          while i < |msg| {
-             byteMsg := byteMsg + [msg[i] as int as byte];
+             byteMsg := byteMsg + [msg[i] as int as uint8];
              i := i + 1;
          }
          var encoded := Encode(byteMsg);
@@ -23,7 +26,7 @@ module Demo {
          var dmsg := "";
          i := 0;
          while i < |decoded.value| {
-             dmsg := dmsg + [decoded.value[i] as int as char];
+             dmsg := dmsg + [decoded.value[i] as char];
              i := i + 1;
          }
          print "The decoded message is: ", dmsg, "\n\n";

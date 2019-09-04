@@ -1,7 +1,7 @@
-include "StandardLibrary.dfy"
+include "Std.dfy"
 
 module Base64 {
-    import opened StandardLibrary
+    import opened Std
 
     newtype index = x | 0 <= x < 0x40
     newtype tribyte = x | 0 <= x < 0x100_0000
@@ -35,7 +35,7 @@ module Base64 {
         else (c - 71 as char) as index
     }
 
-    function method SplitBytes(n: tribyte): (b: (byte, byte, byte))
+    function method SplitBytes(n: tribyte): (b: (uint8, uint8, uint8))
     {
         var n0 := n / 0x1_0000;
         var m0 := n - n0 * 0x1_0000;
@@ -43,10 +43,10 @@ module Base64 {
         var m1 := m0 - n1 * 0x100;
         var n2 := m1;
         assert n0 * 0x1_0000 + n1 * 0x100 + n2 == n;
-        (n0 as byte, n1 as byte, n2 as byte)
+        (n0 as uint8, n1 as uint8, n2 as uint8)
     }
     
-    function method CombineBytes(b: (byte, byte, byte)): (n: tribyte)
+    function method CombineBytes(b: (uint8, uint8, uint8)): (n: tribyte)
         ensures SplitBytes(n) == b
     {
         b.0 as tribyte * 0x1_0000 + b.1 as tribyte * 0x100 + b.2 as tribyte
@@ -71,17 +71,17 @@ module Base64 {
         (n0 as index, n1 as index, n2 as index, n3 as index)
     }
 
-    function method DecodeBlock(c: (index, index, index, index)): (b: (byte, byte, byte)) {
+    function method DecodeBlock(c: (index, index, index, index)): (b: (uint8, uint8, uint8)) {
         SplitBytes(CombineIndices(c))
     }
 
-    function method EncodeBlock(b: (byte, byte, byte)): (c: (index, index, index, index))
+    function method EncodeBlock(b: (uint8, uint8, uint8)): (c: (index, index, index, index))
         ensures DecodeBlock(c) == b
     {
         SplitIndices(CombineBytes(b))
     }
 
-    function method DecodeRecursively(s: seq<index>): (b: seq<byte>)
+    function method DecodeRecursively(s: seq<index>): (b: seq<uint8>)
         requires |s| % 4 == 0
         ensures |b| == |s| / 4 * 3
         ensures |b| % 3 == 0
@@ -91,7 +91,7 @@ module Base64 {
         [d.0, d.1, d.2] + DecodeRecursively(s[4..])
     }
 
-    function method EncodeRecursively(b: seq<byte>): (s: seq<index>)
+    function method EncodeRecursively(b: seq<uint8>): (s: seq<index>)
         requires |b| % 3 == 0
         ensures |s| == |b| / 3 * 4
         ensures |s| % 4 == 0
@@ -119,7 +119,7 @@ module Base64 {
         seq(|b|, i requires 0 <= i < |b| => Base64Char(b[i]))
     }
 
-    function method DecodeConverter(s: seq<char>): (b: seq<byte>)
+    function method DecodeConverter(s: seq<char>): (b: seq<uint8>)
         requires IsUnpaddedBase64String(s)
         ensures |b| == |s| / 4 * 3
         ensures |b| % 3 == 0
@@ -127,7 +127,7 @@ module Base64 {
         DecodeRecursively(FromCharsToIndices(s))
     }
 
-    function method {:opaque} EncodeConverter(b: seq<byte>): (s: seq<char>)
+    function method {:opaque} EncodeConverter(b: seq<uint8>): (s: seq<char>)
         requires |b| % 3 == 0
         ensures IsUnpaddedBase64String(s)
         ensures |s| == |b| / 3 * 4
@@ -144,7 +144,7 @@ module Base64 {
         s[3] == '='
     }
 
-    function method Decode1Padding(s: seq<char>): (b: seq<byte>)
+    function method Decode1Padding(s: seq<char>): (b: seq<uint8>)
         requires Is1Padding(s)
         ensures |b| == 2
     {
@@ -153,7 +153,7 @@ module Base64 {
         [d.0, d.1]
     }
 
-    function method {:opaque} Encode1Padding(b: seq<byte>): (s: seq<char>)
+    function method {:opaque} Encode1Padding(b: seq<uint8>): (s: seq<char>)
         requires |b| == 2
         ensures Is1Padding(s)
         ensures Decode1Padding(s) == b
@@ -170,7 +170,7 @@ module Base64 {
         s[3] == '='
     }
 
-    function method Decode2Padding(s: seq<char>): (b: seq<byte>)
+    function method Decode2Padding(s: seq<char>): (b: seq<uint8>)
         requires Is2Padding(s)
     {
         var c := (s[0], s[1], 'A', 'A');
@@ -178,7 +178,7 @@ module Base64 {
         [d.0]
     }
 
-    function method Encode2Padding(b: seq<byte>): (s: seq<char>)
+    function method Encode2Padding(b: seq<uint8>): (s: seq<char>)
         requires |b| == 1
         ensures Is2Padding(s)
         ensures Decode2Padding(s) == b
@@ -195,7 +195,7 @@ module Base64 {
                     || Is1Padding(s[|s|-4..]))))
     }
 
-    function method DecodeValid(s: seq<char>): (b: seq<byte>)
+    function method DecodeValid(s: seq<char>): (b: seq<uint8>)
         requires IsBase64String(s)
     {
         if s == [] then [] 
@@ -204,11 +204,11 @@ module Base64 {
         else DecodeConverter(s)
     }
 
-    function method Decode(s: seq<char>): (b: Result<seq<byte>>) {
+    function method Decode(s: seq<char>): (b: Result<seq<uint8>>) {
         if IsBase64String(s) then Success(DecodeValid(s)) else Failure("The encoding is malformed")
     }
 
-    function method Encode(b: seq<byte>): (s: seq<char>)
+    function method Encode(b: seq<uint8>): (s: seq<char>)
         ensures Decode(s) == Success(b)
     {
         var res := (
