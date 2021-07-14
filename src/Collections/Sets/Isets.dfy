@@ -1,7 +1,7 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-include "../Mathematics.dfy"
+include "../../Mathematics.dfy"
 
 module Isets {
 

@@ -6,8 +6,8 @@ Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, ET
 SPDX-License-Identifier: BSD-2-Clause
 **********************************************************************************************************************/
 
-include "../Options.dfy"
-include "../Mathematics.dfy"
+include "../../Options.dfy"
+include "../../Mathematics.dfy"
 
 module Seq {
 
