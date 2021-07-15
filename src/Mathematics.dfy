@@ -1,3 +1,6 @@
+// RUN: %dafny "%s" > "%t"
+// RUN: %diff "%s.expect" "%t"
+
 module Mathematics {
   function method min(a: int, b: int): int
   {

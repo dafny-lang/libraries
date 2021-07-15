@@ -1,3 +1,6 @@
+// RUN: %dafny "%s" > "%t"
+// RUN: %diff "%s.expect" "%t"
+
 module Options {
   
   datatype Option<T> = None | Some(value: T) {
