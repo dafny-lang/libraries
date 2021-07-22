@@ -12,8 +12,7 @@ So, please do use this library, give feedback, and contribute code, but also exp
 
 ## Contributions
 
-Any contributions of generally useful code are welcome, just open a pull request!
-All added code should be accompanied by some examples in the `examples` directory which illustrates how to use the code.
+Any contributions of generally useful code are welcome, just open a pull request!  Please follow the [library style guidelines](STYLE.md).  If the way to use your new code is not obvious, please add some examples in the `examples` directory to illustrate how to use the code.
 
 ## Acknowledgements
 
@@ -21,5 +20,6 @@ Much of this code came from or was inspired by code from the following projects:
 
 * [Ironclad Apps](https://github.com/microsoft/Ironclad/tree/main/ironclad-apps)
 * [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet)
-* [Verified BetrFS](https://github.com/vmware-labs/verified-betrfs)
 * [Vale](https://github.com/project-everest/vale/tree/legacy_dafny)
+* [Verified BetrFS](https://github.com/vmware-labs/verified-betrfs)
+
