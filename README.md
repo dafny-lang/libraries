@@ -19,8 +19,7 @@ All added code should be accompanied by some examples in the `examples` director
 
 Much of this code was inspired by code from the following projects:
 
-* Ironclad Apps: https://github.com/microsoft/Ironclad/tree/main/ironclad-apps
-* IronFleet: https://github.com/microsoft/Ironclad/tree/main/ironfleet
-* Verified BetrFS: https://github.com/vmware-labs/verified-betrfs
-* Vale: https://github.com/project-everest/vale/tree/legacy_dafny
-
+* [Ironclad Apps](https://github.com/microsoft/Ironclad/tree/main/ironclad-apps)
+* [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet)
+* [Verified BetrFS](https://github.com/vmware-labs/verified-betrfs)
+* [Vale](https://github.com/project-everest/vale/tree/legacy_dafny)
