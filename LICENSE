@@ -19,3 +19,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+This project also includes code from projects shown in README.md, which were licensed under the following licenses: 
+
+- BSD-2 License: https://github.com/vmware-labs/verified-betrfs/blob/master/LICENSE.txt
+- Apache License (Version 2.0): https://github.com/project-everest/vale/blob/legacy_dafny/LICENSE
+- MIT License: https://github.com/microsoft/Ironclad/blob/main/ironfleet/LICENSE
