@@ -19,7 +19,19 @@ module Seq {
   Last in Sequences
   *
   ***********************************************************/
-  
+  /* finds the first element in the sequence */
+  function method first<T>(s: seq<T>): T
+    requires |s| > 0
+  {
+    s[0]
+  }
+
+  function method drop_first<T>(s: seq<T>): seq<T>
+    requires |s| > 0
+  {
+    s[1..]
+  }
+
   /* finds the last element in the sequence */
   function method last<T>(s: seq<T>): T
     requires |s| > 0;
@@ -231,6 +243,11 @@ module Seq {
   {
     assert s == s[..pos] + s[pos..];
     s[..pos] + [a] + s[pos..]
+  }
+
+  function method {:opaque} reverse<T>(s: seq<T>): seq<T>
+  {
+    if s == [] then [] else [s[|s|-1]] + reverse(s[0 .. |s|-1])
   }
     
   function method {:opaque} repeat<T>(v: T, length: nat): (s: seq<T>)
@@ -480,7 +497,7 @@ module Seq {
     reads set i, o {:trigger o in f.reads(s[i])} | 0 <= i < |s| && o in f.reads(s[i]):: o
   {
     if |s| == 0 then []
-    else  [f(s[0])] + apply(f, s[1..])
+    else [f(s[0])] + apply(f, s[1..])
   }
 
   /* concatenating two sequences and then using "apply" is the same as using "apply" on each sequence 
@@ -513,7 +530,7 @@ module Seq {
     reads f.reads
   {
     if |s| == 0 then []
-    else ((if f(s[0]) then [s[0]] else []) + filter(f, s[1..]))
+    else (if f(s[0]) then [s[0]] else []) + filter(f, s[1..])
   }
 
   /* concatenating two sequences and then using "filter" is the same as using "filter" on each sequences
@@ -544,6 +561,8 @@ module Seq {
     else fold_left(f, f(init, s[0]), s[1..])
   }
 
+  /* Concatenating two sequences, then folding left is the same as folding the first sequence and using the result as the initial value to fold the second
+  sequence. */
   lemma {:opaque} lemma_fold_left_concat<A,T>(f: (A, T) -> A, init: A, a: seq<T>, b: seq<T>)
     requires 0 <= |a + b|
     ensures fold_left(f, init, a + b) == fold_left(f, fold_left(f, init, a), b)
@@ -566,12 +585,42 @@ module Seq {
     }
   }
 
+  /* inv is an invariant under stp, which is a relational version of the
+  function f passed to fold. */
+  predicate inv_fold_left<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
+                                           stp: (B, A, B) -> bool)
+  {
+    forall x: A, xs: seq<A>, b: B, b': B ::
+      inv(b, [x] + xs) && stp(b, x, b') ==> inv(b', xs)
+  }
+
+  /* inv(b, xs) ==> inv(fold_left(f, b, xs), []). */
+  lemma lemma_inv_fold_left<A,B>(inv: (B, seq<A>) -> bool,
+                                 stp: (B, A, B) -> bool,
+                                 f: (B, A) -> B,
+                                 b: B,
+                                 xs: seq<A>)
+    requires inv_fold_left(inv, stp)
+    requires forall b, a :: stp(b, a, f(b, a))
+    requires inv(b, xs)
+    ensures inv(fold_left(f, b, xs), [])
+  {
+    reveal_fold_left();
+    if xs == [] {
+    } else {
+      assert [xs[0]] + xs[1..] == xs;
+      lemma_inv_fold_left(inv, stp, f, f(b, xs[0]), xs[1..]);
+    }
+  }
+
   function method {:opaque} fold_right<A,T>(f: (T, A) -> A, s: seq<T>, init: A): A
   {
     if |s| == 0 then init
     else f(s[0], fold_right(f, s[1..], init))
   }
 
+  /* Concatenating two sequences, then folding right is the same as folding the second sequence and using the result as the initial value to fold the first
+  sequence. */
   lemma {:opaque} lemma_fold_right_concat<A,T>(f: (T, A) -> A, init: A, a: seq<T>, b: seq<T>)
     requires 0 <= |a + b|
     ensures fold_right(f, a + b, init) == fold_right(f, a, fold_right(f, b, init))
@@ -588,6 +637,33 @@ module Seq {
             assert (a + b)[1..] == a[1..] + b; }
         fold_right(f, a + b, init);
       }
+    }
+  }
+
+  /* inv is an invariant under stp, which is a relational version of the
+  function f passed to fold. */
+  predicate inv_fold_right<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
+                                            stp: (A, B, B) -> bool)
+  {
+    forall x: A, xs: seq<A>, b: B, b': B ::
+      inv(xs, b) && stp(x, b, b') ==> inv(([x] + xs), b')
+  }
+
+  /* inv([], b) ==> inv(xs, fold_right(f, xs, b)) */
+  lemma lemma_inv_fold_right<A,B>(inv: (seq<A>, B) -> bool,
+                                  stp: (A, B, B) -> bool,
+                                  f: (A, B) -> B,
+                                  b: B,
+                                  xs: seq<A>)
+    requires inv_fold_right(inv, stp)
+    requires forall a, b :: stp(a, b, f(a, b))
+    requires inv([], b)
+    ensures inv(xs, fold_right(f, xs, b))
+  {
+    reveal_fold_right();
+    if xs == [] {
+    } else {
+      assert [xs[0]] + xs[1..] == xs;
     }
   }
 
