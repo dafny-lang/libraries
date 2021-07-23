@@ -33,13 +33,5 @@ module Options {
       case Failure(e) => default
     }
   }
-
-  method to_array<T>(s: seq<T>) returns (a: array<T>)
-    ensures fresh(a)
-    ensures a.Length == |s|
-    ensures forall i :: 0 <= i < |s| ==> a[i] == s[i]
-  {
-    a := new T[|s|](i requires 0 <= i < |s| => s[i]);
-  }
   
 } 

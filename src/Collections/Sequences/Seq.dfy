@@ -5,18 +5,19 @@
 SPDX-License-Identifier: BSD-2-Clause */
 
 include "../../Options.dfy"
-include "../../Mathematics.dfy"
+include "../../BasicMath.dfy"
 
 module Seq {
 
   import opened Options
-  import Math = Mathematics
+  import Math = BasicMath
 
   /**********************************************************
   *
-  Last in Sequences
+  *  Manipulating the End of a Sequence
   *
   ***********************************************************/
+
   /* finds the first element in the sequence */
   function method first<T>(s: seq<T>): T
     requires |s| > 0
@@ -66,7 +67,7 @@ module Seq {
 
   /**********************************************************
   *
-  Contents and Placement in Sequence
+  *  Manipulating the Content of a Sequence
   *
   ***********************************************************/
   
@@ -111,6 +112,15 @@ module Seq {
     forall i {:trigger r2[i], r3[i]}| 0 <= i < |r2| ensures r2[i] == r3[i];
     {
     }
+  }
+
+  /* converts a sequence to an array */
+  method to_array<T>(s: seq<T>) returns (a: array<T>)
+    ensures fresh(a)
+    ensures a.Length == |s|
+    ensures forall i :: 0 <= i < |s| ==> a[i] == s[i]
+  {
+    a := new T[|s|](i requires 0 <= i < |s| => s[i]);
   }
 
   /* converts a sequence to a set */
@@ -291,7 +301,7 @@ module Seq {
 
   /**********************************************************
   *
-  Extrema in Sequences
+  *  Extrema in Sequences
   *
   ***********************************************************/
 
@@ -376,7 +386,7 @@ module Seq {
 
   /**********************************************************
   *
-  Sequences of Sequences
+  *  Sequences of Sequences
   *
   ***********************************************************/
 
@@ -483,7 +493,7 @@ module Seq {
 
   /**********************************************************
   *
-  Higher Order Sequence Functions
+  *  Higher-Order Sequence Functions
   *
   ***********************************************************/
 

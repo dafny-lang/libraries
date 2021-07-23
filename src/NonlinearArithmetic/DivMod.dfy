@@ -51,7 +51,7 @@ module DivMod {
   }
 
   /* zero divided by an integer besides 0 is 0 */
-  lemma {:opaque} lemma_div_of_0(d: int)
+  lemma lemma_div_of_0(d: int)
     requires d != 0
     ensures 0 / d == 0
   { 
