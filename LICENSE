@@ -23,11 +23,11 @@ SOFTWARE.
 
 This project also includes code from projects shown in README.md, which were licensed under the following licenses: 
 
-- BSD-2 License: https://github.com/vmware-labs/verified-betrfs/blob/master/LICENSE.txt
-- Apache License (Version 2.0): https://github.com/project-everest/vale/blob/legacy_dafny/LICENSE
-- MIT License: https://github.com/microsoft/Ironclad/blob/main/ironfleet/LICENSE
+1) BSD-2 License: https://github.com/vmware-labs/verified-betrfs/blob/master/LICENSE.txt
+2) Apache License (Version 2.0): https://github.com/project-everest/vale/blob/legacy_dafny/LICENSE
+3) MIT License: https://github.com/microsoft/Ironclad/blob/main/ironfleet/LICENSE
 
-
+1)
 Copyright 2021 VMware, Inc.
 
 The BSD-2 license (the "License") set forth below applies to all parts of the Verified BetrFS project. You may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ Redistributions in binary form must reproduce the above copyright notice, this l
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
+2)
 Apache License
 Version 2.0, January 2004
 http://www.apache.org/licenses/ 
@@ -234,7 +234,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the Apache Version 2.0 License for specific language governing
 permissions and limitations under the License.
 
-
+3)
 Copyright (c) Microsoft Corporation
 All rights reserved. 
 
