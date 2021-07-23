@@ -29,7 +29,7 @@ module Demo {
     m.Put("message", "Hello");
     var o: Option<string> := m.Get("message");
     if o.Some? {
-      print o.get, "\n";
+      print o.unwrap_or, "\n";
     } else {
       print "oops\n";
     }
@@ -46,7 +46,7 @@ module Demo {
   // Sometimes we want to go from Option to Result:
   method FindName(m: MyMap<string, string>) returns (res: Result<string>) {
     // Will return a default error message in case of None:
-    res := m.Get("name").ToResult();
+    res := m.Get("name").to_result();
     // We can also match on the option to write a custom error:
     match m.Get("name")
     case Some(n) => res := Success(n);
