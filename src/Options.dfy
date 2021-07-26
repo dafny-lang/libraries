@@ -1,6 +1,11 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
+/*********************************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+**********************************************************************************************/
+
 module Options {
   
   datatype Option<T> = None | Some(value: T) {

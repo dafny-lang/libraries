@@ -1,6 +1,11 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
+/*********************************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+**********************************************************************************************/
+
 module BasicMath {
   function method min(a: int, b: int): int
   {

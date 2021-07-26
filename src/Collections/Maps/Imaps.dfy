@@ -1,8 +1,14 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/* Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, ETH Zurich, and University of Washington
-SPDX-License-Identifier: BSD-2-Clause */
+/*********************************************************************************************
+*  Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+*  ETH Zurich, and University of Washington
+*  SPDX-License-Identifier: BSD-2-Clause 
+* 
+*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+**********************************************************************************************/
 
 include "../../Options.dfy"
 

@@ -1,9 +1,17 @@
 // RUN: %dafny /compile:0 /noNLarith "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/* lemmas and functions in this file are used in the proofs in DivMod.dfy */
+/***********************************************************************************
+*  Original: Copyright (c) Microsoft Corporation
+*  SPDX-License-Identifier: MIT
+*  
+*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+************************************************************************************/
 
-/* Specs/implements mathematical div and mod, not the C version.
+/* lemmas and functions in this file are used in the proofs in DivMod.dfy 
+
+Specs/implements mathematical div and mod, not the C version.
 This may produce "surprising" results for negative values
 For example, -3 div 5 is -1 and -3 mod 5 is 2.
 Note this is consistent: -3 * -1 + 2 == 5 */
