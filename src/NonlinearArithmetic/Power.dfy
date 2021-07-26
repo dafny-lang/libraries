@@ -5,14 +5,14 @@
 be more stable and less reliant on Z3 heuristics. The latter includes automation and its use requires less effort */
 
 include "DivMod.dfy"
-include "../Mathematics.dfy"
+include "../BasicMath.dfy"
 include "Internals/GeneralInternals.dfy"
 include "Mul.dfy"
 include "Internals/MulInternals.dfy"
 
 module Power {
   import opened DivMod
-  import opened Mathematics
+  import opened BasicMath
   import opened GeneralInternals
   import opened Mul
   import opened MulInternals
