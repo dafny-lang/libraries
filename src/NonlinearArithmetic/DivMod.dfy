@@ -169,7 +169,7 @@ module DivMod {
   }
 
   /* Rounding is different when multiplying the sum of two integers by a fraction d/d vs. 
-  first multiplying by each integer by d/d and then adding the quotients */
+  first multiplying each integer by d/d and then adding the quotients */
   lemma lemma_dividing_sums(a: int, b: int, d: int, R: int)
     requires 0 < d
     requires R == a % d + b % d - (a + b) % d
