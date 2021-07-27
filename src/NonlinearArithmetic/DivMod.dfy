@@ -1317,7 +1317,6 @@ module DivMod {
     }
   }
   
-  /* ensures easier to follow than a comment would be */
   lemma lemma_mul_mod_noop_left(x: int, y: int, m: int)
     requires 0 < m
     ensures (x % m) * y % m == x * y % m
@@ -1336,7 +1335,6 @@ module DivMod {
     }
   }
   
-  /* ensures easier to follow than a comment would be */
   lemma lemma_mul_mod_noop_right(x: int, y: int, m: int)
     requires 0 < m
     ensures x * (y % m) % m == (x * y) % m
