@@ -1,0 +1,12 @@
+# Convenient short-hand
+[attr]txt     text eol=lf whitespace=blank-at-eol,space-before-tab,-indent-with-non-tab,tab-in-indent,-blank-at-eof,tabwidth=4
+[attr]txtwtab text eol=lf whitespace=blank-at-eol,space-before-tab,indent-with-non-tab,-tab-in-indent,-blank-at-eof
+
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly mark situations for each type of file we care about
+.gitattributes     txt
+*.md               txt
+*.dfy              txt
+Makefile           txtwtab
