@@ -20,7 +20,7 @@ module Mul {
   import MulINL = MulInternalsNonlinear
   import opened MulInternals
 
-  /* the common syntax of multiplication results in the same product as multiplication 
+  /* the built-in syntax of multiplication results in the same product as multiplication 
   through recursive addition */
   lemma lemma_mul_is_mul_recursive(x: int, y: int)
     ensures x * y == mul_recursive(x, y)
@@ -40,7 +40,7 @@ module Mul {
     }
   }
 
-  /* the common syntax of multiplying two positive integers results in the same product as 
+  /* the built-in syntax of multiplying two positive integers results in the same product as 
   mul_pos, which is achieved by recursive addition */ 
   lemma lemma_mul_is_mul_pos(x: int, y: int)
     requires x >= 0
@@ -115,7 +115,7 @@ module Mul {
     }
   }
 
-  /* multiplcation is commutative */
+  /* multiplication is commutative */
   lemma lemma_mul_is_commutative(x: int, y: int)
     ensures x * y == y * x
   {

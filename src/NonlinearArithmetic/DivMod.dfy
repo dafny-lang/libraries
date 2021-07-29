@@ -584,7 +584,7 @@ module DivMod {
     }
   }
 
-  /* mutltiplying an integer by a fraction is equivalent to multiplying the integer by the
+  /* multiplying an integer by a fraction is equivalent to multiplying the integer by the
   fraction's numerator */
   lemma lemma_mul_hoist_inequality(x: int, y: int, z: int)
     requires 0 <= x
