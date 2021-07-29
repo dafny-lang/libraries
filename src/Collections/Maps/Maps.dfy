@@ -17,15 +17,15 @@ module Maps {
 
   function method get<X, Y>(m: map<X, Y>, x: X): Option<Y>
   {
-	  if x in m then Some(m[x]) else None
-	}
+    if x in m then Some(m[x]) else None
+  }
 
   function method {:opaque} to_imap<X, Y>(m: map<X, Y>): (m': imap<X, Y>)
     ensures forall x {:trigger m'[x]} :: x in m ==> x in m' && m'[x] == m[x]
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m
   {
-	  imap x | x in m :: m[x]
-	}
+    imap x | x in m :: m[x]
+  }
 
   /* Remove all key-value pairs corresponding to the set of keys provided. */
   function method {:opaque} remove_keys<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
@@ -55,8 +55,7 @@ module Maps {
     map x | x in xs && x in m :: m[x]
   }
 
-  /* True iff two maps contain the same key-value pairs for intersecting
-  keys. */
+  /* True iff x maps to the same value or does not exist in m and m'. */
   predicate equal_on_key<X, Y>(m: map<X, Y>, m': map<X, Y>, x: X)
   {
     (x !in m && x !in m') || (x in m && x in m' && m[x] == m'[x])
