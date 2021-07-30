@@ -31,7 +31,7 @@ module Options {
       case Success(s) => Some(s)
       case Failure(e) => None()
     }
-    function method unwrap_pr(default: T): T 
+    function method unwrap_or(default: T): T 
     {
       match this
       case Success(s) => s
