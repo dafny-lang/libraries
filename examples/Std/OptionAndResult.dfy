@@ -29,7 +29,7 @@ module Demo {
     m.Put("message", "Hello");
     var o: Option<string> := m.Get("message");
     if o.Some? {
-      print o.unwrap_or, "\n";
+      print o.value, "\n";
     } else {
       print "oops\n";
     }
