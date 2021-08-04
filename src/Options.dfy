@@ -8,12 +8,12 @@
 
 module Options {
   
-  datatype Option<T> = None | Some(value: T) {
-    function method to_result(): Result<T> 
+  datatype Option<T, R> = None | Some(value: T) {
+    function method to_result(error: R): Result<T, R> 
     {
       match this
       case Some(v) => Success(v)
-      case None() => Failure("Option is None")
+      case None => Failure(error)
     }
     
     function method unwrap_or(default: T): T 
@@ -24,8 +24,8 @@ module Options {
     }
   }
   
-  datatype Result<T> = | Success(value: T) | Failure(error: string) {
-    function method to_option(): Option<T> 
+  datatype Result<T, R> = | Success(value: T) | Failure(error: R) {
+    function method to_option(): Option<T, R> 
     {
       match this
       case Success(s) => Some(s)
