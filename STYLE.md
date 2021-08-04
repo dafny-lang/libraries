@@ -211,7 +211,7 @@ predicate foo()
 } 
 
 // NO
-Function foo():bool 
+function foo():bool 
 {
   ...
 }
