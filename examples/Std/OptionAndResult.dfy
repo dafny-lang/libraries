@@ -1,7 +1,7 @@
-include "../../src/Options.dfy"
+include "../../src/OptionAndResult.dfy"
 
 module Demo {
-  import opened Options
+  import opened OptionAndResult
 
   // ------ Demo for Option ----------------------------
   // We use Option when we don't need to pass around a reason for the failure,
