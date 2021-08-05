@@ -217,9 +217,9 @@ module Seq {
   }
 
   /* finds the index of a certain element in the sequence if found*/
-  function index_of<T>(s: seq<T>, v: T): Option<nat>
+  function index_of<T>(s: seq<T>, v: T): Option<nat, string>
     requires v in s;
-    ensures var i:= index_of(s, v);
+    ensures var i := index_of(s, v);
     if i.Some? then i.value < |s| && s[i.value] == v else v !in s;
   {
     if i :| 0 <= i < |s| && s[i] == v then Some(i) else None

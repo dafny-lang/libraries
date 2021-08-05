@@ -15,7 +15,7 @@ include "../../Options.dfy"
 module Imaps {
   import opened Options
 
-  function method get<X, Y>(m: imap<X, Y>, x: X): Option<Y>
+  function method get<X, Y>(m: imap<X, Y>, x: X): Option<Y, string>
   {
     if x in m then Some(m[x]) else None
   }

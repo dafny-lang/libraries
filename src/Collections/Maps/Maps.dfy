@@ -15,7 +15,7 @@ include "../../Options.dfy"
 module Maps {
   import opened Options
 
-  function method get<X, Y>(m: map<X, Y>, x: X): Option<Y>
+  function method get<X, Y>(m: map<X, Y>, x: X): Option<Y, string>
   {
     if x in m then Some(m[x]) else None
   }
