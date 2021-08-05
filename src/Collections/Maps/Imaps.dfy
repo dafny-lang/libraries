@@ -10,10 +10,10 @@
 *  SPDX-License-Identifier: MIT 
 **********************************************************************************************/
 
-include "../../Options.dfy"
+include "../../OptionAndResult.dfy"
 
 module Imaps {
-  import opened Options
+  import opened OptionAndResult
 
   function method get<X, Y>(m: imap<X, Y>, x: X): Option<Y, string>
   {

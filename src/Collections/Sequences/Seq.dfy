@@ -14,12 +14,12 @@
 *  SPDX-License-Identifier: MIT 
 **********************************************************************************************/
 
-include "../../Options.dfy"
+include "../../OptionAndResult.dfy"
 include "../../BasicMath.dfy"
 
 module Seq {
 
-  import opened Options
+  import opened OptionAndResult
   import Math = BasicMath
 
   /**********************************************************

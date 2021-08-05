@@ -10,10 +10,10 @@
 *  SPDX-License-Identifier: MIT 
 **********************************************************************************************/
 
-include "../../Options.dfy"
+include "../../OptionAndResult.dfy"
 
 module Maps {
-  import opened Options
+  import opened OptionAndResult
 
   function method get<X, Y>(m: map<X, Y>, x: X): Option<Y, string>
   {
