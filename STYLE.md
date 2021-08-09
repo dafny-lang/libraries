@@ -6,19 +6,20 @@ This style guide provides coding conventions for the Dafny Standard Library code
 
 ## Naming Convention
 
-Any **classes**, **modules**, **datatypes**, and **newtypes** are named with `PascalCase`.
+Any **variables** are named with `camelCase`.
 
-    Module MyModule {
-        ...
-    }
-    
-Any **lemmas**, **predicates**, **functions**, **methods** and **variables** are named with `PascalCase`.
+    var minValue := 1;
+    var cipherMessage := "Hello World";
+
+
+Any **lemmas**, **predicates**, **functions**, **methods**, **classes**, **modules**, **datatypes**, and **newtypes**
+are named with `PascalCase`.
 
     method FindIndex(arr: seq<int>, k: int)
         ...
         
         
-The **lemma** keyword indicates a ghost method used for proof purposes. Any **lemma** names should be prefixed with `lemma`.
+The **lemma** keyword indicates a ghost method used for proof purposes. Any **lemma** names should be prefixed with `Lemma`.
 
     lemma LemmaValueIsInIndex(arr: seq<int>, k: int)
         ...
