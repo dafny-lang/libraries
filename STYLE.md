@@ -12,15 +12,15 @@ Any **classes**, **modules**, **datatypes**, and **newtypes** are named with `Pa
         ...
     }
     
-Any **lemmas**, **predicates**, **functions**, **methods** and **variables** are named with `camelCase`.
+Any **lemmas**, **predicates**, **functions**, **methods** and **variables** are named with `PascalCase`.
 
-    method findIndex(arr: seq<int>, k: int)
+    method FindIndex(arr: seq<int>, k: int)
         ...
         
         
 The **lemma** keyword indicates a ghost method used for proof purposes. Any **lemma** names should be prefixed with `lemma`.
 
-    lemma lemmaValueIsInIndex(arr: seq<int>, k: int)
+    lemma LemmaValueIsInIndex(arr: seq<int>, k: int)
         ...
         
 Any static or global **constants** are named with `UPPERCASE_WITH_UNDERSCORES`.
@@ -35,16 +35,16 @@ class Integer {
     // The following method converts the given integer
     // to a string.
     //
-    // this method name can be simplified to toString()
-    // so that the method call is Integer.toString(i)
-    // instead of Integer.integerToString(i).
+    // this method name can be simplified to ToString()
+    // so that the method call is Integer.ToString(i)
+    // instead of Integer.IntegerToString(i).
 
     // YES
-    method toString(i: int) returns (s: string)
+    method ToString(i: int) returns (s: string)
         ...
 
     // NO
-    method integerToString(i: int) returns (s: string)
+    method IntegerToString(i: int) returns (s: string)
         ...
     }
     
@@ -64,7 +64,7 @@ Opening braces for **methods**, **lemmas**, **functions**, and **predicates** go
 ```
 module M {
     ...
-    method met(i: int) returns (j: int)
+    method Met(i: int) returns (j: int)
         requires i % 2 == 0
         ensures j > 10
     {
@@ -91,10 +91,10 @@ When a file uses two modules and both of them define a method of the same name, 
 import MyModule
 import YourModule
 ...
-method myMethod() 
+method MyMethod() 
 {
-    myModule.foo();
-    yourModule.foo();
+    MyModule.foo();
+    YourModule.foo();
 }
 ```
 
@@ -104,10 +104,10 @@ In this case, if you want to shorten the module name, import it with a shorthand
 import M = MyModuleWithACumbersomeName
 import Y = YourModuleWithACumbersomeName
 ...
-method myMethod() 
+method MyMethod() 
 {
-    M.foo();
-    Y.foo();
+    M.Foo();
+    Y.Foo();
 }
 ```
 
@@ -144,19 +144,19 @@ End each file with a newline.
 Every Dafny method has the following signature.
 
 ```
-method {:<attributes>} methodName(param1: Type, param2: Type) returns (ret: Type)
+method {:<attributes>} MethodName(param1: Type, param2: Type) returns (ret: Type)
     requires P()
     modifies param2
     ensures Q()
     decreases param1
 ```
 
-When possible, put` methodName` and the `returns` statement on the same line, as the keyword `returns` is distinct from other method specification clauses, such as `requires`, `modifies`, `ensures`, and `decreases`, which should appear in this order. Each method specification clause should be on a separate line, indented.
+When possible, put` MethodName` and the `returns` statement on the same line, as the keyword `returns` is distinct from other method specification clauses, such as `requires`, `modifies`, `ensures`, and `decreases`, which should appear in this order. Each method specification clause should be on a separate line, indented.
 
 In case the Method signature is too long, we can break it down.
 
 ```
-method {:<attributes>} methodName(param1: Type, param2: Type,
+method {:<attributes>} MethodName(param1: Type, param2: Type,
         param3: Type, param4: Type, param5: Type)
     returns (ret1: Type, ret2: Type, ret3: Type, ret4: Type,
         ret5: Type)
@@ -188,14 +188,14 @@ The same rules apply to `function`, `predicate`, and `lemma` definitions.
 Functions, predicates, and methods within a file should be sorted topologically, meaning that everything `method M` depends on should be above `M` in the file.
 
 ```
-function myFunction(a: int): int
+function MyFunction(a: int): int
 {
   ...
 }
-method myMethod(i: int) 
+method MyMethod(i: int) 
 {
   ...
-  return myFunction(i);
+  return MyFunction(i);
 }
 ```
 
@@ -205,13 +205,13 @@ Predicates should be used instead of functions that return a Boolean value.
 
 ```
 // YES
-predicate foo() 
+predicate Foo() 
 {
   ...
 } 
 
 // NO
-Function foo():bool 
+Function Foo():bool 
 {
   ...
 }
@@ -263,7 +263,7 @@ print(x);
 
 ```
 // YES
-method collatz(num: nat)
+method Collatz(num: nat)
     decreases *
 {
     var n := num;
@@ -275,7 +275,7 @@ method collatz(num: nat)
 }
 
 // NO
-method collatz(num: nat)
+method Collatz(num: nat)
     decreases *
 {
     var n := num;
@@ -315,22 +315,22 @@ If the type can be inferred by Dafny, leave it out, unless you think it provides
 
 #### Function, Method, Predicate, and Lemma Declaration
 
-The `function`, `method`, `predicate`, and `lemma` definitions should have the form `functionName(parameterName: parameterType, ...)`.
+The `function`, `method`, `predicate`, and `lemma` definitions should have the form `FunctionName(parameterName: parameterType, ...)`.
 
 ```
 // YES
-function method foo<int>(i: int): int
+function method Foo<int>(i: int): int
 
 // NO
-function method foo<int> (i : int) : int // unnecessary whitespace
+function method Foo<int> (i : int) : int // unnecessary whitespace
 Avoid too little or too much whitespace that reduces the overall readability.
 // YES
-lemma lemmaMyLemma<A, B>(x: seq<seq<A>>, y: B) {
+lemma LemmaMyLemma<A, B>(x: seq<seq<A>>, y: B) {
     ...
 }
 
 // NO
-lemma lemmaMyLemma <A,B> ( x : seq<seq<A>> , y :B){
+lemma LemmaMyLemma <A,B> ( x : seq<seq<A>> , y :B){
     ...
 }
 ```

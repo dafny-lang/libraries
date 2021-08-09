@@ -15,12 +15,12 @@ include "../../OptionAndResult.dfy"
 module Maps {
   import opened OptionAndResult
 
-  function method get<X, Y>(m: map<X, Y>, x: X): Option<Y>
+  function method Get<X, Y>(m: map<X, Y>, x: X): Option<Y>
   {
     if x in m then Some(m[x]) else None
   }
 
-  function method {:opaque} toImap<X, Y>(m: map<X, Y>): (m': imap<X, Y>)
+  function method {:opaque} ToImap<X, Y>(m: map<X, Y>): (m': imap<X, Y>)
     ensures forall x {:trigger m'[x]} :: x in m ==> x in m' && m'[x] == m[x]
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m
   {
@@ -28,7 +28,7 @@ module Maps {
   }
 
   /* Remove all key-value pairs corresponding to the set of keys provided. */
-  function method {:opaque} removeKeys<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
+  function method {:opaque} RemoveKeys<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
     ensures forall x {:trigger m'[x]} :: x in m && x !in xs ==> x in m' && m'[x] == m[x]
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m && x !in xs
     ensures m'.Keys == m.Keys - xs
@@ -37,8 +37,8 @@ module Maps {
   }
 
   /* Remove a key-value pair. Returns unmodified map if key is not found. */
-  function method {:opaque} remove<X, Y>(m: map<X, Y>, x: X): (m': map<X, Y>)
-    ensures m' == removeKeys(m, {x})
+  function method {:opaque} Remove<X, Y>(m: map<X, Y>, x: X): (m': map<X, Y>)
+    ensures m' == RemoveKeys(m, {x})
     ensures |m'.Keys| <= |m.Keys|
     ensures x in m ==> |m'| == |m| - 1
     ensures x !in m ==> |m'| == |m|
@@ -49,28 +49,28 @@ module Maps {
   }
 
   /* Keep all key-value pairs corresponding to the set of keys provided. */
-  function method {:opaque} restrict<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
-    ensures m' == removeKeys(m, m.Keys - xs)
+  function method {:opaque} Restrict<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
+    ensures m' == RemoveKeys(m, m.Keys - xs)
   {
     map x | x in xs && x in m :: m[x]
   }
 
   /* True iff x maps to the same value or does not exist in m and m'. */
-  predicate equalOnKey<X, Y>(m: map<X, Y>, m': map<X, Y>, x: X)
+  predicate EqualOnKey<X, Y>(m: map<X, Y>, m': map<X, Y>, x: X)
   {
     (x !in m && x !in m') || (x in m && x in m' && m[x] == m'[x])
   }
 
   /* True iff m is a subset of m'. */
-  predicate isSubset<X, Y>(m: map<X, Y>, m': map<X, Y>)
+  predicate IsSubset<X, Y>(m: map<X, Y>, m': map<X, Y>)
   {
     && m.Keys <= m'.Keys
-    && forall x {:trigger equalOnKey(m, m', x)}{:trigger x in m} :: x in m ==> equalOnKey(m, m', x)
+    && forall x {:trigger EqualOnKey(m, m', x)}{:trigger x in m} :: x in m ==> EqualOnKey(m, m', x)
   }
 
   /* Union of two maps. Does not require disjoint domains; on the intersection,
   values from the first map are chosen. */
-  function method {:opaque} union<X, Y>(m: map<X, Y>, m': map<X, Y>): (r: map<X, Y>)
+  function method {:opaque} Union<X, Y>(m: map<X, Y>, m': map<X, Y>): (r: map<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
     ensures forall x {:trigger r[x]} :: x in m ==> r[x] == m[x]
     ensures forall x {:trigger r[x]} :: x in m' && x !in m ==> r[x] == m'[x]
@@ -80,50 +80,50 @@ module Maps {
 
   /* The size of the disjoint union is equal to the sum of individual map
   sizes. */
-  lemma lemmaDisjointUnionSize<X, Y>(m: map<X, Y>, m': map<X, Y>)
+  lemma LemmaDisjointUnionSize<X, Y>(m: map<X, Y>, m': map<X, Y>)
     requires m.Keys !! m'.Keys
-    ensures |union(m, m')| == |m| + |m'|
+    ensures |Union(m, m')| == |m| + |m'|
   {
-    var u := union(m, m');
+    var u := Union(m, m');
     assert |u.Keys| == |m.Keys| + |m'.Keys|;
   }
 
   /* True iff a map is injective. */
-  predicate {:opaque} injective<X, Y>(m: map<X, Y>)
+  predicate {:opaque} Injective<X, Y>(m: map<X, Y>)
   {
     forall x, x' {:trigger m[x], m[x']} :: x != x' && x in m && x' in m ==> m[x] != m[x']
   }
 
   /* Swaps map keys and values. Values are not required to be unique; no
   promises on which key is chosen on the intersection. */
-  function {:opaque} invert<X, Y>(m: map<X, Y>): map<Y, X>
+  function {:opaque} Invert<X, Y>(m: map<X, Y>): map<Y, X>
   {
     map y | y in m.Values :: var x :| x in m.Keys && m[x] == y; x
   }
 
   /* Inverted maps are injective. */
-  lemma lemmaInvertIsInjective<X, Y>(m: map<X, Y>)
-    ensures injective(invert(m))
+  lemma LemmaInvertIsInjective<X, Y>(m: map<X, Y>)
+    ensures Injective(Invert(m))
   {
-    reveal injective();
-    reveal invert();
+    reveal Injective();
+    reveal Invert();
   }
 
   /* True iff a map contains all valid keys. */
-  predicate {:opaque} total<X(!new), Y>(m: map<X, Y>)
+  predicate {:opaque} Total<X(!new), Y>(m: map<X, Y>)
   {
     forall i {:trigger m[i]}{:trigger i in m} :: i in m
   }
 
   /* True iff a map is monotonic. */
-  predicate {:opaque} monotonic(m: map<int, int>)
+  predicate {:opaque} Monotonic(m: map<int, int>)
   {
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && x <= x' ==> m[x] <= m[x']
   }
 
   /* True iff a map is monotonic. Only considers keys greater than or
   equal to start. */
-  predicate {:opaque} monotonicFrom(m: map<int, int>, start: int)
+  predicate {:opaque} MonotonicFrom(m: map<int, int>, start: int)
   {
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
   }

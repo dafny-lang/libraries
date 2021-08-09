@@ -9,7 +9,7 @@
 *  SPDX-License-Identifier: MIT 
 ************************************************************************************/
 
-/* Every lemma comes in 2 forms: 'lemmaProperty' and 'lemmaPropertyAuto'. The former takes arguments and may 
+/* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The former takes arguments and may 
 be more stable and less reliant on Z3 heuristics. The latter includes automation and its use requires less effort */
 
 include "Internals/MulInternalsNonlinear.dfy"
@@ -22,36 +22,36 @@ module Mul {
 
   /* the built-in syntax of multiplication results in the same product as multiplication 
   through recursive addition */
-  lemma lemmaMulIsMulRecursive(x: int, y: int)
-    ensures x * y == mulRecursive(x, y)
+  lemma LemmaMulIsMulRecursive(x: int, y: int)
+    ensures x * y == MulRecursive(x, y)
   {
-    if (x >= 0) { lemmaMulIsMulPos(x, y); }
-    if (x <= 0) { lemmaMulIsMulPos(-x, y); }
-    lemmaMulAuto();
+    if (x >= 0) { LemmaMulIsMulPos(x, y); }
+    if (x <= 0) { LemmaMulIsMulPos(-x, y); }
+    LemmaMulAuto();
   }
 
-  lemma lemmaMulIsMulRecursiveAuto()
-    ensures forall x: int, y: int :: x * y == mulRecursive(x, y)
+  lemma LemmaMulIsMulRecursiveAuto()
+    ensures forall x: int, y: int :: x * y == MulRecursive(x, y)
   {
     forall x: int, y: int
-      ensures x * y == mulRecursive(x, y)
+      ensures x * y == MulRecursive(x, y)
     {
-      lemmaMulIsMulRecursive(x, y);
+      LemmaMulIsMulRecursive(x, y);
     }
   }
 
   /* the built-in syntax of multiplying two positive integers results in the same product as 
-  mulPos, which is achieved by recursive addition */ 
-  lemma lemmaMulIsMulPos(x: int, y: int)
+  MulPos, which is achieved by recursive addition */ 
+  lemma LemmaMulIsMulPos(x: int, y: int)
     requires x >= 0
-    ensures x * y == mulPos(x, y)
+    ensures x * y == MulPos(x, y)
   {
-    reveal mulPos();
-    lemmaMulInductionAuto(x, u => u >= 0 ==> u * y == mulPos(u, y));
+    reveal MulPos();
+    LemmaMulInductionAuto(x, u => u >= 0 ==> u * y == MulPos(u, y));
   }
 
   /* ensures that the basic properties of multiplication, including the identity and zero properties */
-  lemma lemmaMulBasics(x: int)
+  lemma LemmaMulBasics(x: int)
     ensures 0 * x == 0
     ensures x * 0 == 0
     ensures 1 * x == x
@@ -59,7 +59,7 @@ module Mul {
   {
   }
 
-  lemma lemmaMulBasicsAuto()
+  lemma LemmaMulBasicsAuto()
     ensures forall x: int {:trigger 0 * x} :: 0 * x == 0
     ensures forall x: int {:trigger x * 0} :: x * 0 == 0
     ensures forall x: int {:trigger 1 * x} :: 1 * x == x
@@ -68,331 +68,331 @@ module Mul {
   }
 
  /* multiplying two nonzero integers will never result in 0 as the poduct */
-  lemma lemmaMulNonzero(x: int, y: int)
+  lemma LemmaMulNonzero(x: int, y: int)
     ensures x * y != 0 <==> x != 0 && y != 0
   {
-    MulINL.lemmaMulNonzero(x, y);
+    MulINL.LemmaMulNonzero(x, y);
   }
 
   /* multiplying any two nonzero integers will never result in 0 as the poduct */
-  lemma lemmaMulNonzeroAuto()
+  lemma LemmaMulNonzeroAuto()
     ensures forall x: int, y: int {:trigger x * y} :: x * y != 0 <==> x != 0 && y != 0
   {
     forall (x: int, y: int)
       ensures x * y != 0 <==> x != 0 && y != 0;
     {
-      lemmaMulNonzero(x, y);
+      LemmaMulNonzero(x, y);
     }
   }
   
   /* any integer multiplied by 0 results in a product of 0 */
-  lemma lemmaMulByZeroIsZeroAuto()
+  lemma LemmaMulByZeroIsZeroAuto()
     ensures forall x: int {:trigger 0 * x} {:trigger x * 0} :: x * 0 == 0 * x == 0
   {
     forall x: int {:trigger 0 * x} {:trigger x * 0}
       ensures x * 0 == 0 * x == 0
     {
-      lemmaMulBasics(x);
+      LemmaMulBasics(x);
     }
   }
 
   /* multiplication is associative */
-  lemma lemmaMulIsAssociative(x: int, y: int, z: int)
+  lemma LemmaMulIsAssociative(x: int, y: int, z: int)
     ensures x * (y * z) == (x * y) * z
   {
-    MulINL.lemmaMulIsAssociative(x, y, z);
+    MulINL.LemmaMulIsAssociative(x, y, z);
   }
 
   /* multiplication is always associative for all integers*/
-  lemma lemmaMulIsAssociativeAuto()
+  lemma LemmaMulIsAssociativeAuto()
     ensures forall x: int, y: int, z: int {:trigger x * (y * z)} {:trigger (x * y) * z} 
         :: x * (y * z) == (x * y) * z
   {
     forall (x: int, y: int, z: int)
       ensures x * (y * z) == (x * y) * z
     {
-      lemmaMulIsAssociative(x, y, z);
+      LemmaMulIsAssociative(x, y, z);
     }
   }
 
   /* multiplication is commutative */
-  lemma lemmaMulIsCommutative(x: int, y: int)
+  lemma LemmaMulIsCommutative(x: int, y: int)
     ensures x * y == y * x
   {
   }
 
   /* multiplication is always commutative for all integers */
-  lemma lemmaMulIsCommutativeAuto()
+  lemma LemmaMulIsCommutativeAuto()
     ensures forall x: int, y: int {:trigger x * y} :: x * y == y * x
   {
   }
 
   /* the product of two integers is greater than the value of each individual integer */ 
-  lemma lemmaMulOrdering(x: int, y: int)
+  lemma LemmaMulOrdering(x: int, y: int)
     requires x != 0
     requires y != 0
     requires 0 <= x * y
     ensures x * y >= x && x * y >= y
   {
-    MulINL.lemmaMulOrdering(x, y);
+    MulINL.LemmaMulOrdering(x, y);
   }
 
   /* the product of two positive integers is always greater than the individual value of either 
   multiplied integer */
-  lemma lemmaMulOrderingAuto()
+  lemma LemmaMulOrderingAuto()
     ensures forall x: int, y: int {:trigger x * y} :: (0 != x && 0 != y && x * y >= 0) ==> x * y >= x && x * y >= y
   {
     forall x: int, y: int | 0 != x && 0 != y && x * y >= 0
         ensures x * y >= x && x * y >= y
     {
-      lemmaMulOrdering(x, y);
+      LemmaMulOrdering(x, y);
     }
   }
 
-  lemma lemmaMulEquality(x: int, y: int, z: int)
+  lemma LemmaMulEquality(x: int, y: int, z: int)
     requires x == y
     ensures x * z == y * z
   {}
 
-  lemma lemmaMulEqualityAuto()
+  lemma LemmaMulEqualityAuto()
     ensures forall x: int, y: int, z: int {:trigger x * z, y * z } :: x == y ==> x * z == y * z
   {
     forall (x: int, y: int, z: int | x == y) 
       ensures x * z == y * z
     {
-      lemmaMulEquality(x, y, z);
+      LemmaMulEquality(x, y, z);
     }
   }
 
   /* two integers that are multiplied by a positive number will maintain their numerical order */
-  lemma lemmaMulInequality(x: int, y: int, z: int)
+  lemma LemmaMulInequality(x: int, y: int, z: int)
     requires x <= y
     requires z >= 0
     ensures  x * z <= y * z
   {
-    lemmaMulInductionAuto(z, u => u >= 0 ==> x * u <= y * u);
+    LemmaMulInductionAuto(z, u => u >= 0 ==> x * u <= y * u);
   }
 
   /* any two integers that are multiplied by a positive number will maintain their numerical order */
-  lemma lemmaMulInequalityAuto()
+  lemma LemmaMulInequalityAuto()
     ensures  forall x: int, y: int, z: int {:trigger x * z, y * z} :: x <= y && z >= 0 ==> x * z <= y * z
   {
     forall (x: int, y: int, z: int | x <= y && z >= 0)
       ensures x * z <= y * z
     {
-      lemmaMulInequality(x, y, z);
+      LemmaMulInequality(x, y, z);
     }
   }
 
   /* multiplying by a positive integer preserves inequality */
-  lemma lemmaMulStrictInequality(x: int, y: int, z: int)
+  lemma LemmaMulStrictInequality(x: int, y: int, z: int)
     requires x < y
     requires z > 0
     ensures  x * z < y * z
   {
-    MulINL.lemmaMulStrictInequality(x, y, z);
+    MulINL.LemmaMulStrictInequality(x, y, z);
   }
 
   /* multiplying by a positive integer preserves inequality for all integers*/
-  lemma lemmaMulStrictInequalityAuto()
+  lemma LemmaMulStrictInequalityAuto()
     ensures  forall x: int, y: int, z: int {:trigger x * z, y * z} :: x < y && z > 0 ==> x * z < y * z
   {
     forall (x: int, y: int, z: int | x < y && z > 0)
       ensures x * z < y * z
     {
-      lemmaMulStrictInequality(x, y, z);
+      LemmaMulStrictInequality(x, y, z);
     }
   }
 
   /* the product of two bounded integers is less than or equal to the product of their upper bounds */
-  lemma lemmaMulUpperBound(x: int, xBound: int, y: int, yBound: int)
-    requires x <= xBound
-    requires y <= yBound
+  lemma LemmaMulUpperBound(x: int, XBound: int, y: int, YBound: int)
+    requires x <= XBound
+    requires y <= YBound
     requires 0 <= x
     requires 0 <= y
-    ensures x * y <= xBound * yBound
+    ensures x * y <= XBound * YBound
   {
-    lemmaMulInequality(x, xBound, y);
-    lemmaMulInequality(y, yBound, xBound);
+    LemmaMulInequality(x, XBound, y);
+    LemmaMulInequality(y, YBound, XBound);
   }
 
-  lemma lemmaMulUpperBoundAuto()
-    ensures forall x: int, xBound: int, y: int, yBound: int {:trigger x * y, xBound * yBound}
-        :: x <= xBound && y <= yBound && 0 <= x && 0 <= y ==> x * y <= xBound * yBound
+  lemma LemmaMulUpperBoundAuto()
+    ensures forall x: int, XBound: int, y: int, YBound: int {:trigger x * y, XBound * YBound}
+        :: x <= XBound && y <= YBound && 0 <= x && 0 <= y ==> x * y <= XBound * YBound
   {
-    forall (x: int, xBound: int, y: int, yBound: int | x <= xBound && y <= yBound && 0 <= x && 0 <= y)
-      ensures x * y <= xBound * yBound
+    forall (x: int, XBound: int, y: int, YBound: int | x <= XBound && y <= YBound && 0 <= x && 0 <= y)
+      ensures x * y <= XBound * YBound
     {
-      lemmaMulUpperBound(x, xBound, y, yBound);
+      LemmaMulUpperBound(x, XBound, y, YBound);
     }
   }
 
   /* the product of two strictly upper bounded integers is less than the product of their upper bounds */
-  lemma lemmaMulStrictUpperBound(x: int, xBound: int, y: int, yBound: int)
-    requires x < xBound 
-    requires y < yBound 
+  lemma LemmaMulStrictUpperBound(x: int, XBound: int, y: int, YBound: int)
+    requires x < XBound 
+    requires y < YBound 
     requires 0 < x
     requires 0 < y
-    ensures x * y <= (xBound - 1) * (yBound - 1)
+    ensures x * y <= (XBound - 1) * (YBound - 1)
   {
-    lemmaMulInequality(x, xBound - 1, y);
-    lemmaMulInequality(y, yBound - 1, xBound - 1);
+    LemmaMulInequality(x, XBound - 1, y);
+    LemmaMulInequality(y, YBound - 1, XBound - 1);
   }
 
-  lemma lemmaMulStrictUpperBoundAuto()
-    ensures forall x: int, xBound: int, y: int, yBound: int {:trigger x * y, (xBound - 1) * (yBound - 1)} 
-        :: x < xBound && y < yBound && 0 < x && 0 < y ==> x * y <= (xBound - 1) * (yBound - 1)
+  lemma LemmaMulStrictUpperBoundAuto()
+    ensures forall x: int, XBound: int, y: int, YBound: int {:trigger x * y, (XBound - 1) * (YBound - 1)} 
+        :: x < XBound && y < YBound && 0 < x && 0 < y ==> x * y <= (XBound - 1) * (YBound - 1)
   {
-    forall (x: int, xBound: int, y: int, yBound: int | x < xBound && y < yBound && 0 < x && 0 < y)
-      ensures x * y <= (xBound - 1) * (yBound - 1)
+    forall (x: int, XBound: int, y: int, YBound: int | x < XBound && y < YBound && 0 < x && 0 < y)
+      ensures x * y <= (XBound - 1) * (YBound - 1)
     {
-      lemmaMulStrictUpperBound(x, xBound, y, yBound);
+      LemmaMulStrictUpperBound(x, XBound, y, YBound);
     }
   }
 
   /* any two integers that are multiplied by a positive number will maintain their numerical order */
-  lemma lemmaMulLeftInequality(x: int, y: int, z: int)
+  lemma LemmaMulLeftInequality(x: int, y: int, z: int)
     requires 0 < x
     ensures y <= z ==> x * y <= x * z
     ensures y < z ==> x * y < x * z
   {
-    lemmaMulInductionAuto(x, u => u > 0 ==> y <= z ==> u * y <= u * z);
-    lemmaMulInductionAuto(x, u => u > 0 ==> y < z ==> u * y < u * z);
+    LemmaMulInductionAuto(x, u => u > 0 ==> y <= z ==> u * y <= u * z);
+    LemmaMulInductionAuto(x, u => u > 0 ==> y < z ==> u * y < u * z);
   }
 
-  lemma lemmaMulLeftInequalityAuto()
+  lemma LemmaMulLeftInequalityAuto()
     ensures forall x: int, y: int, z: int {:trigger x * y, x * z}
         :: x > 0 ==> (y <= z ==> x * y <= x * z) && (y < z ==> x * y < x * z)
   {
     forall (x: int, y: int, z: int | (y <= z || y < z) && 0 < x)
       ensures (y <= z ==> x * y <= x * z) && (y < z ==> x * y < x * z)
     {
-      lemmaMulLeftInequality(x, y, z);
+      LemmaMulLeftInequality(x, y, z);
     }
   }
 
 /* if two seperate integers are each multiplied by a common integer and the products are equal, the 
   two original integers are equal */
-  lemma lemmaMulEqualityConverse(m: int, x: int, y: int)
+  lemma LemmaMulEqualityConverse(m: int, x: int, y: int)
     requires m != 0
     requires m * x == m * y
     ensures x == y
   {
-    lemmaMulInductionAuto(m, u => x > y && 0 < u ==> x * u > y * u);
-    lemmaMulInductionAuto(m, u => x > y && 0 > u ==> x * u < y * u);
-    lemmaMulInductionAuto(m, u => x < y && 0 < u ==> x * u < y * u);
-    lemmaMulInductionAuto(m, u => x < y && 0 > u ==> x * u > y * u);
+    LemmaMulInductionAuto(m, u => x > y && 0 < u ==> x * u > y * u);
+    LemmaMulInductionAuto(m, u => x > y && 0 > u ==> x * u < y * u);
+    LemmaMulInductionAuto(m, u => x < y && 0 < u ==> x * u < y * u);
+    LemmaMulInductionAuto(m, u => x < y && 0 > u ==> x * u > y * u);
   }
   
   /* if any two seperate integers are each multiplied by a common integer and the products are equal, the 
   two original integers are equal */
-  lemma lemmaMulEqualityConverseAuto()
+  lemma LemmaMulEqualityConverseAuto()
     ensures forall m: int, x: int, y: int {:trigger m * x, m * y} :: (m != 0 && m * x == m * y) ==> x == y
   {
     forall (m: int, x: int, y: int | m != 0 && m * x == m * y)
       ensures x == y
     {
-      lemmaMulEqualityConverse(m, x, y);
+      LemmaMulEqualityConverse(m, x, y);
     }
   }
 
   /* when two integers, x and y, are each multiplied by a positive integer, z, if x <= z then the x*z <= y*z */
-  lemma lemmaMulInequalityConverse(x: int, y: int, z: int)
+  lemma LemmaMulInequalityConverse(x: int, y: int, z: int)
     requires x * z <= y * z
     requires z > 0
     ensures  x <= y
   {
-    lemmaMulInductionAuto(z, u => x * u <= y * u && u > 0 ==> x <= y);
+    LemmaMulInductionAuto(z, u => x * u <= y * u && u > 0 ==> x <= y);
   }
 
   /* when two integers, x and y, are each multiplied by a positive integer, z, if x <= z then the x*z <= y*z 
   for all valid values of x, y, and z*/
-  lemma lemmaMulInequalityConverseAuto()
+  lemma LemmaMulInequalityConverseAuto()
     ensures  forall x: int, y: int, z: int {:trigger x * z, y * z} :: x * z <= y * z && z > 0 ==> x <= y
   {
     forall (x: int, y: int, z: int | x * z <= y * z && z > 0)
       ensures x <= y
     {
-      lemmaMulInequalityConverse(x, y, z);
+      LemmaMulInequalityConverse(x, y, z);
     }
   }
 
   /* when two integers, x and y, are each multiplied by a positive integer, z, if x < z then the x*z < y*z */
-  lemma lemmaMulStrictInequalityConverse(x: int, y: int, z: int)
+  lemma LemmaMulStrictInequalityConverse(x: int, y: int, z: int)
     requires x * z < y * z
     requires z >= 0
     ensures  x < y
   {
-    lemmaMulInductionAuto(z, u => x * u < y * u && u >= 0 ==> x < y);
+    LemmaMulInductionAuto(z, u => x * u < y * u && u >= 0 ==> x < y);
   }
 
   /* when two integers, x and y, are each multiplied by a positive integer, z, if x < z then the x*z < y*z 
   for all valid values of x, y, and z*/
-  lemma lemmaMulStrictInequalityConverseAuto()
+  lemma LemmaMulStrictInequalityConverseAuto()
     ensures  forall x: int, y: int, z: int {:trigger x * z, y * z} :: x * z < y * z && z >= 0 ==> x < y
   {
       forall (x: int, y: int, z: int | x * z < y * z && z >= 0)
           ensures x < y;
       {
-          lemmaMulStrictInequalityConverse(x, y, z);
+          LemmaMulStrictInequalityConverse(x, y, z);
       }
   }
 
   /* multiplication is distributive */
-  lemma lemmaMulIsDistributiveAdd(x: int, y: int, z: int)
+  lemma LemmaMulIsDistributiveAdd(x: int, y: int, z: int)
     ensures x * (y + z) == x * y + x * z
   {
-    MulINL.lemmaMulIsDistributiveAdd(x, y, z);
+    MulINL.LemmaMulIsDistributiveAdd(x, y, z);
   }
 
   /* for all integers, multiplication is distributive with addition in the form x * (y + z) */
-  lemma lemmaMulIsDistributiveAddAuto()
+  lemma LemmaMulIsDistributiveAddAuto()
     ensures forall x: int, y: int, z: int {:trigger x * (y + z)} :: x * (y + z) == x * y + x * z
   {
     forall (x: int, y: int, z: int)
       ensures x * (y + z) == x * y + x * z
     {
-      lemmaMulIsDistributiveAdd(x, y, z);
+      LemmaMulIsDistributiveAdd(x, y, z);
     }
   }
 
   /* for all integers, multiplication is distributive with addition in the form (y + z) * x */
-  lemma lemmaMulIsDistributiveAddOtherWay(x: int, y: int, z: int)
+  lemma LemmaMulIsDistributiveAddOtherWay(x: int, y: int, z: int)
     ensures (y + z) * x == y * x + z * x
   {
-    lemmaMulAuto();
+    LemmaMulAuto();
   }
 
-  lemma lemmaMulIsDistributiveAddOtherWayAuto()
+  lemma LemmaMulIsDistributiveAddOtherWayAuto()
     ensures forall x: int, y: int, z: int {:trigger (y + z) * x} :: (y + z) * x == y * x + z * x
   {
     forall (x: int, y: int, z: int)
       ensures (y+z) * x == y * x + z * x
     {
-      lemmaMulIsDistributiveAddOtherWay(x, y, z);
+      LemmaMulIsDistributiveAddOtherWay(x, y, z);
     }
   }
 
   /* multiplication is distributive with subtraction */
-  lemma lemmaMulIsDistributiveSub(x: int, y: int, z: int)
+  lemma LemmaMulIsDistributiveSub(x: int, y: int, z: int)
     ensures x * (y - z) == x * y - x * z
   {
-    lemmaMulAuto();
+    LemmaMulAuto();
   }
 
   /* for all integers, multiplication is distributive with subtraction */
-  lemma lemmaMulIsDistributiveSubAuto()
+  lemma LemmaMulIsDistributiveSubAuto()
     ensures forall x: int, y: int, z: int {:trigger x * (y - z)} :: x * (y - z) == x * y - x * z
   {
     forall (x: int, y: int, z: int)
       ensures x * (y - z) == x * y - x * z;
     {
-      lemmaMulIsDistributiveSub(x, y, z);
+      LemmaMulIsDistributiveSub(x, y, z);
     }
   }
 
   /* proves the overall distributive nature of multiplication*/
-  lemma lemmaMulIsDistributive(x: int, y: int, z: int)
+  lemma LemmaMulIsDistributive(x: int, y: int, z: int)
     ensures x * (y + z) == x * y + x * z
     ensures x * (y - z) == x * y - x * z
     ensures (y + z) * x == y * x + z * x
@@ -402,141 +402,141 @@ module Mul {
     ensures x * y == y * x
     ensures x * z == z * x
   {
-    lemmaMulAuto();
+    LemmaMulAuto();
   }
 
   /* for all integers, multiplication is distributive */
-  lemma lemmaMulIsDistributiveAuto()
+  lemma LemmaMulIsDistributiveAuto()
     ensures forall x: int, y: int, z: int {:trigger x * (y + z)} :: x * (y + z) == x * y + x * z
     ensures forall x: int, y: int, z: int {:trigger x * (y - z)} :: x * (y - z) == x * y - x * z
     ensures forall x: int, y: int, z: int {:trigger (y + z) * x} :: (y + z) * x == y * x + z * x
     ensures forall x: int, y: int, z: int {:trigger (y - z) * x} :: (y - z) * x == y * x - z * x
   {
-    lemmaMulIsDistributiveAddAuto();
-    lemmaMulIsDistributiveSubAuto();
-    lemmaMulIsCommutativeAuto();
+    LemmaMulIsDistributiveAddAuto();
+    LemmaMulIsDistributiveSubAuto();
+    LemmaMulIsCommutativeAuto();
   }
 
   /* multiplying two positive integers will result in a positive integer */
-  lemma lemmaMulStrictlyPositive(x: int, y: int)
+  lemma LemmaMulStrictlyPositive(x: int, y: int)
     ensures (0 < x && 0 < y) ==> (0 < x * y)
   {
-    MulINL.lemmaMulStrictlyPositive(x, y);
+    MulINL.LemmaMulStrictlyPositive(x, y);
   }
 
   /* multiplying any two positive integers will result in a positive integer */
-  lemma lemmaMulStrictlyPositiveAuto()
+  lemma LemmaMulStrictlyPositiveAuto()
     ensures forall x: int, y: int {:trigger x * y} :: (0 < x && 0 < y) ==> (0 < x * y)
   {
     forall (x: int, y: int | 0 < x && 0 < y)
       ensures 0 < x * y
     {
-      lemmaMulStrictlyPositive(x,y);
+      LemmaMulStrictlyPositive(x,y);
     }
   }
 
   /* multiplying a positive integer by an integer greater than 1 will result in a product that 
   is greater than the original integer */
-  lemma lemmaMulStrictlyIncreases(x: int, y: int)
+  lemma LemmaMulStrictlyIncreases(x: int, y: int)
     requires 1 < x
     requires 0 < y
     ensures y < x * y
   {
-    lemmaMulInductionAuto(x, u => 1 < u ==> y < u * y);
+    LemmaMulInductionAuto(x, u => 1 < u ==> y < u * y);
   }
 
   /* multiplying any positive integer by any integer greater than 1 will result in a product that 
   is greater than the original integer */
-  lemma lemmaMulStrictlyIncreasesAuto()
+  lemma LemmaMulStrictlyIncreasesAuto()
     ensures forall x: int, y: int {:trigger x * y} :: 1 < x && 0 < y  ==> y < x * y
   {
     forall (x: int, y: int | 1 < x && 0 < y)
       ensures y < x * y
     {
-      lemmaMulStrictlyIncreases(x, y);
+      LemmaMulStrictlyIncreases(x, y);
     }
   }
 
   /* multiplying an integer by a positive integer will result in a product that is greater than or
   equal to the original integer */
-  lemma lemmaMulIncreases(x: int, y: int)
+  lemma LemmaMulIncreases(x: int, y: int)
     requires 0 < x
     requires 0 < y
     ensures y <= x * y
   {
-    lemmaMulInductionAuto(x, u => 0 < u ==> y <= u * y);
+    LemmaMulInductionAuto(x, u => 0 < u ==> y <= u * y);
   }
 
   /* multiplying any integer by any positive integer will result in a product that is greater than or
   equal to the original integer */
-  lemma lemmaMulIncreasesAuto()
+  lemma LemmaMulIncreasesAuto()
     ensures forall x: int, y: int {:trigger x * y} :: (0 < x && 0 < y) ==> (y <= x * y)
   {
     forall (x: int, y: int | 0 < x && 0 < y)
       ensures y <= x * y
     {
-      lemmaMulIncreases(x, y);
+      LemmaMulIncreases(x, y);
     }
   }
 
   /* multiplying two positive numbers will result in a positive product */
-  lemma lemmaMulNonnegative(x: int, y: int)
+  lemma LemmaMulNonnegative(x: int, y: int)
     requires 0 <= x
     requires 0 <= y
     ensures  0 <= x * y
   {
-    lemmaMulInductionAuto(x, u => 0 <= u ==> 0 <= u * y);
+    LemmaMulInductionAuto(x, u => 0 <= u ==> 0 <= u * y);
   }
   
   /* multiplying any two positive numbers will result in a positive product */
-  lemma lemmaMulNonnegativeAuto()
+  lemma LemmaMulNonnegativeAuto()
     ensures forall x: int, y: int {:trigger x * y} :: 0 <= x && 0 <= y ==> 0 <= x * y
   {
     forall (x: int, y: int | 0 <= x && 0 <= y)
       ensures 0 <= x * y
     {
-      lemmaMulNonnegative(x, y);
+      LemmaMulNonnegative(x, y);
     }
   }
 
   /* shows the equivalent forms of using the unary negation operator */
-  lemma lemmaMulUnaryNegation(x: int, y: int)
+  lemma LemmaMulUnaryNegation(x: int, y: int)
     ensures (-x) * y == -(x * y) == x * (-y)
   {
-    lemmaMulInductionAuto(x, u => (-u) * y == -(u * y) == u * (-y));
+    LemmaMulInductionAuto(x, u => (-u) * y == -(u * y) == u * (-y));
   }
 
   /* shows the equivalent forms of using the unary negation operator for any integers*/
-  lemma lemmaMulUnaryNegationAuto()
+  lemma LemmaMulUnaryNegationAuto()
     ensures forall x: int, y: int {:trigger (-x) * y} {:trigger x * (-y)} :: (-x) * y == -(x * y) == x * (-y)
   {
     forall (x: int, y: int) 
       ensures (-x) * y == -(x * y) == x * (-y)
     {
-      lemmaMulUnaryNegation(x, y);
+      LemmaMulUnaryNegation(x, y);
     }
   }
 
   /* multiplying two negative integers, -x and -y, is equivalent to multiplying x and y */
-  lemma lemmaMulCancelsNegatives(x: int, y: int)
+  lemma LemmaMulCancelsNegatives(x: int, y: int)
     ensures x * y == (-x) * (-y)
   {
-    lemmaMulUnaryNegationAuto();
+    LemmaMulUnaryNegationAuto();
   }
 
   /* multiplying two negative integers, -x and -y, is equivalent to multiplying x and y */
-  lemma lemmaMulCancelsNegativesAuto()
+  lemma LemmaMulCancelsNegativesAuto()
     ensures forall x: int, y: int {:trigger x * y} :: x * y == (-x) * (-y)
   {
     forall x: int, y: int 
       ensures x * y == (-x) * (-y)
     {
-      lemmaMulCancelsNegatives(x, y);
+      LemmaMulCancelsNegatives(x, y);
     }
   }
 
   /* includes all properties of multiplication */
-  lemma lemmaMulProperties()
+  lemma LemmaMulProperties()
     ensures forall x: int, y: int {:trigger x * y} :: x * y == y * x
     ensures forall x: int {:trigger x * 1}{:trigger 1 * x} :: x * 1 == 1 * x == x
     ensures forall x: int, y: int, z: int {:trigger x * z, y * z} :: x < y && z > 0 ==> x * z < y * z
@@ -553,15 +553,15 @@ module Mul {
     ensures forall x: int, y: int {:trigger x * y} :: (0 < x && 0 < y) ==> (y <= x * y)
     ensures forall x: int, y: int {:trigger x * y} :: (0 < x && 0 < y) ==> (0 < x * y)
   {
-    lemmaMulStrictInequalityAuto();
-    lemmaMulInequalityAuto();
-    lemmaMulIsDistributiveAuto();
-    lemmaMulIsAssociativeAuto();
-    lemmaMulOrderingAuto();
-    lemmaMulNonzeroAuto();
-    lemmaMulNonnegativeAuto();
-    lemmaMulStrictlyIncreasesAuto();
-    lemmaMulIncreasesAuto();
+    LemmaMulStrictInequalityAuto();
+    LemmaMulInequalityAuto();
+    LemmaMulIsDistributiveAuto();
+    LemmaMulIsAssociativeAuto();
+    LemmaMulOrderingAuto();
+    LemmaMulNonzeroAuto();
+    LemmaMulNonnegativeAuto();
+    LemmaMulStrictlyIncreasesAuto();
+    LemmaMulIncreasesAuto();
   }
 
-} 
+}

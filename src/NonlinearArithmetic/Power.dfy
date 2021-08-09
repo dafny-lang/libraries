@@ -9,7 +9,7 @@
 *  SPDX-License-Identifier: MIT 
 ************************************************************************************/
 
-/* Every lemma comes in 2 forms: 'lemmaProperty' and 'lemmaPropertyAuto'. The former takes arguments and may 
+/* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The former takes arguments and may 
 be more stable and less reliant on Z3 heuristics. The latter includes automation and its use requires less effort */
 
 include "DivMod.dfy"
@@ -25,604 +25,604 @@ module Power {
   import opened Mul
   import opened MulInternals
 
-  function method {:opaque} power(b: int, e: nat): int
+  function method {:opaque} Pow(b: int, e: nat): int
     decreases e
   {
     if e == 0 then
       1
     else
-      b * power(b, e - 1)
+      b * Pow(b, e - 1)
   }
 
   /* A number raised to the power of 0 equals 1. */
-  lemma lemmaPower0(b: int)
-    ensures power(b, 0) == 1
+  lemma LemmaPow0(b: int)
+    ensures Pow(b, 0) == 1
   {
-    reveal power();
+    reveal Pow();
   }
 
-  lemma lemmaPower0Auto()
-    ensures forall b: nat {:trigger power(b, 0)} :: power(b, 0) == 1
+  lemma LemmaPow0Auto()
+    ensures forall b: nat {:trigger Pow(b, 0)} :: Pow(b, 0) == 1
   {
-    reveal power();
-    forall b: nat {:trigger power(b, 0)}
-      ensures power(b, 0) == 1
+    reveal Pow();
+    forall b: nat {:trigger Pow(b, 0)}
+      ensures Pow(b, 0) == 1
     {
-      lemmaPower0(b);
+      LemmaPow0(b);
     }
   }
 
   /* A number raised to the power of 1 equals the number itself. */
-  lemma lemmaPower1(b: int)
-    ensures power(b, 1) == b
+  lemma LemmaPow1(b: int)
+    ensures Pow(b, 1) == b
   {
     calc {
-      power(b, 1);
-        { reveal power(); }
-      b * power(b, 0);
-        { lemmaPower0(b); }
+      Pow(b, 1);
+        { reveal Pow(); }
+      b * Pow(b, 0);
+        { LemmaPow0(b); }
       b * 1;
-        { lemmaMulBasicsAuto(); }
+        { LemmaMulBasicsAuto(); }
       b;
     }
   }
 
-  lemma lemmaPower1Auto()
-    ensures forall b: nat {:trigger power(b, 1)} :: power(b, 1) == b
+  lemma LemmaPow1Auto()
+    ensures forall b: nat {:trigger Pow(b, 1)} :: Pow(b, 1) == b
   {
-    reveal power();
-    forall b: nat {:trigger power(b, 1)}
-      ensures power(b, 1) == b
+    reveal Pow();
+    forall b: nat {:trigger Pow(b, 1)}
+      ensures Pow(b, 1) == b
     {
-      lemmaPower1(b);
+      LemmaPow1(b);
     }
   }
 
   /* 0 raised to a positive power equals 0. */
-  lemma lemma0Power(e: nat)
+  lemma Lemma0Pow(e: nat)
     requires e > 0
-    ensures power(0, e) == 0
+    ensures Pow(0, e) == 0
   {
-    reveal power();
-    lemmaMulBasicsAuto();
+    reveal Pow();
+    LemmaMulBasicsAuto();
     if e != 1 {
-      lemma0Power(e - 1);
+      Lemma0Pow(e - 1);
     }
   }
 
-  lemma lemma0PowerAuto()
-    ensures forall e: nat {:trigger power(0, e)} :: e > 0 ==> power(0, e) == 0
+  lemma Lemma0PowAuto()
+    ensures forall e: nat {:trigger Pow(0, e)} :: e > 0 ==> Pow(0, e) == 0
   {
-    reveal power();
-    forall e: nat {:trigger power(0, e)} | e > 0
-      ensures power(0, e) == 0
+    reveal Pow();
+    forall e: nat {:trigger Pow(0, e)} | e > 0
+      ensures Pow(0, e) == 0
     {
-      lemma0Power(e);
+      Lemma0Pow(e);
     }
   }
 
   /* 1 raised to any power equals 1. */
-  lemma lemma1Power(e: nat)
-    ensures power(1, e) == 1
+  lemma Lemma1Pow(e: nat)
+    ensures Pow(1, e) == 1
   {
-    reveal power();
-    lemmaMulBasicsAuto();
+    reveal Pow();
+    LemmaMulBasicsAuto();
     if e != 0 {
-      lemma1Power(e - 1);
+      Lemma1Pow(e - 1);
     }
   }
 
-  lemma lemma1PowerAuto()
-    ensures forall e: nat {:trigger power(1, e)} :: power(1, e) == 1
+  lemma Lemma1PowAuto()
+    ensures forall e: nat {:trigger Pow(1, e)} :: Pow(1, e) == 1
   {
-    reveal power();
-    forall e: nat {:trigger power(1, e)}
-      ensures power(1, e) == 1
+    reveal Pow();
+    forall e: nat {:trigger Pow(1, e)}
+      ensures Pow(1, e) == 1
     {
-      lemma1Power(e);
+      Lemma1Pow(e);
     }
   }
 
   /* Squaring a number is equal to raising it to the power of 2. */
-  lemma lemmaSquareIsPower2(x: nat)
-    ensures power(x, 2) == x * x
+  lemma LemmaSquareIsPow2(x: nat)
+    ensures Pow(x, 2) == x * x
   {
-    reveal power();
+    reveal Pow();
   }
 
-  lemma lemmaSquareIsPower2Auto()
-    ensures forall x: nat {:trigger power(x, 2)} :: power(x, 2) == x * x
+  lemma LemmaSquareIsPow2Auto()
+    ensures forall x: nat {:trigger Pow(x, 2)} :: Pow(x, 2) == x * x
   {
-    reveal power();
-    forall x: nat {:trigger power(x, 2)}
-      ensures power(x, 2) == x * x
+    reveal Pow();
+    forall x: nat {:trigger Pow(x, 2)}
+      ensures Pow(x, 2) == x * x
     {}
   }
 
   /* A positive number raised to any power is positive. */
-  lemma lemmaPowerPositive(b: int, e: nat)
+  lemma LemmaPowPositive(b: int, e: nat)
     requires b > 0
-    ensures 0 < power(b, e)
+    ensures 0 < Pow(b, e)
   {
-    lemmaMulIncreasesAuto();
-    lemmaMulInductionAuto(e, u => 0 <= u ==> 0 < power(b, u));
+    LemmaMulIncreasesAuto();
+    LemmaMulInductionAuto(e, u => 0 <= u ==> 0 < Pow(b, u));
   }
 
-  lemma lemmaPowerPositiveAuto()
-    ensures forall b: int, e: nat {:trigger power(b, e)}
-      :: b > 0 ==> 0 < power(b, e)
+  lemma LemmaPowPositiveAuto()
+    ensures forall b: int, e: nat {:trigger Pow(b, e)}
+      :: b > 0 ==> 0 < Pow(b, e)
   {
-    reveal power();
-    forall b: int, e: nat {:trigger power(b, e)} | b > 0
-      ensures 0 < power(b, e)
+    reveal Pow();
+    forall b: int, e: nat {:trigger Pow(b, e)} | b > 0
+      ensures 0 < Pow(b, e)
     {
-      lemmaPowerPositive(b, e);
+      LemmaPowPositive(b, e);
     }
   }
 
   /* Add exponents when multiplying powers with the same base. */
-  lemma lemmaPowerAdds(b: int, e1: nat, e2: nat)
+  lemma LemmaPowAdds(b: int, e1: nat, e2: nat)
     decreases e1
-    ensures power(b, e1 + e2) == power(b, e1) * power(b, e2)
+    ensures Pow(b, e1 + e2) == Pow(b, e1) * Pow(b, e2)
   {
     if e1 == 0 {
       calc {
-        power(b, e1) * power(b, e2);
-          { lemmaPower0(b); }
-        1 * power(b, e2);
-          { lemmaMulBasicsAuto(); }
-        power(b, 0 + e2);
+        Pow(b, e1) * Pow(b, e2);
+          { LemmaPow0(b); }
+        1 * Pow(b, e2);
+          { LemmaMulBasicsAuto(); }
+        Pow(b, 0 + e2);
       }
     }
     else {
       calc {
-        power(b, e1) * power(b, e2);
-          { reveal power(); }
-        (b * power(b, e1 - 1)) * power(b, e2);
-          { lemmaMulIsAssociativeAuto(); }
-        b * (power(b, e1 - 1) * power(b, e2));
-          { lemmaPowerAdds(b, e1 - 1, e2); }
-        b * power(b, e1 - 1 + e2);
-          { reveal power(); }
-        power(b, e1 + e2);
+        Pow(b, e1) * Pow(b, e2);
+          { reveal Pow(); }
+        (b * Pow(b, e1 - 1)) * Pow(b, e2);
+          { LemmaMulIsAssociativeAuto(); }
+        b * (Pow(b, e1 - 1) * Pow(b, e2));
+          { LemmaPowAdds(b, e1 - 1, e2); }
+        b * Pow(b, e1 - 1 + e2);
+          { reveal Pow(); }
+        Pow(b, e1 + e2);
       }
     }
   }
 
-  lemma lemmaPowerAddsAuto()
-    ensures forall b: int, e1: nat, e2: nat {:trigger power(b, e1 + e2)}
-      :: power(b, e1 + e2) == power(b, e1) * power(b, e2)
+  lemma LemmaPowAddsAuto()
+    ensures forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 + e2)}
+      :: Pow(b, e1 + e2) == Pow(b, e1) * Pow(b, e2)
   {
-    reveal power();
-    forall b: int, e1: nat, e2: nat {:trigger power(b, e1 + e2)}
-      ensures power(b, e1 + e2) == power(b, e1) * power(b, e2)
+    reveal Pow();
+    forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 + e2)}
+      ensures Pow(b, e1 + e2) == Pow(b, e1) * Pow(b, e2)
     {
-      lemmaPowerAdds(b, e1, e2);
+      LemmaPowAdds(b, e1, e2);
     }
   }
 
   /* Subtract exponents when dividing powers. */
-  lemma lemmaPowerSubtracts(b: nat, e1: nat, e2: nat)
+  lemma LemmaPowSubtracts(b: nat, e1: nat, e2: nat)
     requires b > 0
     requires e1 <= e2
-    ensures power(b, e1) > 0
-    ensures power(b, e2 - e1) == power(b, e2) / power(b, e1) > 0
+    ensures Pow(b, e1) > 0
+    ensures Pow(b, e2 - e1) == Pow(b, e2) / Pow(b, e1) > 0
   {
-    lemmaPowerPositiveAuto();
+    LemmaPowPositiveAuto();
     calc {
-      power(b, e2) / power(b, e1);
-        { lemmaPowerAdds(b, e2 - e1, e1); }
-      power(b, e2 - e1) * power(b, e1) / power(b, e1);
-        { lemmaDivByMultiple(power(b, e2 - e1), power(b, e1)); }
-      power(b, e2 - e1);
+      Pow(b, e2) / Pow(b, e1);
+        { LemmaPowAdds(b, e2 - e1, e1); }
+      Pow(b, e2 - e1) * Pow(b, e1) / Pow(b, e1);
+        { LemmaDivByMultiple(Pow(b, e2 - e1), Pow(b, e1)); }
+      Pow(b, e2 - e1);
     }
   }
 
-  lemma lemmaPowerSubtractsAuto()
-    ensures forall b: nat, e1: nat :: b > 0 ==> power(b, e1) > 0
-    ensures forall b: nat, e1: nat, e2: nat {:trigger power(b, e2 - e1)}
+  lemma LemmaPowSubtractsAuto()
+    ensures forall b: nat, e1: nat :: b > 0 ==> Pow(b, e1) > 0
+    ensures forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e2 - e1)}
       :: b > 0 && e1 <= e2 ==>
-         power(b, e2 - e1) == power(b, e2) / power(b, e1) > 0
+         Pow(b, e2 - e1) == Pow(b, e2) / Pow(b, e1) > 0
   {
-    reveal power();
-    lemmaPowerPositiveAuto();
-    forall b: nat, e1: nat, e2: nat {:trigger power(b, e2 - e1)}
+    reveal Pow();
+    LemmaPowPositiveAuto();
+    forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e2 - e1)}
       | b > 0 && e1 <= e2
-      ensures power(b, e2 - e1) == power(b, e2) / power(b, e1) > 0
+      ensures Pow(b, e2 - e1) == Pow(b, e2) / Pow(b, e1) > 0
     {
-      lemmaPowerSubtracts(b, e1, e2);
+      LemmaPowSubtracts(b, e1, e2);
     }
   }
 
   /* Multiply exponents when finding the power of a power. */
-  lemma lemmaPowerMultiplies(a: int, b: nat, c: nat)
+  lemma LemmaPowMultiplies(a: int, b: nat, c: nat)
     decreases c
     ensures 0 <= b * c
-    ensures power(power(a, b), c) == power(a, b * c)
+    ensures Pow(Pow(a, b), c) == Pow(a, b * c)
   {
-    lemmaMulNonnegative(b, c);
+    LemmaMulNonnegative(b, c);
     if c == 0 {
-      lemmaMulBasicsAuto();
+      LemmaMulBasicsAuto();
       calc {
-        power(a, b * c);
-          { lemmaPower0(a); }
+        Pow(a, b * c);
+          { LemmaPow0(a); }
         1;
-          { lemmaPower0(power(a, b)); }
-        power(power(a, b), c);
+          { LemmaPow0(Pow(a, b)); }
+        Pow(Pow(a, b), c);
       }
     }
     else {
       calc {
         b * c - b;
-          { lemmaMulBasicsAuto(); }
+          { LemmaMulBasicsAuto(); }
         b * c - b * 1;
-          { lemmaMulIsDistributiveAuto(); }
+          { LemmaMulIsDistributiveAuto(); }
         b * (c - 1);
       }
-      lemmaMulNonnegative(b, c - 1);
+      LemmaMulNonnegative(b, c - 1);
       assert 0 <= b * c - b;
 
       calc {
-        power(a, b * c);
-        power(a, b + b * c - b);
-          { lemmaPowerAdds(a, b, b * c - b); }
-        power(a, b) * power(a, b * c - b);
-        power(a, b) * power(a, b * (c - 1));
-          { lemmaPowerMultiplies(a, b, c - 1); }
-        power(a, b) * power(power(a, b), c - 1);
-          { reveal power(); }
-        power(power(a, b), c);
+        Pow(a, b * c);
+        Pow(a, b + b * c - b);
+          { LemmaPowAdds(a, b, b * c - b); }
+        Pow(a, b) * Pow(a, b * c - b);
+        Pow(a, b) * Pow(a, b * (c - 1));
+          { LemmaPowMultiplies(a, b, c - 1); }
+        Pow(a, b) * Pow(Pow(a, b), c - 1);
+          { reveal Pow(); }
+        Pow(Pow(a, b), c);
       }
     }
   }
 
-  lemma lemmaPowerMultipliesAuto()
+  lemma LemmaPowMultipliesAuto()
     ensures forall b: nat, c: nat {:trigger b * c} :: 0 <= b * c
-    ensures forall a: int, b: nat, c: nat {:trigger power(a, b * c)}
-      :: power(power(a, b), c) == power(a, b * c)
+    ensures forall a: int, b: nat, c: nat {:trigger Pow(a, b * c)}
+      :: Pow(Pow(a, b), c) == Pow(a, b * c)
   {
-    reveal power();
-    lemmaMulNonnegativeAuto();
-    forall a: int, b: nat, c: nat {:trigger power(a, b * c)}
-      ensures power(power(a, b), c) == power(a, b * c)
+    reveal Pow();
+    LemmaMulNonnegativeAuto();
+    forall a: int, b: nat, c: nat {:trigger Pow(a, b * c)}
+      ensures Pow(Pow(a, b), c) == Pow(a, b * c)
     {
-      lemmaPowerMultiplies(a, b, c);
+      LemmaPowMultiplies(a, b, c);
     }
   }
 
   /* Distribute the power to factors of a product. */
-  lemma lemmaPowerDistributes(a: int, b: int, e: nat)
+  lemma LemmaPowDistributes(a: int, b: int, e: nat)
     decreases e
-    ensures power(a * b, e) == power(a, e) * power(b, e)
+    ensures Pow(a * b, e) == Pow(a, e) * Pow(b, e)
   {
-    reveal power();
-    lemmaMulBasicsAuto();
+    reveal Pow();
+    LemmaMulBasicsAuto();
     if e > 0 {
       calc {
-        power(a * b, e);
-        (a * b) * power(a * b, e - 1);
-          { lemmaPowerDistributes(a, b, e - 1); }
-        (a * b) * (power(a, e - 1) * power(b, e - 1));
-          { lemmaMulIsAssociativeAuto(); lemmaMulIsCommutativeAuto(); }
-        (a * power(a, e - 1)) * (b * power(b, e - 1));
-        power(a, e) * power(b, e);
+        Pow(a * b, e);
+        (a * b) * Pow(a * b, e - 1);
+          { LemmaPowDistributes(a, b, e - 1); }
+        (a * b) * (Pow(a, e - 1) * Pow(b, e - 1));
+          { LemmaMulIsAssociativeAuto(); LemmaMulIsCommutativeAuto(); }
+        (a * Pow(a, e - 1)) * (b * Pow(b, e - 1));
+        Pow(a, e) * Pow(b, e);
       }
     }
   }
 
-  lemma lemmaPowerDistributesAuto()
-    ensures forall a: int, b: int, e: nat {:trigger power(a * b, e)}
-      :: power(a * b, e) == power(a, e) * power(b, e)
+  lemma LemmaPowDistributesAuto()
+    ensures forall a: int, b: int, e: nat {:trigger Pow(a * b, e)}
+      :: Pow(a * b, e) == Pow(a, e) * Pow(b, e)
   {
-    reveal power();
-    forall a: int, b: int, e: nat {:trigger power(a * b, e)}
-      ensures power(a * b, e) == power(a, e) * power(b, e)
+    reveal Pow();
+    forall a: int, b: int, e: nat {:trigger Pow(a * b, e)}
+      ensures Pow(a * b, e) == Pow(a, e) * Pow(b, e)
     {
-      lemmaPowerDistributes(a, b, e);
+      LemmaPowDistributes(a, b, e);
     }
   }
 
   /* Group properties of powers. */
-  lemma lemmaPowerAuto()
-    ensures forall x: int {:trigger power(x, 0)} :: power(x, 0) == 1
-    ensures forall x: int {:trigger power(x, 1)} :: power(x, 1) == x
-    ensures forall x: int, y: int {:trigger power(x, y)} :: y == 0 ==> power(x, y) == 1
-    ensures forall x: int, y: int {:trigger power(x, y)} :: y == 1 ==> power(x, y) == x
+  lemma LemmaPowAuto()
+    ensures forall x: int {:trigger Pow(x, 0)} :: Pow(x, 0) == 1
+    ensures forall x: int {:trigger Pow(x, 1)} :: Pow(x, 1) == x
+    ensures forall x: int, y: int {:trigger Pow(x, y)} :: y == 0 ==> Pow(x, y) == 1
+    ensures forall x: int, y: int {:trigger Pow(x, y)} :: y == 1 ==> Pow(x, y) == x
     ensures forall x: int, y: int {:trigger x * y} :: 0 < x && 0 < y ==> x <= x * y
     ensures forall x: int, y: int {:trigger x * y} :: 0 < x && 1 < y ==> x < x * y
-    ensures forall x: int, y: nat, z: nat {:trigger power(x, y + z)} :: power(x, y + z) == power(x, y) * power(x, z)
-    ensures forall x: int, y: nat, z: nat {:trigger power(x, y - z)} :: y >= z ==> power(x, y - z) * power(x, z) == power(x, y)
-    ensures forall x: int, y: int, z: nat {:trigger power(x * y, z)} :: power(x * y, z) == power(x, z) * power(y, z)
+    ensures forall x: int, y: nat, z: nat {:trigger Pow(x, y + z)} :: Pow(x, y + z) == Pow(x, y) * Pow(x, z)
+    ensures forall x: int, y: nat, z: nat {:trigger Pow(x, y - z)} :: y >= z ==> Pow(x, y - z) * Pow(x, z) == Pow(x, y)
+    ensures forall x: int, y: int, z: nat {:trigger Pow(x * y, z)} :: Pow(x * y, z) == Pow(x, z) * Pow(y, z)
   {
-    reveal power();
+    reveal Pow();
 
-    lemmaPower0Auto();
-    lemmaPower1Auto();
+    LemmaPow0Auto();
+    LemmaPow1Auto();
 
-    lemmaPowerDistributesAuto();
-    lemmaPowerAddsAuto();
+    LemmaPowDistributesAuto();
+    LemmaPowAddsAuto();
 
-    forall x: int, y: nat, z: nat {:trigger power(x, y - z)} | y >= z
-      ensures power(x, y - z) * power(x, z) == power(x, y)
+    forall x: int, y: nat, z: nat {:trigger Pow(x, y - z)} | y >= z
+      ensures Pow(x, y - z) * Pow(x, z) == Pow(x, y)
     {
-      lemmaPowerAdds(x, y - z, z);
+      LemmaPowAdds(x, y - z, z);
     }
 
-    lemmaMulAuto();
-    lemmaMulIncreasesAuto();
-    lemmaMulStrictlyIncreasesAuto();
+    LemmaMulAuto();
+    LemmaMulIncreasesAuto();
+    LemmaMulStrictlyIncreasesAuto();
   }
 
   /* A positive number raised to a power strictly increases as the power
   strictly increases. */
-  lemma lemmaPowerStrictlyIncreases(b: nat, e1: nat, e2: nat)
+  lemma LemmaPowStrictlyIncreases(b: nat, e1: nat, e2: nat)
     requires 1 < b
     requires e1 < e2
-    ensures power(b, e1) < power(b, e2)
+    ensures Pow(b, e1) < Pow(b, e2)
   {
-    lemmaPowerAuto();
-    var f := e => 0 < e ==> power(b, e1) < power(b, e1 + e);
-    forall i {:trigger isLe(0, i)} | isLe(0, i) && f(i)
+    LemmaPowAuto();
+    var f := e => 0 < e ==> Pow(b, e1) < Pow(b, e1 + e);
+    forall i {:trigger IsLe(0, i)} | IsLe(0, i) && f(i)
       ensures f(i + 1)
     {
       calc {
-        power(b, e1 + i);
-        <= { lemmaPowerPositive(b, e1 + i);
-             lemmaMulLeftInequality(power(b, e1 + i), 1, b); }
-          power(b, e1 + i) * b;
-        == { lemmaPower1(b); }
-          power(b, e1 + i) * power(b, 1);
-        == { lemmaPowerAdds(b, e1 + i, 1); }
-          power(b, e1 + i + 1);
+        Pow(b, e1 + i);
+        <= { LemmaPowPositive(b, e1 + i);
+             LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
+          Pow(b, e1 + i) * b;
+        == { LemmaPow1(b); }
+          Pow(b, e1 + i) * Pow(b, 1);
+        == { LemmaPowAdds(b, e1 + i, 1); }
+          Pow(b, e1 + i + 1);
       }
     }
-    lemmaMulInductionAuto(e2 - e1, f);
+    LemmaMulInductionAuto(e2 - e1, f);
   }
 
-  lemma lemmaPowerStrictlyIncreasesAuto()
-    ensures forall b: nat, e1: nat, e2: nat {:trigger power(b, e1),
-      power(b, e2)} :: (1 < b && e1 < e2) ==> power(b, e1) < power(b, e2)
+  lemma LemmaPowStrictlyIncreasesAuto()
+    ensures forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1),
+      Pow(b, e2)} :: (1 < b && e1 < e2) ==> Pow(b, e1) < Pow(b, e2)
   {
-    reveal power();
-    forall b: nat, e1: nat, e2: nat {:trigger power(b, e1), power(b, e2)}
+    reveal Pow();
+    forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
       | 1 < b && e1 < e2
-      ensures power(b, e1) < power(b, e2)
+      ensures Pow(b, e1) < Pow(b, e2)
     {
-      lemmaPowerStrictlyIncreases(b, e1, e2);
+      LemmaPowStrictlyIncreases(b, e1, e2);
     }
   }
 
   /* A positive number raised to a power increases as the power increases. */
-  lemma lemmaPowerIncreases(b: nat, e1: nat, e2: nat)
+  lemma LemmaPowIncreases(b: nat, e1: nat, e2: nat)
     requires b > 0
     requires e1 <= e2
-    ensures power(b, e1) <= power(b, e2)
+    ensures Pow(b, e1) <= Pow(b, e2)
   {
-    lemmaPowerAuto();
-    var f := e => 0 <= e ==> power(b, e1) <= power(b, e1 + e);
-    forall i {:trigger isLe(0, i)} | isLe(0, i) && f(i)
+    LemmaPowAuto();
+    var f := e => 0 <= e ==> Pow(b, e1) <= Pow(b, e1 + e);
+    forall i {:trigger IsLe(0, i)} | IsLe(0, i) && f(i)
       ensures f(i + 1)
     {
       calc {
-        power(b, e1 + i);
-        <= { lemmaPowerPositive(b, e1 + i);
-             lemmaMulLeftInequality(power(b, e1 + i), 1, b); }
-          power(b, e1 + i) * b;
-        == { lemmaPower1(b); }
-          power(b, e1 + i) * power(b, 1);
-        == { lemmaPowerAdds(b, e1 + i, 1); }
-          power(b, e1 + i + 1);
+        Pow(b, e1 + i);
+        <= { LemmaPowPositive(b, e1 + i);
+             LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
+          Pow(b, e1 + i) * b;
+        == { LemmaPow1(b); }
+          Pow(b, e1 + i) * Pow(b, 1);
+        == { LemmaPowAdds(b, e1 + i, 1); }
+          Pow(b, e1 + i + 1);
       }
     }
-    lemmaMulInductionAuto(e2 - e1, f);
+    LemmaMulInductionAuto(e2 - e1, f);
   }
 
-  lemma lemmaPowerIncreasesAuto()
-    ensures forall b: nat, e1: nat, e2: nat {:trigger power(b, e1),
-      power(b, e2)} :: (1 < b && e1 <= e2) ==> power(b, e1) <= power(b, e2)
+  lemma LemmaPowIncreasesAuto()
+    ensures forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1),
+      Pow(b, e2)} :: (1 < b && e1 <= e2) ==> Pow(b, e1) <= Pow(b, e2)
   {
-    reveal power();
-    forall b: nat, e1: nat, e2: nat {:trigger power(b, e1), power(b, e2)}
+    reveal Pow();
+    forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
       | 1 < b && e1 <= e2
-      ensures power(b, e1) <= power(b, e2)
+      ensures Pow(b, e1) <= Pow(b, e2)
     {
-      lemmaPowerIncreases(b, e1, e2);
+      LemmaPowIncreases(b, e1, e2);
     }
   }
 
   /* A power strictly increases as a positive number raised to the power
   strictly increases. */
-  lemma lemmaPowerStrictlyIncreasesConverse(b: nat, e1: nat, e2: nat)
+  lemma LemmaPowStrictlyIncreasesConverse(b: nat, e1: nat, e2: nat)
     requires b > 0
-    requires power(b, e1) < power(b, e2)
+    requires Pow(b, e1) < Pow(b, e2)
     ensures e1 < e2
   {
     if e1 >= e2 {
-      lemmaPowerIncreases(b, e2, e1);
+      LemmaPowIncreases(b, e2, e1);
       assert false;
     }
   }
 
-  lemma lemmaPowerStrictlyIncreasesConverseAuto()
+  lemma LemmaPowStrictlyIncreasesConverseAuto()
     ensures forall b: nat, e1: nat, e2: nat
-      {:trigger power(b, e1), power(b, e2)}
-      :: b > 0 && power(b, e1) < power(b, e2) ==> e1 < e2
+      {:trigger Pow(b, e1), Pow(b, e2)}
+      :: b > 0 && Pow(b, e1) < Pow(b, e2) ==> e1 < e2
   {
-    reveal power();
-    forall b: nat, e1: nat, e2: nat {:trigger power(b, e1), power(b, e2)}
-      | b > 0 && power(b, e1) < power(b, e2)
+    reveal Pow();
+    forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
+      | b > 0 && Pow(b, e1) < Pow(b, e2)
       ensures e1 < e2
     {
-      lemmaPowerStrictlyIncreasesConverse(b, e1, e2);
+      LemmaPowStrictlyIncreasesConverse(b, e1, e2);
     }
   }
 
   /* A power increases as a positive number raised to the power increases. */
-  lemma lemmaPowerIncreasesConverse(b: nat, e1: nat, e2: nat)
+  lemma LemmaPowIncreasesConverse(b: nat, e1: nat, e2: nat)
     requires 1 < b
-    requires power(b, e1) <= power(b, e2)
+    requires Pow(b, e1) <= Pow(b, e2)
     ensures e1 <= e2
   {
     if e1 > e2 {
-      lemmaPowerStrictlyIncreases(b, e2, e1);
+      LemmaPowStrictlyIncreases(b, e2, e1);
       assert false;
     }
   }
 
-  lemma lemmaPowerIncreasesConverseAuto()
+  lemma LemmaPowIncreasesConverseAuto()
     ensures forall b: nat, e1: nat, e2: nat
-      {:trigger power(b, e1), power(b, e2)}
-      :: 1 < b && power(b, e1) <= power(b, e2) ==> e1 <= e2
+      {:trigger Pow(b, e1), Pow(b, e2)}
+      :: 1 < b && Pow(b, e1) <= Pow(b, e2) ==> e1 <= e2
   {
-    reveal power();
-    forall b: nat, e1: nat, e2: nat {:trigger power(b, e1), power(b, e2)}
-      | 1 < b && power(b, e1) <= power(b, e2)
+    reveal Pow();
+    forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
+      | 1 < b && Pow(b, e1) <= Pow(b, e2)
       ensures e1 <= e2
     {
-      lemmaPowerIncreasesConverse(b, e1, e2);
+      LemmaPowIncreasesConverse(b, e1, e2);
     }
   }
 
   /* (b^xy)^z = (b^x)^yz */
-  lemma lemmaPullOutPowers(b: nat, x: nat, y: nat, z: nat)
+  lemma LemmaPullOutPows(b: nat, x: nat, y: nat, z: nat)
     requires b > 0
     ensures 0 <= x * y
     ensures 0 <= y * z
-    ensures power(power(b, x * y), z) == power(power(b, x), y * z)
+    ensures Pow(Pow(b, x * y), z) == Pow(Pow(b, x), y * z)
   {
-    lemmaMulNonnegative(x, y);
-    lemmaMulNonnegative(y, z);
-    lemmaPowerPositive(b, x);
+    LemmaMulNonnegative(x, y);
+    LemmaMulNonnegative(y, z);
+    LemmaPowPositive(b, x);
     calc {
-      power(power(b, x * y), z);
-        { lemmaPowerMultiplies(b, x, y); }
-      power(power(power(b, x), y), z);
-        { lemmaPowerMultiplies(power(b, x), y, z); }
-      power(power(b, x), y * z);
+      Pow(Pow(b, x * y), z);
+        { LemmaPowMultiplies(b, x, y); }
+      Pow(Pow(Pow(b, x), y), z);
+        { LemmaPowMultiplies(Pow(b, x), y, z); }
+      Pow(Pow(b, x), y * z);
     }
   }
 
-  lemma lemmaPullOutPowersAuto()
+  lemma LemmaPullOutPowsAuto()
     ensures forall y: nat, z: nat {:trigger z * y} :: 0 <= z * y && 0 <= y * z
     ensures forall b: nat, x: nat, y: nat, z: nat
-      {:trigger power(power(b, x * y), z)}
-      :: b > 0 ==> power(power(b, x * y), z) == power(power(b, x), y * z)
+      {:trigger Pow(Pow(b, x * y), z)}
+      :: b > 0 ==> Pow(Pow(b, x * y), z) == Pow(Pow(b, x), y * z)
   {
-    reveal power();
-    lemmaMulNonnegativeAuto();
-    forall b: nat, x: nat, y: nat, z: nat {:trigger power(power(b, x * y), z)}
-      | b > 0 ensures power(power(b, x * y), z) == power(power(b, x), y * z)
+    reveal Pow();
+    LemmaMulNonnegativeAuto();
+    forall b: nat, x: nat, y: nat, z: nat {:trigger Pow(Pow(b, x * y), z)}
+      | b > 0 ensures Pow(Pow(b, x * y), z) == Pow(Pow(b, x), y * z)
     {
-      lemmaPullOutPowers(b, x, y, z);
+      LemmaPullOutPows(b, x, y, z);
     }
   }
 
   /* Inequality due to smaller numerator, same denominator. */
-  lemma lemmaPowerDivisionInequality(x: nat, b: nat, e1: nat, e2: nat)
+  lemma LemmaPowDivisionInequality(x: nat, b: nat, e1: nat, e2: nat)
     requires b > 0
     requires e2 <= e1
-    requires x < power(b, e1)
-    ensures power(b, e2) > 0
-    ensures x / power(b, e2) < power(b, e1 - e2)
+    requires x < Pow(b, e1)
+    ensures Pow(b, e2) > 0
+    ensures x / Pow(b, e2) < Pow(b, e1 - e2)
   {
-    lemmaPowerPositiveAuto();
+    LemmaPowPositiveAuto();
     calc ==> {
-      x / power(b, e2) >= power(b, e1 - e2);
-        { lemmaMulInequality(power(b, e1 - e2), x / power(b, e2), power(b, e2)); }
-      x / power(b, e2) * power(b, e2) >= power(b, e1 - e2) * power(b, e2);
-        { lemmaFundamentalDivMod(x, power(b, e2));
-          lemmaMulIsCommutativeAuto(); }
-      x - x % power(b, e2) >= power(b, e1 - e2) * power(b, e2);
-        { lemmaPowerAdds(b, e1 - e2, e2); }
-      x - x % power(b, e2) >= power(b, e1);
-        { lemmaModPropertiesAuto(); }
-      x >= power(b, e1);
+      x / Pow(b, e2) >= Pow(b, e1 - e2);
+        { LemmaMulInequality(Pow(b, e1 - e2), x / Pow(b, e2), Pow(b, e2)); }
+      x / Pow(b, e2) * Pow(b, e2) >= Pow(b, e1 - e2) * Pow(b, e2);
+        { LemmaFundamentalDivMod(x, Pow(b, e2));
+          LemmaMulIsCommutativeAuto(); }
+      x - x % Pow(b, e2) >= Pow(b, e1 - e2) * Pow(b, e2);
+        { LemmaPowAdds(b, e1 - e2, e2); }
+      x - x % Pow(b, e2) >= Pow(b, e1);
+        { LemmaModPropertiesAuto(); }
+      x >= Pow(b, e1);
       false;
     }
   }
 
-  lemma lemmaPowerDivisionInequalityAuto()
-    ensures forall b: nat, e2: nat :: b > 0 ==> power(b, e2) > 0
+  lemma LemmaPowDivisionInequalityAuto()
+    ensures forall b: nat, e2: nat :: b > 0 ==> Pow(b, e2) > 0
     ensures forall x: nat, b: nat, e1: nat, e2: nat
-      {:trigger x / power(b, e2), power(b, e1 - e2)}
-      :: b > 0 && e2 <= e1 && x < power(b, e1) ==>
-         x / power(b, e2) < power(b, e1 - e2)
+      {:trigger x / Pow(b, e2), Pow(b, e1 - e2)}
+      :: b > 0 && e2 <= e1 && x < Pow(b, e1) ==>
+         x / Pow(b, e2) < Pow(b, e1 - e2)
   {
-    reveal power();
-    lemmaPowerPositiveAuto();
+    reveal Pow();
+    LemmaPowPositiveAuto();
     forall x: nat, b: nat, e1: nat, e2: nat
-      {:trigger x / power(b, e2), power(b, e1 - e2)}
-      | b > 0 && e2 <= e1 && x < power(b, e1)
-      ensures x / power(b, e2) < power(b, e1 - e2)
+      {:trigger x / Pow(b, e2), Pow(b, e1 - e2)}
+      | b > 0 && e2 <= e1 && x < Pow(b, e1)
+      ensures x / Pow(b, e2) < Pow(b, e1 - e2)
     {
-      lemmaPowerDivisionInequality(x, b, e1, e2);
+      LemmaPowDivisionInequality(x, b, e1, e2);
     }
   }
 
   /* b^e % b = 0 */
-  lemma lemmaPowerMod(b: nat, e: nat) 
+  lemma LemmaPowMod(b: nat, e: nat) 
     requires b > 0 && e > 0
-    ensures power(b, e) % b == 0;
+    ensures Pow(b, e) % b == 0;
   {
-    reveal power();
+    reveal Pow();
     calc {
-      power(b, e) % b;
-      (b * power(b, e - 1)) % b;
-        { lemmaMulIsAssociativeAuto(); }
-      (power(b, e - 1) * b) % b;
+      Pow(b, e) % b;
+      (b * Pow(b, e - 1)) % b;
+        { LemmaMulIsAssociativeAuto(); }
+      (Pow(b, e - 1) * b) % b;
         {
-          lemmaPowerPositiveAuto();
-          lemmaModMultiplesBasic(power(b, e-1) , b);
+          LemmaPowPositiveAuto();
+          LemmaModMultiplesBasic(Pow(b, e-1) , b);
         }
       0;
     }
   }
 
-  lemma lemmaPowerModAuto()
-    ensures forall b: nat, e: nat {:trigger power(b, e)}
-      :: b > 0 && e > 0 ==> power(b, e) % b == 0
+  lemma LemmaPowModAuto()
+    ensures forall b: nat, e: nat {:trigger Pow(b, e)}
+      :: b > 0 && e > 0 ==> Pow(b, e) % b == 0
   {
-    reveal power();
-    forall b: nat, e: nat {:trigger power(b, e)} | b > 0 && e > 0
-      ensures power(b, e) % b == 0
+    reveal Pow();
+    forall b: nat, e: nat {:trigger Pow(b, e)} | b > 0 && e > 0
+      ensures Pow(b, e) % b == 0
     {
-      lemmaPowerMod(b, e);
+      LemmaPowMod(b, e);
     }
   }
 
   /* ((b % e)^e) % m = b^e % m */
-  lemma lemmaPowerModNoop(b: int, e: nat, m: int)
+  lemma LemmaPowModNoop(b: int, e: nat, m: int)
     decreases e
     requires m > 0
-    ensures power(b % m, e) % m == power(b, e) % m
+    ensures Pow(b % m, e) % m == Pow(b, e) % m
   {
-    reveal power();
-    lemmaModPropertiesAuto();
+    reveal Pow();
+    LemmaModPropertiesAuto();
     if e > 0 {
       calc {
-        power(b % m, e) % m;
-        ((b % m) * power(b % m, e - 1)) % m;
-          { lemmaMulModNoopGeneral(b, power(b % m, e - 1), m); }
-        ((b % m) * (power(b % m, e - 1) % m) % m) % m;
-          { lemmaPowerModNoop(b, e - 1, m); }
-        ((b % m) * (power(b, e - 1) % m) % m) % m;
-          { lemmaMulModNoopGeneral(b, power(b, e - 1), m); }
-        (b * (power(b, e - 1)) % m) % m;
-        (b * (power(b, e - 1))) % m;
-        power(b, e) % m;
+        Pow(b % m, e) % m;
+        ((b % m) * Pow(b % m, e - 1)) % m;
+          { LemmaMulModNoopGeneral(b, Pow(b % m, e - 1), m); }
+        ((b % m) * (Pow(b % m, e - 1) % m) % m) % m;
+          { LemmaPowModNoop(b, e - 1, m); }
+        ((b % m) * (Pow(b, e - 1) % m) % m) % m;
+          { LemmaMulModNoopGeneral(b, Pow(b, e - 1), m); }
+        (b * (Pow(b, e - 1)) % m) % m;
+        (b * (Pow(b, e - 1))) % m;
+        Pow(b, e) % m;
       }
     }
   }
 
-  lemma lemmaPowerModNoopAuto()
-    ensures forall b: nat, e: nat, m: nat {:trigger power(b % m, e)}
-      :: m > 0 ==> power(b % m, e) % m == power(b, e) % m
+  lemma LemmaPowModNoopAuto()
+    ensures forall b: nat, e: nat, m: nat {:trigger Pow(b % m, e)}
+      :: m > 0 ==> Pow(b % m, e) % m == Pow(b, e) % m
   {
-    reveal power();
-    forall b: nat, e: nat, m: nat {:trigger power(b % m, e)}
-      | m > 0 ensures power(b % m, e) % m == power(b, e) % m
+    reveal Pow();
+    forall b: nat, e: nat, m: nat {:trigger Pow(b % m, e)}
+      | m > 0 ensures Pow(b % m, e) % m == Pow(b, e) % m
     {
-      lemmaPowerModNoop(b, e, m);
+      LemmaPowModNoop(b, e, m);
     }
   }
 

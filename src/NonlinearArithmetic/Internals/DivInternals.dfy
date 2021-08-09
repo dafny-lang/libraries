@@ -28,53 +28,53 @@ module DivInternals {
   import opened MulInternals
 
   /* Performs division recursively with positive denominator. */
-  function method {:opaque} divPos(x: int, d: int): int
+  function method {:opaque} DivPos(x: int, d: int): int
     requires d > 0
     decreases if x < 0 then (d - x) else x
   {
     if x < 0 then
-      -1 + divPos(x + d, d)
+      -1 + DivPos(x + d, d)
     else if x < d then
       0
     else
-      1 + divPos(x - d, d)
+      1 + DivPos(x - d, d)
   }
 
   /* Performs division recursively. */
-  function {:opaque} divRecursive(x: int, d: int): int
+  function {:opaque} DivRecursive(x: int, d: int): int
     requires d != 0
   {
-    reveal divPos();
+    reveal DivPos();
     if d > 0 then
-      divPos(x, d)
+      DivPos(x, d)
     else
-      -1 * divPos(x, -1 * d)
+      -1 * DivPos(x, -1 * d)
   }
 
   /* proves the basics of the division operation */
-  lemma lemmaDivBasics(n: int)
+  lemma LemmaDivBasics(n: int)
     requires n > 0
     ensures  n / n == -((-n) / n) == 1
     ensures  forall x:int {:trigger x / n} :: 0 <= x < n <==> x / n == 0
     ensures  forall x:int {:trigger (x + n) / n} :: (x + n) / n == x / n + 1
     ensures  forall x:int {:trigger (x - n) / n} :: (x - n) / n == x / n - 1
   {
-    lemmaModAuto(n);
-    lemmaModBasics(n);
-    lemmaSmallDiv();
-    lemmaDivBySelf(n);
+    LemmaModAuto(n);
+    LemmaModBasics(n);
+    LemmaSmallDiv();
+    LemmaDivBySelf(n);
     forall x: int | x / n == 0
       ensures 0 <= x < n
     {
-      lemmaFundamentalDivMod(x, n);
+      LemmaFundamentalDivMod(x, n);
     }
   }
 
   /* automates the division operator process */
-  predicate divAuto(n: int)
+  predicate DivAuto(n: int)
     requires n > 0
   {
-    && modAuto(n)
+    && ModAuto(n)
     && (n / n == -((-n) / n) == 1)
     && (forall x: int {:trigger x / n} :: 0 <= x < n <==> x / n == 0)
     && (forall x: int, y: int {:trigger (x + y) / n} ::
@@ -87,13 +87,13 @@ module DivInternals {
                     (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))))
   }
 
-  /* ensures that divAuto is true */
-  lemma lemmaDivAuto(n: int)
+  /* ensures that DivAuto is true */
+  lemma LemmaDivAuto(n: int)
     requires n > 0
-    ensures  divAuto(n)
+    ensures  DivAuto(n)
   {
-    lemmaModAuto(n);
-    lemmaDivBasics(n);
+    LemmaModAuto(n);
+    LemmaDivBasics(n);
     assert (0 + n) / n == 1;
     assert (0 - n) / n == -1;
     forall x:int, y:int {:trigger (x + y) / n}
@@ -124,7 +124,7 @@ module DivInternals {
         assert ((i - n) + j) / n == ((i + j) - n) / n;
         assert (i + (j - n)) / n == ((i + j) - n) / n;
       }
-      lemmaModInductionForall2(n, f);
+      LemmaModInductionForall2(n, f);
       assert f(x, y);
     }
     forall x:int, y:int {:trigger (x - y) / n}
@@ -155,42 +155,42 @@ module DivInternals {
         assert ((i - n) - j) / n == ((i - j) - n) / n;
         assert (i - (j + n)) / n == ((i - j) - n) / n;
       }
-      lemmaModInductionForall2(n, f);
+      LemmaModInductionForall2(n, f);
       assert f(x, y);
     }
   }
 
   /* performs auto induction for division */
-  lemma lemmaDivInductionAuto(n: int, x: int, f: int->bool)
+  lemma LemmaDivInductionAuto(n: int, x: int, f: int->bool)
     requires n > 0
-    requires divAuto(n) ==> && (forall i {:trigger isLe(0, i)} :: isLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger isLe(0, i)} :: isLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger isLe(i + 1, n)} :: isLe(i + 1, n) && f(i) ==> f(i - n))
-    ensures  divAuto(n)
+    requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
+                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+    ensures  DivAuto(n)
     ensures  f(x)
   {
-    lemmaDivAuto(n);
-    assert forall i :: isLe(0, i) && i < n ==> f(i);
-    assert forall i {:trigger f(i), f(i + n)} :: isLe(0, i) && f(i) ==> f(i + n);
-    assert forall i {:trigger f(i), f(i - n)} :: isLe(i + 1, n) && f(i) ==> f(i - n);
-    lemmaModInductionForall(n, f);
+    LemmaDivAuto(n);
+    assert forall i :: IsLe(0, i) && i < n ==> f(i);
+    assert forall i {:trigger f(i), f(i + n)} :: IsLe(0, i) && f(i) ==> f(i + n);
+    assert forall i {:trigger f(i), f(i - n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n);
+    LemmaModInductionForall(n, f);
     assert f(x);
   }
 
   /* performs auto induction on division for all i s.t. f(i) exists */
-  lemma lemmaDivInductionAutoForall(n:int, f:int->bool)
+  lemma LemmaDivInductionAutoForall(n:int, f:int->bool)
     requires n > 0
-    requires divAuto(n) ==> && (forall i {:trigger isLe(0, i)} :: isLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger isLe(0, i)} :: isLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger isLe(i + 1, n)} :: isLe(i + 1, n) && f(i) ==> f(i - n))
-    ensures  divAuto(n)
+    requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
+                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+    ensures  DivAuto(n)
     ensures  forall i {:trigger f(i)} :: f(i)
   {
-    lemmaDivAuto(n);
-    assert forall i :: isLe(0, i) && i < n ==> f(i);
-    assert forall i {:trigger f(i), f(i + n)} :: isLe(0, i) && f(i) ==> f(i + n);
-    assert forall i {:trigger f(i), f(i - n)} :: isLe(i + 1, n) && f(i) ==> f(i - n);
-    lemmaModInductionForall(n, f);
+    LemmaDivAuto(n);
+    assert forall i :: IsLe(0, i) && i < n ==> f(i);
+    assert forall i {:trigger f(i), f(i + n)} :: IsLe(0, i) && f(i) ==> f(i + n);
+    assert forall i {:trigger f(i), f(i - n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n);
+    LemmaModInductionForall(n, f);
   }
 
-} 
+}

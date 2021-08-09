@@ -7,7 +7,7 @@
 **********************************************************************************************/
 
 module BasicMath {
-  function method min(a: int, b: int): int
+  function method Min(a: int, b: int): int
   {
     if a < b
       then a
@@ -15,7 +15,7 @@ module BasicMath {
       b
   }
 
-  function method max(a: int, b: int): int
+  function method Max(a: int, b: int): int
   {
     if a < b
       then b
@@ -23,7 +23,7 @@ module BasicMath {
       a
   }
 
-  predicate injective<X(!new), Y>(f: X-->Y)
+  predicate Injective<X(!new), Y>(f: X-->Y)
     reads f.reads
     requires forall x :: f.requires(x)
   {
