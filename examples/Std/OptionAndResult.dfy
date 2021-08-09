@@ -49,7 +49,7 @@ module Demo {
   // Sometimes we want to go from Option to Result:
   method FindName(m: MyMap<string, string>) returns (res: Result<string, string>) {
     // Will return a default error message in case of None:
-    res := m.Get("name").toResult();
+    res := m.Get("name").ToResult();
     // We can also match on the option to write a custom error:
     match m.Get("name")
     case Some(n) => res := Success(n);

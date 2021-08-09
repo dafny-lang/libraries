@@ -17,7 +17,7 @@ module ModInternalsNonlinear {
   is highly unstable! */
 
   /* the remainder of 0 divided by an integer is 0 */
-  lemma lemmaModOfZeroIsZero(m:int)
+  lemma LemmaModOfZeroIsZero(m:int)
     requires 0 < m
     ensures 0 % m == 0
   { 

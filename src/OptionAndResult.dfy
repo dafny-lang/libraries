@@ -9,14 +9,14 @@
 module OptionAndResult {
   
   datatype Option<T> = None | Some(value: T) {
-    function method toResult(): Result<T, string> 
+    function method ToResult(): Result<T, string> 
     {
       match this
       case Some(v) => Success(v)
       case None() => Failure("Option is None")
     }
     
-    function method unwrapOr(default: T): T 
+    function method UnwrapOr(default: T): T 
     {
       match this
       case Some(v) => v
@@ -25,13 +25,13 @@ module OptionAndResult {
   }
   
   datatype Result<T, R> = | Success(value: T) | Failure(error: R) {
-    function method toOption(): Option<T> 
+    function method ToOption(): Option<T> 
     {
       match this
       case Success(s) => Some(s)
       case Failure(e) => None()
     }
-    function method unwrapOr(default: T): T 
+    function method UnwrapOr(default: T): T 
     {
       match this
       case Success(s) => s
@@ -39,4 +39,4 @@ module OptionAndResult {
     }
   }
   
-} 
+}

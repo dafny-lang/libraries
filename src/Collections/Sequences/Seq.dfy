@@ -226,11 +226,11 @@ module Seq {
   }
 
   /* slices out a specific position's value from the sequence */
-  function method {:opaque} remove<T>(s: seq<T>, pos: nat): seq<T>
+  function method {:opaque} Remove<T>(s: seq<T>, pos: nat): seq<T>
     requires pos < |s|
-    ensures |remove(s, pos)| == |s| - 1
-    ensures forall i {:trigger remove(s, pos)[i], s[i]} | 0 <= i < pos :: remove(s, pos)[i] == s[i]
-    ensures forall i {:trigger remove(s, pos)[i]} | pos <= i < |s| - 1 :: remove(s, pos)[i] == s[i+1]
+    ensures |Remove(s, pos)| == |s| - 1
+    ensures forall i {:trigger Remove(s, pos)[i], s[i]} | 0 <= i < pos :: Remove(s, pos)[i] == s[i]
+    ensures forall i {:trigger Remove(s, pos)[i]} | pos <= i < |s| - 1 :: Remove(s, pos)[i] == s[i+1]
   {
     s[..pos] + s[pos+1..] 
   }
