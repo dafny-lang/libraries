@@ -21,7 +21,7 @@ module Isets {
   import Math = BasicMath
 
   /* If all elements in iset x are in iset y, x is a subset of y. */
-  lemma lemma_subset<T>(x: iset<T>, y: iset<T>)
+  lemma lemmaSubset<T>(x: iset<T>, y: iset<T>)
     requires forall e {:trigger e in y} :: e in x ==> e in y
     ensures x <= y
   {

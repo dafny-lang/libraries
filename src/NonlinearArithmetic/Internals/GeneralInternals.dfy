@@ -12,13 +12,13 @@
 module GeneralInternals {
 
   /* this predicate is primarily used as a trigger */
-  predicate is_le(x: int, y: int) 
+  predicate isLe(x: int, y: int) 
   { 
     x <= y 
   }
 
   /* aids in the process of induction for modulus */
-  lemma lemma_induction_helper(n: int, f: int -> bool, x: int)
+  lemma lemmaInductionHelper(n: int, f: int -> bool, x: int)
     requires n > 0
     requires forall i :: 0 <= i < n ==> f(i)
     requires forall i {:trigger f(i), f(i + n)} :: i >= 0 && f(i) ==> f(i + n)
@@ -28,12 +28,12 @@ module GeneralInternals {
   {
     if (x >= n)
     {
-      lemma_induction_helper(n, f, x - n);
+      lemmaInductionHelper(n, f, x - n);
       assert f((x - n) + n);
     }
     else if (x < 0)
     {
-      lemma_induction_helper(n, f, x + n);
+      lemmaInductionHelper(n, f, x + n);
       assert f((x + n) - n);
     }
   }

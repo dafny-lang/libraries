@@ -1,18 +1,10 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/*********************************************************************************************
-*  Original Copyright under the following: 
-*  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
-*  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
-*  Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT 
-* 
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-**********************************************************************************************/
+/*********************************************************************************************************************
+Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, ETH Zurich, and University of Washington
+SPDX-License-Identifier: BSD-2-Clause
+**********************************************************************************************************************/
 
 include "../../OptionAndResult.dfy"
 include "../../BasicMath.dfy"
@@ -24,10 +16,9 @@ module Seq {
 
   /**********************************************************
   *
-  *  Manipulating the End of a Sequence
+  Last in Sequences
   *
   ***********************************************************/
-
   /* finds the first element in the sequence */
   function method first<T>(s: seq<T>): T
     requires |s| > 0
@@ -35,7 +26,7 @@ module Seq {
     s[0]
   }
 
-  function method drop_first<T>(s: seq<T>): seq<T>
+  function method dropFirst<T>(s: seq<T>): seq<T>
     requires |s| > 0
   {
     s[1..]
@@ -49,59 +40,59 @@ module Seq {
   }
 
   /* returns the sequence slice up to but not including the last element */
-  function method drop_last<T>(s: seq<T>): seq<T> 
+  function method dropLast<T>(s: seq<T>): seq<T> 
     requires |s| > 0;
   {
     s[..|s|-1]
   }
 
   /* concatenating everything but the last element + the last element results in the original seq */
-  lemma lemma_last<T>(s: seq<T>)
+  lemma lemmaLast<T>(s: seq<T>)
     requires |s| > 0;
-    ensures  drop_last(s) + [last(s)] == s;
+    ensures  dropLast(s) + [last(s)] == s;
   {
   }
 
   /* the last element in an appended sequence will be the last element of the latter sequence */
-  lemma lemma_append_last<T>(a: seq<T>, b: seq<T>)
+  lemma lemmaAppendLast<T>(a: seq<T>, b: seq<T>)
     requires 0 < |a + b| && 0 < |b|
     ensures last(a + b) == last(b)
   {
   }
 
   /* explains associative property of sequences in addition */
-  lemma lemma_concat_is_associative<T>(a: seq<T>, b: seq<T>, c: seq<T>)
+  lemma lemmaConcatIsAssociative<T>(a: seq<T>, b: seq<T>, c: seq<T>)
     ensures a + (b + c) == (a + b) + c;
   {
   }
 
   /**********************************************************
   *
-  *  Manipulating the Content of a Sequence
+  Contents and Placement in Sequence
   *
   ***********************************************************/
   
-  predicate is_prefix<T>(a: seq<T>, b: seq<T>)
+  predicate isPrefix<T>(a: seq<T>, b: seq<T>)
   {
     && |a| <= |b|
     && a == b[..|a|]    
   } 
   
-  predicate is_suffix<T>(a: seq<T>, b: seq<T>) {
+  predicate isSuffix<T>(a: seq<T>, b: seq<T>) {
     && |a| <= |b|
     && a == b[|b|-|a|..]
   }
 
   /* a sequence that is sliced at the jth element concatenated with that same
   sequence sliced from the jth element is equal to the original, unsliced sequence */
-  lemma lemma_split_at<T>(s: seq<T>, pos: nat)
+  lemma lemmaSplitAt<T>(s: seq<T>, pos: nat)
     requires pos < |s|;
     ensures s[..pos] + s[pos..] == s;
   {
   }
 
   /* ensures that the element from a slice is included in the original sequence */
-  lemma lemma_element_from_slice<T>(s: seq<T>, s':seq<T>, a:int, b:int, pos:nat)
+  lemma lemmaElementFromSlice<T>(s: seq<T>, s': seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |s|;
     requires s' == s[a..b];
     requires a <= pos < b;
@@ -110,7 +101,7 @@ module Seq {
   {
   }
 
-  lemma lemma_slice_of_slice<T>(s: seq<T>, s1:int, e1:int, s2:int, e2:int)
+  lemma lemmaSliceOfSlice<T>(s: seq<T>, s1: int, e1: int, s2: int, e2: int)
     requires 0 <= s1 <= e1 <= |s|;
     requires 0 <= s2 <= e2 <= e1 - s1;
     ensures  s[s1..e1][s2..e2] == s[s1+s2..s1+e2];
@@ -124,59 +115,50 @@ module Seq {
     }
   }
 
-  /* converts a sequence to an array */
-  method to_array<T>(s: seq<T>) returns (a: array<T>)
-    ensures fresh(a)
-    ensures a.Length == |s|
-    ensures forall i :: 0 <= i < |s| ==> a[i] == s[i]
-  {
-    a := new T[|s|](i requires 0 <= i < |s| => s[i]);
-  }
-
   /* converts a sequence to a set */
-  function method {:opaque} to_set<T>(s: seq<T>): set<T> 
+  function method {:opaque} toSet<T>(s: seq<T>): set<T> 
   {
     set x: T | x in multiset(s)
   }
 
   /* proves that the cardinality of a subsequence is always less than or equal to that
   of the full sequence */
-  lemma lemma_cardinality_of_set<T>(s: seq<T>)
-    ensures |to_set(s)| <= |s| 
+  lemma lemmaCardinalityOfSet<T>(s: seq<T>)
+    ensures |toSet(s)| <= |s| 
   {
-    reveal_to_set();
+    reveal toSet();
     if |s| == 0 {
     } else {
-      assert to_set(s) == to_set(drop_last(s)) + {last(s)};
-      lemma_cardinality_of_set(drop_last(s));
+      assert toSet(s) == toSet(dropLast(s)) + {last(s)};
+      lemmaCardinalityOfSet(dropLast(s));
     }
   }
   
   /* the cardinality of a subsequence of an empty sequence is also 0 */
-  lemma lemma_cardinality_of_empty_set_is_0<T>(s: seq<T>)
-    ensures |to_set(s)| == 0 <==> |s| == 0
+  lemma lemmaCardinalityOfEmptySetIs0<T>(s: seq<T>)
+    ensures |toSet(s)| == 0 <==> |s| == 0
   {
-    reveal_to_set();
+    reveal toSet();
     if |s| != 0 {
-      assert s[0] in to_set(s);
+      assert s[0] in toSet(s);
     }
   }
 
   /* is true if there are no duplicate values in the sequence */
-  predicate {:opaque} has_no_duplicates<T>(s: seq<T>) 
+  predicate {:opaque} hasNoDuplicates<T>(s: seq<T>) 
   {
     (forall i, j {:trigger s[i], s[j]}:: 0 <= i < |s| && 0 <= j < |s| && i != j ==> s[i] != s[j])
   }
 
   /* if sequence a and b don't have duplicates, then the concatenated sequence of a + b
   will not contain duplicates either */
-  lemma {:timeLimitMultiplier 3} lemma_no_duplicates_in_concat<T>(a: seq<T>, b: seq<T>)
-    requires has_no_duplicates(a);
-    requires has_no_duplicates(b);
+  lemma {:timeLimitMultiplier 3} lemmaNoDuplicatesInConcat<T>(a: seq<T>, b: seq<T>)
+    requires hasNoDuplicates(a);
+    requires hasNoDuplicates(b);
     requires multiset(a) !! multiset(b);
-    ensures has_no_duplicates(a+b);
+    ensures hasNoDuplicates(a+b);
   {
-    reveal_has_no_duplicates();
+    reveal hasNoDuplicates();
     var c := a + b;
     if |c| > 1 {
       assert forall i, j {:trigger c[i], c[j]}:: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
@@ -185,41 +167,41 @@ module Seq {
   }
 
   /* A sequence with no duplicates converts to a set of the same cardinality */
-  lemma lemma_cardinality_of_set_no_duplicates<T>(s: seq<T>)
-    requires has_no_duplicates(s)
-    ensures |to_set(s)| == |s|
+  lemma lemmaCardinalityOfSetNoDuplicates<T>(s: seq<T>)
+    requires hasNoDuplicates(s)
+    ensures |toSet(s)| == |s|
   {
-    reveal_has_no_duplicates();
-    reveal_to_set();
+    reveal hasNoDuplicates();
+    reveal toSet();
     if |s| == 0 {
     } else {
-      lemma_cardinality_of_set_no_duplicates(drop_last(s));
-      assert to_set(s) == to_set(drop_last(s)) + {last(s)};
+      lemmaCardinalityOfSetNoDuplicates(dropLast(s));
+      assert toSet(s) == toSet(dropLast(s)) + {last(s)};
     }
   }
 
   /* proves that there are no duplicate values in the multiset version of the sequence */
-  lemma lemma_multiset_has_no_duplicates<T>(s: seq<T>)
-    requires has_no_duplicates(s)
+  lemma lemmaMultisetHasNoDuplicates<T>(s: seq<T>)
+    requires hasNoDuplicates(s)
     ensures forall x {:trigger multiset(s)[x]} | x in multiset(s):: multiset(s)[x] == 1
   {
     if |s| == 0 {
     } else {
-      assert s == drop_last(s) + [last(s)];
-      assert last(s) !in drop_last(s) by {
-        reveal_has_no_duplicates();
+      assert s == dropLast(s) + [last(s)];
+      assert last(s) !in dropLast(s) by {
+        reveal hasNoDuplicates();
       }
-      assert has_no_duplicates(drop_last(s)) by {
-        reveal_has_no_duplicates();
+      assert hasNoDuplicates(dropLast(s)) by {
+        reveal hasNoDuplicates();
       }
-      lemma_multiset_has_no_duplicates(drop_last(s));
+      lemmaMultisetHasNoDuplicates(dropLast(s));
     }
   }
 
   /* finds the index of a certain element in the sequence if found*/
-  function index_of<T>(s: seq<T>, v: T): Option<nat, string>
+  function indexOf<T>(s: seq<T>, v: T): Option<nat>
     requires v in s;
-    ensures var i := index_of(s, v);
+    ensures var i:= indexOf(s, v);
     if i.Some? then i.value < |s| && s[i.value] == v else v !in s;
   {
     if i :| 0 <= i < |s| && s[i] == v then Some(i) else None
@@ -236,14 +218,14 @@ module Seq {
   }
 
   /* slices out a specific value from the sequence */
-  function {:opaque} remove_value<T>(s: seq<T>, v: T): (s': seq<T>)
+  function {:opaque} removeValue<T>(s: seq<T>, v: T): (s': seq<T>)
     ensures v !in s ==> s == s'
     ensures v in s ==> |multiset(s')| == |multiset(s)| - 1
     ensures v in s ==> multiset(s')[v] == multiset(s)[v] - 1
-    ensures has_no_duplicates(s) ==> has_no_duplicates(s') && to_set(s') == to_set(s) - {v}
+    ensures hasNoDuplicates(s) ==> hasNoDuplicates(s') && toSet(s') == toSet(s) - {v}
   {
-    reveal_has_no_duplicates();
-    reveal_to_set();
+    reveal hasNoDuplicates();
+    reveal toSet();
     if v !in s then s else
     var i :| 0 <= i < |s| && s[i] == v;
     assert s == s[..i] + [v] + s[i+1..];
@@ -286,7 +268,7 @@ module Seq {
   {
     if |s| == 0 then ([], [])
     else
-      var (a, b):= unzip(drop_last(s));
+      var (a, b):= unzip(dropLast(s));
       (a + [last(s).0], b + [last(s).1])
   }
 
@@ -300,18 +282,18 @@ module Seq {
     ensures unzip(zip(a, b)).1 == b;
   {
     if |a| == 0 then []
-    else zip(drop_last(a), drop_last(b)) + [(last(a), last(b))]
+    else zip(dropLast(a), dropLast(b)) + [(last(a), last(b))]
   }
 
   /* if a sequence is unzipped and then zipped, it forms the original sequence */
-  lemma lemma_zip_of_unzip<A,B>(s: seq<(A,B)>)
+  lemma lemmaZipOfUnzip<A,B>(s: seq<(A,B)>)
     ensures zip(unzip(s).0, unzip(s).1) == s
   {
   }
 
   /**********************************************************
   *
-  *  Extrema in Sequences
+  Extrema in Sequences
   *
   ***********************************************************/
 
@@ -327,17 +309,17 @@ module Seq {
 
   /* the greater maximum value of two sequences, a and b, becomes the maximum of the total sequence when 
   a and b are concatenated */
-  lemma lemma_max_of_concat(a: seq<int>, b: seq<int>)
+  lemma lemmaMaxOfConcat(a: seq<int>, b: seq<int>)
     requires 0 < |a| && 0 < |b|
     ensures max(a+b) >= max(a)
     ensures max(a+b) >= max(b)
     ensures forall i {:trigger i in [max(a + b)]} :: i in a + b ==> max(a + b) >= i
   {
-    reveal_max();
+    reveal max();
     if |a| == 1 {
     } else {
       assert a[1..] + b == (a + b)[1..];
-      lemma_max_of_concat(a[1..], b);
+      lemmaMaxOfConcat(a[1..], b);
     }
   }
 
@@ -353,23 +335,23 @@ module Seq {
 
   /* the smaller minimum value of two sequences, a and b, becomes the minimum of the total sequence when 
   a and b are concatenated */
-   lemma lemma_min_of_concat(a: seq<int>, b: seq<int>)
+   lemma lemmaMinOfConcat(a: seq<int>, b: seq<int>)
     requires 0 < |a| && 0 < |b|
     ensures min(a+b) <= min(a)
     ensures min(a+b) <= min(b)
     ensures forall i {:trigger i in a + b} :: i in a + b ==> min(a + b) <= i
   {
-    reveal_min();
+    reveal min();
     if |a| == 1 {
     } else {
       assert a[1..] + b == (a + b)[1..];
-      lemma_min_of_concat(a[1..], b);
+      lemmaMinOfConcat(a[1..], b);
     }
   }
 
   /* the maximum element in any subsequence will not be greater than the maximum element in 
   the full sequence */
-  lemma lemma_subseq_max(s: seq<int>, from: nat, to: nat)
+  lemma lemmaSubseqMax(s: seq<int>, from: nat, to: nat)
     requires from < to <= |s|
     ensures max(s[from..to]) <= max(s)
   {
@@ -383,7 +365,7 @@ module Seq {
 
   /* the minimum element in any subsequence will not be less than the minimum element in 
   the full sequence */
-  lemma lemma_subseq_min(s: seq<int>, from: nat, to: nat)
+  lemma lemmaSubseqMin(s: seq<int>, from: nat, to: nat)
     requires from < to <= |s|
     ensures min(s[from..to]) >= min(s)
   {
@@ -396,7 +378,7 @@ module Seq {
 
   /**********************************************************
   *
-  *  Sequences of Sequences
+  Sequences of Sequences
   *
   ***********************************************************/
 
@@ -412,7 +394,7 @@ module Seq {
   /* concatenating two sequences of sequences is equivalent to concatenating 
   each sequence of sequences seperately, and then concatenating the two resulting 
   sequences together */
-  lemma lemma_flatten_concat<T>(a: seq<seq<T>>, b: seq<seq<T>>)
+  lemma lemmaFlattenConcat<T>(a: seq<seq<T>>, b: seq<seq<T>>)
     ensures flatten(a + b) == flatten(a) + flatten(b)
   {
     if |a| == 0 {
@@ -430,47 +412,47 @@ module Seq {
 
   /* concatenates the sequence of sequences into a single sequence. Works by concatenating 
   elements from last to first */
-  function method flatten_reverse<T>(s: seq<seq<T>>): seq<T>
+  function method flattenReverse<T>(s: seq<seq<T>>): seq<T>
   decreases |s|
   {
     if |s| == 0 then []
-    else flatten_reverse(drop_last(s)) + last(s)
+    else flattenReverse(dropLast(s)) + last(s)
   }
 
   /* concatenating two reversed sequences of sequences is the same as reversing two 
   sequences of sequences and then concattenating the two resulting sequences together */
-  lemma lemma_flatten_reverse_concat<T>(a: seq<seq<T>>, b: seq<seq<T>>)
-  ensures flatten_reverse(a + b) == flatten_reverse(a) + flatten_reverse(b)
+  lemma lemmaFlattenReverseConcat<T>(a: seq<seq<T>>, b: seq<seq<T>>)
+  ensures flattenReverse(a + b) == flattenReverse(a) + flattenReverse(b)
   {
     if |b| == 0 {
-      assert flatten_reverse(b) == [];
+      assert flattenReverse(b) == [];
       assert a + b == a;
     } else {
       calc == {
-        flatten_reverse(a + b);
-          { assert last(a + b) == last(b);  assert drop_last(a + b) == a + drop_last(b); }
-        flatten_reverse(a + drop_last(b)) + last(b);
-        flatten_reverse(a) + flatten_reverse(drop_last(b)) + last(b);
-        flatten_reverse(a) + flatten_reverse(b);
+        flattenReverse(a + b);
+          { assert last(a + b) == last(b);  assert dropLast(a + b) == a + dropLast(b); }
+        flattenReverse(a + dropLast(b)) + last(b);
+        flattenReverse(a) + flattenReverse(dropLast(b)) + last(b);
+        flattenReverse(a) + flattenReverse(b);
       }
     }
   }
 
   /* both methods of concatenating sequence (starting from front v. starting from back)
   result in the same sequence */
-  lemma lemma_flatten_and_flatten_reverse_are_equivalent<T>(s: seq<seq<T>>)
-    ensures flatten(s) == flatten_reverse(s)
+  lemma lemmaFlattenAndFlattenReverseAreEquivalent<T>(s: seq<seq<T>>)
+    ensures flatten(s) == flattenReverse(s)
   {
     if |s| == 0 {
     } else {
       calc == {
-        flatten_reverse(s);
-        flatten_reverse(drop_last(s)) + last(s);
-          { lemma_flatten_and_flatten_reverse_are_equivalent(drop_last(s)); }
-        flatten(drop_last(s)) + last(s);
-        flatten(drop_last(s)) + flatten([last(s)]);
-          { lemma_flatten_concat(drop_last(s), [last(s)]); 
-        assert s == drop_last(s) + [last(s)]; }
+        flattenReverse(s);
+        flattenReverse(dropLast(s)) + last(s);
+          { lemmaFlattenAndFlattenReverseAreEquivalent(dropLast(s)); }
+        flatten(dropLast(s)) + last(s);
+        flatten(dropLast(s)) + flatten([last(s)]);
+          { lemmaFlattenConcat(dropLast(s), [last(s)]); 
+        assert s == dropLast(s) + [last(s)]; }
         flatten(s);
       }
     }
@@ -478,32 +460,32 @@ module Seq {
 
   /* the concatenated sequence's length is greater than or equal to each individual
   inner sequence's length */
-  lemma lemma_flatten_length_ge_single_element_length<T>(s: seq<seq<T>>, i: int)
+  lemma lemmaFlattenLengthGeSingleElementLength<T>(s: seq<seq<T>>, i: int)
     requires 0 <= i < |s|
-    ensures |flatten_reverse(s)| >= |s[i]|
+    ensures |flattenReverse(s)| >= |s[i]|
   {
     if i < |s| - 1 {
-      lemma_flatten_length_ge_single_element_length(s[..|s|-1], i);
+      lemmaFlattenLengthGeSingleElementLength(s[..|s|-1], i);
     }
   }
 
   /* the length of concatenating sequence in a sequence together will be no longer 
   than the length of the original sequence of sequences multiplied by the length of 
   the longest sequence */
-  lemma lemma_flatten_length_le_mul<T>(s: seq<seq<T>>, j: int)
+  lemma lemmaFlattenLengthLeMul<T>(s: seq<seq<T>>, j: int)
     requires forall i {:trigger s[i]} | 0 <= i < |s| :: |s[i]| <= j
-    ensures |flatten_reverse(s)| <= |s| * j
+    ensures |flattenReverse(s)| <= |s| * j
   {
     if |s| == 0 {
     } else {
-      lemma_flatten_length_le_mul(s[..|s|-1], j);
+      lemmaFlattenLengthLeMul(s[..|s|-1], j);
     }
   }
 
 
   /**********************************************************
   *
-  *  Higher-Order Sequence Functions
+  Higher Order Sequence Functions
   *
   ***********************************************************/
 
@@ -520,12 +502,12 @@ module Seq {
 
   /* concatenating two sequences and then using "apply" is the same as using "apply" on each sequence 
   seperately and then concatenating the two resulting sequences */
-  lemma {:opaque} lemma_apply_concat<T,R>(f: (T ~> R), a: seq<T>, b: seq<T>)
+  lemma {:opaque} lemmaApplyConcat<T,R>(f: (T ~> R), a: seq<T>, b: seq<T>)
     requires forall i {:trigger a[i]}:: 0 <= i < |a| ==> f.requires(a[i])
     requires forall j {:trigger b[j]}:: 0 <= j < |b| ==> f.requires(b[j])
     ensures apply(f, a + b) == apply(f, a) + apply(f, b)
   {
-    reveal_apply();
+    reveal apply();
     if |a| == 0 {
       assert a + b == b;
     } else {
@@ -553,12 +535,12 @@ module Seq {
 
   /* concatenating two sequences and then using "filter" is the same as using "filter" on each sequences
   seperately and then concatenating their resulting sequences */
-  lemma {:opaque} lemma_filter_concat<T>(f: (T ~> bool), a: seq<T>, b: seq<T>)
+  lemma {:opaque} lemmaFilterConcat<T>(f: (T ~> bool), a: seq<T>, b: seq<T>)
     requires forall i {:trigger a[i]}:: 0 <= i < |a| ==> f.requires(a[i])
     requires forall j {:trigger b[j]}:: 0 <= j < |b| ==> f.requires(b[j])
     ensures filter(f, a + b) == filter(f, a) + filter(f, b)
   {
-    reveal_filter();
+    reveal filter();
     if |a| == 0 {
       assert a + b == b;
     } else {
@@ -573,112 +555,112 @@ module Seq {
     }
   }
   
-  function method {:opaque} fold_left<A,T>(f: (A, T) -> A, init: A, s: seq<T>): A
+  function method {:opaque} foldLeft<A,T>(f: (A, T) -> A, init: A, s: seq<T>): A
   {
     if |s| == 0 then init
-    else fold_left(f, f(init, s[0]), s[1..])
+    else foldLeft(f, f(init, s[0]), s[1..])
   }
 
   /* Concatenating two sequences, then folding left is the same as folding the first sequence and using the result as the initial value to fold the second
   sequence. */
-  lemma {:opaque} lemma_fold_left_concat<A,T>(f: (A, T) -> A, init: A, a: seq<T>, b: seq<T>)
+  lemma {:opaque} lemmaFoldLeftConcat<A,T>(f: (A, T) -> A, init: A, a: seq<T>, b: seq<T>)
     requires 0 <= |a + b|
-    ensures fold_left(f, init, a + b) == fold_left(f, fold_left(f, init, a), b)
+    ensures foldLeft(f, init, a + b) == foldLeft(f, foldLeft(f, init, a), b)
   {
-    reveal_fold_left();
+    reveal foldLeft();
     if |a| == 0 {
       assert a + b == b;
     } else {
       assert |a| >= 1;
       assert ([a[0]] + a[1..] + b)[0] == a[0];
       calc {
-        fold_left(f, fold_left(f, init, a), b);
-        fold_left(f, fold_left(f, f(init, a[0]), a[1..]), b);
-          { lemma_fold_left_concat(f, f(init, a[0]), a[1..], b); }
-        fold_left(f, f(init, a[0]), a[1..] + b);
+        foldLeft(f, foldLeft(f, init, a), b);
+        foldLeft(f, foldLeft(f, f(init, a[0]), a[1..]), b);
+          { lemmaFoldLeftConcat(f, f(init, a[0]), a[1..], b); }
+        foldLeft(f, f(init, a[0]), a[1..] + b);
           { assert (a + b)[0] == a[0];
             assert (a + b)[1..] == a[1..] + b; }
-        fold_left(f, init, a + b);
+        foldLeft(f, init, a + b);
       }
     }
   }
 
   /* inv is an invariant under stp, which is a relational version of the
   function f passed to fold. */
-  predicate inv_fold_left<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
-                                           stp: (B, A, B) -> bool)
+  predicate invFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
+                                         stp: (B, A, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
       inv(b, [x] + xs) && stp(b, x, b') ==> inv(b', xs)
   }
 
-  /* inv(b, xs) ==> inv(fold_left(f, b, xs), []). */
-  lemma lemma_inv_fold_left<A,B>(inv: (B, seq<A>) -> bool,
-                                 stp: (B, A, B) -> bool,
-                                 f: (B, A) -> B,
-                                 b: B,
-                                 xs: seq<A>)
-    requires inv_fold_left(inv, stp)
+  /* inv(b, xs) ==> inv(foldLeft(f, b, xs), []). */
+  lemma lemmaInvFoldLeft<A,B>(inv: (B, seq<A>) -> bool,
+                              stp: (B, A, B) -> bool,
+                              f: (B, A) -> B,
+                              b: B,
+                              xs: seq<A>)
+    requires invFoldLeft(inv, stp)
     requires forall b, a :: stp(b, a, f(b, a))
     requires inv(b, xs)
-    ensures inv(fold_left(f, b, xs), [])
+    ensures inv(foldLeft(f, b, xs), [])
   {
-    reveal_fold_left();
+    reveal foldLeft();
     if xs == [] {
     } else {
       assert [xs[0]] + xs[1..] == xs;
-      lemma_inv_fold_left(inv, stp, f, f(b, xs[0]), xs[1..]);
+      lemmaInvFoldLeft(inv, stp, f, f(b, xs[0]), xs[1..]);
     }
   }
 
-  function method {:opaque} fold_right<A,T>(f: (T, A) -> A, s: seq<T>, init: A): A
+  function method {:opaque} foldRight<A,T>(f: (T, A) -> A, s: seq<T>, init: A): A
   {
     if |s| == 0 then init
-    else f(s[0], fold_right(f, s[1..], init))
+    else f(s[0], foldRight(f, s[1..], init))
   }
 
   /* Concatenating two sequences, then folding right is the same as folding the second sequence and using the result as the initial value to fold the first
   sequence. */
-  lemma {:opaque} lemma_fold_right_concat<A,T>(f: (T, A) -> A, init: A, a: seq<T>, b: seq<T>)
+  lemma {:opaque} lemmaFoldRightConcat<A,T>(f: (T, A) -> A, init: A, a: seq<T>, b: seq<T>)
     requires 0 <= |a + b|
-    ensures fold_right(f, a + b, init) == fold_right(f, a, fold_right(f, b, init))
+    ensures foldRight(f, a + b, init) == foldRight(f, a, foldRight(f, b, init))
   {
-    reveal_fold_right();
+    reveal foldRight();
     if |a| == 0 {
       assert a + b == b;
     } else {
       calc {
-        fold_right(f, a, fold_right(f, b, init));
-        f(a[0], fold_right(f, a[1..], fold_right(f, b, init)));
-        f(a[0], fold_right(f, a[1..] + b, init));
+        foldRight(f, a, foldRight(f, b, init));
+        f(a[0], foldRight(f, a[1..], foldRight(f, b, init)));
+        f(a[0], foldRight(f, a[1..] + b, init));
           { assert (a + b)[0] == a[0];
             assert (a + b)[1..] == a[1..] + b; }
-        fold_right(f, a + b, init);
+        foldRight(f, a + b, init);
       }
     }
   }
 
   /* inv is an invariant under stp, which is a relational version of the
   function f passed to fold. */
-  predicate inv_fold_right<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
-                                            stp: (A, B, B) -> bool)
+  predicate invFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
+                                          stp: (A, B, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
       inv(xs, b) && stp(x, b, b') ==> inv(([x] + xs), b')
   }
 
-  /* inv([], b) ==> inv(xs, fold_right(f, xs, b)) */
-  lemma lemma_inv_fold_right<A,B>(inv: (seq<A>, B) -> bool,
-                                  stp: (A, B, B) -> bool,
-                                  f: (A, B) -> B,
-                                  b: B,
-                                  xs: seq<A>)
-    requires inv_fold_right(inv, stp)
+  /* inv([], b) ==> inv(xs, foldRight(f, xs, b)) */
+  lemma lemmaInvFoldRight<A,B>(inv: (seq<A>, B) -> bool,
+                               stp: (A, B, B) -> bool,
+                               f: (A, B) -> B,
+                               b: B,
+                               xs: seq<A>)
+    requires invFoldRight(inv, stp)
     requires forall a, b :: stp(a, b, f(a, b))
     requires inv([], b)
-    ensures inv(xs, fold_right(f, xs, b))
+    ensures inv(xs, foldRight(f, xs, b))
   {
-    reveal_fold_right();
+    reveal foldRight();
     if xs == [] {
     } else {
       assert [xs[0]] + xs[1..] == xs;

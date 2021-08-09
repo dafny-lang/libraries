@@ -9,7 +9,7 @@
 *  SPDX-License-Identifier: MIT 
 ************************************************************************************/
 
-/* Every lemma comes in 2 forms: 'lemma_property' and 'lemma_property_auto'. The former takes arguments and may 
+/* Every lemma comes in 2 forms: 'lemmaProperty' and 'lemmaPropertyAuto'. The former takes arguments and may 
 be more stable and less reliant on Z3 heuristics. The latter includes automation and its use requires less effort */
 
 include "Internals/GeneralInternals.dfy"
@@ -24,62 +24,62 @@ module Power2 {
   function method {:opaque} power2(e: nat): nat
     ensures power2(e) > 0
   {
-    reveal_power();
-    lemma_power_positive(2, e);
+    reveal power();
+    lemmaPowerPositive(2, e);
     power(2, e)
   }
 
   /* power2() is equivalent to power() with base 2. */
-  lemma lemma_power2_is_power_2(e: nat)
+  lemma lemmaPower2IsPower2(e: nat)
     ensures power2(e) == power(2, e)
   {
-    reveal_power();
-    reveal_power2();
+    reveal power();
+    reveal power2();
   
     if e != 0 {
-      lemma_power2_is_power_2(e - 1);
+      lemmaPower2IsPower2(e - 1);
     }
   }
 
-  lemma lemma_power2_is_power_2_auto()
+  lemma lemmaPower2IsPower2Auto()
     ensures forall e: nat {:trigger power2(e)} :: power2(e) == power(2, e)
   {
-    reveal_power();
-    reveal_power2();
+    reveal power();
+    reveal power2();
     
     forall e: nat {:trigger power2(e)}
       ensures power2(e) == power(2, e)
     {
-      lemma_power2_is_power_2(e);
+      lemmaPower2IsPower2(e);
     }
   }
 
   /* (2^e - 1) / 2 = 2^(e - 1) - 1 */
   // keep
-  lemma lemma_power2_mask_div_2(e: nat)
+  lemma lemmaPower2MaskDiv2(e: nat)
     requires 0 < e
     ensures (power2(e) - 1) / 2 == power2(e - 1) - 1
   {
-    lemma_power_auto();
+    lemmaPowerAuto();
     var f := e => 0 < e ==> (power2(e) - 1) / 2 == power2(e - 1) - 1;
-    assert forall i {:trigger is_le(0, i)} :: is_le(0, i) && f(i) ==> f(i + 1);
-    assert forall i {:trigger is_le(i, 0)} :: is_le(i, 0) && f(i) ==> f(i - 1);
-    lemma_mul_induction_auto(e, f);
+    assert forall i {:trigger isLe(0, i)} :: isLe(0, i) && f(i) ==> f(i + 1);
+    assert forall i {:trigger isLe(i, 0)} :: isLe(i, 0) && f(i) ==> f(i - 1);
+    lemmaMulInductionAuto(e, f);
   }
 
-  lemma lemma_power2_mask_div_2_auto()
+  lemma lemmaPower2MaskDiv2Auto()
     ensures forall e: nat {:trigger power2(e)} :: 0 < e ==>
       (power2(e) - 1) / 2 == power2(e - 1) - 1
   {
-    reveal_power2();
+    reveal power2();
     forall e: nat {:trigger power2(e)} | 0 < e
       ensures (power2(e) - 1) / 2 == power2(e - 1) - 1
     {
-      lemma_power2_mask_div_2(e);
+      lemmaPower2MaskDiv2(e);
     }
   }
 
-  lemma lemma_power2_2to64()
+  lemma lemmaPower22To64()
     ensures power2(0) == 0x1
     ensures power2(1) == 0x2
     ensures power2(2) == 0x4
@@ -115,7 +115,7 @@ module Power2 {
     ensures power2(32) == 0x100000000
     ensures power2(64) == 0x10000000000000000
   {
-    reveal_power2();
+    reveal power2();
   }
 
 } 
