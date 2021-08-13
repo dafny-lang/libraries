@@ -1,7 +1,7 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/*********************************************************************************************
+/*******************************************************************************
 *  Original Copyright under the following: 
 *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
 *  ETH Zurich, and University of Washington
@@ -12,13 +12,13 @@
 * 
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-**********************************************************************************************/
+*******************************************************************************/
 
-include "../../BasicMath.dfy"
+include "../../Functions.dfy"
 
 module Sets {
 
-  import Math = BasicMath
+  import opened Functions
 
   /* If all elements in set x are in set y, x is a subset of y. */
   lemma LemmaSubset<T>(x: set<T>, y: set<T>)
@@ -81,7 +81,7 @@ module Sets {
   another set, the two sets have the same size.  */
   lemma LemmaMapSize<X(!new), Y>(xs: set<X>, ys: set<Y>, f: X-->Y)
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
-    requires Math.Injective(f)
+    requires Injective(f)
     requires forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
     requires forall y {:trigger y in ys} :: y in ys ==> exists x :: x in xs && y == f(x)
     ensures |xs| == |ys|
@@ -98,7 +98,7 @@ module Sets {
   function method {:opaque} Map<X(!new), Y>(xs: set<X>, f: X-->Y): (ys: set<Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
-    requires Math.Injective(f)
+    requires Injective(f)
     ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
     ensures |xs| == |ys|
   {

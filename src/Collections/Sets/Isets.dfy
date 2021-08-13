@@ -1,7 +1,7 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/*********************************************************************************************
+/*******************************************************************************
 *  Original Copyright under the following: 
 *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
 *  ETH Zurich, and University of Washington
@@ -12,13 +12,13 @@
 * 
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-**********************************************************************************************/
+*******************************************************************************/
 
-include "../../BasicMath.dfy"
+include "../../Functions.dfy"
 
 module Isets {
 
-  import Math = BasicMath
+  import opened Functions
 
   /* If all elements in iset x are in iset y, x is a subset of y. */
   lemma LemmaSubset<T>(x: iset<T>, y: iset<T>)
@@ -31,7 +31,7 @@ module Isets {
   function {:opaque} Map<X(!new), Y>(xs: iset<X>, f: X-->Y): (ys: iset<Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
-    requires Math.Injective(f)
+    requires Injective(f)
     ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
   {
     var ys := iset x | x in xs :: f(x);

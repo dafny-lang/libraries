@@ -1,20 +1,21 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/***********************************************************************************
+/*******************************************************************************
 *  Original: Copyright (c) Microsoft Corporation
 *  SPDX-License-Identifier: MIT
 *  
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-************************************************************************************/
+*******************************************************************************/
 
-/* WARNING: In general, you shouldn't need to call these directly. These are used in the proofs in DivInternals */
+/* WARNING: In general, you shouldn't need to call these directly. These are
+used in the proofs in DivInternals */
 
 module DivInternalsNonlinear {
 
-  /* WARNING: Think three times before adding to this file, as nonlinear verification
-  is highly unstable! */
+  /* WARNING: Think three times before adding to this file, as nonlinear
+  verification is highly unstable! */
 
   /* zero divided by an integer besides 0 is 0 */
   lemma LemmaDivOf0(d:int)

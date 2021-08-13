@@ -1,16 +1,17 @@
 // RUN: %dafny /compile:0 /noNLarith "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/***********************************************************************************
+/*******************************************************************************
 *  Original: Copyright (c) Microsoft Corporation
 *  SPDX-License-Identifier: MIT
 *  
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-************************************************************************************/
+*******************************************************************************/
 
-/* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The former takes arguments and may 
-be more stable and less reliant on Z3 heuristics. The latter includes automation and its use requires less effort */
+/* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The
+former takes arguments and may be more stable and less reliant on Z3
+heuristics. The latter includes automation and its use requires less effort */
 
 include "Internals/GeneralInternals.dfy"
 include "Internals/MulInternals.dfy"

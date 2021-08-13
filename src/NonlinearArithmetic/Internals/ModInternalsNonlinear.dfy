@@ -1,20 +1,21 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/***********************************************************************************
+/*******************************************************************************
 *  Original: Copyright (c) Microsoft Corporation
 *  SPDX-License-Identifier: MIT
 *  
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-************************************************************************************/
+*******************************************************************************/
 
-/* WARNING: In general, you shouldn't need to call these directly. These are used in the proofs in ModInternals */
+/* WARNING: In general, you shouldn't need to call these directly. These are
+used in the proofs in ModInternals */
 
 module ModInternalsNonlinear {
   
-  /* WARNING: Think three times before adding to this file, as nonlinear verification
-  is highly unstable! */
+  /* WARNING: Think three times before adding to this file, as nonlinear
+  verification is highly unstable! */
 
   /* the remainder of 0 divided by an integer is 0 */
   lemma LemmaModOfZeroIsZero(m:int)

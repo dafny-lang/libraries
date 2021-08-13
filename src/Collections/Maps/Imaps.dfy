@@ -1,14 +1,14 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/*********************************************************************************************
+/*******************************************************************************
 *  Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
 *  ETH Zurich, and University of Washington
 *  SPDX-License-Identifier: BSD-2-Clause 
 * 
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-**********************************************************************************************/
+*******************************************************************************/
 
 include "../../OptionAndResult.dfy"
 
@@ -30,7 +30,7 @@ module Imaps {
   }
 
   /* Remove a key-value pair. Returns unmodified imap if key is not found. */
-  function {:opaque} Remove<X, Y>(m: imap<X, Y>, x: X): (m': imap<X, Y>)
+  function {:opaque} RemoveKey<X, Y>(m: imap<X, Y>, x: X): (m': imap<X, Y>)
     ensures m' == RemoveKeys(m, iset{x})
     ensures forall x' {:trigger m'[x']} :: x' in m' ==> m'[x'] == m[x']
   {
@@ -58,13 +58,13 @@ module Imaps {
   }
 
   /* Union of two imaps. Does not require disjoint domains; on the intersection,
-  values from the first imap are chosen. */
+  values from the second imap are chosen. */
   function {:opaque} Union<X, Y>(m: imap<X, Y>, m': imap<X, Y>): (r: imap<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
-    ensures forall x {:trigger r[x]} :: x in m ==> r[x] == m[x]
-    ensures forall x {:trigger r[x]} :: x in m' && x !in m ==> r[x] == m'[x]
+    ensures forall x {:trigger r[x]} :: x in m' ==> r[x] == m'[x]
+    ensures forall x {:trigger r[x]} :: x in m && x !in m' ==> r[x] == m[x]
   {
-    imap x | x in m.Keys + m'.Keys :: if x in m then m[x] else m'[x]
+    m + m'
   }
 
   /* True iff an imap is injective. */

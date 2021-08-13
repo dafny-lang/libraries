@@ -1,14 +1,14 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/*********************************************************************************************
+/*******************************************************************************
 *  Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
 *  ETH Zurich, and University of Washington
 *  SPDX-License-Identifier: BSD-2-Clause 
 * 
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-**********************************************************************************************/
+*******************************************************************************/
 
 include "../../OptionAndResult.dfy"
 
@@ -33,7 +33,7 @@ module Maps {
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m && x !in xs
     ensures m'.Keys == m.Keys - xs
   {
-    map x | x in m && x !in xs :: m[x]
+    m - xs
   }
 
   /* Remove a key-value pair. Returns unmodified map if key is not found. */
@@ -69,13 +69,13 @@ module Maps {
   }
 
   /* Union of two maps. Does not require disjoint domains; on the intersection,
-  values from the first map are chosen. */
+  values from the second map are chosen. */
   function method {:opaque} Union<X, Y>(m: map<X, Y>, m': map<X, Y>): (r: map<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
-    ensures forall x {:trigger r[x]} :: x in m ==> r[x] == m[x]
-    ensures forall x {:trigger r[x]} :: x in m' && x !in m ==> r[x] == m'[x]
+    ensures forall x {:trigger r[x]} :: x in m' ==> r[x] == m'[x]
+    ensures forall x {:trigger r[x]} :: x in m && x !in m' ==> r[x] == m[x]
   {
-    map x | x in m.Keys + m'.Keys :: if x in m then m[x] else m'[x]
+    m + m'
   }
 
   /* The size of the disjoint union is equal to the sum of individual map

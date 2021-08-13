@@ -1,7 +1,7 @@
 // RUN: %dafny "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-/*********************************************************************************************
+/*******************************************************************************
 *  Original Copyright under the following: 
 *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
 *  ETH Zurich, and University of Washington
@@ -12,15 +12,15 @@
 * 
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
-**********************************************************************************************/
+*******************************************************************************/
 
 include "../../OptionAndResult.dfy"
-include "../../BasicMath.dfy"
+include "../../Math.dfy"
 
 module Seq {
 
   import opened OptionAndResult
-  import Math = BasicMath
+  import Math
 
   /**********************************************************
   *
@@ -82,12 +82,13 @@ module Seq {
   ***********************************************************/
   
   predicate IsPrefix<T>(a: seq<T>, b: seq<T>)
+    ensures IsPrefix(a, b) ==> (|a| <= |b| && a == b[..|a|])
   {
-    && |a| <= |b|
-    && a == b[..|a|]    
-  } 
+    a <= b    
+  }
   
-  predicate IsSuffix<T>(a: seq<T>, b: seq<T>) {
+  predicate IsSuffix<T>(a: seq<T>, b: seq<T>)
+  {
     && |a| <= |b|
     && a == b[|b|-|a|..]
   }
@@ -101,7 +102,7 @@ module Seq {
   }
 
   /* ensures that the element from a slice is included in the original sequence */
-  lemma LemmaElementFromSlice<T>(s: seq<T>, s':seq<T>, a:int, b:int, pos:nat)
+  lemma LemmaElementFromSlice<T>(s: seq<T>, s':seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |s|;
     requires s' == s[a..b];
     requires a <= pos < b;
@@ -110,7 +111,7 @@ module Seq {
   {
   }
 
-  lemma LemmaSliceOfSlice<T>(s: seq<T>, s1:int, e1:int, s2:int, e2:int)
+  lemma LemmaSliceOfSlice<T>(s: seq<T>, s1: int, e1: int, s2: int, e2: int)
     requires 0 <= s1 <= e1 <= |s|;
     requires 0 <= s2 <= e2 <= e1 - s1;
     ensures  s[s1..e1][s2..e2] == s[s1+s2..s1+e2];
@@ -136,7 +137,7 @@ module Seq {
   /* converts a sequence to a set */
   function method {:opaque} ToSet<T>(s: seq<T>): set<T> 
   {
-    set x: T | x in multiset(s)
+    set x: T | x in s
   }
 
   /* proves that the cardinality of a subsequence is always less than or equal to that
@@ -168,8 +169,9 @@ module Seq {
     (forall i, j {:trigger s[i], s[j]}:: 0 <= i < |s| && 0 <= j < |s| && i != j ==> s[i] != s[j])
   }
 
-  /* if sequence a and b don't have duplicates, then the concatenated sequence of a + b
-  will not contain duplicates either */
+  /* if sequence a and b don't have duplicates and there are no elements in
+  common between them, then the concatenated sequence of a + b will not contain
+  duplicates either */
   lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(a: seq<T>, b: seq<T>)
     requires HasNoDuplicates(a);
     requires HasNoDuplicates(b);
@@ -216,11 +218,19 @@ module Seq {
     }
   }
 
-  /* finds the index of a certain element in the sequence if found*/
-  function IndexOf<T>(s: seq<T>, v: T): Option<nat>
-    requires v in s;
-    ensures var i := IndexOf(s, v);
-    if i.Some? then i.value < |s| && s[i.value] == v else v !in s;
+  /* finds the index of a certain element in the sequence */
+  function IndexOf<T>(s: seq<T>, v: T): nat
+    requires v in s
+    ensures var i := IndexOf(s, v); i < |s| && s[i] == v
+  {
+    var i :| 0 <= i < |s| && s[i] == v;
+    i
+  }
+
+  /* finds the index of a certain element in the sequence if found */
+  function IndexOfOption<T>(s: seq<T>, v: T): Option<nat>
+    ensures var i := IndexOfOption(s, v);
+      if i.Some? then i.value < |s| && s[i.value] == v else v !in s
   {
     if i :| 0 <= i < |s| && s[i] == v then Some(i) else None
   }
@@ -248,6 +258,26 @@ module Seq {
     var i :| 0 <= i < |s| && s[i] == v;
     assert s == s[..i] + [v] + s[i+1..];
     s[..i] + s[i+1..]
+  }
+
+  /* slices out a specific value from the sequence if found */
+  function {:opaque} RemoveValueOption<T>(s: seq<T>, o: Option<T>): (s': seq<T>)
+    ensures o == None || (|s| == 0 && |s'| == 0) ||
+      (|s| > 0 && var v := o.UnwrapOr(s[0]);
+        v !in s ==> s == s'
+        && v in s ==> |multiset(s')| == |multiset(s)| - 1
+        && v in s ==> multiset(s')[v] == multiset(s)[v] - 1
+        && HasNoDuplicates(s) ==> HasNoDuplicates(s') && ToSet(s') == ToSet(s) - {v})
+  {
+    reveal HasNoDuplicates();
+    reveal ToSet();
+    match o
+    case None => s
+    case Some(v) =>
+      if v !in s then s else
+      var i :| 0 <= i < |s| && s[i] == v;
+      assert s == s[..i] + [v] + s[i+1..];
+      s[..i] + s[i+1..]
   }
 
   /* inserts a certain value into a specified index of the sequence */
@@ -404,7 +434,7 @@ module Seq {
   /*concatenates a sequence of sequences into a single sequence. Works by adding 
   elements in order from first to last */
   function method Flatten<T>(s: seq<seq<T>>): seq<T>
-  decreases |s|
+    decreases |s|
   {
     if |s| == 0 then []
     else s[0] + Flatten(s[1..])
@@ -508,7 +538,7 @@ module Seq {
   *
   ***********************************************************/
 
-  /* applies a transformation function on the sequence; this acts as "map" in other languages */
+  /* applies a transformation function on the sequence */
   function method {:opaque} Map<T,R>(f: (T ~> R), s: seq<T>): (result: seq<R>)
     requires forall i {:trigger s[i]} :: 0 <= i < |s| ==> f.requires(s[i])
     ensures |result| == |s|
@@ -519,9 +549,10 @@ module Seq {
     else [f(s[0])] + Map(f, s[1..])
   }
 
-  /* concatenating two sequences and then using "map" is the same as using "map" on each sequence 
-  seperately and then concatenating the two resulting sequences */
-  lemma {:opaque} LemmaMapConcat<T,R>(f: (T ~> R), a: seq<T>, b: seq<T>)
+  /* concatenating two sequences and then applying Map is the same as applying
+  Map on each sequence  seperately and then concatenating the two resulting
+  sequences */
+  lemma {:opaque} LemmaMapAndConcatCommute<T,R>(f: (T ~> R), a: seq<T>, b: seq<T>)
     requires forall i {:trigger a[i]}:: 0 <= i < |a| ==> f.requires(a[i])
     requires forall j {:trigger b[j]}:: 0 <= j < |b| ==> f.requires(b[j])
     ensures Map(f, a + b) == Map(f, a) + Map(f, b)
@@ -554,7 +585,7 @@ module Seq {
 
   /* concatenating two sequences and then using "filter" is the same as using "filter" on each sequences
   seperately and then concatenating their resulting sequences */
-  lemma {:opaque} LemmaFilterConcat<T>(f: (T ~> bool), a: seq<T>, b: seq<T>)
+  lemma {:opaque} LemmaFilterAndCommute<T>(f: (T ~> bool), a: seq<T>, b: seq<T>)
     requires forall i {:trigger a[i]}:: 0 <= i < |a| ==> f.requires(a[i])
     requires forall j {:trigger b[j]}:: 0 <= j < |b| ==> f.requires(b[j])
     ensures Filter(f, a + b) == Filter(f, a) + Filter(f, b)
@@ -582,7 +613,7 @@ module Seq {
 
   /* Concatenating two sequences, then folding left is the same as folding the first sequence and using the result as the initial value to fold the second
   sequence. */
-  lemma {:opaque} LemmaFoldLeftConcat<A,T>(f: (A, T) -> A, init: A, a: seq<T>, b: seq<T>)
+  lemma {:opaque} LemmaFoldLeftConcatAndCommute<A,T>(f: (A, T) -> A, init: A, a: seq<T>, b: seq<T>)
     requires 0 <= |a + b|
     ensures FoldLeft(f, init, a + b) == FoldLeft(f, FoldLeft(f, init, a), b)
   {
@@ -595,7 +626,7 @@ module Seq {
       calc {
         FoldLeft(f, FoldLeft(f, init, a), b);
         FoldLeft(f, FoldLeft(f, f(init, a[0]), a[1..]), b);
-          { LemmaFoldLeftConcat(f, f(init, a[0]), a[1..], b); }
+          { LemmaFoldLeftConcatAndCommute(f, f(init, a[0]), a[1..], b); }
         FoldLeft(f, f(init, a[0]), a[1..] + b);
           { assert (a + b)[0] == a[0];
             assert (a + b)[1..] == a[1..] + b; }
@@ -640,7 +671,7 @@ module Seq {
 
   /* Concatenating two sequences, then folding right is the same as folding the second sequence and using the result as the initial value to fold the first
   sequence. */
-  lemma {:opaque} LemmaFoldRightConcat<A,T>(f: (T, A) -> A, init: A, a: seq<T>, b: seq<T>)
+  lemma {:opaque} LemmaFoldRightConcatAndCommute<A,T>(f: (T, A) -> A, init: A, a: seq<T>, b: seq<T>)
     requires 0 <= |a + b|
     ensures FoldRight(f, a + b, init) == FoldRight(f, a, FoldRight(f, b, init))
   {
