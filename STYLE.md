@@ -218,6 +218,40 @@ Function Foo():bool
 }
 ```
 
+### Lemmas
+
+When writing inductive proofs, contributors are strongly encouraged to
+make the base case explicit.
+
+```
+// YES
+lemma LemmaMinOfConcat(a: seq<int>, b: seq<int>)
+  requires 0 < |a| && 0 < |b|
+  ensures Min(a+b) <= Min(a)
+  ensures Min(a+b) <= Min(b)
+  ensures Min(a+b) == Min(a) || Min(a+b) == Min(b)
+{
+  if |a| == 1 {
+  } else {
+    assert a[1..] + b == (a + b)[1..];
+    LemmaMinOfConcat(a[1..], b);
+  }
+} 
+
+// NO
+lemma LemmaMinOfConcat(a: seq<int>, b: seq<int>)
+  requires 0 < |a| && 0 < |b|
+  ensures Min(a+b) <= Min(a)
+  ensures Min(a+b) <= Min(b)
+  ensures Min(a+b) == Min(a) || Min(a+b) == Min(b)
+{
+  if |a| > 1 {
+    assert a[1..] + b == (a + b)[1..];
+    LemmaMinOfConcat(a[1..], b);
+  }
+}
+```
+
 ## Things to Avoid
 
 ### Parentheses

@@ -384,7 +384,7 @@ module Seq {
 
   /* the smaller minimum value of two sequences, a and b, becomes the minimum of the total sequence when 
   a and b are concatenated */
-   lemma LemmaMinOfConcat(a: seq<int>, b: seq<int>)
+  lemma LemmaMinOfConcat(a: seq<int>, b: seq<int>)
     requires 0 < |a| && 0 < |b|
     ensures Min(a+b) <= Min(a)
     ensures Min(a+b) <= Min(b)
