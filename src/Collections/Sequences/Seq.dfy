@@ -219,34 +219,33 @@ module Seq {
   }
 
   /* finds the index of a certain element in the sequence */
-  function IndexOf<T>(s: seq<T>, v: T): nat
+  function method {:opaque} IndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
-    ensures var i := IndexOf(s, v); i < |s| && s[i] == v
+    ensures i < |s| && s[i] == v
   {
-    var i :| 0 <= i < |s| && s[i] == v;
-    i
+    if s[|s|-1] == v then |s| - 1 else IndexOf(s[..|s|-1], v)
   }
 
   /* finds the index of a certain element in the sequence if found */
-  function IndexOfOption<T>(s: seq<T>, v: T): Option<nat>
-    ensures var i := IndexOfOption(s, v);
-      if i.Some? then i.value < |s| && s[i.value] == v else v !in s
+  function method {:opaque} IndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
+    ensures if o.Some? then o.value < |s| && s[o.value] == v else v !in s
   {
-    if i :| 0 <= i < |s| && s[i] == v then Some(i) else None
+    if |s| == 0 then None()
+    else if s[|s|-1] == v then Some(|s| - 1) else IndexOfOption(s[..|s|-1], v)
   }
 
   /* slices out a specific position's value from the sequence */
-  function method {:opaque} Remove<T>(s: seq<T>, pos: nat): seq<T>
+  function method {:opaque} Remove<T>(s: seq<T>, pos: nat): (s': seq<T>)
     requires pos < |s|
-    ensures |Remove(s, pos)| == |s| - 1
-    ensures forall i {:trigger Remove(s, pos)[i], s[i]} | 0 <= i < pos :: Remove(s, pos)[i] == s[i]
-    ensures forall i {:trigger Remove(s, pos)[i]} | pos <= i < |s| - 1 :: Remove(s, pos)[i] == s[i+1]
+    ensures |s'| == |s| - 1
+    ensures forall i {:trigger s'[i], s[i]} | 0 <= i < pos :: s'[i] == s[i]
+    ensures forall i {:trigger s'[i]} | pos <= i < |s| - 1 :: s'[i] == s[i+1]
   {
-    s[..pos] + s[pos+1..] 
+    s[..pos] + s[pos+1..]
   }
 
   /* slices out a specific value from the sequence */
-  function {:opaque} RemoveValue<T>(s: seq<T>, v: T): (s': seq<T>)
+  function method {:opaque} RemoveValue<T(==)>(s: seq<T>, v: T): (s': seq<T>)
     ensures v !in s ==> s == s'
     ensures v in s ==> |multiset(s')| == |multiset(s)| - 1
     ensures v in s ==> multiset(s')[v] == multiset(s)[v] - 1
@@ -254,14 +253,15 @@ module Seq {
   {
     reveal HasNoDuplicates();
     reveal ToSet();
-    if v !in s then s else
-    var i :| 0 <= i < |s| && s[i] == v;
-    assert s == s[..i] + [v] + s[i+1..];
-    s[..i] + s[i+1..]
+    if v !in s then s
+    else
+      var i := IndexOf(s, v);
+      assert s == s[..i] + [v] + s[i+1..];
+      s[..i] + s[i+1..]
   }
 
   /* slices out a specific value from the sequence if found */
-  function {:opaque} RemoveValueOption<T>(s: seq<T>, o: Option<T>): (s': seq<T>)
+  function method {:opaque} RemoveValueOption<T(==)>(s: seq<T>, o: Option<T>): (s': seq<T>)
     ensures o == None || (|s| == 0 && |s'| == 0) ||
       (|s| > 0 && var v := o.UnwrapOr(s[0]);
         v !in s ==> s == s'
@@ -275,7 +275,7 @@ module Seq {
     case None => s
     case Some(v) =>
       if v !in s then s else
-      var i :| 0 <= i < |s| && s[i] == v;
+      var i := IndexOf(s, v);
       assert s == s[..i] + [v] + s[i+1..];
       s[..i] + s[i+1..]
   }

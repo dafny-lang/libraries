@@ -20,7 +20,7 @@ module MulInternals {
   import opened MulInternalsNonlinear
 
   /* performs multiplication for positive integers using recursive addition */
-  function {:opaque} MulPos(x: int, y: int) : int
+  function method {:opaque} MulPos(x: int, y: int) : int
     requires x >= 0
   {
     if x == 0 then 0
@@ -28,7 +28,7 @@ module MulInternals {
   }
 
   /* performs multiplication for both positive and negative integers */ 
-  function MulRecursive(x: int, y: int) : int
+  function method MulRecursive(x: int, y: int) : int
   {
     if x >= 0 then MulPos(x, y)
     else -1 * MulPos(-1 * x, y)
