@@ -1009,7 +1009,7 @@ module DivMod {
     LemmaModBasicsAuto();
 
     forall x: int, m: int | m > 0
-      ensures m > 0 ==> 0 <= x % m < m
+      ensures 0 <= x % m < m
     {
       LemmaModAuto(m);
     }
@@ -1017,20 +1017,45 @@ module DivMod {
 
   /* the remainder of a natural number x divided by a natural number d will be less
   than or equal to x */
-  lemma LemmaModDecreases(x: nat, d: nat)
-    requires 0 < d
-    ensures x % d <= x
+  lemma LemmaModDecreases(x: nat, m: nat)
+    requires 0 < m
+    ensures x % m <= x
   {
-    LemmaModAuto(d);
+    LemmaModAuto(m);
   }
 
   lemma LemmaModDecreasesAuto()
-    ensures forall x: nat, d: nat {:trigger x % d} :: 0 < d ==> x % d <= x
+    ensures forall x: nat, m: nat {:trigger x % m} :: 0 < m ==> x % m <= x
   {
-    forall x: nat, d: nat | 0 < d 
-      ensures 0 < d ==> x % d <= x
+    forall x: nat, m: nat | 0 < m
+      ensures x % m <= x
     {
-      LemmaModDecreases(x, d);
+      LemmaModDecreases(x, m);
+    }
+  }
+
+  /* if x % y is zero and x is greater than zero, x is greater than y. */
+  lemma LemmaModIsZero(x: nat, m: nat)
+    requires x > 0 && m > 0
+    requires x % m == 0
+    ensures x >= m
+  {
+    calc ==> {
+      x < m;
+        { LemmaSmallMod(x, m); }
+      x % m == x;
+      false;
+    }
+  }
+
+  lemma LemmaModIsZeroAuto()
+    ensures forall x: nat, m: nat {:trigger x % m} :: (x > 0 && m > 0
+      && x % m == 0) ==> x >= m
+  {
+    forall x: nat, m: nat | x > 0 && m > 0 && x % m == 0
+      ensures x >= m
+    {
+      LemmaModIsZero(x, m);
     }
   }
   
@@ -1109,32 +1134,6 @@ module DivMod {
       ensures (m * a + b) % m == b % m
     {
       LemmaModMultiplesVanish(a, b, m);
-    }
-  }
-
-  /* true if x%n and y%n are equal */
-  predicate IsModEquivalent(x: int, y: int, m: int)
-    requires m > 0
-  {
-    (x - y) % m == 0 // same as x % n == y % n, but easier to do induction on x - y than x and y separately
-  }
-  
-  /* proves modulus equivalence in two forms */
-  lemma LemmaModEquivalence(x: int, y: int, m: int)
-    requires 0 < m
-    ensures x % m == y % m <==> (x - y) % m == 0
-  {
-    LemmaModAuto(m);
-  }
-
-  lemma LemmaModEquivalenceAuto()
-    ensures forall x: int, y: int, m: int {:trigger  x % m , y % m} 
-      :: 0 < m && x % m == y % m <==> 0 < m && (x - y) % m == 0
-  {
-    forall x: int, y: int, m: int | 0 < m 
-      ensures x % m == y % m <==> 0 < m && (x - y) % m == 0
-    {
-      LemmaModEquivalence(x, y, m);
     }
   }
 
@@ -1394,6 +1393,56 @@ module DivMod {
       ensures (x % m) * (y % m) % m == (x * y) % m
     {
       LemmaMulModNoop(x, y, m);
+    }
+  }
+
+  /* proves modulus equivalence in two forms */
+  lemma LemmaModEquivalence(x: int, y: int, m: int)
+    requires 0 < m
+    ensures x % m == y % m <==> (x - y) % m == 0
+  {
+    LemmaModAuto(m);
+  }
+
+  lemma LemmaModEquivalenceAuto()
+    ensures forall x: int, y: int, m: int {:trigger  x % m , y % m} 
+      :: 0 < m && x % m == y % m <==> 0 < m && (x - y) % m == 0
+  {
+    forall x: int, y: int, m: int | 0 < m 
+      ensures x % m == y % m <==> 0 < m && (x - y) % m == 0
+    {
+      LemmaModEquivalence(x, y, m);
+    }
+  }
+
+  /* true if x%n and y%n are equal */
+  predicate IsModEquivalent(x: int, y: int, m: int)
+    requires m > 0
+    ensures x % m == y % m <==> (x - y) % m == 0
+  {
+    LemmaModEquivalence(x, y, m);
+    (x - y) % m == 0 // same as x % n == y % n, but easier to do induction on x - y than x and y separately
+  }
+
+  /* if x % m == y % m, then (x * z) % m == (y * z) % m. */
+  lemma LemmaModMulEquivalent(x: int, y: int, z: int, m: int)
+    requires m > 0
+    requires IsModEquivalent(x, y, m)
+    ensures IsModEquivalent(x * z, y * z, m)
+  {
+    LemmaMulModNoopLeft(x, z, m);
+    LemmaMulModNoopLeft(y, z, m);
+  }
+
+  lemma LemmaModMulEquivalentAuto()
+    ensures forall x: int, y: int, z: int, m: int
+      {:trigger IsModEquivalent(x * z, y * z, m)}  
+      :: m > 0 && IsModEquivalent(x, y, m) ==> IsModEquivalent(x * z, y * z, m)
+  {
+    forall x: int, y: int, z: int, m: int | m > 0 && IsModEquivalent(x, y, m)
+      ensures IsModEquivalent(x * z, y * z, m)
+    {
+      LemmaModMulEquivalent(x, y, z, m);
     }
   }
 
