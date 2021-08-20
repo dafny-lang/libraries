@@ -43,7 +43,7 @@ module DivInternals {
   }
 
   /* Performs division recursively. */
-  function {:opaque} DivRecursive(x: int, d: int): int
+  function method {:opaque} DivRecursive(x: int, d: int): int
     requires d != 0
   {
     reveal DivPos();
