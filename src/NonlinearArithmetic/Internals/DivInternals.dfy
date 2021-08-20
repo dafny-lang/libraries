@@ -12,7 +12,9 @@
 /* lemmas and functions in this file are used in the proofs in DivMod.dfy 
 
 Specs/implements mathematical div and mod, not the C version.
-This may produce "surprising" results for negative values
+(x div n) * n + (x mod n) == x, where 0 <= x mod n < n.
+
+This may produce "surprising" results for negative values.
 For example, -3 div 5 is -1 and -3 mod 5 is 2.
 Note this is consistent: -3 * -1 + 2 == 5 */
 
@@ -41,7 +43,7 @@ module DivInternals {
   }
 
   /* Performs division recursively. */
-  function method {:opaque} DivRecursive(x: int, d: int): int
+  function {:opaque} DivRecursive(x: int, d: int): int
     requires d != 0
   {
     reveal DivPos();
