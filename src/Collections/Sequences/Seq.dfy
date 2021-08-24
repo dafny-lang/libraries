@@ -223,7 +223,7 @@ module Seq {
     requires v in s
     ensures i < |s| && s[i] == v
   {
-    if s[0] == v then 0 else 1 + IndexOf(s[1..], v)
+    if s[|s|-1] == v then |s| - 1 else IndexOf(s[..|s|-1], v)
   }
 
   /* finds the index of a certain element in the sequence if found */
