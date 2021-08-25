@@ -218,7 +218,7 @@ module Seq {
     }
   }
 
-  /* finds the index of the first occurance of an element in the sequence */
+  /* finds the index of the first occurrence of an element in the sequence */
   function method {:opaque} IndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
@@ -227,7 +227,7 @@ module Seq {
     if s[0] == v then 0 else 1 + IndexOf(s[1..], v)
   }
 
-  /* finds the index of the first occurance of an element in the sequence if
+  /* finds the index of the first occurrence of an element in the sequence if
   found */
   function method {:opaque} IndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |s| && s[o.value] == v &&
@@ -242,7 +242,7 @@ module Seq {
         if o'.Some? then Some(o'.value + 1) else None()
   }
 
-  /* finds the index of the last occurance of an element in the sequence */
+  /* finds the index of the last occurrence of an element in the sequence */
   function method {:opaque} LastIndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
@@ -251,7 +251,7 @@ module Seq {
     if s[|s|-1] == v then |s| - 1 else LastIndexOf(s[..|s|-1], v)
   }
 
-  /* finds the index of the last occurance of an element in the sequence if
+  /* finds the index of the last occurrence of an element in the sequence if
   found */
   function method {:opaque} LastIndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |s| && s[o.value] == v &&
