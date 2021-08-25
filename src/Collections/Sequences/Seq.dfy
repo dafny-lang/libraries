@@ -218,20 +218,48 @@ module Seq {
     }
   }
 
-  /* finds the index of a certain element in the sequence */
+  /* finds the index of the first occurance of an element in the sequence */
   function method {:opaque} IndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
+    ensures forall j {:trigger s[j]} :: 0 <= j < i ==> s[j] != v
   {
-    if s[|s|-1] == v then |s| - 1 else IndexOf(s[..|s|-1], v)
+    if s[0] == v then 0 else 1 + IndexOf(s[1..], v)
   }
 
-  /* finds the index of a certain element in the sequence if found */
+  /* finds the index of the first occurance of an element in the sequence if
+  found */
   function method {:opaque} IndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
-    ensures if o.Some? then o.value < |s| && s[o.value] == v else v !in s
+    ensures if o.Some? then o.value < |s| && s[o.value] == v &&
+                            forall j {:trigger s[j]} :: 0 <= j < o.value ==> s[j] != v
+            else v !in s
   {
     if |s| == 0 then None()
-    else if s[|s|-1] == v then Some(|s| - 1) else IndexOfOption(s[..|s|-1], v)
+    else
+      if s[0] == v then Some(0)
+      else
+        var o' := IndexOfOption(s[1..], v);
+        if o'.Some? then Some(o'.value + 1) else None()
+  }
+
+  /* finds the index of the last occurance of an element in the sequence */
+  function method {:opaque} LastIndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
+    requires v in s
+    ensures i < |s| && s[i] == v
+    ensures forall j {:trigger s[j]} :: i < j < |s| ==> s[j] != v
+  {
+    if s[|s|-1] == v then |s| - 1 else LastIndexOf(s[..|s|-1], v)
+  }
+
+  /* finds the index of the last occurance of an element in the sequence if
+  found */
+  function method {:opaque} LastIndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
+    ensures if o.Some? then o.value < |s| && s[o.value] == v &&
+                            forall j {:trigger s[j]} :: o.value < j < |s| ==> s[j] != v
+            else v !in s
+  {
+    if |s| == 0 then None()
+    else if s[|s|-1] == v then Some(|s| - 1) else LastIndexOfOption(s[..|s|-1], v)
   }
 
   /* slices out a specific position's value from the sequence */
