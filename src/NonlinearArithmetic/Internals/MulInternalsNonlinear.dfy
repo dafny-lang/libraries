@@ -9,9 +9,6 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-/* WARNING: In general, you shouldn't need to call these directly. These are
-used in the proofs in MulInternals*/
-
 module MulInternalsNonlinear {
 
   /* WARNING: Think three times before adding to this file, as nonlinear

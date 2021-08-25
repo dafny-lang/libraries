@@ -93,8 +93,7 @@ module DivMod {
       LemmaDivBasics(x);
     }
     forall x: int, y: int | x >= 0 && y > 0
-      ensures x / y >= 0
-      ensures x / y <= x
+      ensures 0 <= x / y <= x
     {
       LemmaDivPosIsPos(x, y);
       LemmaDivIsOrderedByDenominator(x, 1, y);

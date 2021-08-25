@@ -369,3 +369,16 @@ lemma LemmaMyLemma <A,B> ( x : seq<seq<A>> , y :B){
     ...
 }
 ```
+
+### | Clauses
+
+Avoid `|` clauses in quantifier expressions.
+
+```
+// YES
+forall x: int {:trigger (x + 2) % 2} :: x % 2 == 0 ==> (x + 2) % 2 == 0
+
+// NO
+forall x: int {:trigger (x + 2) % 2} | x % 2 == 0 :: (x + 2) % 2 == 0
+```
+

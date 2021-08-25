@@ -53,7 +53,7 @@ module DivInternals {
       -1 * DivPos(x, -1 * d)
   }
 
-  /* proves the basics of the division operation */
+  /* Proves the basics of the division operation */
   lemma LemmaDivBasics(n: int)
     requires n > 0
     ensures  n / n == -((-n) / n) == 1
@@ -72,7 +72,9 @@ module DivInternals {
     }
   }
 
-  /* automates the division operator process */
+  /* Automates the division operator process. Contains the identity property, a
+  fact about when quotients are zero, and facts about adding and subtracting
+  integers over a common denominator. */
   predicate DivAuto(n: int)
     requires n > 0
   {
@@ -89,7 +91,7 @@ module DivInternals {
                     (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))))
   }
 
-  /* ensures that DivAuto is true */
+  /* Ensures that DivAuto is true */
   lemma LemmaDivAuto(n: int)
     requires n > 0
     ensures  DivAuto(n)
@@ -162,7 +164,7 @@ module DivInternals {
     }
   }
 
-  /* performs auto induction for division */
+  /* Performs auto induction for division */
   lemma LemmaDivInductionAuto(n: int, x: int, f: int->bool)
     requires n > 0
     requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
@@ -179,7 +181,7 @@ module DivInternals {
     assert f(x);
   }
 
-  /* performs auto induction on division for all i s.t. f(i) exists */
+  /* Performs auto induction on division for all i s.t. f(i) exists */
   lemma LemmaDivInductionAutoForall(n:int, f:int->bool)
     requires n > 0
     requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
