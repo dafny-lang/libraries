@@ -8,46 +8,46 @@ This style guide provides coding conventions for the Dafny Standard Library code
 
 Any **variables** are named with `camelCase`.
 
-    var minValue := 1;
-    var cipherMessage := "Hello World";
+  var minValue := 1;
+  var cipherMessage := "Hello World";
 
 
 Any **lemmas**, **predicates**, **functions**, **methods**, **classes**, **modules**, **datatypes**, and **newtypes**
 are named with `PascalCase`.
 
-    method FindIndex(arr: seq<int>, k: int)
-        ...
+  method FindIndex(arr: seq<int>, k: int)
+    ...
         
         
 The **lemma** keyword indicates a ghost method used for proof purposes. Any **lemma** names should be prefixed with `Lemma`.
 
-    lemma LemmaValueIsInIndex(arr: seq<int>, k: int)
-        ...
+  lemma LemmaValueIsInIndex(arr: seq<int>, k: int)
+    ...
         
 Any static or global **constants** are named with `UPPERCASE_WITH_UNDERSCORES`.
 
-    static const MONTHS_IN_A_YEAR := 12
+  static const MONTHS_IN_A_YEAR := 12
     
 ### Method Prefix
 
 Avoid redundant names when variables or methods are in a class/module.
 class Integer {
 
-    // The following method converts the given integer
-    // to a string.
-    //
-    // this method name can be simplified to ToString()
-    // so that the method call is Integer.ToString(i)
-    // instead of Integer.IntegerToString(i).
+  // The following method converts the given integer
+  // to a string.
+  //
+  // this method name can be simplified to ToString()
+  // so that the method call is Integer.ToString(i)
+  // instead of Integer.IntegerToString(i).
 
-    // YES
-    method ToString(i: int) returns (s: string)
-        ...
+  // YES
+  method ToString(i: int) returns (s: string)
+    ...
 
-    // NO
-    method IntegerToString(i: int) returns (s: string)
-        ...
-    }
+  // NO
+  method IntegerToString(i: int) returns (s: string)
+    ...
+  }
     
 ## Code Layout
 
@@ -56,7 +56,7 @@ class Integer {
 Opening braces for **modules**, **classes**, **datatypes**, **if** statements go on the same line.
 ```
 module M {
-    ...
+  ...
 }
 ```
 
@@ -64,13 +64,13 @@ Opening braces for **methods**, **lemmas**, **functions**, and **predicates** go
 
 ```
 module M {
+  ...
+  method Met(i: int) returns (j: int)
+    requires i % 2 == 0
+    ensures j > 10
+  {
     ...
-    method Met(i: int) returns (j: int)
-        requires i % 2 == 0
-        ensures j > 10
-    {
-        ...
-    }
+  }
 }
 ```
 
@@ -78,13 +78,13 @@ module M {
 
 By default, import modules without opening them.
 
-    import Coffee
-    ...
+  import Coffee
+  ...
 
 However, if some members of a module are used very frequently, import it using `opened`:
 
-    import opened Donut
-    ...
+  import opened Donut
+  ...
     
 When a file uses two modules and both of them define a method of the same name, do not import them `opened`.
 
@@ -94,8 +94,8 @@ import YourModule
 ...
 method MyMethod() 
 {
-    MyModule.foo();
-    YourModule.foo();
+  MyModule.foo();
+  YourModule.foo();
 }
 ```
 
@@ -107,8 +107,8 @@ import Y = YourModuleWithACumbersomeName
 ...
 method MyMethod() 
 {
-    M.Foo();
-    Y.Foo();
+  M.Foo();
+  Y.Foo();
 }
 ```
 
@@ -146,38 +146,38 @@ Every Dafny method has the following signature.
 
 ```
 method {:<attributes>} MethodName(param1: Type, param2: Type) returns (ret: Type)
-    requires P()
-    modifies param2
-    ensures Q()
-    decreases param1
+  requires P()
+  modifies param2
+  ensures Q()
+  decreases param1
 ```
 
-When possible, put` MethodName` and the `returns` statement on the same line, as the keyword `returns` is distinct from other method specification clauses, such as `requires`, `modifies`, `ensures`, and `decreases`, which should appear in this order. Each method specification clause should be on a separate line, indented.
+When possible, put` MethodName` and the keyword `returns` on the same line, as `returns` is distinct from other method specification clauses, such as `requires`, `modifies`, `ensures`, and `decreases`, which should appear in this order. Each method specification clause should be on a separate line, indented.
 
 In case the Method signature is too long, we can break it down.
 
 ```
 method {:<attributes>} MethodName(param1: Type, param2: Type,
-        param3: Type, param4: Type, param5: Type)
-    returns (ret1: Type, ret2: Type, ret3: Type, ret4: Type,
-        ret5: Type)
-    requires P1()
-    requires P2()
-    requires P3()
-    modifies param2
-    modifies param3
-    ensures Q1()
-    ensures Q2()
-    decreases param1
+    param3: Type, param4: Type, param5: Type)
+  returns (ret1: Type, ret2: Type, ret3: Type, ret4: Type,
+    ret5: Type)
+  requires P1()
+  requires P2()
+  requires P3()
+  modifies param2
+  modifies param3
+  ensures Q1()
+  ensures Q2()
+  decreases param1
 ````
 
 Multiple `requires` or `ensures` can be combined into one:
 
 ```
 requires
-    && P1()
-    && P2()
-    && P3()
+  && P1()
+  && P2()
+  && P3()
 ````
 
 The same rules apply to `function`, `predicate`, and `lemma` definitions.
@@ -212,7 +212,7 @@ predicate Foo()
 } 
 
 // NO
-Function Foo():bool 
+function Foo(): bool 
 {
   ...
 }
@@ -264,21 +264,21 @@ In many cases, Dafny does not require parentheses around expressions. Here are s
 // YES
 var i := 1;
 while i < 10 {
-    ...
-    if 1 < i {
-        ...
-    }
-    ...
+  ...
+  if 1 < i {
+      ...
+  }
+  ...
 }
 
 // NO
 var i := 1;
 while (i < 10) {
-    ...
-    if (1 < i) {
-        ...
-    }
-    ...
+  ...
+  if (1 < i) {
+      ...
+  }
+  ...
 }
 ```
 
@@ -299,26 +299,26 @@ print(x);
 ```
 // YES
 method Collatz(num: nat)
-    decreases *
+  decreases *
 {
-    var n := num;
-    while 1 < n
-        decreases *
-    {
-        n := if n % 2 == 0 then n / 2 else n * 3 + 1;
-    }
+  var n := num;
+  while 1 < n
+    decreases *
+  {
+    n := if n % 2 == 0 then n / 2 else n * 3 + 1;
+  }
 }
 
 // NO
 method Collatz(num: nat)
-    decreases *
+  decreases *
 {
-    var n := num;
-    while (1 < n) // unnecessary parentheses
-        decreases *
-    {
-        n := if ((n % 2) == 0) then (n / 2) else ((n * 3) + 1); // unnecessary parentheses
-    }
+  var n := num;
+  while (1 < n) // unnecessary parentheses
+    decreases *
+  {
+    n := if ((n % 2) == 0) then (n / 2) else ((n * 3) + 1); // unnecessary parentheses
+  }
 }
 ```
 
@@ -334,19 +334,19 @@ A type declaration should have a form of `variableName: variableType`.
 // YES
 const one: int := 1
 class {:extern} Util {
-    var {:extern} Exception: System.String
+  var {:extern} Exception: System.String
 }
 
 // NO
 const one : int := 1 // unnecessary whitespace
 class {:extern} Util {
-    var {:extern} Exception : System.String // unnecessary whitespace
+  var {:extern} Exception : System.String // unnecessary whitespace
 }
 ```
 
 If the type can be inferred by Dafny, leave it out, unless you think it provides useful documentation in the program. So, constant `one` above is better declared as
 
-    const one := 1
+  const one := 1
 
 #### Function, Method, Predicate, and Lemma Declaration
 
@@ -361,24 +361,11 @@ function method Foo<int> (i : int) : int // unnecessary whitespace
 Avoid too little or too much whitespace that reduces the overall readability.
 // YES
 lemma LemmaMyLemma<A, B>(x: seq<seq<A>>, y: B) {
-    ...
+  ...
 }
 
 // NO
 lemma LemmaMyLemma <A,B> ( x : seq<seq<A>> , y :B){
-    ...
+  ...
 }
 ```
-
-### | Clauses
-
-Avoid `|` clauses in quantifier expressions.
-
-```
-// YES
-forall x: int {:trigger (x + 2) % 2} :: x % 2 == 0 ==> (x + 2) % 2 == 0
-
-// NO
-forall x: int {:trigger (x + 2) % 2} | x % 2 == 0 :: (x + 2) % 2 == 0
-```
-
