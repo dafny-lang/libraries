@@ -1,4 +1,4 @@
-// RUN: %dafny "%s" > "%t"
+// RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
 /*******************************************************************************
@@ -6,7 +6,7 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module OptionAndResult {
+module Wrappers {
   
   datatype Option<T> = None | Some(value: T) {
     function method ToResult(): Result<T, string> 

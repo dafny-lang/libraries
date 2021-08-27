@@ -1,10 +1,10 @@
-// RUN: %dafny "%s" > "%t"
+// RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-include "../../src/OptionAndResult.dfy"
+include "../../src/Wrappers.dfy"
 
 module Demo {
-  import opened OptionAndResult
+  import opened Wrappers
 
   // ------ Demo for Option ----------------------------
   // We use Option when we don't need to pass around a reason for the failure,

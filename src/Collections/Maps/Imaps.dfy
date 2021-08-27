@@ -1,4 +1,4 @@
-// RUN: %dafny "%s" > "%t"
+// RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
 /*******************************************************************************
@@ -10,10 +10,10 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../OptionAndResult.dfy"
+include "../../Wrappers.dfy"
 
 module Imaps {
-  import opened OptionAndResult
+  import opened Wrappers
 
   function method Get<X, Y>(m: imap<X, Y>, x: X): Option<Y>
   {
