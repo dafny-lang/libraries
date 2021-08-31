@@ -1,7 +1,10 @@
-include "../../src/Std.dfy"
+// RUN: %dafny /compile:0 "%s" > "%t"
+// RUN: %diff "%s.expect" "%t"
+
+include "../../src/Wrappers.dfy"
 
 module Demo {
-  import opened Std
+  import opened Wrappers
 
   // ------ Demo for Option ----------------------------
   // We use Option when we don't need to pass around a reason for the failure,
@@ -29,13 +32,13 @@ module Demo {
     m.Put("message", "Hello");
     var o: Option<string> := m.Get("message");
     if o.Some? {
-      print o.get, "\n";
+      print o.value, "\n";
     } else {
       print "oops\n";
     }
 
     m.Put("name", "Dafny");
-    var r: Result<string> := FindName(m);
+    var r: Result<string, string> := FindName(m);
     if r.Success? {
       print r.value, "\n";
     } else {
@@ -44,7 +47,7 @@ module Demo {
   }
 
   // Sometimes we want to go from Option to Result:
-  method FindName(m: MyMap<string, string>) returns (res: Result<string>) {
+  method FindName(m: MyMap<string, string>) returns (res: Result<string, string>) {
     // Will return a default error message in case of None:
     res := m.Get("name").ToResult();
     // We can also match on the option to write a custom error:
@@ -64,7 +67,7 @@ module Demo {
     }
 
     // Result<()> is used to return a Result without any data
-    method WriteFile(path: string, contents: string) returns (res: Result<()>)
+    method WriteFile(path: string, contents: string) returns (res: Result<(), string>)
       modifies this
     {
       if path in files {
@@ -77,7 +80,7 @@ module Demo {
       }
     }
 
-    method CreateFile(path: string) returns (res: Result<()>)
+    method CreateFile(path: string) returns (res: Result<(), string>)
       modifies this
     {
       if path in files {
@@ -88,7 +91,7 @@ module Demo {
       }
     }
 
-    method ReadFile(path: string) returns (res: Result<string>) {
+    method ReadFile(path: string) returns (res: Result<string, string>) {
       if path in files {
         res := Success(files[path]);
       } else {
@@ -101,7 +104,7 @@ module Demo {
     var fs := new MyFilesystem();
     // Note: these verbose "outcome.Failure?" patterns will soon
     // not be needed any more, see https://github.com/dafny-lang/rfcs/pull/1
-    var outcome: Result<()> := fs.CreateFile("test.txt");
+    var outcome: Result<(), string> := fs.CreateFile("test.txt");
     if outcome.Failure? {
       print outcome.error, "\n";
       return;
@@ -111,7 +114,7 @@ module Demo {
       print outcome.error, "\n";
       return;
     }
-    var fileResult: Result<string> := fs.ReadFile("test.txt");
+    var fileResult: Result<string, string> := fs.ReadFile("test.txt");
     if outcome.Failure? {
       print fileResult.error, "\n";
       return;
@@ -125,4 +128,5 @@ module Demo {
     TestMyMap();
     TestMyFilesystem();
   }
+
 }

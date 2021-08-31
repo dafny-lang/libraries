@@ -1,0 +1,6 @@
+DivMod.dfy(1484,4): Warning: For expression "d * k > 0":
+   /!\ No trigger covering all quantified variables found.
+DivMod.dfy(1518,4): Warning: For expression "0 < a * b":
+   /!\ No trigger covering all quantified variables found.
+
+Dafny program verifier finished with 239 verified, 0 errors
