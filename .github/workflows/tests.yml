@@ -1,0 +1,23 @@
+# This workflow performs static analysis checks.
+name: tests
+
+on: ["pull_request", "push"]
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dafny
+        uses: tchajed/setup-dafny-action@v1
+        with:
+          dafny-version: "3.2.0"
+
+      - uses: actions/setup-python@v1
+
+      - name: Install lit 
+        run: pip install lit
+
+      - name: Verify/Test Dafny code
+        run: lit --time-tests -v .
