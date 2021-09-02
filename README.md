@@ -20,6 +20,8 @@ Much of this code came from or was inspired by code from the following projects:
 
 * [Ironclad Apps](https://github.com/microsoft/Ironclad/tree/main/ironclad-apps)
 * [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet)
+* [James Wilcox's Notes](https://github.com/wilcoxjay/notes)
 * [Vale](https://github.com/project-everest/vale/tree/legacy_dafny)
 * [Verified BetrFS](https://github.com/vmware-labs/verified-betrfs)
+* [Verifying OpenTitan](https://github.com/secure-foundations/veri-titan)
 
