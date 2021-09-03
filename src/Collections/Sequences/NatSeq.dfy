@@ -90,12 +90,11 @@ abstract module NatSeq {
   }
 
   lemma LemmaToNatEqToNatRevAuto()
-    ensures forall xs: seq<uint> {:trigger ToNatRev(xs)}{:trigger ToNat(xs)}
-      :: ToNat(xs) == ToNatRev(xs)
+    ensures forall xs: seq<uint> :: ToNat(xs) == ToNatRev(xs)
   {
     reveal ToNat();
     reveal ToNatRev();
-    forall xs: seq<uint> {:trigger ToNatRev(xs)}{:trigger ToNat(xs)}
+    forall xs: seq<uint>
       ensures ToNat(xs) == ToNatRev(xs)
     {
       LemmaToNatEqToNatRev(xs);
@@ -425,7 +424,7 @@ abstract module NatSeq {
   sequence of zeros. */
   lemma LemmaSeqZero(xs: seq<uint>)
     requires ToNat(xs) == 0
-    ensures forall i {:trigger xs[i]} :: 0 <= i < |xs| ==> xs[i] == 0
+    ensures forall i :: 0 <= i < |xs| ==> xs[i] == 0
   {
     reveal ToNat();
     if |xs| == 0 {
@@ -441,7 +440,7 @@ abstract module NatSeq {
   /* Generates a sequence of zeros of a specified length. */
   function method {:opaque} SeqZero(len: nat): (xs: seq<uint>)
     ensures |xs| == len
-    ensures forall i {:trigger xs[i]} :: 0 <= i < |xs| ==> xs[i] == 0
+    ensures forall i :: 0 <= i < |xs| ==> xs[i] == 0
     ensures ToNat(xs) == 0
   {
     LemmaPowPositive(BOUND(), len);
