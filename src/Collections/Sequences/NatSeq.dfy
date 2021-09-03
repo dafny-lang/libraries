@@ -2,7 +2,7 @@
 // RUN: %diff "%s.expect" "%t"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
+*  Original: Copyright (c) 2020 Secure Foundations Lab
 *  SPDX-License-Identifier: MIT
 *  
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
