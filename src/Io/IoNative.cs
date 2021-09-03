@@ -1,3 +1,11 @@
+/*******************************************************************************
+*  Original: Copyright (c) Microsoft Corporation
+*  SPDX-License-Identifier: MIT
+*  
+*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+*******************************************************************************/
+
 using System;
 using FStream = System.IO.FileStream;
 

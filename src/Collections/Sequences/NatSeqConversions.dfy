@@ -1,6 +1,14 @@
 // RUN: %dafny /compile:0 /noNLarith "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
+/*******************************************************************************
+*  Original: Copyright (c) Microsoft Corporation
+*  SPDX-License-Identifier: MIT
+*  
+*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+*******************************************************************************/
+
 include "../../NonlinearArithmetic/DivMod.dfy"
 include "../../NonlinearArithmetic/Mul.dfy"
 include "../../NonlinearArithmetic/Power.dfy"
