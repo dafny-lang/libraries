@@ -1,7 +1,7 @@
-// RUN: %dafny /compile:0 "%s" > "%t"
+// RUN: %dafny /compile:3 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-include "../../src/Wrappers.dfy"
+include "../src/Wrappers.dfy"
 
 module Demo {
   import opened Wrappers
@@ -30,6 +30,13 @@ module Demo {
   method TestMyMap() {
     var m := new MyMap<string, string>();
     m.Put("message", "Hello");
+    Greet(m);
+
+    m.Put("name", "Dafny");
+    Greet(m);
+  }
+
+  method Greet(m: MyMap<string, string>) {
     var o: Option<string> := m.Get("message");
     if o.Some? {
       print o.value, "\n";
@@ -37,7 +44,6 @@ module Demo {
       print "oops\n";
     }
 
-    m.Put("name", "Dafny");
     var r: Result<string, string> := FindName(m);
     if r.Success? {
       print r.value, "\n";
@@ -56,6 +62,13 @@ module Demo {
     case None => res := Failure("'name' was not found");
   }
 
+  // Propogating failures using :- statements
+  method GetGreeting(m: MyMap<string, string>) returns (res: Option<string>) {
+    var message: string :- m.Get("message");
+    var nameResult := FindName(m);
+    var name :- nameResult.ToOption();
+    res := Some(message + " " + name);
+  }
 
   // ------ Demo for Result ----------------------------
   // We use Result when we want to give a reason for the failure:
@@ -98,6 +111,16 @@ module Demo {
         res := Failure("File not found");
       }
     }
+  }
+
+  // Propogating failures using :- statements
+  method CopyFile(fs: MyFilesystem, fromPath: string, toPath: string) returns (res: Result<(), string>)
+    modifies fs
+  {
+    var contents :- fs.ReadFile(fromPath);
+    var _ :- fs.CreateFile(toPath);
+    var _ :- fs.WriteFile(toPath, contents);
+    res := Success(());
   }
 
   method TestMyFilesystem() {
