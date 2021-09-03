@@ -18,7 +18,7 @@ abstract module NatSeq {
 
   /* Upper bound of a word */
   function method BOUND(): nat
-		ensures BOUND() > 1
+    ensures BOUND() > 1
 
   type uint = i: int | 0 <= i < BOUND()
 
