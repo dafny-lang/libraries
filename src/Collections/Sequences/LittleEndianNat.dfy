@@ -18,7 +18,7 @@ include "../../NonlinearArithmetic/Mul.dfy"
 include "../../NonlinearArithmetic/Power.dfy"
 include "Seq.dfy"
 
-abstract module NatSeq {
+abstract module LittleEndianNat {
 
   import opened DivMod
   import opened Mul

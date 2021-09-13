@@ -10,10 +10,10 @@ include "../../NonlinearArithmetic/DivMod.dfy"
 include "../../NonlinearArithmetic/Mul.dfy"
 include "../../NonlinearArithmetic/Power.dfy"
 include "Seq.dfy"
-include "NatSeq.dfy"
+include "LittleEndianNat.dfy"
 
 /* Sequence with smaller base. */
-abstract module SmallSeq refines NatSeq {
+abstract module SmallSeq refines LittleEndianNat {
 
   function method BITS(): nat
     ensures BITS() > 1
@@ -28,7 +28,7 @@ abstract module SmallSeq refines NatSeq {
 }
 
 /* Sequence with larger base. */
-abstract module LargeSeq refines NatSeq {
+abstract module LargeSeq refines LittleEndianNat {
 
   import Small : SmallSeq
 
@@ -44,7 +44,7 @@ abstract module LargeSeq refines NatSeq {
 
 }
 
-abstract module NatSeqConversions {
+abstract module LittleEndianNatConversions {
 
   import opened DivMod
   import opened Mul
@@ -220,7 +220,7 @@ abstract module NatSeqConversions {
 }
 
 /* Conversions between sequences of uint8 and uint16. */
-module Uint8_16 refines NatSeqConversions {
+module Uint8_16 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
     function method BITS(): nat { 8 }
@@ -237,7 +237,7 @@ module Uint8_16 refines NatSeqConversions {
 }
 
 /* Conversions between sequences of uint8 and uint32. */
-module Uint8_32 refines NatSeqConversions {
+module Uint8_32 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
     function method BITS(): nat { 8 }
@@ -254,7 +254,7 @@ module Uint8_32 refines NatSeqConversions {
 }
 
 /* Conversions between sequences of uint8 and uint64. */
-module Uint8_64 refines NatSeqConversions {
+module Uint8_64 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
     function method BITS(): nat { 8 }
@@ -271,7 +271,7 @@ module Uint8_64 refines NatSeqConversions {
 }
 
 /* Conversions between sequences of uint16 and uint32. */
-module Uint16_32 refines NatSeqConversions {
+module Uint16_32 refines LittleEndianNatConversions {
 
   module Uint16Seq refines SmallSeq {
     function method BITS(): nat { 16 }
@@ -288,7 +288,7 @@ module Uint16_32 refines NatSeqConversions {
 }
 
 /* Conversions between sequences of uint32 and uint64. */
-module Uint32_64 refines NatSeqConversions {
+module Uint32_64 refines LittleEndianNatConversions {
 
   module Uint32Seq refines SmallSeq {
     function method BITS(): nat { 32 }

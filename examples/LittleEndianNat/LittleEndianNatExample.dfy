@@ -6,9 +6,9 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../src/Collections/Sequences/NatSeqConversions.dfy"
+include "../../src/Collections/Sequences/LittleEndianNatConversions.dfy"
 
-module NatSeqExample {
+module LittleEndianNatExample {
 
   import opened Uint8_32
 
