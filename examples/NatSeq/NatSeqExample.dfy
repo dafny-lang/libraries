@@ -1,4 +1,4 @@
-// RUN: %dafny /compile:0 /noNLarith "%s" > "%t"
+// RUN: %dafny /compile:3 /noNLarith "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
 /*******************************************************************************
@@ -17,20 +17,22 @@ module NatSeqExample {
 
     // Convert n to uint8 and uint32 sequences
     var smallSeq, largeSeq := Small.FromNat(n), Large.FromNat(n);
+    expect smallSeq == [122, 7, 134, 140, 11];
+    expect largeSeq == [2357593978, 11];
 
     Small.LemmaNatSeqNat(n);
     Large.LemmaNatSeqNat(n);
-    assert Small.ToNat(smallSeq) == Large.ToNat(largeSeq) == n;
+    assert Small.ToNatRight(smallSeq) == Large.ToNatRight(largeSeq) == n;
 
     // Extend smallSeq
     smallSeq := Small.SeqExtendMultiple(smallSeq, E());
-    assert Small.ToNat(smallSeq) == n;
+    assert Small.ToNatRight(smallSeq) == n;
 
     // Convert between smallSeqExtended and largeSeq
     LemmaToSmall(largeSeq);
     LemmaToLarge(smallSeq);
-    assert Small.ToNat(ToSmall(largeSeq)) == n;
-    assert Large.ToNat(ToLarge(smallSeq)) == n;
+    assert Small.ToNatRight(ToSmall(largeSeq)) == n;
+    assert Large.ToNatRight(ToLarge(smallSeq)) == n;
     assert |ToSmall(largeSeq)|  == |largeSeq| * E();
     assert |ToLarge(smallSeq)|  == |smallSeq| / E();
 

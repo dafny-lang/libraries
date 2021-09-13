@@ -9,8 +9,9 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-/* The first element of a sequence is the least significant word; the last
-element is the most significant word. */
+/* Little endian interpretation of a sequence of numbers with a given base. The
+first element of a sequence is the least significant position; the last
+element is the most significant position. */
 
 include "../../NonlinearArithmetic/DivMod.dfy"
 include "../../NonlinearArithmetic/Mul.dfy"
@@ -24,11 +25,10 @@ abstract module NatSeq {
   import opened Power
   import opened Seq
 
-  /* Upper bound of a word */
-  function method BOUND(): nat
-    ensures BOUND() > 1
+  function method BASE(): nat
+    ensures BASE() > 1
 
-  type uint = i: int | 0 <= i < BOUND()
+  type uint = i: int | 0 <= i < BASE()
 
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -36,133 +36,139 @@ abstract module NatSeq {
   //
   //////////////////////////////////////////////////////////////////////////////
 
-  /* Converts a sequence to a nat beginning from the least significant word. */
-  function method {:opaque} ToNat(xs: seq<uint>): nat
+  /* Converts a sequence to a nat beginning with the least significant position. */
+  function method {:opaque} ToNatRight(xs: seq<uint>): nat
   {
     if |xs| == 0 then 0
     else
       LemmaMulNonnegativeAuto();
-      ToNat(DropFirst(xs)) * BOUND() + First(xs)
+      ToNatRight(DropFirst(xs)) * BASE() + First(xs)
   }
 
-  /* Converts a sequence to a nat beginning from the most significant word. */
-  function method {:opaque} ToNatRev(xs: seq<uint>): nat
+  /* Converts a sequence to a nat beginning with the most significant position. */
+  function method {:opaque} ToNatLeft(xs: seq<uint>): nat
   {
     if |xs| == 0 then 0
     else
       LemmaPowPositiveAuto();
       LemmaMulNonnegativeAuto();
-      ToNatRev(DropLast(xs)) + Last(xs) * Pow(BOUND(), |xs| - 1)
+      ToNatLeft(DropLast(xs)) + Last(xs) * Pow(BASE(), |xs| - 1)
   }
 
-  /* Given the same sequence, ToNat and ToNatRev return the same nat. */
-  lemma LemmaToNatEqToNatRev(xs: seq<uint>)
-    ensures ToNat(xs) == ToNatRev(xs)
+  /* Given the same sequence, ToNatRight and ToNatLeft return the same nat. */
+  lemma LemmaToNatLeftEqToNatRight(xs: seq<uint>)
+    ensures ToNatRight(xs) == ToNatLeft(xs)
   {
-    reveal ToNat();
-    reveal ToNatRev();
+    reveal ToNatRight();
+    reveal ToNatLeft();
     if xs == [] {
     } else {
       if DropLast(xs) == [] {
         calc {
-          ToNatRev(xs);
-          Last(xs) * Pow(BOUND(), |xs| - 1);
-            { LemmaPow0Auto(); }
-          ToNat(xs);
+          ToNatLeft(xs);
+          Last(xs) * Pow(BASE(), |xs| - 1);
+            {
+              LemmaPow0Auto();
+              LemmaMulBasicsAuto();
+            }
+          Last(xs);
+          First(xs);
+            { assert ToNatRight(DropFirst(xs)) == 0; }
+          ToNatRight(xs);
         }
       } else {
         calc {
-          ToNatRev(xs);
-          ToNatRev(DropLast(xs)) + Last(xs) * Pow(BOUND(), |xs| - 1);
-            { LemmaToNatEqToNatRev(DropLast(xs)); }
-          ToNat(DropLast(xs)) + Last(xs) * Pow(BOUND(), |xs| - 1);
-          ToNat(DropFirst(DropLast(xs))) * BOUND() + First(xs) + Last(xs)
-            * Pow(BOUND(), |xs| - 1);
-            { LemmaToNatEqToNatRev(DropFirst(DropLast(xs))); }
-          ToNatRev(DropFirst(DropLast(xs))) * BOUND() + First(xs) + Last(xs)
-            * Pow(BOUND(), |xs| - 1);
+          ToNatLeft(xs);
+          ToNatLeft(DropLast(xs)) + Last(xs) * Pow(BASE(), |xs| - 1);
+            { LemmaToNatLeftEqToNatRight(DropLast(xs)); }
+          ToNatRight(DropLast(xs)) + Last(xs) * Pow(BASE(), |xs| - 1);
+          ToNatRight(DropFirst(DropLast(xs))) * BASE() + First(xs) + Last(xs)
+            * Pow(BASE(), |xs| - 1);
+            { LemmaToNatLeftEqToNatRight(DropFirst(DropLast(xs))); }
+          ToNatLeft(DropFirst(DropLast(xs))) * BASE() + First(xs) + Last(xs)
+            * Pow(BASE(), |xs| - 1);
             {
               assert DropFirst(DropLast(xs)) == DropLast(DropFirst(xs));
               reveal Pow();
               LemmaMulProperties();
             }
-          ToNatRev(DropLast(DropFirst(xs))) * BOUND() + First(xs) + Last(xs)
-            * Pow(BOUND(), |xs| - 2) * BOUND();
+          ToNatLeft(DropLast(DropFirst(xs))) * BASE() + First(xs) + Last(xs)
+            * Pow(BASE(), |xs| - 2) * BASE();
             { LemmaMulIsDistributiveAddOtherWayAuto(); }
-          ToNatRev(DropFirst(xs)) * BOUND() + First(xs);
-            { LemmaToNatEqToNatRev(DropFirst(xs)); }
-          ToNat(xs);
+          ToNatLeft(DropFirst(xs)) * BASE() + First(xs);
+            { LemmaToNatLeftEqToNatRight(DropFirst(xs)); }
+          ToNatRight(xs);
         }
       }
     }
   }
 
-  lemma LemmaToNatEqToNatRevAuto()
-    ensures forall xs: seq<uint> :: ToNat(xs) == ToNatRev(xs)
+  lemma LemmaToNatLeftEqToNatRightAuto()
+    ensures forall xs: seq<uint> :: ToNatRight(xs) == ToNatLeft(xs)
   {
-    reveal ToNat();
-    reveal ToNatRev();
+    reveal ToNatRight();
+    reveal ToNatLeft();
     forall xs: seq<uint>
-      ensures ToNat(xs) == ToNatRev(xs)
+      ensures ToNatRight(xs) == ToNatLeft(xs)
     {
-      LemmaToNatEqToNatRev(xs);
+      LemmaToNatLeftEqToNatRight(xs);
     }
   }
 
   /* The nat representation of a sequence of length 1 is its first (and only)
-  word. */
+  position. */
   lemma LemmaSeqLen1(xs: seq<uint>)
     requires |xs| == 1
-    ensures ToNat(xs) == First(xs)
+    ensures ToNatRight(xs) == First(xs)
   {
-    reveal ToNat();
+    reveal ToNatRight();
   }
 
   /* The nat representation of a sequence of length 2 is sum of its first
-  word and the product of its second word and BOUND(). */
+  position and the product of its second position and BASE(). */
   lemma LemmaSeqLen2(xs: seq<uint>)
     requires |xs| == 2
-    ensures ToNat(xs) == First(xs) + xs[1] * BOUND()
+    ensures ToNatRight(xs) == First(xs) + xs[1] * BASE()
   {
-    reveal ToNat();
+    reveal ToNatRight();
     LemmaSeqLen1(DropLast(xs));
   }
 
   /* Appending a zero does not change the nat representation of the sequence. */
   lemma LemmaSeqAppendZero(xs: seq<uint>) 
-    ensures ToNat(xs + [0]) == ToNat(xs)
+    ensures ToNatRight(xs + [0]) == ToNatRight(xs)
   {
-    reveal ToNatRev();
-    LemmaToNatEqToNatRevAuto();
-    calc == {
-      ToNat(xs + [0]);
-      ToNatRev(xs + [0]);
-      ToNatRev(xs) + 0 * Pow(BOUND(), |xs|);
+    reveal ToNatLeft();
+    LemmaToNatLeftEqToNatRightAuto();
+    calc {
+      ToNatRight(xs + [0]);
+      ToNatLeft(xs + [0]);
+      ToNatLeft(xs) + 0 * Pow(BASE(), |xs|);
         { LemmaMulBasicsAuto(); }
-      ToNatRev(xs);
-      ToNat(xs);
+      ToNatLeft(xs);
+      ToNatRight(xs);
     }
   }
 
-  /* The nat representation of a sequence is bounded by BOUND() to the power of
+  /* The nat representation of a sequence is bounded by BASE() to the power of
   the sequence length. */
   lemma LemmaSeqNatBound(xs: seq<uint>)
-    ensures ToNat(xs) < Pow(BOUND(), |xs|)
+    ensures ToNatRight(xs) < Pow(BASE(), |xs|)
   {
     reveal Pow();
     if |xs| == 0 {
-      reveal ToNat();
+      reveal ToNatRight();
     } else {
       var len' := |xs| - 1;
-      var pow := Pow(BOUND(), len');
+      var pow := Pow(BASE(), len');
       calc {
-        ToNat(xs);
-           { LemmaToNatEqToNatRev(xs); }
-        ToNatRev(xs);
-           { reveal ToNatRev(); }
-        ToNatRev(DropLast(xs)) + Last(xs) * pow;
+        ToNatRight(xs);
+           { LemmaToNatLeftEqToNatRight(xs); }
+        ToNatLeft(xs);
+           { reveal ToNatLeft(); }
+        ToNatLeft(DropLast(xs)) + Last(xs) * pow;
         <  {
-             LemmaToNatEqToNatRev(DropLast(xs));
+             LemmaToNatLeftEqToNatRight(DropLast(xs));
              LemmaSeqNatBound(DropLast(xs));
            }
         pow + Last(xs) * pow;
@@ -170,9 +176,9 @@ abstract module NatSeq {
             LemmaPowPositiveAuto();
             LemmaMulInequalityAuto();
            }
-        pow + (BOUND() - 1) * pow;
+        pow + (BASE() - 1) * pow;
            { LemmaMulIsDistributiveAuto(); }
-        Pow(BOUND(), len' + 1);
+        Pow(BASE(), len' + 1);
       }
     }
   }
@@ -181,50 +187,50 @@ abstract module NatSeq {
   representation of its prefix. */
   lemma LemmaSeqPrefix(xs: seq<uint>, i: nat)
     requires 0 <= i <= |xs|
-    ensures ToNat(xs[..i]) + ToNat(xs[i..]) * Pow(BOUND(), i) == ToNat(xs)
+    ensures ToNatRight(xs[..i]) + ToNatRight(xs[i..]) * Pow(BASE(), i) == ToNatRight(xs)
   {
-    reveal ToNat();
+    reveal ToNatRight();
     reveal Pow();
     if i == 1 {
-      assert ToNat(xs[..1]) == First(xs);
+      assert ToNatRight(xs[..1]) == First(xs);
     } else if i > 1 {
       calc {
-        ToNat(xs[..i]) + ToNat(xs[i..]) * Pow(BOUND(), i);
-        ToNat(DropFirst(xs[..i])) * BOUND() + First(xs) + ToNat(xs[i..]) * Pow(BOUND(), i);
+        ToNatRight(xs[..i]) + ToNatRight(xs[i..]) * Pow(BASE(), i);
+        ToNatRight(DropFirst(xs[..i])) * BASE() + First(xs) + ToNatRight(xs[i..]) * Pow(BASE(), i);
           {
             assert DropFirst(xs[..i]) == DropFirst(xs)[..i-1];
             LemmaMulProperties();
           }
-        ToNat(DropFirst(xs)[..i-1]) * BOUND() + First(xs) + (ToNat(xs[i..]) * Pow(BOUND(), i - 1)) * BOUND();
+        ToNatRight(DropFirst(xs)[..i-1]) * BASE() + First(xs) + (ToNatRight(xs[i..]) * Pow(BASE(), i - 1)) * BASE();
           { LemmaMulIsDistributiveAddOtherWayAuto(); }
-        (ToNat(DropFirst(xs)[..i-1]) + ToNat(DropFirst(xs)[i-1..]) * Pow(BOUND(), i - 1)) * BOUND() + First(xs);
+        (ToNatRight(DropFirst(xs)[..i-1]) + ToNatRight(DropFirst(xs)[i-1..]) * Pow(BASE(), i - 1)) * BASE() + First(xs);
           { LemmaSeqPrefix(DropFirst(xs), i - 1); }
-        ToNat(xs);
+        ToNatRight(xs);
       }
     }
   }
 
-  /* If there is an inequality between the most significant words of two
+  /* If there is an inequality between the most significant positions of two
   sequences, then there is an inequality between the nat representations of
   those sequences. Helper lemma for LemmaSeqNeq. */
   lemma LemmaSeqMswInequality(xs: seq<uint>, ys: seq<uint>)
     requires |xs| == |ys| > 0
     requires Last(xs) < Last(ys)
-    ensures ToNat(xs) < ToNat(ys)
+    ensures ToNatRight(xs) < ToNatRight(ys)
   {
-    reveal ToNatRev();
-    LemmaToNatEqToNatRevAuto();
+    reveal ToNatLeft();
+    LemmaToNatLeftEqToNatRightAuto();
     var len' := |xs| - 1;
     calc {
-      ToNat(xs);
-      ToNatRev(xs);
+      ToNatRight(xs);
+      ToNatLeft(xs);
       <  { LemmaSeqNatBound(DropLast(xs)); }
-      Pow(BOUND(), len') + Last(xs) * Pow(BOUND(), len');
+      Pow(BASE(), len') + Last(xs) * Pow(BASE(), len');
       == { LemmaMulIsDistributiveAuto(); }
-      (1 + Last(xs)) * Pow(BOUND(), len');
+      (1 + Last(xs)) * Pow(BASE(), len');
       <= { LemmaPowPositiveAuto(); LemmaMulInequalityAuto(); }
-      ToNatRev(ys);
-      ToNat(ys);
+      ToNatLeft(ys);
+      ToNatRight(ys);
     }
   }
 
@@ -232,8 +238,8 @@ abstract module NatSeq {
   do not have the same nat representations. Helper lemma for LemmaSeqNeq. */
   lemma LemmaSeqPrefixNeq(xs: seq<uint>, ys: seq<uint>, i: nat)
     requires 0 <= i <= |xs| == |ys|
-    requires ToNat(xs[..i]) != ToNat(ys[..i])
-    ensures ToNat(xs) != ToNat(ys)
+    requires ToNatRight(xs[..i]) != ToNatRight(ys[..i])
+    ensures ToNatRight(xs) != ToNatRight(ys)
     decreases |xs| - i
   {
     if i == |xs| {
@@ -241,15 +247,16 @@ abstract module NatSeq {
       assert ys[..i] == ys;
     } else {
       if xs[i] == ys[i] {
-        reveal ToNatRev();
+        reveal ToNatLeft();
         assert DropLast(xs[..i+1]) == xs[..i];
         assert DropLast(ys[..i+1]) == ys[..i];
 
-        LemmaToNatEqToNatRevAuto();
-        assert ToNat(xs[..i+1]) == ToNatRev(xs[..i+1]);
+        LemmaToNatLeftEqToNatRightAuto();
+        assert ToNatRight(xs[..i+1]) == ToNatLeft(xs[..i+1]);
+      } else if xs[i] < ys[i] {
+        LemmaSeqMswInequality(xs[..i+1], ys[..i+1]);
       } else {
-        if xs[i] < ys[i]  { LemmaSeqMswInequality(xs[..i+1], ys[..i+1]); }
-        else              { LemmaSeqMswInequality(ys[..i+1], xs[..i+1]); }
+        LemmaSeqMswInequality(ys[..i+1], xs[..i+1]);
       }
       LemmaSeqPrefixNeq(xs, ys, i + 1);
     }
@@ -260,7 +267,7 @@ abstract module NatSeq {
   lemma LemmaSeqNeq(xs: seq<uint>, ys: seq<uint>)
     requires |xs| == |ys|
     requires xs != ys
-    ensures ToNat(xs) != ToNat(ys)
+    ensures ToNatRight(xs) != ToNatRight(ys)
   {
     ghost var i: nat, n: nat := 0, |xs|;
 
@@ -273,15 +280,15 @@ abstract module NatSeq {
       }
       i := i + 1;
     }
-    assert ToNatRev(xs[..i]) == ToNatRev(ys[..i]);
+    assert ToNatLeft(xs[..i]) == ToNatLeft(ys[..i]);
 
-    reveal ToNatRev();
+    reveal ToNatLeft();
     assert xs[..i+1][..i] == xs[..i];
     assert ys[..i+1][..i] == ys[..i];
     LemmaPowPositiveAuto();
     LemmaMulStrictInequalityAuto();
-    assert ToNatRev(xs[..i+1]) != ToNatRev(ys[..i+1]);
-    LemmaToNatEqToNatRevAuto();
+    assert ToNatLeft(xs[..i+1]) != ToNatLeft(ys[..i+1]);
+    LemmaToNatLeftEqToNatRightAuto();
 
     LemmaSeqPrefixNeq(xs, ys, i+1);
   }
@@ -290,35 +297,35 @@ abstract module NatSeq {
   to each other, the sequences are the same. */
   lemma LemmaSeqEq(xs: seq<uint>, ys: seq<uint>)
     requires |xs| == |ys|
-    requires ToNat(xs) == ToNat(ys)
+    requires ToNatRight(xs) == ToNatRight(ys)
     ensures xs == ys
   {
     calc ==> {
       xs != ys;
         { LemmaSeqNeq(xs, ys); }
-      ToNat(xs) != ToNat(ys);
+      ToNatRight(xs) != ToNatRight(ys);
       false;
     }
   }
 
-  /* The nat representation of a sequence and its least significant word are
+  /* The nat representation of a sequence and its least significant position are
   congruent. */
   lemma LemmaSeqLswModEquivalence(xs: seq<uint>)
     requires |xs| >= 1;
-    ensures IsModEquivalent(ToNat(xs), First(xs), BOUND());
+    ensures IsModEquivalent(ToNatRight(xs), First(xs), BASE());
   {
     if |xs| == 1 {
       LemmaSeqLen1(xs);
       LemmaModEquivalenceAuto();
     } else {
-      assert IsModEquivalent(ToNat(xs), First(xs), BOUND()) by {
-        reveal ToNat();
+      assert IsModEquivalent(ToNatRight(xs), First(xs), BASE()) by {
+        reveal ToNatRight();
         calc ==> {
           true;
             { LemmaModEquivalenceAuto(); }
-          IsModEquivalent(ToNat(xs), ToNat(DropFirst(xs)) * BOUND() + First(xs), BOUND());
+          IsModEquivalent(ToNatRight(xs), ToNatRight(DropFirst(xs)) * BASE() + First(xs), BASE());
             { LemmaModMultiplesBasicAuto(); }
-          IsModEquivalent(ToNat(xs), First(xs), BOUND());
+          IsModEquivalent(ToNatRight(xs), First(xs), BASE());
         }
       }
     }
@@ -337,15 +344,14 @@ abstract module NatSeq {
     else
       LemmaDivBasicsAuto();
       LemmaDivDecreasesAuto();
-      [n % BOUND()] + FromNat(n / BOUND())
+      [n % BASE()] + FromNat(n / BASE())
   }
 
   /* Ensures length of the sequence generated by FromNat is less than len.
   Helper lemma for FromNatWithLen. */
   lemma LemmaFromNatLen(n: nat, len: nat)
-    requires Pow(BOUND(), len) > n
+    requires Pow(BASE(), len) > n
     ensures |FromNat(n)| <= len
-    decreases n
   {
     reveal FromNat();
     if n == 0 {
@@ -353,12 +359,12 @@ abstract module NatSeq {
       calc {
         |FromNat(n)|;
         == { LemmaDivBasicsAuto(); }
-        1 + |FromNat(n / BOUND())|;
+        1 + |FromNat(n / BASE())|;
         <= {
              LemmaMultiplyDivideLtAuto();
              LemmaDivDecreasesAuto();
              reveal Pow();
-             LemmaFromNatLen(n / BOUND(), len - 1);
+             LemmaFromNatLen(n / BASE(), len - 1);
            }
         len;
       }
@@ -368,24 +374,24 @@ abstract module NatSeq {
   /* If we start with a nat, convert it to a sequence, and convert it back, we
   get the same nat we started with. */
   lemma LemmaNatSeqNat(n: nat)
-    ensures ToNat(FromNat(n)) == n
+    ensures ToNatRight(FromNat(n)) == n
     decreases n
   {
-    reveal ToNat();
+    reveal ToNatRight();
     reveal FromNat();
     if n == 0 {
     } else {
       calc {
-        ToNat(FromNat(n));
+        ToNatRight(FromNat(n));
           { LemmaDivBasicsAuto(); }
-        ToNat([n % BOUND()] + FromNat(n / BOUND()));
-        n % BOUND() + ToNat(FromNat(n / BOUND())) * BOUND();
+        ToNatRight([n % BASE()] + FromNat(n / BASE()));
+        n % BASE() + ToNatRight(FromNat(n / BASE())) * BASE();
           {
             LemmaDivDecreasesAuto();
-            LemmaNatSeqNat(n / BOUND());
+            LemmaNatSeqNat(n / BASE());
           }
-        n % BOUND() + n / BOUND() * BOUND();
-          { LemmaFundamentalDivMod(n, BOUND()); }
+        n % BASE() + n / BASE() * BASE();
+          { LemmaFundamentalDivMod(n, BASE()); }
         n;
       }
     }
@@ -395,7 +401,7 @@ abstract module NatSeq {
   function method {:opaque} SeqExtend(xs: seq<uint>, n: nat): (ys: seq<uint>)
     requires |xs| <= n
     ensures |ys| == n
-    ensures ToNat(ys) == ToNat(xs)
+    ensures ToNatRight(ys) == ToNatRight(xs)
     decreases n - |xs|
   {
     if |xs| >= n then xs else LemmaSeqAppendZero(xs); SeqExtend(xs + [0], n)
@@ -405,7 +411,7 @@ abstract module NatSeq {
   function method {:opaque} SeqExtendMultiple(xs: seq<uint>, n: nat): (ys: seq<uint>)
     requires n > 0
     ensures |ys| % n == 0
-    ensures ToNat(ys) == ToNat(xs)
+    ensures ToNatRight(ys) == ToNatRight(xs)
   {
     var newLen := |xs| + n - (|xs| % n);
     LemmaSubModNoopRight(|xs| + n, |xs|, n);
@@ -419,9 +425,9 @@ abstract module NatSeq {
 
   /* Converts a nat to a sequence of a specified length. */
   function method {:opaque} FromNatWithLen(n: nat, len: nat): (xs: seq<uint>)
-    requires Pow(BOUND(), len) > n
+    requires Pow(BASE(), len) > n
     ensures |xs| == len
-    ensures ToNat(xs) == n
+    ensures ToNatRight(xs) == n
   {
     LemmaFromNatLen(n, len);
     LemmaNatSeqNat(n);
@@ -431,10 +437,10 @@ abstract module NatSeq {
   /* If the nat representation of a sequence is zero, then the sequence is a
   sequence of zeros. */
   lemma LemmaSeqZero(xs: seq<uint>)
-    requires ToNat(xs) == 0
+    requires ToNatRight(xs) == 0
     ensures forall i :: 0 <= i < |xs| ==> xs[i] == 0
   {
-    reveal ToNat();
+    reveal ToNatRight();
     if |xs| == 0 {
     } else {
       LemmaMulNonnegativeAuto();
@@ -449,9 +455,9 @@ abstract module NatSeq {
   function method {:opaque} SeqZero(len: nat): (xs: seq<uint>)
     ensures |xs| == len
     ensures forall i :: 0 <= i < |xs| ==> xs[i] == 0
-    ensures ToNat(xs) == 0
+    ensures ToNatRight(xs) == 0
   {
-    LemmaPowPositive(BOUND(), len);
+    LemmaPowPositive(BASE(), len);
     var xs := FromNatWithLen(0, len);
     LemmaSeqZero(xs);
     xs
@@ -461,18 +467,18 @@ abstract module NatSeq {
   sequence with the same length as the original sequence, we get the same
   sequence we started with. */
   lemma LemmaSeqNatSeq(xs: seq<uint>)
-    ensures Pow(BOUND(), |xs|) > ToNat(xs)
-    ensures FromNatWithLen(ToNat(xs), |xs|) == xs
+    ensures Pow(BASE(), |xs|) > ToNatRight(xs)
+    ensures FromNatWithLen(ToNatRight(xs), |xs|) == xs
   {
     reveal FromNat();
-    reveal ToNat();
+    reveal ToNatRight();
     LemmaSeqNatBound(xs);
     if |xs| > 0 {
       calc {
-        FromNatWithLen(ToNat(xs), |xs|) != xs;
-          { LemmaSeqNeq(FromNatWithLen(ToNat(xs), |xs|), xs); }
-        ToNat(FromNatWithLen(ToNat(xs), |xs|)) != ToNat(xs);
-        ToNat(xs) != ToNat(xs);
+        FromNatWithLen(ToNatRight(xs), |xs|) != xs;
+          { LemmaSeqNeq(FromNatWithLen(ToNatRight(xs), |xs|), xs); }
+        ToNatRight(FromNatWithLen(ToNatRight(xs), |xs|)) != ToNatRight(xs);
+        ToNatRight(xs) != ToNatRight(xs);
         false;
       }
     }
@@ -495,8 +501,8 @@ abstract module NatSeq {
     else
       var (zs', cin) := SeqAdd(DropLast(xs), DropLast(ys));
       var sum: int := Last(xs) + Last(ys) + cin;
-      var (sum_out, cout) := if sum < BOUND() then (sum, 0)
-                             else (sum - BOUND(), 1);
+      var (sum_out, cout) := if sum < BASE() then (sum, 0)
+                             else (sum - BASE(), 1);
       (zs' + [sum_out], cout)
   }
 
@@ -505,38 +511,38 @@ abstract module NatSeq {
   lemma LemmaSeqAdd(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
     requires |xs| == |ys|
     requires SeqAdd(xs, ys) == (zs, cout)
-    ensures ToNat(xs) + ToNat(ys) == ToNat(zs) + cout * Pow(BOUND(), |xs|)
+    ensures ToNatRight(xs) + ToNatRight(ys) == ToNatRight(zs) + cout * Pow(BASE(), |xs|)
   {
     reveal SeqAdd();
     if |xs| == 0 {
-      reveal ToNat();
+      reveal ToNatRight();
     } else {
-      var pow := Pow(BOUND(), |xs| - 1);
+      var pow := Pow(BASE(), |xs| - 1);
       var (zs', cin) := SeqAdd(DropLast(xs), DropLast(ys));
       var sum: int := Last(xs) + Last(ys) + cin;
-      var z := if sum < BOUND() then sum else sum - BOUND();
-      assert sum == z + cout * BOUND();
+      var z := if sum < BASE() then sum else sum - BASE();
+      assert sum == z + cout * BASE();
 
-      reveal ToNatRev();
-      LemmaToNatEqToNatRevAuto();
+      reveal ToNatLeft();
+      LemmaToNatLeftEqToNatRightAuto();
       calc {
-        ToNat(zs);
-        ToNatRev(zs);
-        ToNatRev(zs') + z * pow;
+        ToNatRight(zs);
+        ToNatLeft(zs);
+        ToNatLeft(zs') + z * pow;
           { LemmaSeqAdd(DropLast(xs), DropLast(ys), zs', cin); }
-        ToNatRev(DropLast(xs)) + ToNatRev(DropLast(ys)) - cin * pow + z * pow;
+        ToNatLeft(DropLast(xs)) + ToNatLeft(DropLast(ys)) - cin * pow + z * pow;
           {
             LemmaMulEqualityAuto();
-            assert sum * pow == (z + cout * BOUND()) * pow;
+            assert sum * pow == (z + cout * BASE()) * pow;
             LemmaMulIsDistributiveAuto();
           } 
-        ToNatRev(xs) + ToNatRev(ys) - cout * BOUND() * pow;
+        ToNatLeft(xs) + ToNatLeft(ys) - cout * BASE() * pow;
           {
-            LemmaMulIsAssociative(cout, BOUND(), pow);
+            LemmaMulIsAssociative(cout, BASE(), pow);
             reveal Pow();
           }
-        ToNatRev(xs) + ToNatRev(ys) - cout * Pow(BOUND(), |xs|);
-        ToNat(xs) + ToNat(ys) - cout * Pow(BOUND(), |xs|);
+        ToNatLeft(xs) + ToNatLeft(ys) - cout * Pow(BASE(), |xs|);
+        ToNatRight(xs) + ToNatRight(ys) - cout * Pow(BASE(), |xs|);
       }
     }
   }
@@ -553,7 +559,7 @@ abstract module NatSeq {
       var (zs, cin) := SeqSub(DropLast(xs), DropLast(ys));
       var (diff_out, cout) := if Last(xs) >= Last(ys) + cin
                               then (Last(xs) - Last(ys) - cin, 0)
-                              else (BOUND() + Last(xs) - Last(ys) - cin, 1);
+                              else (BASE() + Last(xs) - Last(ys) - cin, 1);
       (zs + [diff_out], cout)
   }
 
@@ -562,39 +568,39 @@ abstract module NatSeq {
   lemma LemmaSeqSub(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
     requires |xs| == |ys|
     requires SeqSub(xs, ys) == (zs, cout)
-    ensures ToNat(xs) - ToNat(ys) + cout * Pow(BOUND(), |xs|) == ToNat(zs)
+    ensures ToNatRight(xs) - ToNatRight(ys) + cout * Pow(BASE(), |xs|) == ToNatRight(zs)
   {
     reveal SeqSub();
     if |xs| == 0 {
-      reveal ToNat();
+      reveal ToNatRight();
     } else {
-      var pow := Pow(BOUND(), |xs| - 1);
+      var pow := Pow(BASE(), |xs| - 1);
       var (zs', cin) := SeqSub(DropLast(xs), DropLast(ys));
       var z := if Last(xs) >= Last(ys) + cin
                then Last(xs) - Last(ys) - cin
-               else BOUND() + Last(xs) - Last(ys) - cin;
-      assert cout * BOUND() + Last(xs) - cin - Last(ys) == z;
+               else BASE() + Last(xs) - Last(ys) - cin;
+      assert cout * BASE() + Last(xs) - cin - Last(ys) == z;
 
-      reveal ToNatRev();
-      LemmaToNatEqToNatRevAuto();
+      reveal ToNatLeft();
+      LemmaToNatLeftEqToNatRightAuto();
       calc {
-        ToNat(zs);
-        ToNatRev(zs);
-        ToNatRev(zs') + z * pow;
+        ToNatRight(zs);
+        ToNatLeft(zs);
+        ToNatLeft(zs') + z * pow;
           { LemmaSeqSub(DropLast(xs), DropLast(ys), zs', cin); }
-        ToNatRev(DropLast(xs)) - ToNatRev(DropLast(ys)) + cin * pow + z * pow;
+        ToNatLeft(DropLast(xs)) - ToNatLeft(DropLast(ys)) + cin * pow + z * pow;
           {
             LemmaMulEqualityAuto();
-            assert pow * (cout * BOUND() + Last(xs) - cin - Last(ys)) == pow * z;
+            assert pow * (cout * BASE() + Last(xs) - cin - Last(ys)) == pow * z;
             LemmaMulIsDistributiveAuto();
           }
-        ToNatRev(xs) - ToNatRev(ys) + cout * BOUND() * pow;
+        ToNatLeft(xs) - ToNatLeft(ys) + cout * BASE() * pow;
           {
-            LemmaMulIsAssociative(cout, BOUND(), pow);
+            LemmaMulIsAssociative(cout, BASE(), pow);
             reveal Pow();
           }
-        ToNatRev(xs) - ToNatRev(ys) + cout * Pow(BOUND(), |xs|);
-        ToNat(xs) - ToNat(ys) + cout * Pow(BOUND(), |xs|);
+        ToNatLeft(xs) - ToNatLeft(ys) + cout * Pow(BASE(), |xs|);
+        ToNatRight(xs) - ToNatRight(ys) + cout * Pow(BASE(), |xs|);
       }
     }
   }

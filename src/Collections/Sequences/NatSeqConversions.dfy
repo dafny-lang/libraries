@@ -12,13 +12,13 @@ include "../../NonlinearArithmetic/Power.dfy"
 include "Seq.dfy"
 include "NatSeq.dfy"
 
-/* Sequence with smaller bound. */
+/* Sequence with smaller base. */
 abstract module SmallSeq refines NatSeq {
 
   function method BITS(): nat
     ensures BITS() > 1
 
-  function method BOUND(): nat
+  function method BASE(): nat
   {
     LemmaPowPositive(2, BITS() - 1);
     LemmaPowStrictlyIncreases(2, BITS() - 1, BITS());
@@ -27,7 +27,7 @@ abstract module SmallSeq refines NatSeq {
 
 }
 
-/* Sequence with larger bound. */
+/* Sequence with larger base. */
 abstract module LargeSeq refines NatSeq {
 
   import Small : SmallSeq
@@ -35,7 +35,7 @@ abstract module LargeSeq refines NatSeq {
   function method BITS(): nat
     ensures BITS() > Small.BITS() && BITS() % Small.BITS() == 0
 
-  function method BOUND(): nat
+  function method BASE(): nat
   {
     LemmaPowPositive(2, BITS() - 1);
     LemmaPowStrictlyIncreases(2, BITS() - 1, BITS());
@@ -53,9 +53,9 @@ abstract module NatSeqConversions {
 
   import opened Large : LargeSeq
 
-  /* Small.BOUND() to the power of E is Large.BOUND(). */
+  /* Small.BASE() to the power of E is Large.BASE(). */
   function method E(): (E: nat)
-    ensures Pow(Small.BOUND(), E) == Large.BOUND()
+    ensures Pow(Small.BASE(), E) == Large.BASE()
     ensures E > 0
   {
     LemmaDivBasicsAuto();
@@ -64,7 +64,7 @@ abstract module NatSeqConversions {
     Large.BITS() / Small.BITS()
   }
 
-  /* Converts a sequence from Large.BOUND() to Small.BOUND(). */
+  /* Converts a sequence from Large.BASE() to Small.BASE(). */
   function method {:opaque} ToSmall(xs: seq<Large.uint>): (ys: seq<Small.uint>)
     ensures |ys| == |xs| * E()
   {
@@ -74,7 +74,7 @@ abstract module NatSeqConversions {
       Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs))
   }
 
-  /* Converts a sequence from Small.BOUND() to Large.BOUND(). */
+  /* Converts a sequence from Small.BASE() to Large.BASE(). */
   function method {:opaque} ToLarge(xs: seq<Small.uint>): (ys: seq<Large.uint>)
     requires |xs| % E() == 0
     ensures |ys| == |xs| / E()
@@ -87,56 +87,56 @@ abstract module NatSeqConversions {
       Small.LemmaSeqNatBound(xs[..E()]);
       LemmaModSubMultiplesVanishAuto();
       LemmaDivMinusOne(|xs|, E());
-      [Small.ToNat(xs[..E()]) as Large.uint] + ToLarge(xs[E()..])
+      [Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..])
   }
 
-  /* Sequence conversion from Large.BOUND() to Small.BOUND() does not
+  /* Sequence conversion from Large.BASE() to Small.BASE() does not
   change its nat representation. */
   lemma LemmaToSmall(xs: seq<Large.uint>)
-    ensures Small.ToNat(ToSmall(xs)) == Large.ToNat(xs)
+    ensures Small.ToNatRight(ToSmall(xs)) == Large.ToNatRight(xs)
   {
-    reveal Small.ToNat();
-    reveal Large.ToNat();
+    reveal Small.ToNatRight();
+    reveal Large.ToNatRight();
     reveal ToSmall();
     if |xs| == 0 {
     } else {
       calc {
-        Small.ToNat(ToSmall(xs));
-        Small.ToNat(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
+        Small.ToNatRight(ToSmall(xs));
+        Small.ToNatRight(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
           {
             Small.LemmaSeqPrefix(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)), E());
             LemmaToSmall(DropFirst(xs));
           }
-        First(xs) + Large.ToNat(DropFirst(xs)) * Pow(Small.BOUND(), E());
-          { assert Pow(Small.BOUND(), E()) == Large.BOUND(); }
-        Large.ToNat(xs);
+        First(xs) + Large.ToNatRight(DropFirst(xs)) * Pow(Small.BASE(), E());
+          { assert Pow(Small.BASE(), E()) == Large.BASE(); }
+        Large.ToNatRight(xs);
       }
     }
   }
 
-  /* Sequence conversion from Small.BOUND() to Large.BOUND() does not
+  /* Sequence conversion from Small.BASE() to Large.BASE() does not
   change its nat representation. */
   lemma LemmaToLarge(xs: seq<Small.uint>)
     requires |xs| % E() == 0
-    ensures Large.ToNat(ToLarge(xs)) == Small.ToNat(xs)
+    ensures Large.ToNatRight(ToLarge(xs)) == Small.ToNatRight(xs)
   {
-    reveal Large.ToNat();
-    reveal Small.ToNat();
+    reveal Large.ToNatRight();
+    reveal Small.ToNatRight();
     reveal ToLarge();
     if |xs| == 0 {
     } else {
       calc {
-        Large.ToNat(ToLarge(xs));
+        Large.ToNatRight(ToLarge(xs));
           {
             LemmaModIsZero(|xs|, E());
             LemmaModSubMultiplesVanishAuto();
             Small.LemmaSeqNatBound(xs[..E()]);
           }
-        Large.ToNat([Small.ToNat(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
+        Large.ToNatRight([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
           { LemmaToLarge(xs[E()..]); }
-        Small.ToNat(xs[..E()]) + Small.ToNat(xs[E()..]) * Pow(Small.BOUND(), E());
+        Small.ToNatRight(xs[..E()]) + Small.ToNatRight(xs[E()..]) * Pow(Small.BASE(), E());
           { Small.LemmaSeqPrefix(xs, E()); }
-        Small.ToNat(xs);
+        Small.ToNatRight(xs);
       }
     }
   }
@@ -149,7 +149,7 @@ abstract module NatSeqConversions {
   {
     LemmaToSmall(xs);
     LemmaToSmall(ys);
-    assert Large.ToNat(xs) == Large.ToNat(ys);
+    assert Large.ToNatRight(xs) == Large.ToNatRight(ys);
     Large.LemmaSeqEq(xs, ys);
   }
 
@@ -162,7 +162,7 @@ abstract module NatSeqConversions {
   {
     LemmaToLarge(xs);
     LemmaToLarge(ys);
-    assert Small.ToNat(xs) == Small.ToNat(ys);
+    assert Small.ToNatRight(xs) == Small.ToNatRight(ys);
     Small.LemmaSeqEq(xs, ys);
   }
 
@@ -183,8 +183,8 @@ abstract module NatSeqConversions {
             Small.LemmaSeqNatBound(xs[..E()]);
             LemmaModSubMultiplesVanishAuto();
           }
-        ToSmall([Small.ToNat(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
-        Small.FromNatWithLen(Small.ToNat(xs[..E()]), E()) + ToSmall(ToLarge(xs[E()..]));
+        ToSmall([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
+        Small.FromNatWithLen(Small.ToNatRight(xs[..E()]), E()) + ToSmall(ToLarge(xs[E()..]));
           {
             Small.LemmaSeqNatSeq(xs[..E()]);
             LemmaSmallLargeSmall(xs[E()..]);
@@ -208,7 +208,7 @@ abstract module NatSeqConversions {
       calc {
         ToLarge(ToSmall(xs));
         ToLarge(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
-        [Small.ToNat(Small.FromNatWithLen(First(xs), E())) as Large.uint] + ToLarge(ToSmall(DropFirst(xs)));
+        [Small.ToNatRight(Small.FromNatWithLen(First(xs), E())) as Large.uint] + ToLarge(ToSmall(DropFirst(xs)));
         [First(xs)] + ToLarge(ToSmall(DropFirst(xs)));
           { LemmaLargeSmallLarge(DropFirst(xs)); }
         [First(xs)] + DropFirst(xs);
