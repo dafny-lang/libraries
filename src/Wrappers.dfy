@@ -69,4 +69,26 @@ module Wrappers {
       value
     }
   }
+
+  datatype MUST<E> = NeedsAreMeet | ResultInError(error: E)
+  {
+    predicate method IsFailure() {
+      ResultInError?
+    }
+    // Note: PropagateFailure returns a Result, not an MUST
+    function method PropagateFailure<U>(): Result<U, E>
+      requires ResultInError?
+    {
+      Failure(this.error)
+    }
+    // Note: no Extract method
+  }
+
+  // A helper function to ensure a requiremnt is me at runtime
+  // :- needs(5 == |mySet|, "The set MUST have 5 elements.")
+  method needs<E>(condition: bool, error: E) returns (result: MUST<E>) 
+    ensures result.NeedsAreMeet? ==> condition
+  {
+    return if condition then NeedsAreMeet else ResultInError(error);
+  }
 }
