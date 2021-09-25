@@ -147,6 +147,26 @@ module Demo {
     }
   }
 
+  // ------ Demo for Need ----------------------------
+  // We use Need when something has to be true but we can't prove staticly
+  // This is a very contrived example
+
+  method whatIsCharacterFive(fs: MyFilesystem, fromPath: string) returns (res: Result<char, string>)
+    modifies fs
+  {
+
+    // Get a string that we cant reason about staticly
+    var contents :- fs.ReadFile(fromPath);
+
+    // We need both the runtime, and the Dafny to belive that the string is least 5 characters long
+    :- Need(|contents| >= 5, "File contents not long long enugh.");
+
+    // Now we can get the character
+    var c := contents[4];
+    
+    return Success(c);
+  }
+
   method Main() {
     TestMyMap();
     TestMyFilesystem();
