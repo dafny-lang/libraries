@@ -70,14 +70,14 @@ module Wrappers {
     }
   }
 
-  datatype MUST<E> = NeedsAreMeet | ResultInError(error: E)
+  datatype Outcome<E> = Pass | Fail(error: E)
   {
     predicate method IsFailure() {
-      ResultInError?
+      Fail?
     }
     // Note: PropagateFailure returns a Result, not an MUST
     function method PropagateFailure<U>(): Result<U, E>
-      requires ResultInError?
+      requires Fail?
     {
       Failure(this.error)
     }
@@ -85,10 +85,10 @@ module Wrappers {
   }
 
   // A helper function to ensure a requiremnt is me at runtime
-  // :- needs(5 == |mySet|, "The set MUST have 5 elements.")
-  method needs<E>(condition: bool, error: E) returns (result: MUST<E>) 
-    ensures result.NeedsAreMeet? ==> condition
+  // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
+  function method Need<E>(condition: bool, error: E): (result: Outcome<E>)
+    ensures result.Pass? ==> condition
   {
-    return if condition then NeedsAreMeet else ResultInError(error);
+    if condition then Pass else Fail(error)
   }
 }
