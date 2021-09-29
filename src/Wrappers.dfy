@@ -87,7 +87,6 @@ module Wrappers {
   // A helper function to ensure a requirement is true at runtime
   // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
   function method Need<E>(condition: bool, error: E): (result: Outcome<E>)
-    ensures result.Pass? ==> condition
   {
     if condition then Pass else Fail(error)
   }
