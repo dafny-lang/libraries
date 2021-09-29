@@ -84,7 +84,7 @@ module Wrappers {
     // Note: no Extract method
   }
 
-  // A helper function to ensure a requiremnt is me at runtime
+  // A helper function to ensure a requirement is true at runtime
   // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
   function method Need<E>(condition: bool, error: E): (result: Outcome<E>)
     ensures result.Pass? ==> condition
