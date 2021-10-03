@@ -29,15 +29,9 @@ module Multiset {
     }
   }
 
-  lemma LemmaToSetOfDisjointUnion<T>(a: multiset<T>, b: multiset<T>)
-    requires a !! b
-    ensures ToSet(a + b) == ToSet(a) + ToSet(b)
-  {
-  }
-
   /* proves that the cardinality of a multiset is always more than or equal to that
   of the conversion to a set */
-  lemma LemmaCardinalityOfSet<T>(s: multiset<T>)
+  lemma LemmaCardinalityOfSetBound<T>(s: multiset<T>)
     ensures |ToSet(s)| <= |s| 
   {
     reveal ToSet();
@@ -47,10 +41,28 @@ module Multiset {
       var xs := multiset{}[x := s[x]];
       assert ToSet(xs) == {x};
       var rest := s - xs;
-      LemmaCardinalityOfSet(rest);
-      LemmaToSetOfDisjointUnion(xs, rest);
-      assert |s| == |xs| + |rest|;
+      LemmaCardinalityOfSetBound(rest);
       assert ToSet(s) == ToSet(xs) + ToSet(rest);
+    }
+  }
+
+  lemma LemmaCardinalityOfSet<T>(s: multiset<T>, e: T)
+    requires s[e] > 1
+    ensures |ToSet(s)| < |s| 
+  {
+    reveal ToSet();
+    if |s| == 0 {
+    } else {
+      var x :| x in s && s[x] > 1;
+      var xs := multiset{}[x := s[x]];
+      assert ToSet(xs) == {x};
+      var rest := s - xs;
+      LemmaCardinalityOfSetBound(rest);
+      assert ToSet(s) == ToSet(xs) + ToSet(rest);
+      assert ToSet(xs) !! ToSet(rest);
+      assert |ToSet(s)| == |ToSet(xs)| + |ToSet(rest)|;
+      assert |ToSet(s)| <= |ToSet(xs)| + |rest|;
+      assert |xs| > 1;
     }
   }
 }

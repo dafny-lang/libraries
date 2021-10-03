@@ -209,12 +209,14 @@ module Seq {
   {
     reveal HasNoDuplicates();
     reveal ToSet();
+    reveal Multiset.ToSet();
     if i,j :| 0 <= i < j < |s| && s[i] == s[j] {
       var x := s[i];
       assert s == s[..j] + s[j..];
       assert multiset(s)[x] >= 2;
-      Multiset.LemmaCardinalityOfSet(multiset(s));
-      assert |multiset(s)| < |s|;
+      Multiset.LemmaCardinalityOfSet(multiset(s), x);
+      assert ToSet(s) == Multiset.ToSet(multiset(s));
+      assert |ToSet(s)| < |s|;
      }
   }
 
