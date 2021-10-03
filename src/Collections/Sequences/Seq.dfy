@@ -209,15 +209,15 @@ module Seq {
     reveal ToSet();
     if |s| == 0 {
     } else {
-      assert s == [s[0]] + s[1..];
-      assert ToSet(s) == {s[0]} + ToSet(s[1..]);
-      if s[0] in s[1..] {
-        assert ToSet(s) == ToSet(s[1..]);
-        LemmaCardinalityOfSet(s[1..]);
-        assert |ToSet(s)| <= |s[1..]|;
+      assert s == [First(s)] + DropFirst(s);
+      assert ToSet(s) == {First(s)} + ToSet(DropFirst(s));
+      if First(s) in DropFirst(s) {
+        assert ToSet(s) == ToSet(DropFirst(s));
+        LemmaCardinalityOfSet(DropFirst(s));
+        assert |ToSet(s)| <= |DropFirst(s)|;
       } else {
-        assert |ToSet(s)| == 1 + |ToSet(s[1..])|;
-        LemmaNoDuplicatesCardinalityOfSet(s[1..]);
+        assert |ToSet(s)| == 1 + |ToSet(DropFirst(s))|;
+        LemmaNoDuplicatesCardinalityOfSet(DropFirst(s));
       }
     }
   }
