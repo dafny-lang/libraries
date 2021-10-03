@@ -213,10 +213,10 @@ module Seq {
       assert ToSet(s) == {s[0]} + ToSet(s[1..]);
       if s[0] in s[1..] {
         assert ToSet(s) == ToSet(s[1..]);
-	LemmaCardinalityOfSet(s[1..]);
-	assert |ToSet(s)| <= |s[1..]|;
+        LemmaCardinalityOfSet(s[1..]);
+        assert |ToSet(s)| <= |s[1..]|;
       } else {
-	assert |ToSet(s)| == 1 + |ToSet(s[1..])|;
+        assert |ToSet(s)| == 1 + |ToSet(s[1..])|;
         LemmaNoDuplicatesCardinalityOfSet(s[1..]);
       }
     }
