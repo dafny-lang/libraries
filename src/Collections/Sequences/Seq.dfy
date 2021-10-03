@@ -14,6 +14,7 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
+include "../Multisets/Multiset.dfy"
 include "../../Wrappers.dfy"
 include "../../Math.dfy"
 
@@ -21,6 +22,7 @@ module Seq {
 
   import opened Wrappers
   import Math
+  import Multiset
 
   /**********************************************************
   *
@@ -198,6 +200,26 @@ module Seq {
       LemmaCardinalityOfSetNoDuplicates(DropLast(s));
       assert ToSet(s) == ToSet(DropLast(s)) + {Last(s)};
     }
+  }
+
+  /* A sequence that converts to a set of the same cardinality has no duplicates  */
+  lemma LemmaNoDuplicatesCardinalityOfSet<T>(s: seq<T>)
+    requires |ToSet(s)| == |s|
+    ensures HasNoDuplicates(s)
+  {
+    reveal HasNoDuplicates();
+    reveal ToSet();
+    reveal Multiset.ToSet();
+    // Proof by contrapositive: if there is a duplicate, then the cardinality of the
+    // set would be strictly less than that of the sequence, which contradicts the precondition.
+    if i,j :| 0 <= i < j < |s| && s[i] == s[j] {
+      var x := s[i];
+      assert s == s[..j] + s[j..];
+      assert multiset(s)[x] >= 2;
+      Multiset.LemmaCardinalityOfSetWithDuplicates(multiset(s), x);
+      assert ToSet(s) == Multiset.ToSet(multiset(s));
+      assert |ToSet(s)| < |s|;
+     }
   }
 
   /* proves that there are no duplicate values in the multiset version of the sequence */
