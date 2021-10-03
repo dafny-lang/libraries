@@ -212,6 +212,7 @@ module Seq {
       assert s == [First(s)] + DropFirst(s);
       assert ToSet(s) == {First(s)} + ToSet(DropFirst(s));
       if First(s) in DropFirst(s) {
+        // If there is a duplicate, then we show that |ToSet(s)| == |s| cannot hold.
         assert ToSet(s) == ToSet(DropFirst(s));
         LemmaCardinalityOfSet(DropFirst(s));
         assert |ToSet(s)| <= |DropFirst(s)|;
