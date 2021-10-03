@@ -22,4 +22,5 @@ Much of this code came from or was inspired by code from the following projects:
 * [IronFleet](https://github.com/microsoft/Ironclad/tree/main/ironfleet)
 * [Vale](https://github.com/project-everest/vale/tree/legacy_dafny)
 * [Verified BetrFS](https://github.com/vmware-labs/verified-betrfs)
+* [Verifying OpenTitan](https://github.com/secure-foundations/veri-titan)
 
