@@ -75,7 +75,7 @@ module Wrappers {
     predicate method IsFailure() {
       Fail?
     }
-    // Note: PropagateFailure returns a Result, not an MUST
+    // Note: PropagateFailure returns a Result, not an Outcome.
     function method PropagateFailure<U>(): Result<U, E>
       requires Fail?
     {
