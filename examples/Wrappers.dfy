@@ -148,7 +148,7 @@ module Demo {
   }
 
   // ------ Demo for Need ----------------------------
-  // We use Need when something has to be true but we can't prove staticly
+  // We use Need when something has to be true but we can't prove it statically
   // This is a very contrived example
 
   method whatIsCharacterFive(fs: MyFilesystem, fromPath: string) returns (res: Result<char, string>)
