@@ -69,4 +69,25 @@ module Wrappers {
       value
     }
   }
+
+  datatype Outcome<E> = Pass | Fail(error: E)
+  {
+    predicate method IsFailure() {
+      Fail?
+    }
+    // Note: PropagateFailure returns a Result, not an Outcome.
+    function method PropagateFailure<U>(): Result<U, E>
+      requires Fail?
+    {
+      Failure(this.error)
+    }
+    // Note: no Extract method
+  }
+
+  // A helper function to ensure a requirement is true at runtime
+  // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
+  function method Need<E>(condition: bool, error: E): (result: Outcome<E>)
+  {
+    if condition then Pass else Fail(error)
+  }
 }
