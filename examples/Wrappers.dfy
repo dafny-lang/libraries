@@ -159,7 +159,7 @@ module Demo {
     var contents :- fs.ReadFile(fromPath);
 
     // We need both the runtime, and the Dafny to belive that the string is least 5 characters long
-    :- Need(|contents| >= 5, "File contents not long long enugh.");
+    :- Need(|contents| >= 5, "File contents not long enough.");
 
     // Now we can get the character
     var c := contents[4];
