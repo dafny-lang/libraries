@@ -158,7 +158,8 @@ module Demo {
     // Get a string that we can't reason about statically
     var contents :- fs.ReadFile(fromPath);
 
-    // We need both the runtime, and the Dafny to belive that the string is least 5 characters long
+    // Dynamically test whether the string is at least 5 characters long, and return a failure if not. 
+    // If we pass this line, Dafny can now assume that the string is long enough.
     :- Need(|contents| >= 5, "File contents not long enough.");
 
     // Now we can get the character
