@@ -200,6 +200,29 @@ module Seq {
     }
   }
 
+  /* A sequence with cardinality equal to its set has no duplicates */
+  lemma LemmaNoDuplicatesCardinalityOfSet<T>(s: seq<T>)
+    requires |ToSet(s)| == |s|
+    ensures HasNoDuplicates(s)
+  {
+    reveal HasNoDuplicates();
+    reveal ToSet();
+    if |s| == 0 {
+    } else {
+      assert s == [First(s)] + DropFirst(s);
+      assert ToSet(s) == {First(s)} + ToSet(DropFirst(s));
+      if First(s) in DropFirst(s) {
+        // If there is a duplicate, then we show that |ToSet(s)| == |s| cannot hold.
+        assert ToSet(s) == ToSet(DropFirst(s));
+        LemmaCardinalityOfSet(DropFirst(s));
+        assert |ToSet(s)| <= |DropFirst(s)|;
+      } else {
+        assert |ToSet(s)| == 1 + |ToSet(DropFirst(s))|;
+        LemmaNoDuplicatesCardinalityOfSet(DropFirst(s));
+      }
+    }
+  }
+
   /* proves that there are no duplicate values in the multiset version of the sequence */
   lemma LemmaMultisetHasNoDuplicates<T>(s: seq<T>)
     requires HasNoDuplicates(s)
