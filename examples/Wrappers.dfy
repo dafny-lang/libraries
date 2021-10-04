@@ -155,7 +155,7 @@ module Demo {
     modifies fs
   {
 
-    // Get a string that we cant reason about staticly
+    // Get a string that we can't reason about statically
     var contents :- fs.ReadFile(fromPath);
 
     // We need both the runtime, and the Dafny to belive that the string is least 5 characters long
