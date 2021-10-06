@@ -48,6 +48,17 @@ module Maps {
     m'
   }
 
+  /* Map a function to the values of a map */
+  function method {:opaque} mapValue<K, V, V'>(f: V -> V', m: map<K, V>): (m':map<K, V'>)
+    requires forall k:: k in m.Keys ==> f.requires(m[k])
+    ensures m.Keys == m'.Keys
+    ensures |m| == |m'|
+  {
+    var result := map k | k in m :: f(m[k]);
+    assert |result.Keys| == |result|;
+    result
+  }
+
   /* Keep all key-value pairs corresponding to the set of keys provided. */
   function method {:opaque} Restrict<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
     ensures m' == RemoveKeys(m, m.Keys - xs)
