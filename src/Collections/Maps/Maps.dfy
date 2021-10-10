@@ -21,7 +21,9 @@ module Maps {
   }
 
   function method {:opaque} ToImap<X, Y>(m: map<X, Y>): (m': imap<X, Y>)
+    /* Dafny selected triggers: {m[x]}, {m'[x]}, {x in m'}, {x in m} */
     ensures forall x {:trigger m'[x]} :: x in m ==> x in m' && m'[x] == m[x]
+    /* Dafny selected triggers: {x in m}, {x in m'} */
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m
   {
     imap x | x in m :: m[x]
@@ -29,7 +31,9 @@ module Maps {
 
   /* Remove all key-value pairs corresponding to the set of keys provided. */
   function method {:opaque} RemoveKeys<X, Y>(m: map<X, Y>, xs: set<X>): (m': map<X, Y>)
+    /* Dafny selected triggers: {m[x]}, {m'[x]}, {x in m'}, {x in xs}, {x in m} */
     ensures forall x {:trigger m'[x]} :: x in m && x !in xs ==> x in m' && m'[x] == m[x]
+    /* Dafny selected triggers: {x in xs}, {x in m}, {x in m'} */
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m && x !in xs
     ensures m'.Keys == m.Keys - xs
   {
@@ -65,14 +69,16 @@ module Maps {
   predicate IsSubset<X, Y>(m: map<X, Y>, m': map<X, Y>)
   {
     && m.Keys <= m'.Keys
-    && forall x {:trigger EqualOnKey(m, m', x)}{:trigger x in m} :: x in m ==> EqualOnKey(m, m', x)
+    && forall x :: x in m ==> EqualOnKey(m, m', x)
   }
 
   /* Union of two maps. Does not require disjoint domains; on the intersection,
   values from the second map are chosen. */
   function method {:opaque} Union<X, Y>(m: map<X, Y>, m': map<X, Y>): (r: map<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
+    /* Dafny selected triggers: {m'[x]}, {r[x]}, {x in m'} */
     ensures forall x {:trigger r[x]} :: x in m' ==> r[x] == m'[x]
+    /* Dafny selected triggers:  {m[x]}, {r[x]}, {x in m'}, {x in m} */
     ensures forall x {:trigger r[x]} :: x in m && x !in m' ==> r[x] == m[x]
   {
     m + m'
@@ -91,6 +97,7 @@ module Maps {
   /* True iff a map is injective. */
   predicate {:opaque} Injective<X, Y>(m: map<X, Y>)
   {
+    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
     forall x, x' {:trigger m[x], m[x']} :: x != x' && x in m && x' in m ==> m[x] != m[x']
   }
 
@@ -112,12 +119,14 @@ module Maps {
   /* True iff a map contains all valid keys. */
   predicate {:opaque} Total<X(!new), Y>(m: map<X, Y>)
   {
+    /* Dafny selected triggers: {i in m} */
     forall i {:trigger m[i]}{:trigger i in m} :: i in m
   }
 
   /* True iff a map is monotonic. */
   predicate {:opaque} Monotonic(m: map<int, int>)
   {
+    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && x <= x' ==> m[x] <= m[x']
   }
 
@@ -125,6 +134,7 @@ module Maps {
   equal to start. */
   predicate {:opaque} MonotonicFrom(m: map<int, int>, start: int)
   {
+    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
   }
 

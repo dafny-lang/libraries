@@ -22,7 +22,9 @@ module Imaps {
 
   /* Remove all key-value pairs corresponding to the iset of keys provided. */
   function {:opaque} RemoveKeys<X, Y>(m: imap<X, Y>, xs: iset<X>): (m': imap<X, Y>)
+    /* Dafny selected triggers: {m[x]}, {m'[x]}, {x in m'}, {x in xs}, {x in m} */ 
     ensures forall x {:trigger m'[x]} :: x in m && x !in xs ==> x in m' && m'[x] == m[x]
+    /* Dafny selected triggers: {x in xs}, {x in m}, {x in m'} */
     ensures forall x {:trigger x in m'} :: x in m' ==> x in m && x !in xs
     ensures m'.Keys == m.Keys - xs
   {
@@ -32,6 +34,7 @@ module Imaps {
   /* Remove a key-value pair. Returns unmodified imap if key is not found. */
   function {:opaque} RemoveKey<X, Y>(m: imap<X, Y>, x: X): (m': imap<X, Y>)
     ensures m' == RemoveKeys(m, iset{x})
+    /* Dafny selected triggers: {m[x']}, {m'[x']}, {x' in m'} */
     ensures forall x' {:trigger m'[x']} :: x' in m' ==> m'[x'] == m[x']
   {
     imap i | i in m && i != x :: m[i]
@@ -54,14 +57,16 @@ module Imaps {
   predicate IsSubset<X, Y>(m: imap<X, Y>, m': imap<X, Y>)
   {
     && m.Keys <= m'.Keys
-    && forall x {:trigger EqualOnKey(m, m', x)}{:trigger x in m} :: x in m ==> EqualOnKey(m, m', x)
+    && forall x :: x in m ==> EqualOnKey(m, m', x)
   }
 
   /* Union of two imaps. Does not require disjoint domains; on the intersection,
   values from the second imap are chosen. */
   function {:opaque} Union<X, Y>(m: imap<X, Y>, m': imap<X, Y>): (r: imap<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
+    /* Dafny selected triggers: {m'[x]}, {r[x]}, {x in m'} */
     ensures forall x {:trigger r[x]} :: x in m' ==> r[x] == m'[x]
+    /* Dafny selected triggers: {m[x]}, {r[x]}, {x in m'}, {x in m} */
     ensures forall x {:trigger r[x]} :: x in m && x !in m' ==> r[x] == m[x]
   {
     m + m'
@@ -70,6 +75,7 @@ module Imaps {
   /* True iff an imap is injective. */
   predicate {:opaque} Injective<X, Y>(m: imap<X, Y>)
   {
+    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
     forall x, x' {:trigger m[x], m[x']} :: x != x' && x in m && x' in m ==> m[x] != m[x']
   }
   
@@ -91,12 +97,14 @@ module Imaps {
   /* True iff an imap contains all valid keys. */
   predicate {:opaque} Total<X(!new), Y>(m: imap<X, Y>)
   {
+    /* Dafny selected triggers: {i in m} */
     forall i {:trigger m[i]}{:trigger i in m} :: i in m
   }
 
   /* True iff an imap is monotonic. */
   predicate {:opaque} Monotonic(m: imap<int, int>)
   {
+    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && x <= x' ==> m[x] <= m[x']
   }
 
@@ -104,6 +112,7 @@ module Imaps {
   equal to start. */
   predicate {:opaque} MonotonicFrom(m: imap<int, int>, start: int)
   {
+    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
   }
 

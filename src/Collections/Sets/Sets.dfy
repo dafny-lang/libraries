@@ -22,6 +22,7 @@ module Sets {
 
   /* If all elements in set x are in set y, x is a subset of y. */
   lemma LemmaSubset<T>(x: set<T>, y: set<T>)
+    /* Dafny selected triggers: {e in y}, {e in x} */
     requires forall e {:trigger e in y} :: e in x ==> e in y
     ensures x <= y
   {
@@ -80,10 +81,11 @@ module Sets {
   /* If an injective function is applied to each element of a set to construct
   another set, the two sets have the same size.  */
   lemma LemmaMapSize<X(!new), Y>(xs: set<X>, ys: set<Y>, f: X-->Y)
-    requires forall x {:trigger f.requires(x)} :: f.requires(x)
+    requires forall x :: f.requires(x)
     requires Injective(f)
+    /* Dafny selected triggers: {f(x)}, {x in xs} */
     requires forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
-    requires forall y {:trigger y in ys} :: y in ys ==> exists x :: x in xs && y == f(x)
+    requires forall y :: y in ys ==> exists x :: x in xs && y == f(x)
     ensures |xs| == |ys|
   {
     if xs != {} {
@@ -97,8 +99,9 @@ module Sets {
   /* Map an injective function to each element of a set. */
   function method {:opaque} Map<X(!new), Y>(xs: set<X>, f: X-->Y): (ys: set<Y>)
     reads f.reads
-    requires forall x {:trigger f.requires(x)} :: f.requires(x)
+    requires forall x :: f.requires(x)
     requires Injective(f)
+    /* Dafny selected triggers: {f(x)}, {x in xs} */
     ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
     ensures |xs| == |ys|
   {
@@ -111,7 +114,8 @@ module Sets {
   function returns true, the size of ys is less than or equal to the size of
   xs. */
   lemma LemmaFilterSize<X>(xs: set<X>, ys: set<X>, f: X~>bool)
-    requires forall x {:trigger f.requires(x)}{:trigger x in xs} :: x in xs ==> f.requires(x)
+    requires forall x :: x in xs ==> f.requires(x)
+    /* Dafny selected triggers: {f(y)}, {y in xs}, {y in ys} */
     requires forall y {:trigger f(y)}{:trigger y in xs} :: y in ys ==> y in xs && f(y)
     ensures |ys| <= |xs|
     decreases xs, ys
@@ -128,7 +132,8 @@ module Sets {
   true. */
   function method {:opaque} Filter<X(!new)>(xs: set<X>, f: X~>bool): (ys: set<X>)
     reads f.reads
-    requires forall x {:trigger f.requires(x)} {:trigger x in xs} :: x in xs ==> f.requires(x)
+    requires forall x :: x in xs ==> f.requires(x)
+    /* Dafny selected triggers: {f(y)}, {y in xs}, {y in ys} */
     ensures forall y {:trigger f(y)}{:trigger y in xs} :: y in ys <==> y in xs && f(y)
     ensures |ys| <= |xs|
   {
@@ -162,7 +167,7 @@ module Sets {
   /* Construct a set with all integers in the range [a, b). */
   function method {:opaque} SetRange(a: int, b: int): (s: set<int>)
     requires a <= b
-    ensures forall i {:trigger i in s} :: a <= i < b <==> i in s
+    ensures forall i :: a <= i < b <==> i in s
     ensures |s| == b - a
     decreases b - a
   {
@@ -172,7 +177,7 @@ module Sets {
   /* Construct a set with all integers in the range [0, n). */
   function method {:opaque} SetRangeZeroBound(n: int): (s: set<int>)
     requires n >= 0
-    ensures forall i {:trigger i in s} :: 0 <= i < n <==> i in s
+    ensures forall i :: 0 <= i < n <==> i in s
     ensures |s| == n
   {
     SetRange(0, n)
@@ -181,12 +186,12 @@ module Sets {
   /* If a set solely contains integers in the range [a, b), then its size is
   bounded by b - a. */
   lemma LemmaBoundedSetSize(x: set<int>, a: int, b: int)
-    requires forall i {:trigger i in x} :: i in x ==> a <= i < b
+    requires forall i :: i in x ==> a <= i < b
     requires a <= b
     ensures |x| <= b - a
   {
     var range := SetRange(a, b);
-    forall e {:trigger e in range}{:trigger e in x} | e in x
+    forall e | e in x
       ensures e in range;
     {
     }
