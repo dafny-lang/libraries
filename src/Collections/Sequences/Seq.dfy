@@ -267,7 +267,7 @@ module Seq {
     requires pos < |s|
     ensures |s'| == |s| - 1
     ensures forall i | 0 <= i < pos :: s'[i] == s[i]
-    ensures forall i| pos <= i < |s| - 1 :: s'[i] == s[i+1]
+    ensures forall i | pos <= i < |s| - 1 :: s'[i] == s[i+1]
   {
     s[..pos] + s[pos+1..]
   }
@@ -374,8 +374,7 @@ module Seq {
     requires 0 < |a| && 0 < |b|
     ensures Max(a+b) >= Max(a)
     ensures Max(a+b) >= Max(b)
-    /* Dafny selected trigger: {i in a + b} */
-    ensures forall i {:trigger i in [Max(a + b)]} :: i in a + b ==> Max(a + b) >= i
+    ensures forall i :: i in a + b ==> Max(a + b) >= i
   {
     reveal Max();
     if |a| == 1 {
@@ -401,8 +400,7 @@ module Seq {
     requires 0 < |a| && 0 < |b|
     ensures Min(a+b) <= Min(a)
     ensures Min(a+b) <= Min(b)
-    /* Dafny selected trigger: {i in a + b} */
-    ensures forall i {:trigger i in a + b} :: i in a + b ==> Min(a + b) <= i 
+    ensures forall i :: i in a + b ==> Min(a + b) <= i 
   {
     reveal Min();
     if |a| == 1 {
