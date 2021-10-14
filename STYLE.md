@@ -377,4 +377,4 @@ lemma LemmaMyLemma <A,B> ( x : seq<seq<A>> , y :B){
 
 ### Triggers
 
-The `{:trigger}` annotations used in the standard library are an advanced topic and should not be needed when starting out on Dafny projects. For some background on quantifiers and triggers, checkout [this](https://github.com/dafny-lang/dafny/wiki/FAQ#how-does-dafny-handle-quantifiers-ive-heard-about-triggers-what-are-those). 
+The `{:trigger}` annotations used in the standard library are an advanced topic and should not be needed when starting out on Dafny projects. For some background on quantifiers and triggers, check [this](https://github.com/dafny-lang/dafny/wiki/FAQ#how-does-dafny-handle-quantifiers-ive-heard-about-triggers-what-are-those) out. 
