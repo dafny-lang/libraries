@@ -582,7 +582,7 @@ module Seq {
   }
 
 /* applies a transformation function that returns a result on the sequence */
-  function method {:opaque} MapWithResult<T,R, E>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
+  function method {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
     requires forall i {:trigger s[i]} :: 0 <= i < |s| ==> f.requires(s[i])
     ensures result.Success? ==>
       && |result.value| == |s|
