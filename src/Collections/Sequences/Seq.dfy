@@ -589,7 +589,7 @@ module Seq {
       && (forall i :: 0 <= i < |s| ==> 
         && f(s[i]).Success?
         && result.value[i] == f(s[i]).value)
-    reads set i, o {:trigger o in f.reads(s[i])} | 0 <= i < |s| && o in f.reads(s[i]):: o
+    reads set i, o {:trigger o in f.reads(s[i])} | 0 <= i < |s| && o in f.reads(s[i]) :: o
   {
     if |s| == 0 then Success([])
     else
