@@ -581,6 +581,23 @@ module Seq {
     else [f(s[0])] + Map(f, s[1..])
   }
 
+/* applies a transformation function that returns a result on the sequence */
+  function method {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
+    requires forall i :: 0 <= i < |s| ==> f.requires(s[i])
+    ensures result.Success? ==>
+      && |result.value| == |s|
+      && (forall i :: 0 <= i < |s| ==> 
+        && f(s[i]).Success?
+        && result.value[i] == f(s[i]).value)
+    reads set i, o | 0 <= i < |s| && o in f.reads(s[i]) :: o
+  {
+    if |s| == 0 then Success([])
+    else
+      var head :- f(s[0]);
+      var tail :- MapWithResult(f, s[1..]);
+      Success([head] + tail)
+  }
+
   /* concatenating two sequences and then applying Map is the same as applying
   Map on each sequence  seperately and then concatenating the two resulting
   sequences */
