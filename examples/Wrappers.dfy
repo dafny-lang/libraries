@@ -1,7 +1,7 @@
-// RUN: %dafny /compile:0 "%s" > "%t"
+// RUN: %dafny /compile:3 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-include "../../src/Wrappers.dfy"
+include "../src/Wrappers.dfy"
 
 module Demo {
   import opened Wrappers
@@ -30,6 +30,13 @@ module Demo {
   method TestMyMap() {
     var m := new MyMap<string, string>();
     m.Put("message", "Hello");
+    Greet(m);
+
+    m.Put("name", "Dafny");
+    Greet(m);
+  }
+
+  method Greet(m: MyMap<string, string>) {
     var o: Option<string> := m.Get("message");
     if o.Some? {
       print o.value, "\n";
@@ -37,7 +44,6 @@ module Demo {
       print "oops\n";
     }
 
-    m.Put("name", "Dafny");
     var r: Result<string, string> := FindName(m);
     if r.Success? {
       print r.value, "\n";
@@ -56,6 +62,13 @@ module Demo {
     case None => res := Failure("'name' was not found");
   }
 
+  // Propogating failures using :- statements
+  method GetGreeting(m: MyMap<string, string>) returns (res: Option<string>) {
+    var message: string :- m.Get("message");
+    var nameResult := FindName(m);
+    var name :- nameResult.ToOption();
+    res := Some(message + " " + name);
+  }
 
   // ------ Demo for Result ----------------------------
   // We use Result when we want to give a reason for the failure:
@@ -100,6 +113,16 @@ module Demo {
     }
   }
 
+  // Propogating failures using :- statements
+  method CopyFile(fs: MyFilesystem, fromPath: string, toPath: string) returns (res: Result<(), string>)
+    modifies fs
+  {
+    var contents :- fs.ReadFile(fromPath);
+    var _ :- fs.CreateFile(toPath);
+    var _ :- fs.WriteFile(toPath, contents);
+    res := Success(());
+  }
+
   method TestMyFilesystem() {
     var fs := new MyFilesystem();
     // Note: these verbose "outcome.Failure?" patterns will soon
@@ -122,6 +145,27 @@ module Demo {
     if fileResult.Success? {
       print fileResult.value, "\n";
     }
+  }
+
+  // ------ Demo for Need ----------------------------
+  // We use Need when something has to be true but we can't prove it statically
+  // This is a very contrived example
+
+  method whatIsCharacterFive(fs: MyFilesystem, fromPath: string) returns (res: Result<char, string>)
+    modifies fs
+  {
+
+    // Get a string that we can't reason about statically
+    var contents :- fs.ReadFile(fromPath);
+
+    // Dynamically test whether the string is at least 5 characters long, and return a failure if not. 
+    // If we pass this line, Dafny can now assume that the string is long enough.
+    :- Need(|contents| >= 5, "File contents not long enough.");
+
+    // Now we can get the character
+    var c := contents[4];
+    
+    return Success(c);
   }
 
   method Main() {
