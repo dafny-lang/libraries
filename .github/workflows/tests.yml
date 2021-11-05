@@ -6,7 +6,6 @@ on: ["pull_request", "push"]
 jobs:
   verification:
     runs-on: ubuntu-latest
-    environment: continuous-integration
     steps:
       - uses: actions/checkout@v2
 
@@ -18,9 +17,8 @@ jobs:
       - name: Verify Dafny Code
         run: dafny /verificationLogger:trx **/*.dfy
 
-      - name: Publish Verification Results
-        uses: dorny/test-reporter@v1
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
         with:
-          name: Verification Results
-          path: '**/*.trx'
-          reporter: dotnet-trx
+          name: verification-results
+          path: 'TestResults/*.trx'
