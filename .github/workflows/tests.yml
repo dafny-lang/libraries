@@ -12,12 +12,13 @@ jobs:
       - name: Install Dafny
         uses: tchajed/setup-dafny-action@v1
         with:
-          dafny-version: "3.2.0"
+          dafny-version: "3.3.0"
 
-      - uses: actions/setup-python@v1
+      - name: Verify Dafny Code
+        run: dafny /verificationLogger:trx **/*.dfy
 
-      - name: Install lit 
-        run: pip install lit OutputCheck
-
-      - name: Verify/Test Dafny code
-        run: lit --time-tests -v .
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: verification-results
+          path: 'TestResults/*.trx'
