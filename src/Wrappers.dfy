@@ -90,4 +90,10 @@ module Wrappers {
   {
     if condition then Pass else Fail(error)
   }
+
+  // Dummy verification-breaking change
+  function Foo(): int {
+    assert false;
+    42
+  }
 }
