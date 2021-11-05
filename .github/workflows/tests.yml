@@ -12,12 +12,14 @@ jobs:
       - name: Install Dafny
         uses: tchajed/setup-dafny-action@v1
         with:
-          dafny-version: "3.2.0"
+          dafny-version: "3.3.0"
 
-      - uses: actions/setup-python@v1
+      - name: Verify Dafny Code
+        run: dafny /verificationLogger:trx **/*.dfy
 
-      - name: Install lit 
-        run: pip install lit OutputCheck
-
-      - name: Verify/Test Dafny code
-        run: lit --time-tests -v .
+      - name: Publish Verification Results
+        uses: dorny/test-reporter@v1
+        with:
+          name: Verification Results
+          path: '**/*.trx'
+          reporter: dotnet-trx
