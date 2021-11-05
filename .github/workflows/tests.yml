@@ -6,6 +6,7 @@ on: ["pull_request", "push"]
 jobs:
   verification:
     runs-on: ubuntu-latest
+    environment: continuous-integration
     steps:
       - uses: actions/checkout@v2
 
