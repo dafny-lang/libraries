@@ -766,4 +766,43 @@ module Seq {
     }
   }
 
+  /* If the multiset of a is a subset of the multiset of b,
+   * then every item in a is in b.
+   */
+  lemma LemmaMultisetSubsetImpliesSeqMemebership<T>(a: seq<T>, b: seq<T>)
+    requires multiset(a) <= multiset(b)
+    ensures forall i | i in a :: i in b
+  {
+    if |a| == 0 {
+    } else {
+      assert multiset{First(a)} <= multiset(b);
+      assert First(a) in b;
+      assert a == [First(a)] + a[1..];
+      LemmaMultisetSubsetImpliesSeqMemebership(a[1..], b);
+    }
+  }
+
+  /* Every item in the parts to be flattend
+   * is in the flattened seq.
+   */
+  lemma LemmaFlattenMembership<T>(parts: seq<seq<T>>, flat: seq<T>)
+    requires Flatten(parts) == flat
+    ensures forall index
+    | 0 <= index < |parts|
+    :: multiset(parts[index]) <= multiset(flat)
+    ensures multiset(Flatten(parts)) == multiset(flat)
+    ensures forall part | part in parts
+    :: (forall i | i in part :: i in flat)
+    ensures forall i | i in flat
+    :: (exists part | part in parts :: i in part)
+  {
+    if |parts| == 0 {
+    } else {
+      assert multiset(First(parts)) <= multiset(flat);
+      assert parts == [First(parts)] + parts[1..];
+      assert flat ==  First(parts) + Flatten(parts[1..]);
+      LemmaFlattenMembership(parts[1..], Flatten(parts[1..]));
+    }
+  }
+
 }
