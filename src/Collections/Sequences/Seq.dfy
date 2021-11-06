@@ -303,12 +303,12 @@ module Seq {
 
   function method {:opaque} Reverse<T>(s: seq<T>): (s': seq<T>)
     ensures |s'| == |s|
-    /* Dafny selected triggers: {s'[i]} */
-    ensures forall i {:trigger s'[i]}{:trigger s[|s| - i - 1]} :: 0 <= i < |s| ==> s'[i] == s[|s| - i - 1]
+    ensures forall i :: 0 <= i < |s| ==> s'[i] == s[|s| - i - 1]
+    ensures forall i :: 0 <= i < |s| ==> s[i] == s'[|s|' - i - 1]
   {
     if s == [] then [] else [s[|s|-1]] + Reverse(s[0 .. |s|-1])
   }
-    
+
   function method {:opaque} Repeat<T>(v: T, length: nat): (s: seq<T>)
     ensures |s| == length
     ensures forall i: nat | i < |s| :: s[i] == v
