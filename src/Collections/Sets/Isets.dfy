@@ -22,8 +22,7 @@ module Isets {
 
   /* If all elements in iset x are in iset y, x is a subset of y. */
   lemma LemmaSubset<T>(x: iset<T>, y: iset<T>)
-    /* Dafny selected triggers: {e in y}, {e in x} */
-    requires forall e {:trigger e in y} :: e in x ==> e in y
+    requires forall e :: e in x ==> e in y
     ensures x <= y
   {
   }
