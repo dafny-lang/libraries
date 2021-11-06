@@ -73,8 +73,9 @@ module Maps {
   }
 
   /* Union of two maps. Does not require disjoint domains; on the intersection,
-  values from the second map are chosen. */
-  function method {:opaque} Union<X, Y>(m: map<X, Y>, m': map<X, Y>): (r: map<X, Y>)
+  values from the second map are chosen. PartiallyOpaqueUnion has more 
+  restrictive triggers than +. */
+  function method {:opaque} PartiallyOpaqueUnion<X, Y>(m: map<X, Y>, m': map<X, Y>): (r: map<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
     /* Dafny selected triggers: {m'[x]}, {r[x]}, {x in m'} */
     ensures forall x {:trigger r[x]} :: x in m' ==> r[x] == m'[x]
@@ -88,9 +89,9 @@ module Maps {
   sizes. */
   lemma LemmaDisjointUnionSize<X, Y>(m: map<X, Y>, m': map<X, Y>)
     requires m.Keys !! m'.Keys
-    ensures |Union(m, m')| == |m| + |m'|
+    ensures |PartiallyOpaqueUnion(m, m')| == |m| + |m'|
   {
-    var u := Union(m, m');
+    var u := PartiallyOpaqueUnion(m, m');
     assert |u.Keys| == |m.Keys| + |m'.Keys|;
   }
 

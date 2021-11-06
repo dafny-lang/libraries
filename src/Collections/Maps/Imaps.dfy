@@ -61,8 +61,9 @@ module Imaps {
   }
 
   /* Union of two imaps. Does not require disjoint domains; on the intersection,
-  values from the second imap are chosen. */
-  function {:opaque} Union<X, Y>(m: imap<X, Y>, m': imap<X, Y>): (r: imap<X, Y>)
+  values from the second imap are chosen. PartiallyOpaqueUnion has more 
+  restrictive triggers than +. */
+  function {:opaque} PartiallyOpaqueUnion<X, Y>(m: imap<X, Y>, m': imap<X, Y>): (r: imap<X, Y>)
     ensures r.Keys == m.Keys + m'.Keys
     /* Dafny selected triggers: {m'[x]}, {r[x]}, {x in m'} */
     ensures forall x {:trigger r[x]} :: x in m' ==> r[x] == m'[x]
