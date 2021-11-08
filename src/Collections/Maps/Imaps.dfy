@@ -76,8 +76,7 @@ module Imaps {
   /* True iff an imap is injective. */
   predicate {:opaque} Injective<X, Y>(m: imap<X, Y>)
   {
-    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
-    forall x, x' {:trigger m[x], m[x']} :: x != x' && x in m && x' in m ==> m[x] != m[x']
+    forall x, x' :: x != x' && x in m && x' in m ==> m[x] != m[x']
   }
   
   /* Swaps imap keys and values. Values are not required to be unique; no
@@ -105,16 +104,13 @@ module Imaps {
   /* True iff an imap is monotonic. */
   predicate {:opaque} Monotonic(m: imap<int, int>)
   {
-    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
-    forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && x <= x' ==> m[x] <= m[x']
+    forall x, x' :: x in m && x' in m && x <= x' ==> m[x] <= m[x']
   }
 
   /* True iff an imap is monotonic. Only considers keys greater than or
   equal to start. */
   predicate {:opaque} MonotonicFrom(m: imap<int, int>, start: int)
   {
-    /* Dafny selected triggers: {m[x'], m[x]}, {m[x'], x in m}, {m[x], x' in m}, {x' in m, x in m} */
-    forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
+    forall x, x' :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
   }
-
 }
