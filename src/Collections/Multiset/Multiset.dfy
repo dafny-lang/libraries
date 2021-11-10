@@ -16,7 +16,7 @@ module Multiset {
 
   /* proves that the cardinality of a multiset is always more than or equal to that
   of the conversion to a set */
-  lemma LemmaCardinalityOfSetBound<T>(m: multiset<T>)
+  lemma LemmaCardinalityOfToSetBound<T>(m: multiset<T>)
     ensures |ToSet(m)| <= |m| 
   {
     reveal ToSet();
