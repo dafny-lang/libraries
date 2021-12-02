@@ -66,8 +66,8 @@ module Wrappers {
     function method MapFailure<NewR>(reWrap: R -> NewR): Result<T, NewR>
     {
       match this
-        case Success(s) => Success(s)
-        case Failure(e) => Failure(reWrap(e))
+      case Success(s) => Success(s)
+      case Failure(e) => Failure(reWrap(e))
     }
 
     function method Extract(): T
