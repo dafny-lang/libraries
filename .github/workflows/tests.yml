@@ -12,7 +12,7 @@ jobs:
       - name: Install Dafny
         uses: tchajed/setup-dafny-action@v1
         with:
-          dafny-version: "3.2.0"
+          dafny-version: "3.4.0"
 
       - uses: actions/setup-python@v1
 
