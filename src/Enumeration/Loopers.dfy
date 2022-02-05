@@ -1,15 +1,17 @@
 
 include "../Actions.dfy"
+include "../Frames.dfy"
 
 module Loopers {
 
   import opened Actions
+  import opened Frames
 
   trait Looper {
-      predicate Invariant()
-      method Step() 
-        requires Invariant()
-        ensures Invariant()
+    predicate Invariant()
+    method Step() 
+      requires Invariant()
+      ensures Invariant()
   }
 
   method DoLoopStar(l: Looper) 
@@ -21,43 +23,40 @@ module Loopers {
     }
   }
 
-  trait TerminatingLooper {
-      ghost var Repr: set<object>
-      predicate Invariant()
-        reads this, Repr
-        ensures Invariant() ==> this in Repr
-      
-      // Will need to be arbitrary termination clause somehow instead
-      // https://github.com/dafny-lang/dafny/issues/762
-      // TODO: split up the ghost version from the version called at runtime?
-      function method Decreases(): nat
-        reads Repr
-        decreases Repr
-        requires Invariant()
-      predicate method Done() 
-        reads Repr
-        requires Invariant()
-      {
-        Decreases() == 0
-      }
+  trait TerminatingLooper extends Validatable {
+    // Will need to be arbitrary termination clause somehow instead
+    // https://github.com/dafny-lang/dafny/issues/762
+    // TODO: split up the ghost version from the version called at runtime?
+    // Implementor needs to use this to prove termination, but caller
+    // only needs Done()
+    function method Decreases(): nat
+      reads Repr
+      decreases Repr
+      requires Valid()
+    predicate method Done() 
+      reads Repr
+      requires Valid()
+    {
+      Decreases() == 0
+    }
 
-      method Step() 
-        requires Invariant()
-        requires !Done()
-        modifies Repr
-        ensures Invariant()
-        ensures fresh(Repr - old(Repr))
-        ensures Decreases() < old(Decreases())
+    method Step() 
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures Decreases() < old(Decreases())
   }
 
   method DoLoop(l: TerminatingLooper) 
-    requires l.Invariant()
+    requires l.Valid()
     modifies l.Repr
-    ensures l.Invariant()
+    ensures l.Valid()
     ensures l.Done()
   {
     while (l.Decreases() > 0)
-      invariant l.Invariant()
+      invariant l.Valid()
       invariant fresh(l.Repr - old(l.Repr))
     {
       l.Step();
@@ -75,9 +74,9 @@ module Loopers {
       Repr := {this};
     }
 
-    predicate Invariant() 
+    predicate Valid() 
       reads this, Repr 
-      ensures Invariant() ==> this in Repr 
+      ensures Valid() ==> this in Repr 
       decreases Repr
     {
       && this in Repr
@@ -86,17 +85,17 @@ module Loopers {
 
     function method Decreases(): nat
       reads Repr
-      requires Invariant()
+      requires Valid()
     {
       |elements| - index
     }
 
     method Step()
-      requires Invariant()
+      requires Valid()
       requires !Done()
       modifies Repr
-      ensures Invariant()
-      ensures fresh(Repr - old(Repr))
+      decreases Repr
+      ensures ValidAndDisjoint()
       ensures Decreases() < old(Decreases())
     {
       index := index + 1;
@@ -112,36 +111,41 @@ module Loopers {
       this.body := body;
     }
 
-    predicate Invariant() 
+    predicate Valid() 
       reads this, Repr
       decreases Repr
-      ensures Invariant() ==> this in Repr
+      ensures Valid() ==> this in Repr
     {
       && this in Repr
-      && iter in Repr
-      && iter.Repr <= Repr
-      && this !in iter.Repr
-      && iter.Invariant() && (iter.Invariant() ==> body.Requires(iter))
+      && ValidComponent(iter)
+      && ValidComponent(body)
+      && iter.Repr !! body.Repr
+      && (iter.Valid() ==> body.Requires(iter))
+      && (iter.Valid() ==> body.Modifies(iter) == {})
     }
 
     function method Decreases(): nat 
       reads Repr
-      requires Invariant()
+      requires Valid()
     {
       iter.Decreases()
     }
 
     method Step() 
-      requires Invariant()
+      requires Valid()
       requires Decreases() > 0
       modifies Repr
       decreases Repr
-      ensures Invariant()
-      ensures fresh(Repr - old(Repr))
+      ensures ValidAndDisjoint()
       ensures Decreases() < old(Decreases())
     {
       iter.Step();
+      Repr := Repr + iter.Repr;
+      
       var _ := body.Invoke(iter);
+      Repr := Repr +  body.Repr;
     }
   }
+
+  
 }

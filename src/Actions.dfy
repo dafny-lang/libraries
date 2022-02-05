@@ -1,19 +1,103 @@
 include "Wrappers.dfy"
+include "Frames.dfy"
 
 module Actions {  
 
   import opened Wrappers
+  import opened Frames
 
-  trait {:termination false} Action<A, R>
+  // TODO: Unfortunately, would be good to have Action0 up to ActionN for
+  // some small N. Maybe also M for number of returns.
+  // Using () is SUPER awkward with Dafny syntax. An action with
+  // no arguments or return using unit looks like:
+  // var _ := runnable.Invoke(());
+  trait {:termination false} Action<A, R> extends Validatable
   {
     method Invoke(a: A) returns (r: R)
+      requires Valid()
       requires Requires(a)
       modifies Modifies(a)
+      decreases Decreases(a)
+      ensures ValidAndDisjoint()
       ensures old(allocated(r)) && Ensures(a, r)
 
     predicate Requires(a: A)
+    // Need this separately from Repr for callers
+    // Repr is the frame for Valid(), but callers
+    // need to know what ELSE gets modified.
     function Modifies(a: A): set<object>
+    function Decreases(a: A): nat
     twostate predicate Ensures(a: A, r: R)
+  }
+
+  class SeqCollector<T> extends Action<T, ()> {
+
+    var elements: seq<T>
+
+    predicate Valid() reads this, Repr {
+      true
+    }
+
+    method Invoke(t: T) returns (nothing: ()) 
+      requires Valid()
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t)
+      ensures ValidAndDisjoint()
+      ensures old(allocated(())) && Ensures(t, ())
+    {
+      elements := elements + [t];
+    }
+
+    predicate Requires(t: T) {
+      true
+    }
+
+    function Modifies(t: T): set<object> {
+      {this}
+    }
+
+    function Decreases(t: T): nat {
+      0
+    }
+
+    twostate predicate Ensures(t: T, nothing: ()) {
+      true
+    }
+  }
+
+  class InvokeAction extends Action<Action<int, ()>, ()> {
+
+    predicate Valid() reads this, Repr {
+      true
+    }
+
+    method Invoke(a: Action<int, ()>) returns (nothing: ()) 
+      requires Valid()
+      requires Requires(a)
+      modifies Modifies(a)
+      decreases Decreases(a)
+      ensures ValidAndDisjoint()
+      ensures Ensures(a, ())
+    {
+      var _ := a.Invoke(42);
+    }
+
+    predicate Requires(a: Action<int, ()>) {
+      a.Decreases(42) < Decreases(a)
+    }
+
+    function Modifies(a: Action<int, ()>): set<object> {
+      a.Modifies(42)
+    }
+
+    function Decreases(a: Action<int, ()>): nat {
+      0
+    }
+
+    twostate predicate Ensures(a: Action<int, ()>, nothing: ()) {
+      true
+    }
   }
 
   type IEnumeration<T> = Action<(), T>
@@ -97,7 +181,7 @@ module Actions {
       ensures fresh(Repr - old(Repr))
       ensures t == old(pending)[0]
       ensures pending == old(pending)[1..]
-      ensures |pending| == |old(pending)| + 1
+      ensures |pending| == |old(pending)| - 1
     {
       t := elements[0];
       elements := elements[1..];
@@ -121,7 +205,7 @@ module Actions {
       invariant e.Valid()
       invariant fresh(e.Repr - old(e.Repr))
       invariant count + |e.pending| == |old(e.pending)|
-      decreases *
+      decreases |e.pending|
     {
       label before: next := e.Next();
 
