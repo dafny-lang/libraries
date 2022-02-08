@@ -25,11 +25,12 @@ module Actions {
     // Need this separately from Repr for callers
     // Repr is the frame for Valid(), but callers
     // need to know what ELSE gets modified.
-    function Modifies(a: A): set<object>
+    function Modifies(a: A): set<object> requires Requires(a)
     function Decreases(a: A): nat
-    twostate predicate Ensures(a: A, r: R)
+    predicate Ensures(a: A, r: R)
   }
 
+  // TODO: ArrayCollector will be more interesting, to track capacity
   class SeqCollector<T> extends Action<T, ()> {
 
     var elements: seq<T>
@@ -61,8 +62,93 @@ module Actions {
       0
     }
 
-    twostate predicate Ensures(t: T, nothing: ()) {
+    predicate Ensures(t: T, nothing: ()) {
       true
+    }
+  }
+
+  class FunctionAsAction<T, R> extends Action<T, R> {
+    const f: T ~> R
+    const e: (T, R) ~> bool
+
+    constructor(f: T ~> R, e: (T, R) ~> bool) {
+      this.f := f;
+      this.e := e;
+    }
+
+    predicate Valid() reads this, Repr {
+      // TODO: This is what we want but can't because we're not using (!new)
+      // forall t: T :: e(t, f(t))
+      true
+    }
+
+    method Invoke(t: T) returns (r: R) 
+      requires Valid()
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t)
+      ensures ValidAndDisjoint()
+      ensures old(allocated(r)) && Ensures(t, r)
+    {
+      r := f(t);
+    }
+
+    predicate Requires(t: T) {
+      f.requires(t)
+    }
+
+    function Modifies(t: T): set<object> {
+      {}
+    }
+
+    function Decreases(t: T): nat {
+      0
+    }
+
+    predicate Ensures(t: T, r: R) {
+      e(t, r)
+    }
+  }
+
+  class ComposedAction<T, M, R> extends Action<T, R> {
+    const inner: Action<T, M>
+    const outer: Action<M, R>
+
+    constructor(inner: Action<T, M>, outer: Action<M, R>) {
+      this.inner := inner;
+      this.outer := outer;
+    }
+
+    predicate Valid() reads this, Repr {
+      true
+    }
+
+    method Invoke(t: T) returns (r: R) 
+      requires Valid()
+      requires Requires(t)
+      modifies Modifies(t)
+      decreases Decreases(t)
+      ensures ValidAndDisjoint()
+      ensures old(allocated(r)) && Ensures(t, r)
+    {
+      var m := inner.Invoke(t);
+      r := outer.Invoke(m);
+    }
+
+    predicate Requires(t: T) {
+      inner.Requires(t)
+    }
+
+    function Modifies(t: T): set<object> {
+      set m: M, o: object | inner.Ensures(t, m) && o in outer.Modifies(m) :: o
+    }
+
+    function Decreases(t: T): nat {
+      inner.Decreases(t)
+    }
+
+    predicate Ensures(t: T, r: R) {
+      exists m: M :: inner.Ensures(t, m) && outer.Ensures(m, r)
     }
   }
 
@@ -87,7 +173,7 @@ module Actions {
       a.Decreases(42) < Decreases(a)
     }
 
-    function Modifies(a: Action<int, ()>): set<object> {
+    function Modifies(a: Action<int, ()>): set<object> requires Requires(a) {
       a.Modifies(42)
     }
 
@@ -95,7 +181,7 @@ module Actions {
       0
     }
 
-    twostate predicate Ensures(a: Action<int, ()>, nothing: ()) {
+    predicate Ensures(a: Action<int, ()>, nothing: ()) {
       true
     }
   }
