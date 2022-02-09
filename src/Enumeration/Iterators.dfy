@@ -28,6 +28,8 @@ module IteratorExperiments {
       ensures more <==> !Done()
       ensures !Done() ==> Decreases() < old(Decreases())
 
+    // TODO: Still a problem here with calling `Current`
+    // on a fresh enumerator without first calling `MoveNext`
     function method Current(): T
       reads this, Repr
       requires Valid()
@@ -119,75 +121,74 @@ module IteratorExperiments {
     }
   }
 
-  // class Filter<T(0)> extends Enumerator<T> {
-  //   const wrapped: Enumerator<T>
-  //   const filter: T -> bool
-  //   var current: T
+  class Filter<T(0)> extends Enumerator<T> {
+    const wrapped: Enumerator<T>
+    const filter: T -> bool
+    var current: T
 
-  //   constructor(wrapped: Enumerator<T>, filter: T -> bool) 
-  //     requires wrapped.Valid()
-  //     ensures Valid() 
-  //   {
-  //     this.wrapped := wrapped;
-  //     this.filter := filter;
-  //     Repr := {this} + wrapped.Repr;
-  //   }
+    constructor(wrapped: Enumerator<T>, filter: T -> bool) 
+      requires wrapped.Valid()
+      ensures Valid() 
+    {
+      this.wrapped := wrapped;
+      this.filter := filter;
+      Repr := {this} + wrapped.Repr;
+    }
 
-  //   predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
-  //     && this in Repr
-  //     && ValidComponent(wrapped)
-  //   }
+    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+      && this in Repr
+      && ValidComponent(wrapped)
+    }
 
-  //   predicate Done()
-  //     requires Valid()
-  //     reads this, Repr
-  //   {
-  //     wrapped.Done()
-  //   }
+    predicate Done()
+      requires Valid()
+      reads this, Repr
+    {
+      wrapped.Done()
+    }
 
-  //   method MoveNext() returns (more: bool) 
-  //     requires Valid()
-  //     requires !Done()
-  //     modifies Repr
-  //     decreases Repr
-  //     ensures ValidAndDisjoint()
-  //     ensures more <==> !Done()
-  //     ensures !Done() ==> Decreases() < old(Decreases())
-  //   {
-  //     more := true;
-  //     while (true)
-  //       invariant Valid()
-  //       invariant old(allocated(wrapped)) && fresh(wrapped.Repr - old(wrapped.Repr))
-  //       decreases more, wrapped.Decreases()
-  //     {
-  //       assert wrapped.Repr < Repr;
-  //       assert !wrapped.Done();
-  //       more := wrapped.MoveNext();
-  //       Repr := Repr + wrapped.Repr;
+    method MoveNext() returns (more: bool) 
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures more <==> !Done()
+      ensures !Done() ==> Decreases() < old(Decreases())
+    {
+      more := true;
+      while (true)
+        invariant Valid()
+        invariant more <==> !wrapped.Done()
+        invariant old(allocated(wrapped)) && fresh(wrapped.Repr - old(wrapped.Repr))
+        decreases more, wrapped.Decreases()
+      {
+        assert wrapped.Repr < Repr;     // should satify the method decreases clause...
+        more := wrapped.MoveNext();     // wrong decreases clauses applied?
+        Repr := Repr + wrapped.Repr;
+        if (!more) { break; }
 
-  //       if (!more) { break; }
+        current := wrapped.Current();
+        if (filter(current)) {
+          break;
+        }
+      }
+    }
 
-  //       current := wrapped.Current();
-  //       if (filter(current)) {
-  //         break;
-  //       }
-  //     }
-  //   }
+    function method Current(): T
+      reads this, Repr
+      requires Valid()
+    {
+      current
+    }
 
-  //   function method Current(): T
-  //     reads this, Repr
-  //     requires Valid()
-  //   {
-  //     current
-  //   }
-
-  //   function Decreases(): nat 
-  //     reads this, Repr
-  //     requires Valid() 
-  //   {
-  //     wrapped.Decreases()
-  //   }
-  // }
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+    {
+      wrapped.Decreases()
+    }
+  }
 
   method Main() {
     var s: seq<nat> := [1, 1, 2, 3, 5, 8];
@@ -205,7 +206,7 @@ module IteratorExperiments {
       if (!more) { break; }
       var (element, index) := e.Current();
 
-      print "Index: ", index, ", Element: ", element;
+      print "Index: ", index, ", Element: ", element, "\n";
     }
   }
 
