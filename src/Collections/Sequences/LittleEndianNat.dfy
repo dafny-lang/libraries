@@ -56,7 +56,7 @@ abstract module LittleEndianNat {
   }
 
   /* Given the same sequence, ToNatRight and ToNatLeft return the same nat. */
-  lemma LemmaToNatLeftEqToNatRight(xs: seq<uint>)
+  lemma {:timeLimitMultiplier 3} LemmaToNatLeftEqToNatRight(xs: seq<uint>)
     ensures ToNatRight(xs) == ToNatLeft(xs)
   {
     reveal ToNatRight();
