@@ -10,9 +10,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install Dafny
-        uses: tchajed/setup-dafny-action@v1
+        uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.2.0"
+          dafny-version: "3.4.0"
 
       - uses: actions/setup-python@v1
 
