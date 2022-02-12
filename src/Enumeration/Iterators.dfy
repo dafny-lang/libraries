@@ -1,13 +1,113 @@
 
 include "../Frames.dfy"
+include "../Wrappers.dfy"
+include "../Collections/Sequences/Seq.dfy"
 
 module IteratorExperiments {
 
   import opened Frames
+  import opened Wrappers
+
+  import Seq
+
+  // Would like to make this extend the even more general Looper
+  // concept, but tough to use without bounded polymorphism.
+  trait Enumerator<T> extends Validatable {
+
+    // Any enumerator that produces one value at a time
+    // and provably terminates is equivalent to an enumerator
+    // that produces a specific seq<T>. This value may be underspecified
+    // such that it is not known, even its length, until after all
+    // values have been produced.
+    // Dafny doesn't let you pass around an underspecified value though,
+    // so we don't define a "to be enumerated" field or function.
+    ghost var enumerated: seq<T>
+
+    // Valid() is used as the enumeration invariant
+
+    method MoveNext() returns (more: bool)
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures more <==> !Done()
+      ensures !Done() ==> HasCurrent()
+      ensures !Done() ==> Decreases() < old(Decreases())
+      ensures !Done() ==> enumerated == old(enumerated) + [Current()]
+
+    predicate HasCurrent()
+      reads this, Repr
+      requires Valid()
+
+    function method Current(): T
+      reads this, Repr
+      requires Valid()
+      requires HasCurrent()
+
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid()
+
+    predicate method Done()
+      requires Valid()
+      reads this, Repr
+  }
+
+    class SeqLooper<T> extends TerminatingLooper {
+
+      const elements: seq<T>
+      var index: nat
+
+      constructor(s: seq<T>) 
+        ensures Valid()
+        ensures fresh(Repr - {this})
+      {
+        elements := s;
+        index := 0;
+        Repr := {this};
+      }
+
+      predicate Valid() 
+        reads this, Repr 
+        ensures Valid() ==> this in Repr 
+        decreases Repr
+      {
+        && this in Repr
+        && 0 <= index <= |elements|
+      }
+
+      function Decreases(): nat
+        reads Repr
+        requires Valid()
+      {
+        |elements| - index
+      }
+
+      predicate method Done() 
+        reads Repr
+        requires Valid()
+        ensures Decreases() == 0 ==> Done()
+      {
+        index == |elements|
+      }
+
+      method Step()
+        requires Valid()
+        requires !Done()
+        modifies Repr
+        decreases Repr
+        ensures ValidAndDisjoint()
+        ensures Decreases() < old(Decreases())
+      {
+        index := index + 1;
+      }
+    }
+  }
 
   iterator ForEachWithIndex<T(0)>(s: seq<T>) yields (element: T, index: nat)
-    ensures elements == s
     yield ensures elements <= s
+    ensures elements == s
   {
     for i := 0 to |s|
       invariant i == |elements|
@@ -17,47 +117,13 @@ module IteratorExperiments {
     }
   }
 
-  trait Enumerator<T> extends Validatable {
-
-    method MoveNext() returns (more: bool)
-      requires Valid()
-      requires !Done()
-      modifies Repr
-      decreases Repr
-      ensures ValidAndDisjoint()
-      ensures more <==> !Done()
-      ensures !Done() ==> Decreases() < old(Decreases())
-
-    // TODO: Still a problem here with calling `Current`
-    // on a fresh enumerator without first calling `MoveNext`
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
-
-    predicate Done()
-      requires Valid()
-      reads this, Repr
-
-    // Needs a better name, it's only a measure that is USED
-    // in decreases clauses but not the same thing.
-    // Although decreases is already overloaded to mean slightly
-    // different things for a method spec vs. a while loop spec.
-    // NOT what decreases means on an iterator though.
-    function Decreases(): nat 
-      reads this, Repr
-      requires Valid()
-
-    // Should this be forced on every enumerator? Or provided on
-    // an Enumerator<T> wrapper instead, since it's implementable generically?
-    // ghost var enumerated: set<T>
-  }
-
   class ForEachWithIndexEnumerator<T(0)> extends Enumerator<(T, nat)> {
 
     const iter: ForEachWithIndex<T>
-    ghost var remaining: nat
-    ghost var done: bool
+    var done: bool
+
+    ghost const original: seq<T>
+    ghost var hasCurrent: bool
 
     constructor(s: seq<T>) 
       ensures Valid() 
@@ -65,9 +131,10 @@ module IteratorExperiments {
       ensures !Done()
     {
       iter := new ForEachWithIndex(s);
+      original := s;
       new;
       done := false;
-      remaining := |iter.s| - |iter.elements|;
+      hasCurrent := false;
       Repr := {this, iter};
     }
 
@@ -81,12 +148,13 @@ module IteratorExperiments {
       && iter._reads <= Repr
       && iter._new <= Repr
       && (!done ==> iter.Valid())
-      && remaining == |iter.s| - |iter.elements|
+      && enumerated == Seq.Zip(original[0..|enumerated|], Range(0, |enumerated|))
     }
 
-    predicate Done()
+    predicate method Done()
       requires Valid()
       reads this, Repr
+      ensures Done() ==> enumerated == Seq.Zip(original, Range(0, |original|))
     {
       done
     }
@@ -98,12 +166,25 @@ module IteratorExperiments {
       decreases Repr
       ensures ValidAndDisjoint()
       ensures more <==> !Done()
+      ensures !Done() ==> HasCurrent()
       ensures !Done() ==> Decreases() < old(Decreases())
+      ensures !Done() ==> enumerated == old(enumerated) + [Current()]
     {
       more := iter.MoveNext();
       done := !more;
-      remaining := |iter.s| - |iter.elements|;
+
       Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
+      if more {
+        hasCurrent := true;
+        enumerated := enumerated + [Current()];
+      }
+    }
+
+    predicate HasCurrent()
+      reads this, Repr
+      requires Valid()
+    {
+      hasCurrent
     }
 
     function method Current(): (T, nat) 
@@ -117,13 +198,24 @@ module IteratorExperiments {
       reads this, Repr 
       requires Valid() 
     {
-      remaining
+      |original| - |enumerated|
     }
   }
 
+  // TODO: move to Seq.dfy?
+  function Range(start: int, end: int): seq<int> 
+    requires start <= end
+    decreases end - start
+  {
+    var length := end - start;
+    seq(length, i requires 0 <= i < length => start + i)
+  }
+
+  // TODO: Prove the semantics!
   class Filter<T(0)> extends Enumerator<T> {
     const wrapped: Enumerator<T>
     const filter: T -> bool
+    var hasCurrent: bool
     var current: T
 
     constructor(wrapped: Enumerator<T>, filter: T -> bool) 
@@ -140,7 +232,7 @@ module IteratorExperiments {
       && ValidComponent(wrapped)
     }
 
-    predicate Done()
+    predicate method Done()
       requires Valid()
       reads this, Repr
     {
@@ -154,25 +246,38 @@ module IteratorExperiments {
       decreases Repr
       ensures ValidAndDisjoint()
       ensures more <==> !Done()
+      ensures !Done() ==> HasCurrent()
       ensures !Done() ==> Decreases() < old(Decreases())
+      ensures !Done() ==> enumerated == old(enumerated) + [Current()]
     {
+      assert wrapped.Repr < Repr; 
       more := true;
       while (true)
         invariant Valid()
         invariant more <==> !wrapped.Done()
-        invariant old(allocated(wrapped)) && fresh(wrapped.Repr - old(wrapped.Repr))
+        modifies Repr
         decreases more, wrapped.Decreases()
       {
-        assert wrapped.Repr < Repr;     // should satify the method decreases clause...
-        more := wrapped.MoveNext();     // wrong decreases clauses applied?
+        assert wrapped.Repr < old(Repr);
+        more := wrapped.MoveNext();
         Repr := Repr + wrapped.Repr;
         if (!more) { break; }
 
+        assert Valid();
+        assert wrapped.HasCurrent();
         current := wrapped.Current();
         if (filter(current)) {
+          enumerated := enumerated + [Current()];
           break;
         }
       }
+    }
+
+    predicate HasCurrent()
+      reads this, Repr
+      requires Valid()
+    {
+      hasCurrent
     }
 
     function method Current(): T
@@ -188,7 +293,130 @@ module IteratorExperiments {
     {
       wrapped.Decreases()
     }
+
+    predicate DoneProperty() 
+      requires Valid()
+      requires Done()
+      reads this, Repr
+    {
+      enumerated == wrapped.enumerated
+    }
   }
+
+  // (0) is necessary because we can't just use an Option<T> to
+  // hold the current value - the spec doesn't prevent you from constructing
+  // this and then calling Current() before calling MoveNext()
+  // TODO: multiset version as well? Instead?
+  class SetEnumerator<T(==, 0)> extends Enumerator<T> {
+    ghost const original: set<T>
+    var remaining: set<T>
+    var current: T
+    var hasCurrent: bool
+    var done: bool
+
+    constructor(s: set<T>) 
+      ensures Valid() 
+      ensures fresh(Repr)
+    {
+      this.original := s;
+      this.remaining := s;
+      this.done := false;
+
+      enumerated := [];
+      Repr := {this};
+    }
+
+    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+      && this in Repr
+    }
+
+    predicate method Done()
+      requires Valid()
+      reads this, Repr
+    {
+      done
+    }
+
+    method MoveNext() returns (more: bool) 
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures more <==> !Done()
+      ensures more ==> HasCurrent()
+      ensures !Done() ==> Decreases() < old(Decreases())
+      ensures !Done() ==> enumerated == old(enumerated) + [Current()]
+    {
+      if |remaining| == 0 {
+        done := true;
+        more := false;
+      } else {
+        var c :| c in remaining;
+        current := c;
+        hasCurrent := true;
+        enumerated := enumerated + [current];
+        remaining := remaining - {c};
+        more := true;
+      }
+    }
+
+    predicate HasCurrent()
+      reads this, Repr
+      requires Valid()
+    {
+      hasCurrent
+    }
+
+    function method Current(): T
+      reads this, Repr
+      requires Valid()
+      requires HasCurrent()
+    {
+      current
+    }
+
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+    {
+      |remaining|
+    }
+
+    predicate DoneProperty() 
+      requires Valid()
+      requires Done()
+      reads this, Repr
+    {
+      multiset(enumerated) == multiset(original)
+    }
+  }
+
+  // method Max(s: set<int>) returns (max: int)
+  //   requires |s| > 0
+  //   ensures max in s
+  //   ensures forall x | x in s :: max >= x
+  // {
+  //   var first: int :| first in s;
+  //   max := first;
+  //   var sEnum: SetEnumerator<int> := new SetEnumerator(s - {max});
+  //   assert fresh(sEnum.Repr);
+  //   label start:
+  //   var more := true;
+  //   while (!sEnum.Done()) 
+  //     invariant sEnum.Valid()
+  //     invariant fresh(sEnum.Repr)
+  //     invariant max == Seq.Max([first] + sEnum.enumerated)
+  //     decreases more, sEnum.Decreases()
+  //   {
+  //     var more := sEnum.MoveNext();
+  //     if !more { break; }
+
+  //     if sEnum.Current() > max {
+  //       max := sEnum.Current();
+  //     }
+  //   }
+  // }
 
   method Main() {
     var s: seq<nat> := [1, 1, 2, 3, 5, 8];
@@ -210,25 +438,25 @@ module IteratorExperiments {
     }
   }
 
-  datatype E<T> = Done | Next(T, () -> E<T>)
+  datatype E<T> = Done | Next(T, Enum<T>)
+  type Enum<T> = () -> E<T>
 
-  function OneTwoThree(): E<nat> {
-    Next(1, () => Next(2, () => Next(3, () => Done)))
+  function OneTwoThree(): Enum<nat> {
+    () => Next(1, () => Next(2, () => Next(3, () => Done)))
   }
 
-  function CountdownFrom(n: nat): E<nat> {
-    if n > 0 then
-      Next(n, () => CountdownFrom(n - 1))
-    else
-      Done
+  function CountdownFrom(n: nat): Enum<nat> {
+    () => 
+      if n > 0 then
+        Next(n, CountdownFrom(n - 1))
+      else
+        Done
   }
 
-  function CountupFrom(n: nat): E<nat> {
-    if n > 0 then
-      Next(n, () => CountdownFrom(n + 1))
-    else
-      Done
-  }
+  // Doesn't terminate so you can't do this
+  // function CountupFrom(n: nat): Enum<nat> {
+  //   () => Next(n, CountupFrom(n + 1))
+  // }
 
   // iterator Iter<T(0)>(s: set<T>) yields (x: T)
   //   yield ensures x in s && x !in xs[..|xs|-1];
