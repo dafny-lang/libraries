@@ -83,7 +83,8 @@ module Loopers {
       requires !Done()
       modifies Repr
       decreases Repr
-      ensures ValidAndDisjoint()
+      ensures Valid()
+      ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [old(Current())]
 
@@ -141,7 +142,8 @@ module Loopers {
       requires !Done()
       modifies Repr
       decreases Repr
-      ensures ValidAndDisjoint()
+      ensures Valid()
+      ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [old(Current())]
     {
@@ -204,7 +206,8 @@ module Loopers {
       requires !Done()
       modifies Repr
       decreases Repr
-      ensures ValidAndDisjoint()
+      ensures Valid()
+      ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [old(Current())]
     {
@@ -234,90 +237,90 @@ module Loopers {
     }
   }
 
-  class SeqIteratorEnumerator<T(0)> extends Enumerator<T> {
+  // class SeqIteratorEnumerator<T(0)> extends Enumerator<T> {
 
-    const iter: SeqIterator<T>
-    var done: bool
+  //   const iter: SeqIterator<T>
+  //   var done: bool
 
-    ghost const original: seq<T>
+  //   ghost const original: seq<T>
 
-    constructor(s: seq<T>) 
-      ensures Valid() 
-      ensures fresh(Repr) 
-    {
-      iter := new SeqIterator(s);
-      original := s;
-      enumerated := [];
+  //   constructor(s: seq<T>) 
+  //     ensures Valid() 
+  //     ensures fresh(Repr) 
+  //   {
+  //     iter := new SeqIterator(s);
+  //     original := s;
+  //     enumerated := [];
       
-      new;
+  //     new;
 
-      // Calling MoveNext() right away ensures we only enumerated yielded state.
-      // Another version of this adaptor could not do this, and by consequence
-      // enumerate the initial state of the iterator as well.
-      var more := iter.MoveNext();
-      done := !more;
+  //     // Calling MoveNext() right away ensures we only enumerated yielded state.
+  //     // Another version of this adaptor could not do this, and by consequence
+  //     // enumerate the initial state of the iterator as well.
+  //     var more := iter.MoveNext();
+  //     done := !more;
       
-      Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
-    }
+  //     Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
+  //   }
 
-    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
-      && this in Repr
-      && iter in Repr
-      && this !in iter._modifies
-      && this !in iter._reads
-      && this !in iter._new
-      && iter._modifies <= Repr
-      && iter._reads <= Repr
-      && iter._new <= Repr
-      && (!done ==> iter.Valid())
-      && iter.elements < iter.s
-      && |enumerated| <= |original|
-      && enumerated == original[0..|enumerated|]
-    }
+  //   predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+  //     && this in Repr
+  //     && iter in Repr
+  //     && this !in iter._modifies
+  //     && this !in iter._reads
+  //     && this !in iter._new
+  //     && iter._modifies <= Repr
+  //     && iter._reads <= Repr
+  //     && iter._new <= Repr
+  //     && (!done ==> iter.Valid())
+  //     && iter.elements < iter.s
+  //     && |enumerated| <= |original|
+  //     && enumerated == original[0..|enumerated|]
+  //   }
 
-    predicate method Done()
-      requires Valid()
-      reads this, Repr
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
-      // ensures Done() ==> enumerated == original
-    {
-      done
-    }
+  //   predicate method Done()
+  //     requires Valid()
+  //     reads this, Repr
+  //     decreases Repr, 0
+  //     ensures Decreases() == 0 ==> Done()
+  //     // ensures Done() ==> enumerated == original
+  //   {
+  //     done
+  //   }
 
-    method Step()
-      requires Valid()
-      requires !Done()
-      modifies Repr
-      decreases Repr
-      ensures ValidAndDisjoint()
-      ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
-    {
-      enumerated := enumerated + [Current()];
+  //   method Step()
+  //     requires Valid()
+  //     requires !Done()
+  //     modifies Repr
+  //     decreases Repr
+  //     ensures ValidAndDisjoint()
+  //     ensures Decreases() < old(Decreases())
+  //     ensures enumerated == old(enumerated) + [old(Current())]
+  //   {
+  //     enumerated := enumerated + [Current()];
 
-      var more := iter.MoveNext();
-      done := !more;
+  //     var more := iter.MoveNext();
+  //     done := !more;
 
-      Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
-    }
+  //     Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
+  //   }
 
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
-    {
-      iter.element
-    }
+  //   function method Current(): T
+  //     reads this, Repr
+  //     requires Valid()
+  //     requires !Done()
+  //   {
+  //     iter.element
+  //   }
 
-    function Decreases(): nat 
-      reads this, Repr 
-      requires Valid() 
-    {
-      assert iter.elements < iter.s;
-      (|iter.s| - |iter.elements|) //+ (if done then 0 else 1)
-    }
-  }
+  //   function Decreases(): nat 
+  //     reads this, Repr 
+  //     requires Valid() 
+  //   {
+  //     assert iter.elements < iter.s;
+  //     (|iter.s| - |iter.elements|) //+ (if done then 0 else 1)
+  //   }
+  // }
 
   class ConcatEnumerator<T(0)> extends Enumerator<T> {
 
@@ -359,7 +362,8 @@ module Loopers {
       requires !Done()
       modifies Repr
       decreases Repr
-      ensures ValidAndDisjoint()
+      ensures Valid()
+      ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [old(Current())]
     {
@@ -422,19 +426,26 @@ module Loopers {
       requires !Done()
       modifies Repr
       decreases Repr
-      ensures ValidAndDisjoint()
+      ensures Valid()
+      ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [old(Current())]
     {
       enumerated := enumerated + [Current()];
+
+      wrapped.Step();
       while (!wrapped.Done() && !filter(wrapped.Current()))
-        invariant wrapped.Valid()
-        modifies Repr
+        invariant Valid()
+        // Necessary to allow the recursive call to Step
+        invariant wrapped.Repr < old(Repr)
+        // Necessary to ensure Repr <= old(Repr)
+        invariant Repr == old(Repr)
+        // Apparently even this is necessary :)
+        invariant enumerated == old(enumerated) + [old(Current())]
         decreases wrapped.Decreases()
       {
         wrapped.Step();
-      } 
-      Repr := Repr + wrapped.Repr;
+      }
     }
 
     function method Current(): T
