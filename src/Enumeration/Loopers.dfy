@@ -2,12 +2,15 @@
 // include "../Actions.dfy"
 include "../Frames.dfy"
 include "../Wrappers.dfy"
+include "../Collections/Sequences/Seq.dfy"
 
 module Loopers {
 
   // import opened Actions
   import opened Frames
   import opened Wrappers
+
+  import opened Seq
 
   trait InfiniteStepper extends Validatable {
     method Step() 
@@ -24,7 +27,9 @@ module Loopers {
     }
   }
 
-  trait Stepper extends Validatable {
+  // TODO: Merge this with Enumerator<T> - no point in having it separate
+  // since you can always define Current() to be `this`.
+   trait Stepper extends Validatable {
     method Step() 
       requires Valid()
       requires !Done()
@@ -217,6 +222,237 @@ module Loopers {
     }
   }
 
+  iterator SeqIterator<T(0)>(s: seq<T>) yields (element: T)
+    yield ensures elements <= s
+    ensures elements == s
+  {
+    for i := 0 to |s|
+      invariant i == |elements|
+      invariant elements <= s
+    {
+      yield s[i];
+    }
+  }
+
+  class SeqIteratorEnumerator<T(0)> extends Enumerator<T> {
+
+    const iter: SeqIterator<T>
+    var done: bool
+
+    ghost const original: seq<T>
+
+    constructor(s: seq<T>) 
+      ensures Valid() 
+      ensures fresh(Repr) 
+    {
+      iter := new SeqIterator(s);
+      original := s;
+      enumerated := [];
+      
+      new;
+
+      // Calling MoveNext() right away ensures we only enumerated yielded state.
+      // Another version of this adaptor could not do this, and by consequence
+      // enumerate the initial state of the iterator as well.
+      var more := iter.MoveNext();
+      done := !more;
+      
+      Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
+    }
+
+    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+      && this in Repr
+      && iter in Repr
+      && this !in iter._modifies
+      && this !in iter._reads
+      && this !in iter._new
+      && iter._modifies <= Repr
+      && iter._reads <= Repr
+      && iter._new <= Repr
+      && (!done ==> iter.Valid())
+      && iter.elements < iter.s
+      && |enumerated| <= |original|
+      && enumerated == original[0..|enumerated|]
+    }
+
+    predicate method Done()
+      requires Valid()
+      reads this, Repr
+      decreases Repr, 0
+      ensures Decreases() == 0 ==> Done()
+      // ensures Done() ==> enumerated == original
+    {
+      done
+    }
+
+    method Step()
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures Decreases() < old(Decreases())
+      ensures enumerated == old(enumerated) + [old(Current())]
+    {
+      enumerated := enumerated + [Current()];
+
+      var more := iter.MoveNext();
+      done := !more;
+
+      Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
+    }
+
+    function method Current(): T
+      reads this, Repr
+      requires Valid()
+      requires !Done()
+    {
+      iter.element
+    }
+
+    function Decreases(): nat 
+      reads this, Repr 
+      requires Valid() 
+    {
+      assert iter.elements < iter.s;
+      (|iter.s| - |iter.elements|) //+ (if done then 0 else 1)
+    }
+  }
+
+  class ConcatEnumerator<T(0)> extends Enumerator<T> {
+
+    const first: Enumerator<T>
+    const second: Enumerator<T>
+
+    constructor(first: Enumerator<T>, second: Enumerator<T>)
+      requires first.Valid()
+      requires second.Valid()
+      requires first.Repr !! second.Repr
+      ensures Valid() 
+      ensures fresh(Repr - first.Repr - second.Repr) 
+    {
+      this.first := first;
+      this.second := second;
+      enumerated := [];
+      
+      Repr := {this} + first.Repr + second.Repr;
+    }
+
+    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+      && this in Repr
+      && ValidComponent(first)
+      && ValidComponent(second)
+      && first.Repr !! second.Repr
+    }
+
+    predicate method Done()
+      requires Valid()
+      reads this, Repr
+      decreases Repr, 0
+      ensures Decreases() == 0 ==> Done()
+    {
+      first.Done() && second.Done()
+    }
+
+    method Step()
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures Decreases() < old(Decreases())
+      ensures enumerated == old(enumerated) + [old(Current())]
+    {
+      enumerated := enumerated + [Current()];
+
+      if !first.Done() {
+        first.Step();
+      } else {
+        second.Step();
+      }
+      Repr := {this} + first.Repr + second.Repr;
+    }
+
+    function method Current(): T
+      reads this, Repr
+      requires Valid()
+      requires !Done()
+    {
+      if !first.Done() then first.Current() else second.Current()
+    }
+
+    function Decreases(): nat 
+      reads this, Repr 
+      requires Valid() 
+    {
+      first.Decreases() + second.Decreases()
+    }
+  }
+
+  // TODO: Prove the semantics!
+  class Filter<T(0)> extends Enumerator<T> {
+    const wrapped: Enumerator<T>
+    const filter: T -> bool
+
+    constructor(wrapped: Enumerator<T>, filter: T -> bool) 
+      requires wrapped.Valid()
+      ensures Valid() 
+    {
+      this.wrapped := wrapped;
+      this.filter := filter;
+      Repr := {this} + wrapped.Repr;
+    }
+
+    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+      && this in Repr
+      && ValidComponent(wrapped)
+    }
+
+    predicate method Done()
+      reads Repr
+      requires Valid()
+      decreases Repr, 0
+      ensures Decreases() == 0 ==> Done()
+    {
+      wrapped.Done()
+    }
+
+    method Step()
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures Decreases() < old(Decreases())
+      ensures enumerated == old(enumerated) + [old(Current())]
+    {
+      enumerated := enumerated + [Current()];
+      while (!wrapped.Done() && !filter(wrapped.Current()))
+        invariant wrapped.Valid()
+        modifies Repr
+        decreases wrapped.Decreases()
+      {
+        wrapped.Step();
+      } 
+      Repr := Repr + wrapped.Repr;
+    }
+
+    function method Current(): T
+      reads this, Repr
+      requires Valid()
+      requires !Done() 
+    {
+      wrapped.Current() 
+    }
+
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+    {
+      wrapped.Decreases()
+    }
+  }
+
   method Example1() {
     var numbers := [1, 2, 3, 4, 5];
     var e: Enumerator<int> := new SeqEnumerator(numbers);
@@ -246,9 +482,27 @@ module Loopers {
     }
   }
 
+  method Example3() {
+    var first := [1, 2, 3, 4, 5];
+    var second := [6, 7, 8];
+    var e1 := new SeqEnumerator(first);
+    var e2 := new SeqEnumerator(second);
+    var e := new ConcatEnumerator(e1, e2);
+   
+    label start:
+    while (!e.Done()) 
+      invariant e.Valid()
+      invariant fresh(e.Repr)
+      decreases e.Decreases()
+    {
+      print e.Current(), "\n";
+      
+      e.Step();
+    }
+  }
+
   method Main() {
-    Example1();
-    Example2();
+    Example3();
   }
 
   // TODO: Some similarities between this and composing

@@ -54,54 +54,53 @@ module IteratorExperiments {
       reads this, Repr
   }
 
-    class SeqLooper<T> extends TerminatingLooper {
+  class SeqEnumerator<T> extends Enumerator<T> {
 
-      const elements: seq<T>
-      var index: nat
+    const elements: seq<T>
+    var index: nat
 
-      constructor(s: seq<T>) 
-        ensures Valid()
-        ensures fresh(Repr - {this})
-      {
-        elements := s;
-        index := 0;
-        Repr := {this};
-      }
+    constructor(s: seq<T>) 
+      ensures Valid()
+      ensures fresh(Repr - {this})
+    {
+      elements := s;
+      index := 0;
+      Repr := {this};
+    }
 
-      predicate Valid() 
-        reads this, Repr 
-        ensures Valid() ==> this in Repr 
-        decreases Repr
-      {
-        && this in Repr
-        && 0 <= index <= |elements|
-      }
+    predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      decreases Repr
+    {
+      && this in Repr
+      && 0 <= index <= |elements|
+    }
 
-      function Decreases(): nat
-        reads Repr
-        requires Valid()
-      {
-        |elements| - index
-      }
+    function Decreases(): nat
+      reads Repr
+      requires Valid()
+    {
+      |elements| - index
+    }
 
-      predicate method Done() 
-        reads Repr
-        requires Valid()
-        ensures Decreases() == 0 ==> Done()
-      {
-        index == |elements|
-      }
+    predicate method Done() 
+      reads Repr
+      requires Valid()
+      ensures Decreases() == 0 ==> Done()
+    {
+      index == |elements|
+    }
 
-      method Step()
-        requires Valid()
-        requires !Done()
-        modifies Repr
-        decreases Repr
-        ensures ValidAndDisjoint()
-        ensures Decreases() < old(Decreases())
-      {
-        index := index + 1;
-      }
+    method Step()
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures ValidAndDisjoint()
+      ensures Decreases() < old(Decreases())
+    {
+      index := index + 1;
     }
   }
 
