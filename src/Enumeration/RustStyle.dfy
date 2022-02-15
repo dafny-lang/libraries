@@ -34,6 +34,9 @@ module RustStyle {
     constructor(iter: RustStyleIterator<T>)
       requires iter.Valid()
       modifies iter.Repr
+      ensures Valid()
+      ensures iter.Repr <= old(iter.Repr)
+      ensures Repr == {this} + iter.Repr
     {
       this.iter := iter;
       new;
@@ -106,6 +109,7 @@ module RustStyle {
 
     constructor(s: seq<int>) 
       ensures Valid()
+      ensures fresh(Repr)
     {
       this.s := s;
       Repr := {this};
@@ -140,6 +144,22 @@ module RustStyle {
       requires Valid()
     {
       |s|
+    }
+  }
+
+  method Main() {
+    var iter := new SeqRustStyleIterator([1,2,3,4,5]);
+
+    var enum: Enumerator<int> := new RustStyleIteratorEnumerator(iter);
+    while (!enum.Done()) 
+      invariant enum.Valid() && fresh(enum.Repr)
+      decreases enum.Decreases()
+    {
+      // Loop body starts
+      print enum.Current();
+      // Loop body ends
+
+      enum.Step();
     }
   }
 }
