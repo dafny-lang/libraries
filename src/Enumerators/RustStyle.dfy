@@ -103,11 +103,11 @@ module RustStyle {
     }
   }
 
-  class SeqRustStyleIterator extends RustStyleIterator<int> {
+  class SeqRustStyleIterator<T> extends RustStyleIterator<T> {
 
-    var s: seq<int>
+    var s: seq<T>
 
-    constructor(s: seq<int>) 
+    constructor(s: seq<T>) 
       ensures Valid()
       ensures fresh(Repr)
     {
@@ -123,7 +123,7 @@ module RustStyle {
       && this in Repr
     }
 
-    method Next() returns (res: Option<int>)
+    method Next() returns (res: Option<T>)
       requires Valid()
       modifies Repr
       ensures Valid()

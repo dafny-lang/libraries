@@ -1,9 +1,9 @@
 
-include "Loopers.dfy"
+include "Enumerators.dfy"
 
 module IteratorAdaptorExample {
 
-  import opened Loopers
+  import opened Enumerators
 
   iterator SeqIterator<T(0)>(s: seq<T>) yields (element: T)
     yield ensures elements <= s
