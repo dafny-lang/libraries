@@ -23,6 +23,7 @@ module Enumerators {
     // Dafny doesn't let you pass around an underspecified value though,
     // so we don't define a "to be enumerated" field or function.
 
+    // TODO: Change into `Next() returns T` so we don't need a separate Current() method
     method Step()
       requires Valid()
       requires !Done()
@@ -395,4 +396,9 @@ module Enumerators {
       e.Step();
     }
   }
+
+  // TODO: Explicit example of working with lazy iterators, more emphasis on `Done` being a pure function
+  // TODO: Need to give background on Validatable, the fact that Valid() is the loop invariant
+  // TODO: Mention `enumerated` ghost variable, proving semantics based on that
+  // TODO: Fix Filter even before proving semantics?
 }
