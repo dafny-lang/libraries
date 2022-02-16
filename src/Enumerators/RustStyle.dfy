@@ -1,13 +1,13 @@
 
 include "../Frames.dfy"
 include "../Wrappers.dfy"
-include "Loopers.dfy"
+include "Enumerators.dfy"
 
 module RustStyle {
 
   import opened Frames
   import opened Wrappers
-  import opened Loopers
+  import opened Enumerators
 
   trait RustStyleIterator<T> extends Validatable {
 
@@ -59,7 +59,7 @@ module RustStyle {
       && decr == (if this.next.None? then 0 else iter.Decreases() + 1)
     }
 
-    method Step() 
+    method Next() returns (element: T) 
       requires Valid()
       requires !Done()
       modifies Repr
@@ -67,23 +67,17 @@ module RustStyle {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
+      ensures enumerated == old(enumerated) + [element]
     {
-      enumerated := enumerated + [Current()];
+      element := next.value;
+      enumerated := enumerated + [element];
+
       next := iter.Next();
       if this.next.None? {
         decr := 0;
       } else {
         decr := iter.Decreases() + 1;
       }
-    }
-
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
-    {
-      next.value
     }
 
     function Decreases(): nat
@@ -155,11 +149,11 @@ module RustStyle {
       invariant enum.Valid() && fresh(enum.Repr)
       decreases enum.Decreases()
     {
-      // Loop body starts
-      print enum.Current();
-      // Loop body ends
+      var element := enum.Next();
 
-      enum.Step();
+      // Loop body starts
+      print element, "\n";
+      // Loop body ends
     }
   }
 }

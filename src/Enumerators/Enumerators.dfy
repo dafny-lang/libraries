@@ -23,8 +23,7 @@ module Enumerators {
     // Dafny doesn't let you pass around an underspecified value though,
     // so we don't define a "to be enumerated" field or function.
 
-    // TODO: Change into `Next() returns T` so we don't need a separate Current() method
-    method Step()
+    method Next() returns (element: T)
       requires Valid()
       requires !Done()
       modifies Repr
@@ -32,7 +31,7 @@ module Enumerators {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
+      ensures enumerated == old(enumerated) + [element]
 
     // Would be better as an arbitrary termination clause somehow instead
     // https://github.com/dafny-lang/dafny/issues/762
@@ -46,12 +45,11 @@ module Enumerators {
       requires Valid()
       decreases Repr, 0
       ensures Decreases() == 0 ==> Done()
-
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
   }
+
+  // TODO: Common EagerEnumerator<T> that wraps a Enumerator<Option<T>>
+  // for cases like Filter or IteratorAdaptor that can't calculate Done() 
+  // ahead of time?
 
   class SeqEnumerator<T> extends Enumerator<T> {
 
@@ -96,7 +94,7 @@ module Enumerators {
       index == |elements|
     }
 
-    method Step()
+    method Next() returns (element: T)
       requires Valid()
       requires !Done()
       modifies Repr
@@ -104,25 +102,17 @@ module Enumerators {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
+      ensures enumerated == old(enumerated) + [element]
     {
-      enumerated := enumerated + [Current()];
+      element := elements[index];
+      enumerated := enumerated + [element];
       index := index + 1;
-    }
-
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
-    {
-      elements[index]
     }
   }
 
   class SetEnumerator<T(==)> extends Enumerator<T> {
     ghost const original: set<T>
     var remaining: set<T>
-    var current: Option<T>
 
     constructor(s: set<T>) 
       ensures Valid() 
@@ -130,14 +120,6 @@ module Enumerators {
     {
       this.original := s;
       this.remaining := s;
-      new;
-      if |remaining| > 0 {
-        var element: T :| element in remaining;
-        current := Some(element);
-        remaining := remaining - {element};
-      } else {
-        current := None;
-      }
 
       enumerated := [];
       Repr := {this};
@@ -148,7 +130,6 @@ module Enumerators {
       ensures Valid() ==> this in Repr 
     {
       && this in Repr
-      && (current.None? ==> |remaining| == 0)
     }
 
     predicate method Done()
@@ -157,10 +138,10 @@ module Enumerators {
       decreases Repr, 0
       ensures Decreases() == 0 ==> Done()
     {
-      current.None?
+      |remaining| == 0
     }
 
-    method Step()
+    method Next() returns (element: T)
       requires Valid()
       requires !Done()
       modifies Repr
@@ -168,37 +149,79 @@ module Enumerators {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
+      ensures enumerated == old(enumerated) + [element]
     {
-      enumerated := enumerated + [Current()];
-
-      if |remaining| > 0 {
-        var element: T :| element in remaining;
-        current := Some(element);
-        remaining := remaining - {element};
-      } else {
-        current := None;
-      }
-    }
-
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
-    {
-      current.value
+      var picked: T :| picked in remaining;
+      element := picked;
+      remaining := remaining - {element};
+      enumerated := enumerated + [element];
     }
 
     function Decreases(): nat 
       reads this, Repr
       requires Valid() 
     {
-      |remaining| + (if current.Some? then 1 else 0)
+      |remaining|
+    }
+  }
+
+  class MapEnumerator<T, R> extends Enumerator<R> {
+    const wrapped: Enumerator<T>
+    const f: T -> R
+
+    constructor(f: T -> R, wrapped: Enumerator<T>) 
+      requires wrapped.Valid()
+      ensures Valid() 
+    {
+      this.wrapped := wrapped;
+      this.f := f;
+      Repr := {this} + wrapped.Repr;
+    }
+
+    predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr
+      decreases Repr
+    {
+      && this in Repr
+      && ValidComponent(wrapped)
+    }
+
+    predicate method Done()
+      reads Repr
+      requires Valid()
+      decreases Repr, 0
+      ensures Decreases() == 0 ==> Done()
+    {
+      wrapped.Done()
+    }
+
+    method Next() returns (element: R)
+      requires Valid()
+      requires !Done()
+      modifies Repr
+      decreases Repr
+      ensures Valid()
+      ensures Repr <= old(Repr)
+      ensures Decreases() < old(Decreases())
+      ensures enumerated == old(enumerated) + [element]
+    {
+      var t := wrapped.Next();
+      element := f(t);
+      enumerated := enumerated + [element];
+    }
+
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+    {
+      wrapped.Decreases()
     }
   }
 
   class ConcatEnumerator<T(0)> extends Enumerator<T> {
 
+    // TODO: Unset once each is Done() to allow garbage collection?
     const first: Enumerator<T>
     const second: Enumerator<T>
 
@@ -233,7 +256,7 @@ module Enumerators {
       first.Done() && second.Done()
     }
 
-    method Step()
+    method Next() returns (element: T)
       requires Valid()
       requires !Done()
       modifies Repr
@@ -241,27 +264,16 @@ module Enumerators {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
+      ensures enumerated == old(enumerated) + [element]
     {
-      enumerated := enumerated + [Current()];
-
       if !first.Done() {
-        first.Step();
+        element := first.Next();
       } else {
-        second.Step();
+        element := second.Next();
       }
-      Repr := {this} + first.Repr + second.Repr;
-    }
 
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done()
-    {
-      if !first.Done() then 
-        first.Current() 
-      else
-        second.Current()
+      Repr := {this} + first.Repr + second.Repr;
+      enumerated := enumerated + [element];
     }
 
     function Decreases(): nat 
@@ -273,9 +285,10 @@ module Enumerators {
   }
 
   // TODO: Prove the semantics!
-  class Filter<T(0)> extends Enumerator<T> {
+  class Filter<T> extends Enumerator<T> {
     const wrapped: Enumerator<T>
     const filter: T -> bool
+    var next: Option<T>
 
     constructor(wrapped: Enumerator<T>, filter: T -> bool) 
       requires wrapped.Valid()
@@ -297,10 +310,10 @@ module Enumerators {
       decreases Repr, 0
       ensures Decreases() == 0 ==> Done()
     {
-      wrapped.Done()
+      next.None?
     }
 
-    method Step()
+    method Next() returns (element: T)
       requires Valid()
       requires !Done()
       modifies Repr
@@ -308,28 +321,29 @@ module Enumerators {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [old(Current())]
+      ensures enumerated == old(enumerated) + [element]
     {
-      enumerated := enumerated + [Current()];
+      element := next.value;
+      enumerated := enumerated + [element];
 
-      wrapped.Step();
-      while (!wrapped.Done() && !filter(wrapped.Current()))
-        invariant Valid()
-        invariant wrapped.Repr < old(Repr)
-        invariant Repr == old(Repr)
-        invariant enumerated == old(enumerated) + [old(Current())]
-        decreases wrapped.Decreases()
-      {
-        wrapped.Step();
+      if wrapped.Done() {
+        next := None;
+      } else {
+        var t := wrapped.Next();
+        while (!filter(t) && !wrapped.Done())
+          invariant Valid()
+          invariant wrapped.Repr < old(Repr)
+          invariant Repr == old(Repr)
+          decreases wrapped.Decreases()
+        {
+          t := wrapped.Next();
+        }
+        if filter(t) {
+          next := Some(t);
+        } else {
+          next := None;
+        }
       }
-    }
-
-    function method Current(): T
-      reads this, Repr
-      requires Valid()
-      requires !Done() 
-    {
-      wrapped.Current() 
     }
 
     function Decreases(): nat 
@@ -374,9 +388,9 @@ module Enumerators {
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
-      print e.Current(), "\n";
+      var element := e.Next();
 
-      e.Step();
+      print element, "\n";
     }
   }
 
@@ -391,10 +405,28 @@ module Enumerators {
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
-      print e.Current(), "\n";
-      
-      e.Step();
+      var element := e.Next();
+
+      print element, "\n";
     }
+  }
+
+  method PrintWithCommas() {
+    var first := [1, 2, 3, 4, 5];
+    var e := new SeqEnumerator(first);
+   
+    while (!e.Done()) 
+      invariant e.Valid() && fresh(e.Repr)
+      decreases e.Decreases()
+    {
+      var element := e.Next();
+
+      print element;
+      if !e.Done() {
+        print ", ";
+      }
+    }
+    print "\n";
   }
 
   // TODO: Explicit example of working with lazy iterators, more emphasis on `Done` being a pure function
