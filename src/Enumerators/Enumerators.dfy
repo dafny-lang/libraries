@@ -244,7 +244,7 @@ module Enumerators {
       && ValidComponent(first)
       && ValidComponent(second)
       && first.Repr !! second.Repr
-      && enumerated == first.enumerated + second.enumerated
+      // && enumerated == first.enumerated + second.enumerated
     }
 
     predicate method Done()
@@ -292,11 +292,15 @@ module Enumerators {
 
     constructor(wrapped: Enumerator<T>, filter: T -> bool) 
       requires wrapped.Valid()
+      modifies wrapped.Repr
       ensures Valid() 
     {
       this.wrapped := wrapped;
       this.filter := filter;
+      this.next := None;
       Repr := {this} + wrapped.Repr;
+      new;
+      FindNext();
     }
 
     predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
@@ -326,22 +330,31 @@ module Enumerators {
       element := next.value;
       enumerated := enumerated + [element];
 
-      if wrapped.Done() {
-        next := None;
-      } else {
+      FindNext();
+    }
+
+    method FindNext() 
+      requires Valid()
+      requires next.Some?
+      modifies Repr
+      decreases Repr, 0
+      ensures Valid()
+      ensures Repr <= old(Repr)
+      ensures Decreases() < old(Decreases())
+      ensures unchanged(this`enumerated)
+    {
+      next := None;
+      while (!wrapped.Done())
+        invariant Valid()
+        invariant wrapped.Repr < old(Repr)
+        invariant Repr == old(Repr)
+        invariant unchanged(this`enumerated)
+        decreases wrapped.Decreases()
+      {
         var t := wrapped.Next();
-        while (!filter(t) && !wrapped.Done())
-          invariant Valid()
-          invariant wrapped.Repr < old(Repr)
-          invariant Repr == old(Repr)
-          decreases wrapped.Decreases()
-        {
-          t := wrapped.Next();
-        }
         if filter(t) {
           next := Some(t);
-        } else {
-          next := None;
+          return;
         }
       }
     }
@@ -350,7 +363,7 @@ module Enumerators {
       reads this, Repr
       requires Valid() 
     {
-      wrapped.Decreases()
+      wrapped.Decreases() + (if next.Some? then 1 else 0)
     }
   }
 
