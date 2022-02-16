@@ -25,7 +25,7 @@ module Enumerators {
 
     method Next() returns (element: T)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -40,11 +40,11 @@ module Enumerators {
       decreases Repr
       requires Valid()
 
-    predicate method Done() 
+    predicate method HasNext() 
       reads Repr
       requires Valid()
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
   }
 
   // TODO: Common EagerEnumerator<T> that wraps a Enumerator<Option<T>>
@@ -84,19 +84,19 @@ module Enumerators {
       |elements| - index
     }
 
-    predicate method Done() 
+    predicate method HasNext() 
       reads Repr
       requires Valid()
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
-      ensures Done() ==> enumerated == elements
+      ensures Decreases() == 0 ==> !HasNext()
+      ensures !HasNext() ==> enumerated == elements
     {
-      index == |elements|
+      index < |elements|
     }
 
     method Next() returns (element: T)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -132,18 +132,18 @@ module Enumerators {
       && this in Repr
     }
 
-    predicate method Done()
+    predicate method HasNext()
       requires Valid()
       reads this, Repr
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      |remaining| == 0
+      |remaining| > 0
     }
 
     method Next() returns (element: T)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -187,18 +187,18 @@ module Enumerators {
       && ValidComponent(wrapped)
     }
 
-    predicate method Done()
+    predicate method HasNext()
       reads Repr
       requires Valid()
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      wrapped.Done()
+      wrapped.HasNext()
     }
 
     method Next() returns (element: R)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -247,18 +247,18 @@ module Enumerators {
       // && enumerated == first.enumerated + second.enumerated
     }
 
-    predicate method Done()
+    predicate method HasNext()
       requires Valid()
       reads this, Repr
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      first.Done() && second.Done()
+      first.HasNext() || second.HasNext()
     }
 
     method Next() returns (element: T)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -266,7 +266,7 @@ module Enumerators {
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [element]
     {
-      if !first.Done() {
+      if first.HasNext() {
         element := first.Next();
       } else {
         element := second.Next();
@@ -290,6 +290,8 @@ module Enumerators {
     const filter: T -> bool
     var next: Option<T>
 
+    ghost var decr: nat
+
     constructor(wrapped: Enumerator<T>, filter: T -> bool) 
       requires wrapped.Valid()
       modifies wrapped.Repr
@@ -299,6 +301,7 @@ module Enumerators {
       this.filter := filter;
       this.next := None;
       Repr := {this} + wrapped.Repr;
+      decr := wrapped.Decreases();
       new;
       FindNext();
     }
@@ -308,18 +311,18 @@ module Enumerators {
       && ValidComponent(wrapped)
     }
 
-    predicate method Done()
+    predicate method HasNext()
       reads Repr
       requires Valid()
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      next.None?
+      next.Some?
     }
 
     method Next() returns (element: T)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -335,26 +338,33 @@ module Enumerators {
 
     method FindNext() 
       requires Valid()
-      requires next.Some?
       modifies Repr
       decreases Repr, 0
       ensures Valid()
       ensures Repr <= old(Repr)
-      ensures Decreases() < old(Decreases())
+      ensures old(next.Some?) ==> Decreases() < old(Decreases())
       ensures unchanged(this`enumerated)
     {
-      next := None;
-      while (!wrapped.Done())
-        invariant Valid()
-        invariant wrapped.Repr < old(Repr)
-        invariant Repr == old(Repr)
-        invariant unchanged(this`enumerated)
-        decreases wrapped.Decreases()
-      {
+      // TODO: Had to unroll the loop a bit to prove that Decreases() decreases,
+      // is it possible to clean this up?
+      if (!wrapped.HasNext()) {
+        next := None;
+      } else {
         var t := wrapped.Next();
         if filter(t) {
           next := Some(t);
-          return;
+        }
+        while (wrapped.HasNext() && next.None?)
+          invariant Valid()
+          invariant wrapped.Repr < old(Repr)
+          invariant Repr == old(Repr)
+          invariant unchanged(this`enumerated)
+          decreases wrapped.Decreases()
+        {
+          var t := wrapped.Next();
+          if filter(t) {
+            next := Some(t);
+          }
         }
       }
     }
@@ -397,7 +407,7 @@ module Enumerators {
     var numbers := [1, 2, 3, 4, 5];
 
     var e: Enumerator<int> := new SeqEnumerator(numbers);
-    while (!e.Done()) 
+    while (e.HasNext()) 
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
@@ -414,7 +424,7 @@ module Enumerators {
     var e2 := new SeqEnumerator(second);
     var e := new ConcatEnumerator(e1, e2);
    
-    while (!e.Done()) 
+    while (e.HasNext()) 
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
@@ -428,14 +438,14 @@ module Enumerators {
     var first := [1, 2, 3, 4, 5];
     var e := new SeqEnumerator(first);
    
-    while (!e.Done()) 
+    while (e.HasNext()) 
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
       var element := e.Next();
 
       print element;
-      if !e.Done() {
+      if e.HasNext() {
         print ", ";
       }
     }
@@ -445,5 +455,4 @@ module Enumerators {
   // TODO: Explicit example of working with lazy iterators, more emphasis on `Done` being a pure function
   // TODO: Need to give background on Validatable, the fact that Valid() is the loop invariant
   // TODO: Mention `enumerated` ghost variable, proving semantics based on that
-  // TODO: Fix Filter even before proving semantics?
 }

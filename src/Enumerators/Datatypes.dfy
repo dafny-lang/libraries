@@ -70,18 +70,18 @@ module DatatypeEnumerator {
       next.Length()
     }
 
-    predicate method Done() 
+    predicate method HasNext() 
       reads Repr
       requires Valid()
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      next.Nil?
+      next.Cons?
     }
 
     method Next() returns (element: T)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()

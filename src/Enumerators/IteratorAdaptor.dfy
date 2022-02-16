@@ -22,7 +22,7 @@ module IteratorAdaptorExample {
   class SeqIteratorEnumerator<T(0)> extends Enumerator<Option<T>> {
 
     const iter: SeqIterator<T>
-    var done: bool
+    var hasNext: bool
 
     ghost const original: seq<T>
     ghost var decr: nat
@@ -32,7 +32,7 @@ module IteratorAdaptorExample {
       ensures fresh(Repr) 
     {
       iter := new SeqIterator(s);
-      done := false;
+      hasNext := true;
       original := s;
       enumerated := [];
       
@@ -51,23 +51,23 @@ module IteratorAdaptorExample {
       && iter._modifies <= Repr
       && iter._reads <= Repr
       && iter._new <= Repr
-      && (!done ==> iter.Valid())
-      && (!done ==> iter.elements < iter.s)
+      && (hasNext ==> iter.Valid())
+      && (hasNext ==> iter.elements < iter.s)
       && decr == |iter.s| - |enumerated|
     } 
 
-    predicate method Done()
+    predicate method HasNext()
       requires Valid()
       reads this, Repr
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      done
+      hasNext
     }
 
     method Next() returns (element: Option<T>)
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -91,7 +91,7 @@ module IteratorAdaptorExample {
       reads this, Repr 
       requires Valid() 
     {
-      decr
+      decr 
     }
   }
 }

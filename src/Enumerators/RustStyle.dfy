@@ -61,7 +61,7 @@ module RustStyle {
 
     method Next() returns (element: T) 
       requires Valid()
-      requires !Done()
+      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
@@ -87,13 +87,13 @@ module RustStyle {
       decr
     }
 
-    predicate method Done() 
+    predicate method HasNext() 
       reads Repr
       requires Valid()
       decreases Repr, 0
-      ensures Decreases() == 0 ==> Done()
+      ensures Decreases() == 0 ==> !HasNext()
     {
-      next.None?
+      next.Some?
     }
   }
 
@@ -145,7 +145,7 @@ module RustStyle {
     var iter := new SeqRustStyleIterator([1,2,3,4,5]);
 
     var enum: Enumerator<int> := new RustStyleIteratorEnumerator(iter);
-    while (!enum.Done()) 
+    while (enum.HasNext()) 
       invariant enum.Valid() && fresh(enum.Repr)
       decreases enum.Decreases()
     {
