@@ -7,51 +7,35 @@ module IteratorAdaptorExample {
 
   import opened Enumerators
   import opened Wrappers
-  iterator SeqIterator<T(0)>(s: seq<T>) yields (element: T)
-    yield ensures elements <= s
-    ensures elements == s
+  iterator RangeIterator(start: int, end: int) yields (element: int)
+    requires start <= end
+    yield ensures element - start + 1 == |elements|
+    ensures |elements| == end - start
   {
-    for i := 0 to |s|
-      invariant i == |elements|
-      invariant elements <= s
+    for i := start to end
+      invariant i - start == |elements|
     {
-      yield s[i];
+      yield i;
     }
   }
 
-  class SeqIteratorEnumerator<T(0)> extends Enumerator<Option<T>> {
+  class RangeEnumerator extends Enumerator<int> {
 
-    const iter: SeqIterator<T>
-    var hasNext: bool
+    const iter: RangeIterator
+    var remaining: nat
 
-    ghost const original: seq<T>
-    ghost var decr: nat
-
-    constructor(s: seq<T>) 
+    constructor(start: int, end: int) 
+      requires start <= end
       ensures Valid() 
       ensures fresh(Repr) 
     { 
-      iter := new SeqIterator(s);
-      hasNext := true;
-      original := s;
+      iter := new RangeIterator(start, end);
+      remaining := end - start;
       enumerated := [];
       
       new;
       
       Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
-      decr := |iter.s| - |enumerated|;
-
-      assert this in Repr;
-      assert iter in Repr;
-      assert this !in iter._modifies;
-      assert this !in iter._reads;
-      assert this !in iter._new;
-      assert iter._modifies <= Repr;
-      assert iter._reads <= Repr;
-      assert iter._new <= Repr;
-      assert (hasNext ==> iter.Valid());
-      assert (hasNext ==> iter.elements < iter.s);
-      // assert decr == |iter.s| - |enumerated|;
     }
 
     predicate Valid()
@@ -67,9 +51,7 @@ module IteratorAdaptorExample {
       && iter._modifies <= Repr
       && iter._reads <= Repr
       && iter._new <= Repr
-      && (hasNext ==> iter.Valid())
-      && (hasNext ==> iter.elements < iter.s)
-      && decr == |iter.s| - |enumerated|
+      && (remaining > 0 ==> iter.Valid())
     } 
 
     predicate method HasNext()
@@ -78,10 +60,10 @@ module IteratorAdaptorExample {
       decreases Repr, 2
       ensures HasNext() ==> Decreases() > 0
     {
-      hasNext
+      remaining > 0
     }
 
-    method Next() returns (element: Option<T>)
+    method Next() returns (element: int)
       requires Valid()
       requires HasNext()
       modifies Repr
@@ -91,16 +73,11 @@ module IteratorAdaptorExample {
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [element]
     {
-      
-      hasNext := iter.MoveNext();
-      if hasNext {
-        element := Some(iter.element);
-      } else {
-        element := None;
-      }
+      var more := iter.MoveNext();
+      element := iter.element;
+      remaining := remaining - 1;
 
       Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
-      decr := |iter.s| - |enumerated|;
     }
 
     function Decreases(): nat 
@@ -108,7 +85,7 @@ module IteratorAdaptorExample {
       requires Valid()
       decreases Repr, 1
     {
-      decr 
+      remaining
     }
   }
 }
