@@ -36,8 +36,9 @@ module Demo {
     ensures result == Seq.Filter(p, s)
   {
     var e := new SeqEnumerator(s);
-    var filtered := new FilteredEnumerator(e, p);
+    var filtered: FilteredEnumerator := new FilteredEnumerator(e, p);
     result := CollectToSeq(filtered);
+    assert filtered.Valid();
   }
 
   method Concatenate<T>(first: seq<T>, second: seq<T>) returns (result: seq<T>)

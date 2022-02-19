@@ -344,14 +344,25 @@ module Enumerators {
       FindNext();
     }
 
-    predicate Valid()
+
+
+    predicate AlmostValid()
       reads this, Repr
-      ensures Valid() ==> this in Repr
+      ensures AlmostValid() ==> this in Repr
       decreases Repr, 0
     {
       && this in Repr
       && ValidComponent(wrapped)
       && (if next.Some? then enumerated + [next.value] else enumerated) == Seq.Filter(filter, wrapped.enumerated)
+    }
+
+    predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
+      && AlmostValid()
+      && (next.None? ==> !wrapped.HasNext())
     }
 
     predicate method HasNext()
@@ -383,21 +394,21 @@ module Enumerators {
     }
 
     method FindNext() 
-      requires Valid()  // TODO: Weaken this slightly so Valid() can imply next.None? ==> !wrapped.HasNext()
+      requires AlmostValid()
       requires next.None?
       modifies Repr
       decreases Repr, 0
       ensures Valid()
-      ensures Decreases() <= old(Decreases())
+      ensures Decreases() <= old(wrapped.Decreases() + (if next.Some? then 1 else 0))
       ensures unchanged(this`enumerated)
       ensures unchanged(this`Repr)
     {
       while (wrapped.HasNext() && next.None?)
-        invariant Valid()
+        invariant AlmostValid()
         invariant wrapped.Repr < old(Repr)
         invariant Repr == old(Repr)
         invariant unchanged(this`enumerated)
-        invariant Decreases() <= old(Decreases())
+        invariant wrapped.Decreases() + (if next.Some? then 1 else 0) <= old(wrapped.Decreases() + (if next.Some? then 1 else 0))
         decreases wrapped.Decreases()
       {
         var wrappedEnumeratedBefore := wrapped.enumerated;
@@ -413,7 +424,7 @@ module Enumerators {
 
     function Decreases(): nat 
       reads this, Repr
-      requires Valid() 
+      requires Valid()
       decreases Repr, 1
     {
       // If we could declare semi-arbitrary values as in decreases clauses,
@@ -544,4 +555,6 @@ module Enumerators {
   //       Also usually need to (at least for v1) require that child enumerators are fresh (enumerated == [])
   // TODO: Framing invariant is a pain in the butt, seems to need a label to be generic
   // TODO: Example of various traversals of datatype trees/graphs
+  // TODO: Think about Enumerator<T> (and hypothetical Aggregator<T>) as special cases of
+  //       Action<T, R>s with a relationship between their pre- and post-conditions.
 }
