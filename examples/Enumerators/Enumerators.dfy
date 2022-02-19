@@ -36,7 +36,7 @@ module Demo {
     ensures result == Seq.Filter(p, s)
   {
     var e := new SeqEnumerator(s);
-    var filtered := new Filter(e, p);
+    var filtered := new FilteredEnumerator(e, p);
     result := CollectToSeq(filtered);
   }
 

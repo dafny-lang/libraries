@@ -318,7 +318,7 @@ module Enumerators {
   }
 
   // TODO: Prove the semantics!
-  class Filter<T> extends Enumerator<T> {
+  class FilteredEnumerator<T> extends Enumerator<T> {
     const wrapped: Enumerator<T>
     const filter: T -> bool
     var next: Option<T>
@@ -328,8 +328,8 @@ module Enumerators {
       requires wrapped.enumerated == []
       modifies wrapped.Repr
       ensures Valid()
+      ensures fresh(Repr - old(wrapped.Repr))
       ensures enumerated == []
-      ensures fresh(Repr - wrapped.Repr)
       ensures this.wrapped == wrapped
       ensures this.filter == filter
     {
@@ -338,7 +338,9 @@ module Enumerators {
       this.next := None;
       Repr := {this} + wrapped.Repr;
       enumerated := [];
+
       new;
+      
       FindNext();
     }
 
@@ -357,6 +359,7 @@ module Enumerators {
       requires Valid()
       decreases Repr, 2
       ensures HasNext() ==> Decreases() > 0
+      ensures !HasNext() ==> !wrapped.HasNext() // TODO
     {
       assert if next.Some? then Decreases() >= 1 else true;
       next.Some?
@@ -374,39 +377,36 @@ module Enumerators {
     {
       element := next.value;
       enumerated := enumerated + [element];
+      next := None;
 
       FindNext();
     }
 
     method FindNext() 
-      requires Valid()
+      requires Valid()  // TODO: Weaken this slightly so Valid() can imply next.None? ==> !wrapped.HasNext()
+      requires next.None?
       modifies Repr
       decreases Repr, 0
       ensures Valid()
-      ensures Repr <= old(Repr)
-      ensures old(next.Some?) ==> Decreases() < old(Decreases())
+      ensures Decreases() <= old(Decreases())
       ensures unchanged(this`enumerated)
+      ensures unchanged(this`Repr)
     {
-      // TODO: Had to unroll the loop a bit to prove that Decreases() decreases,
-      // is it possible to clean this up?
-      if (!wrapped.HasNext()) {
-        next := None;
-      } else {
+      while (wrapped.HasNext() && next.None?)
+        invariant Valid()
+        invariant wrapped.Repr < old(Repr)
+        invariant Repr == old(Repr)
+        invariant unchanged(this`enumerated)
+        invariant Decreases() <= old(Decreases())
+        decreases wrapped.Decreases()
+      {
+        var wrappedEnumeratedBefore := wrapped.enumerated;
         var t := wrapped.Next();
+        reveal Seq.Filter();
+        LemmaFilterDistributesOverConcat(filter, wrappedEnumeratedBefore, [t]);
+          
         if filter(t) {
           next := Some(t);
-        }
-        while (wrapped.HasNext() && next.None?)
-          invariant Valid()
-          invariant wrapped.Repr < old(Repr)
-          invariant Repr == old(Repr)
-          invariant unchanged(this`enumerated)
-          decreases wrapped.Decreases()
-        {
-          var t := wrapped.Next();
-          if filter(t) {
-            next := Some(t);
-          }
         }
       }
     }
@@ -416,6 +416,8 @@ module Enumerators {
       requires Valid() 
       decreases Repr, 1
     {
+      // If we could declare semi-arbitrary values as in decreases clauses,
+      // this could just be (wrapped.Decreases(), next)
       wrapped.Decreases() + (if next.Some? then 1 else 0)
     }
   }
