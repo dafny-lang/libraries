@@ -30,8 +30,8 @@ module Enumerators {
     predicate method HasNext() 
       reads Repr
       requires Valid()
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
 
     method Next() returns (element: T)
       requires Valid()
@@ -47,7 +47,7 @@ module Enumerators {
     // https://github.com/dafny-lang/dafny/issues/762
     function Decreases(): nat
       reads Repr
-      decreases Repr
+      decreases Repr, 1
       requires Valid()
   }
 
@@ -76,7 +76,7 @@ module Enumerators {
     predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
-      decreases Repr
+      decreases Repr, 0
     {
       && this in Repr
       && 0 <= index <= |elements|
@@ -86,6 +86,7 @@ module Enumerators {
     function Decreases(): nat
       reads Repr
       requires Valid()
+      decreases Repr, 1
     {
       |elements| - index
     }
@@ -93,8 +94,8 @@ module Enumerators {
     predicate method HasNext() 
       reads Repr
       requires Valid()
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
       ensures !HasNext() ==> enumerated == elements
     {
       index < |elements|
@@ -136,6 +137,7 @@ module Enumerators {
     predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
+      decreases Repr, 0
     {
       && this in Repr
       && multiset(enumerated) + multiset(remaining) == multiset(original)
@@ -144,8 +146,8 @@ module Enumerators {
     predicate method HasNext()
       requires Valid()
       reads this, Repr
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
     {
       |remaining| > 0
     }
@@ -169,6 +171,7 @@ module Enumerators {
     function Decreases(): nat 
       reads this, Repr
       requires Valid() 
+      decreases Repr, 1
     {
       |remaining|
     }
@@ -196,7 +199,7 @@ module Enumerators {
     predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
-      decreases Repr
+      decreases Repr, 0
     {
       && this in Repr
       && ValidComponent(wrapped)
@@ -206,9 +209,10 @@ module Enumerators {
     predicate method HasNext()
       reads Repr
       requires Valid()
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
     {
+      assert wrapped.HasNext() ==> Decreases() > 0;
       wrapped.HasNext()
     }
 
@@ -230,6 +234,7 @@ module Enumerators {
     function Decreases(): nat 
       reads this, Repr
       requires Valid() 
+      decreases Repr, 1
     {
       wrapped.Decreases()
     }
@@ -242,8 +247,8 @@ module Enumerators {
     const second: Enumerator<T>
 
     constructor(first: Enumerator<T>, second: Enumerator<T>)
-      requires first.Valid()
-      requires second.Valid()
+      requires first.Valid() && first.enumerated == []
+      requires second.Valid() && second.enumerated == []
       requires first.Repr !! second.Repr
       ensures Valid() 
       ensures fresh(Repr - first.Repr - second.Repr) 
@@ -257,21 +262,27 @@ module Enumerators {
       Repr := {this} + first.Repr + second.Repr;
     }
 
-    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+    predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
       && this in Repr
       && ValidComponent(first)
       && ValidComponent(second)
       && first.Repr !! second.Repr
-      // && (first.HasNext() ==> second.enumerated == [])
+      && (first.HasNext() ==> second.enumerated == [])
       && enumerated == first.enumerated + second.enumerated
     }
 
     predicate method HasNext()
       requires Valid()
       reads this, Repr
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
     {
+      assert first.HasNext() ==> Decreases() > 0;
+      assert second.HasNext() ==> Decreases() > 0;
       first.HasNext() || second.HasNext()
     }
 
@@ -287,8 +298,10 @@ module Enumerators {
     {
       if first.HasNext() {
         element := first.Next();
+        assert first.Decreases() < old(first.Decreases());
       } else {
         element := second.Next();
+        assert second.Decreases() < old(second.Decreases());
       }
 
       Repr := {this} + first.Repr + second.Repr;
@@ -298,6 +311,7 @@ module Enumerators {
     function Decreases(): nat 
       reads this, Repr 
       requires Valid() 
+      decreases Repr, 1
     {
       first.Decreases() + second.Decreases()
     }
@@ -314,6 +328,10 @@ module Enumerators {
       requires wrapped.enumerated == []
       modifies wrapped.Repr
       ensures Valid()
+      ensures enumerated == []
+      ensures fresh(Repr - wrapped.Repr)
+      ensures this.wrapped == wrapped
+      ensures this.filter == filter
     {
       this.wrapped := wrapped;
       this.filter := filter;
@@ -324,18 +342,23 @@ module Enumerators {
       FindNext();
     }
 
-    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+    predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
       && this in Repr
       && ValidComponent(wrapped)
-      // && (if next.Some? then enumerated + [next.value] else enumerated) == Seq.Filter(filter, wrapped.enumerated)
+      && (if next.Some? then enumerated + [next.value] else enumerated) == Seq.Filter(filter, wrapped.enumerated)
     }
 
     predicate method HasNext()
       reads Repr
       requires Valid()
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
     {
+      assert if next.Some? then Decreases() >= 1 else true;
       next.Some?
     }
 
@@ -391,6 +414,7 @@ module Enumerators {
     function Decreases(): nat 
       reads this, Repr
       requires Valid() 
+      decreases Repr, 1
     {
       wrapped.Decreases() + (if next.Some? then 1 else 0)
     }
@@ -417,31 +441,31 @@ module Enumerators {
     }
   }
 
-  method Max(s: set<int>) returns (max: int)
-    requires |s| > 0
-    ensures max in s
-    ensures forall x | x in s :: max >= x
-  {
-    var first: int :| first in s;
-    max := first;
-    var rest := s - {max};
+  // method Max(s: set<int>) returns (max: int)
+  //   requires |s| > 0
+  //   ensures max in s
+  //   ensures forall x | x in s :: max >= x
+  // {
+  //   var first: int :| first in s;
+  //   max := first;
+  //   var rest := s - {max};
 
-    var sEnum: SetEnumerator<int> := new SetEnumerator(rest);
-    while (sEnum.HasNext()) 
-      invariant sEnum.Valid()
-      invariant fresh(sEnum.Repr)
-      invariant max == Seq.Max([first] + sEnum.enumerated)
-      decreases sEnum.Decreases()
-    {
-      var element := sEnum.Next();
+  //   var sEnum: SetEnumerator<int> := new SetEnumerator(rest);
+  //   while (sEnum.HasNext()) 
+  //     invariant sEnum.Valid()
+  //     invariant fresh(sEnum.Repr)
+  //     invariant max == Seq.Max([first] + sEnum.enumerated)
+  //     decreases sEnum.Decreases()
+  //   {
+  //     var element := sEnum.Next();
 
-      if max < element {
-        max := element;
-      }
-    }
-    assert max == Seq.Max([first] + sEnum.enumerated);
-    assert multiset(sEnum.enumerated) == multiset(rest);
-  }
+  //     if max < element {
+  //       max := element;
+  //     }
+  //   }
+  //   assert max == Seq.Max([first] + sEnum.enumerated);
+  //   assert multiset(sEnum.enumerated) == multiset(rest);
+  // }
 
   method Example1() {
     var numbers := [1, 2, 3, 4, 5];
@@ -515,5 +539,7 @@ module Enumerators {
   // TODO: Are ghost enumerators a thing? :)
   // TODO: Most enumerator constructors should ensure enumerated == [] and other things
   //       Important to have end to end examples to ensure correctness invariants are actually usable!
+  //       Also usually need to (at least for v1) require that child enumerators are fresh (enumerated == [])
   // TODO: Framing invariant is a pain in the butt, seems to need a label to be generic
+  // TODO: Example of various traversals of datatype trees/graphs
 }

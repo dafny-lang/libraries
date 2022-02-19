@@ -52,7 +52,7 @@ module RustStyle {
     predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
-      decreases Repr
+      decreases Repr, 0
     {
       && this in Repr
       && ValidComponent(iter)
@@ -83,6 +83,7 @@ module RustStyle {
     function Decreases(): nat
       reads Repr
       requires Valid()
+      decreases Repr, 1
     {
       decr
     }
@@ -90,7 +91,7 @@ module RustStyle {
     predicate method HasNext() 
       reads Repr
       requires Valid()
-      decreases Repr, 0
+      decreases Repr, 2
       ensures Decreases() == 0 ==> !HasNext()
     {
       next.Some?
@@ -112,7 +113,7 @@ module RustStyle {
     predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
-      decreases Repr
+      decreases Repr, 0
     {
       && this in Repr
     }

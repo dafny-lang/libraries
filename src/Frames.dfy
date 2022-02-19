@@ -11,6 +11,7 @@ module Frames {
     predicate Valid()
       reads this, Repr
       ensures Valid() ==> this in Repr
+      decreases Repr, 0
 
     // Convenience predicate for when your object's validity depends on one
     // or more other objects.

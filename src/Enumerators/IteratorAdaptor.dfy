@@ -30,7 +30,7 @@ module IteratorAdaptorExample {
     constructor(s: seq<T>) 
       ensures Valid() 
       ensures fresh(Repr) 
-    {
+    { 
       iter := new SeqIterator(s);
       hasNext := true;
       original := s;
@@ -40,9 +40,25 @@ module IteratorAdaptorExample {
       
       Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
       decr := |iter.s| - |enumerated|;
+
+      assert this in Repr;
+      assert iter in Repr;
+      assert this !in iter._modifies;
+      assert this !in iter._reads;
+      assert this !in iter._new;
+      assert iter._modifies <= Repr;
+      assert iter._reads <= Repr;
+      assert iter._new <= Repr;
+      assert (hasNext ==> iter.Valid());
+      assert (hasNext ==> iter.elements < iter.s);
+      // assert decr == |iter.s| - |enumerated|;
     }
 
-    predicate Valid() reads this, Repr ensures Valid() ==> this in Repr {
+    predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr 
+      decreases Repr, 0
+    {
       && this in Repr
       && iter in Repr
       && this !in iter._modifies
@@ -59,8 +75,8 @@ module IteratorAdaptorExample {
     predicate method HasNext()
       requires Valid()
       reads this, Repr
-      decreases Repr, 0
-      ensures Decreases() == 0 ==> !HasNext()
+      decreases Repr, 2
+      ensures HasNext() ==> Decreases() > 0
     {
       hasNext
     }
@@ -76,8 +92,8 @@ module IteratorAdaptorExample {
       ensures enumerated == old(enumerated) + [element]
     {
       
-      var more := iter.MoveNext();
-      if more {
+      hasNext := iter.MoveNext();
+      if hasNext {
         element := Some(iter.element);
       } else {
         element := None;
@@ -89,7 +105,8 @@ module IteratorAdaptorExample {
 
     function Decreases(): nat 
       reads this, Repr 
-      requires Valid() 
+      requires Valid()
+      decreases Repr, 1
     {
       decr 
     }
