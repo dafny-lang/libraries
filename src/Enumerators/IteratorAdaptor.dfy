@@ -4,16 +4,18 @@ include "../Wrappers.dfy"
 
 module IteratorAdaptorExample {
 
-
   import opened Enumerators
   import opened Wrappers
+
   iterator RangeIterator(start: int, end: int) yields (element: int)
     requires start <= end
     yield ensures element - start + 1 == |elements|
+    yield ensures _new == {};
     ensures |elements| == end - start
   {
     for i := start to end
       invariant i - start == |elements|
+      invariant _new == {}
     {
       yield i;
     }
@@ -35,7 +37,7 @@ module IteratorAdaptorExample {
       
       new;
       
-      Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
+      Repr := {this, iter};
     }
 
     predicate Valid()
@@ -45,13 +47,9 @@ module IteratorAdaptorExample {
     {
       && this in Repr
       && iter in Repr
-      && this !in iter._modifies
-      && this !in iter._reads
-      && this !in iter._new
-      && iter._modifies <= Repr
-      && iter._reads <= Repr
-      && iter._new <= Repr
-      && (remaining > 0 ==> iter.Valid())
+      && iter._modifies + iter._reads + iter._new == {}
+      && iter.Valid()
+      && remaining == (iter.end - iter.start) - |iter.elements|
     } 
 
     predicate method HasNext()
@@ -75,9 +73,8 @@ module IteratorAdaptorExample {
     {
       var more := iter.MoveNext();
       element := iter.element;
+      enumerated := enumerated + [element];
       remaining := remaining - 1;
-
-      Repr := {this, iter} + iter._modifies + iter._reads + iter._new;
     }
 
     function Decreases(): nat 

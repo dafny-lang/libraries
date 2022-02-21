@@ -344,8 +344,6 @@ module Enumerators {
       FindNext();
     }
 
-
-
     predicate AlmostValid()
       reads this, Repr
       ensures AlmostValid() ==> this in Repr
@@ -554,7 +552,9 @@ module Enumerators {
   //       Important to have end to end examples to ensure correctness invariants are actually usable!
   //       Also usually need to (at least for v1) require that child enumerators are fresh (enumerated == [])
   // TODO: Framing invariant is a pain in the butt, seems to need a label to be generic
+  //       Solution seems to be assuming enumerators are usually local, so fresh(e.Repr)
   // TODO: Example of various traversals of datatype trees/graphs
   // TODO: Think about Enumerator<T> (and hypothetical Aggregator<T>) as special cases of
   //       Action<T, R>s with a relationship between their pre- and post-conditions.
+  // TODO: Could we have a TerminationMeasure trait, implementable by potentially any type?
 }
