@@ -1,6 +1,6 @@
 
-include "../Frames.dfy"
-include "../Wrappers.dfy"
+include "../../src/Frames.dfy"
+include "../../src/Wrappers.dfy"
 include "Enumerators.dfy"
 
 module RustStyle {
