@@ -67,10 +67,7 @@ abstract module LittleEndianNat {
         calc {
           ToNatLeft(xs);
           Last(xs) * Pow(BASE(), |xs| - 1);
-          Last(xs) * Pow(BASE(), 0);
-            { LemmaPow0Auto(); }
-          Last(xs) * 1;
-            { LemmaMulBasicsAuto(); }
+            { reveal Pow(); }
           Last(xs);
           First(xs);
             { assert ToNatRight(DropFirst(xs)) == 0; }
