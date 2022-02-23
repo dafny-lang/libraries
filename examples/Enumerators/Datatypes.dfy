@@ -1,11 +1,18 @@
 
 include "Enumerators.dfy"
 
+// An example of an enumerator that traverses the sub-values in 
+// an algebraic datatype value.
 module DatatypeEnumerator {
 
   import opened Enumerators
   
-  // Implicit trait approach
+  // TODO: A TreeEnumerator would be much more interesting!
+  // Show how to implement multiple traversal options, probably
+  // using ConcatEnumerator for child paths.
+
+  // TODO: Could define a Enumerable<T> trait as well, although datatypes
+  // can't yet implement that anyway.
   datatype List<T> = Cons(value: T, tail: List<T>) | Nil {
     method Enumerator() returns (e: Enumerator<T>) {
       e := new ListEnumerator(this);
@@ -35,7 +42,7 @@ module DatatypeEnumerator {
     predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
-      decreases Repr
+      decreases Repr, 0
     {
       && this in Repr
     }
@@ -43,8 +50,9 @@ module DatatypeEnumerator {
     function Decreases(): nat
       reads Repr
       requires Valid()
+      decreases Repr, 1
     {
-      // This is where I wish I could just say "next" and 
+      // TODO: This is where I wish I could just say "next" and 
       // rely on the well-founded ordering.
       next.Length()
     }
@@ -52,7 +60,7 @@ module DatatypeEnumerator {
     predicate method HasNext() 
       reads Repr
       requires Valid()
-      decreases Repr, 0
+      decreases Repr, 2
       ensures Decreases() == 0 ==> !HasNext()
     {
       next.Cons?

@@ -6,17 +6,20 @@ include "../Collections/Sequences/Seq.dfy"
 
 module Enumerators {
 
-  // import opened Actions
   import opened Frames
   import opened Wrappers
   import opened Seq
 
+
+  // A trait for any value that produces a finite set of value.
   trait {:termination false} Enumerator<T> extends Validatable {
     
     // The Valid() predicate from the Validatable trait ends up
     // becoming the "enumeration invariant", which in turn becomes
     // the loop invariant in a while loop that uses an enumerator.
 
+    // All values produced by the Next() method in the order they
+    // were produced.
     ghost var enumerated: seq<T>
 
     // Any enumerator that produces one value at a time
@@ -26,9 +29,13 @@ module Enumerators {
     // values have been produced.
     // Dafny doesn't let you pass around an underspecified value though,
     // so we don't define a "to be enumerated" field or function.
-
-    // Would be better as an arbitrary termination clause somehow instead.
-    // https://github.com/dafny-lang/dafny/issues/762
+    
+    // The termination measure for the enumerator. Must decrease on every
+    // call to Next().
+    //
+    // Would be better as an arbitrary termination clause somehow instead,
+    // but we don't have language-level access to the built-in well-founded
+    // ordering. See https://github.com/dafny-lang/dafny/issues/762.
     function Decreases(): nat
       reads Repr
       decreases Repr, 1
@@ -113,6 +120,17 @@ module Enumerators {
     }
   }
 
+  // This encapsulates the canonical method for enumerating
+  // the values in a set by using :| and set subtraction.
+  // Enumerating a set this way will generally take quadratic time, however,
+  // given each set subtraction will normally require making a new copy of
+  // the set at runtime.
+  //
+  // The good news is that if the Enumerator concept, or a generalized
+  // type characteristic it satisfies, is added to Dafny itself, then
+  // the various runtimes can provide a much more efficient implementation
+  // of this enumerator based on iteration features in the underlying set
+  // implementation.
   class SetEnumerator<T(==)> extends Enumerator<T> {
     ghost const original: set<T>
     var remaining: set<T>
@@ -139,6 +157,14 @@ module Enumerators {
       && multiset(enumerated) + multiset(remaining) == multiset(original)
     }
 
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+      decreases Repr, 1
+    {
+      |remaining|
+    }
+    
     predicate method HasNext()
       requires Valid()
       reads this, Repr
@@ -162,14 +188,6 @@ module Enumerators {
       element := picked;
       remaining := remaining - {element};
       enumerated := enumerated + [element];
-    }
-
-    function Decreases(): nat 
-      reads this, Repr
-      requires Valid() 
-      decreases Repr, 1
-    {
-      |remaining|
     }
   }
 
@@ -238,7 +256,6 @@ module Enumerators {
 
   class ConcatEnumerator<T> extends Enumerator<T> {
 
-    // TODO: Unset once each is Done() to allow garbage collection?
     const first: Enumerator<T>
     const second: Enumerator<T>
 
@@ -313,7 +330,6 @@ module Enumerators {
     }
   }
 
-  // TODO: Prove the semantics!
   class FilteredEnumerator<T> extends Enumerator<T> {
     const wrapped: Enumerator<T>
     const filter: T -> bool

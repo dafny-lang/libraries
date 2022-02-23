@@ -3,12 +3,19 @@ include "../../src/Frames.dfy"
 include "../../src/Wrappers.dfy"
 include "Enumerators.dfy"
 
-module RustStyle {
+// There are lots of ways to define an Iterator/Enumerator
+// concept, and there is precious little alignment on the exact
+// APIs that various programming languages have chosen. :)
+// This is an example of how to adapt another flavour of enumerator
+// (Rust's in this case) to Dafny's.
+module RustStyleExample {
 
   import opened Frames
   import opened Wrappers
   import opened Enumerators
 
+  // Roughly aligns with Rust's std::iter::Iterator trait.
+  // https://doc.rust-lang.org/std/iter/trait.Iterator.html
   trait RustStyleIterator<T> extends Validatable {
 
     method Next() returns (res: Option<T>)
@@ -24,6 +31,13 @@ module RustStyle {
       requires Valid()
   }
 
+  // Adapts from a Rust Iterator to an Enumerator.
+  // Because the latter defines HasNext() as a pure predicate,
+  // the adaptor needs to pre-fetch the next element eagerly.
+  // An alternative approach is to extend Enumerator<Option<T>>
+  // instead, in which case clients of the enumerator will need
+  // to handle None values as well, likely by break-ing out of the
+  // loop.
   class RustStyleIteratorEnumerator<T> extends Enumerator<T> {
 
     const iter: RustStyleIterator<T>
@@ -152,9 +166,7 @@ module RustStyle {
     {
       var element := enum.Next();
 
-      // Loop body starts
       print element, "\n";
-      // Loop body ends
     }
   }
 }
