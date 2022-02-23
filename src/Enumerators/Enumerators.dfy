@@ -41,6 +41,15 @@ module Enumerators {
       decreases Repr, 1
       requires Valid()
 
+    // Pre-condition for Next(). Making this a pure predicate means that
+    // enumerators have to at least know ahead of time if they are able to
+    // produce a value, even if they do not know what value it is until
+    // Next() is invoked. This avoids forcing the type parameter for any
+    // enumerator to satisfy the Auto-initializable type characteristic (0),
+    // and allows for much cleaner assertions about state and invariants.
+    // When this is overly restrictive, having an enumerator produce a wrapper
+    // such as Option<T> instead is a good option (ha!), with the caveat that
+    // client code will need to skip over Nones. 
     predicate method HasNext() 
       reads Repr
       requires Valid()
@@ -53,6 +62,12 @@ module Enumerators {
       modifies Repr
       decreases Repr
       ensures Valid()
+      // This is more restrictive than the usual post-condition of
+      // Validatable.ValidAndDisjoint(), because if we allow the Repr
+      // of an enumerator to grow, even if fresh, it becomes much more
+      // difficult to prove termination of a wrapper enumerator like
+      // FilteredEnumerator below which needs to make a recursive call to
+      // Next() inside a loop. 
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [element]
@@ -330,6 +345,10 @@ module Enumerators {
     }
   }
 
+  // Note that to satisfy the Enumerator API, this enumerator has
+  // to eagerly fetch the next value to return from Next().
+  // An alternative is to use a MappingEnumerator that maps to Option<T>
+  // values, and having consumers skip None values.
   class FilteredEnumerator<T> extends Enumerator<T> {
     const wrapped: Enumerator<T>
     const filter: T -> bool
@@ -380,7 +399,7 @@ module Enumerators {
       requires Valid()
       decreases Repr, 2
       ensures HasNext() ==> Decreases() > 0
-      ensures !HasNext() ==> !wrapped.HasNext() // TODO
+      ensures !HasNext() ==> !wrapped.HasNext()
     {
       assert if next.Some? then Decreases() >= 1 else true;
       next.Some?
@@ -422,6 +441,11 @@ module Enumerators {
         decreases wrapped.Decreases()
       {
         var wrappedEnumeratedBefore := wrapped.enumerated;
+        // This is where it is very difficult to prove termination if we
+        // allow wrapped.Repr to potentially grow, because the assertion
+        // we must satisfy for the recursive call to be allowed is actually
+        // wrapped.Repr < old(Repr). That means updating Repr after this call
+        // wouldn't help.
         var t := wrapped.Next();
         reveal Seq.Filter();
         LemmaFilterDistributesOverConcat(filter, wrappedEnumeratedBefore, [t]);
@@ -469,7 +493,7 @@ module Enumerators {
 
   method CollectToSeq<T>(e: Enumerator<T>) returns (result: seq<T>)
     requires e.Valid()
-    // TODO: Might remove this
+    // TODO: Might remove these
     requires e.enumerated == []
     modifies e.Repr
     ensures e.Valid()
@@ -487,115 +511,9 @@ module Enumerators {
       result := result + [element];
     }
 
-    // TODO: Figure out how to use Fold. Good case study for invariant support!
+    // TODO: Figure out how to use Fold instead. Good case study for invariant support!
     // var f := (s, x) => s + [x];
     // result := Fold(f, [], e);
     // Seq.LemmaInvFoldLeft(???, (s, x, s') => s + x == s', f, [], []);
   }
-
-  // method Max(s: set<int>) returns (max: int)
-  //   requires |s| > 0
-  //   ensures max in s
-  //   ensures forall x | x in s :: max >= x
-  // {
-  //   var first: int :| first in s;
-  //   max := first;
-  //   var rest := s - {max};
-
-  //   var sEnum: SetEnumerator<int> := new SetEnumerator(rest);
-  //   while (sEnum.HasNext()) 
-  //     invariant sEnum.Valid()
-  //     invariant fresh(sEnum.Repr)
-  //     invariant max == Seq.Max([first] + sEnum.enumerated)
-  //     decreases sEnum.Decreases()
-  //   {
-  //     var element := sEnum.Next();
-
-  //     if max < element {
-  //       max := element;
-  //     }
-  //   }
-  //   assert max == Seq.Max([first] + sEnum.enumerated);
-  //   assert multiset(sEnum.enumerated) == multiset(rest);
-  // }
-
-  method Example1() {
-    var numbers := [1, 2, 3, 4, 5];
-
-    var e: Enumerator<int> := new SeqEnumerator(numbers);
-    while (e.HasNext()) 
-      invariant e.Valid() && fresh(e.Repr)
-      decreases e.Decreases()
-    {
-      var element := e.Next();
-
-      print element, "\n";
-    }
-  }
-
-  method Example2() {
-    var first := [1, 2, 3, 4, 5];
-    var second := [6, 7, 8];
-    var e1 := new SeqEnumerator(first);
-    var e2 := new SeqEnumerator(second);
-    var e := new ConcatEnumerator(e1, e2);
-   
-    while (e.HasNext()) 
-      invariant e.Valid() && fresh(e.Repr)
-      decreases e.Decreases()
-    {
-      var element := e.Next();
-
-      print element, "\n";
-    }
-  }
-
-  method PrintWithCommas() {
-    var first := [1, 2, 3, 4, 5];
-    var e := new SeqEnumerator(first);
-   
-    while (e.HasNext()) 
-      invariant e.Valid() && fresh(e.Repr)
-      decreases e.Decreases()
-    {
-      var element := e.Next();
-
-      print element;
-      if e.HasNext() {
-        print ", ";
-      }
-    }
-    print "\n";
-  }
-
-  method MappingExample() {
-    var first := [1, 2, 3, 4, 5];
-    var e1 := new SeqEnumerator(first);
-    var e := new MappingEnumerator(x => x + 2, e1);
-   
-    var result: seq<int> := [];
-    while (e.HasNext()) 
-      invariant e.Valid() && fresh(e.Repr)
-      decreases e.Decreases()
-    {
-      var element := e.Next();
-
-      result := result + [element];
-    }
-    assert e.enumerated == Seq.Map(x => x + 2, first);
-  }
-
-  // TODO: Explicit example of working with lazy iterators, more emphasis on `HasNext` being a pure function
-  // TODO: Need to give background on Validatable, the fact that Valid() is the loop invariant
-  // TODO: Mention `enumerated` ghost variable, proving semantics based on that
-  // TODO: Are ghost enumerators a thing? :)
-  // TODO: Most enumerator constructors should ensure enumerated == [] and other things
-  //       Important to have end to end examples to ensure correctness invariants are actually usable!
-  //       Also usually need to (at least for v1) require that child enumerators are fresh (enumerated == [])
-  // TODO: Framing invariant is a pain in the butt, seems to need a label to be generic
-  //       Solution seems to be assuming enumerators are usually local, so fresh(e.Repr)
-  // TODO: Example of various traversals of datatype trees/graphs
-  // TODO: Think about Enumerator<T> (and hypothetical Aggregator<T>) as special cases of
-  //       Action<T, R>s with a relationship between their pre- and post-conditions.
-  // TODO: Could we have a TerminationMeasure trait, implementable by potentially any type?
 }
