@@ -1,3 +1,5 @@
+// RUN: %dafny /compile:3 "%s" > "%t"
+// RUN: %diff "%s.expect" "%t"
 
 include "../../src/Frames.dfy"
 include "../../src/Wrappers.dfy"

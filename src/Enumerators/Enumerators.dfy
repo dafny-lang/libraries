@@ -1,5 +1,6 @@
+// RUN: %dafny /compile:0 "%s" > "%t"
+// RUN: %diff "%s.expect" "%t"
 
-// include "../Actions.dfy"
 include "../Frames.dfy"
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
