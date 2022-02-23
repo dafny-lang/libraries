@@ -56,7 +56,7 @@ abstract module LittleEndianNat {
   }
 
   /* Given the same sequence, ToNatRight and ToNatLeft return the same nat. */
-  lemma LemmaToNatLeftEqToNatRight(xs: seq<uint>)
+  lemma {:vcs_split_on_every_assert} LemmaToNatLeftEqToNatRight(xs: seq<uint>)
     ensures ToNatRight(xs) == ToNatLeft(xs)
   {
     reveal ToNatRight();
@@ -67,10 +67,7 @@ abstract module LittleEndianNat {
         calc {
           ToNatLeft(xs);
           Last(xs) * Pow(BASE(), |xs| - 1);
-            {
-              LemmaPow0Auto();
-              LemmaMulBasicsAuto();
-            }
+            { reveal Pow(); }
           Last(xs);
           First(xs);
             { assert ToNatRight(DropFirst(xs)) == 0; }
