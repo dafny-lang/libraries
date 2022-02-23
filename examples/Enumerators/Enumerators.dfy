@@ -13,7 +13,7 @@ module Demo {
   method RoundTrip(s: seq<nat>) returns (result: seq<nat>)
     ensures result == s
   {
-    var e: SeqEnumerator := new SeqEnumerator(s);
+    var e: Enumerator := new SeqEnumerator(s);
     result := CollectToSeq(e);
   }
 
@@ -21,7 +21,7 @@ module Demo {
     ensures result == Seq.Map(x => x + 2, s)
   {
     var e := new SeqEnumerator(s);
-    var mapped := new MappingEnumerator(x => x + 2, e);
+    var mapped: Enumerator := new MappingEnumerator(x => x + 2, e);
     result := CollectToSeq(mapped);
   }
 
@@ -45,10 +45,14 @@ module Demo {
     ensures result == first + second
   {
     var e1: Enumerator<T> := new SeqEnumerator(first);
-    var e2 := new SeqEnumerator(second);
+    var e2: Enumerator<T> := new SeqEnumerator(second);
     var concatenated: ConcatEnumerator := new ConcatEnumerator(e1, e2);
     result := CollectToSeq(concatenated);
     assert concatenated.Valid();
   }
 
+  // TODO: Need to support the case of an invariant that isn't attached to a specific
+  // concrete type that implements Enumerator<T>.
+  // Want to state "will enumerate this" without that being baked into Enumerator<T> itself.
+  
 }

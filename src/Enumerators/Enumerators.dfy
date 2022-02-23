@@ -27,6 +27,13 @@ module Enumerators {
     // Dafny doesn't let you pass around an underspecified value though,
     // so we don't define a "to be enumerated" field or function.
 
+    // Would be better as an arbitrary termination clause somehow instead.
+    // https://github.com/dafny-lang/dafny/issues/762
+    function Decreases(): nat
+      reads Repr
+      decreases Repr, 1
+      requires Valid()
+
     predicate method HasNext() 
       reads Repr
       requires Valid()
@@ -42,18 +49,7 @@ module Enumerators {
       ensures Repr <= old(Repr)
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [element]
-
-    // Would be better as an arbitrary termination clause somehow instead
-    // https://github.com/dafny-lang/dafny/issues/762
-    function Decreases(): nat
-      reads Repr
-      decreases Repr, 1
-      requires Valid()
   }
-
-  // TODO: Common EagerEnumerator<T> that wraps a Enumerator<Option<T>>
-  // for cases like Filter or IteratorAdaptor that can't calculate HasNext() 
-  // ahead of time?
 
   class SeqEnumerator<T> extends Enumerator<T> {
 
@@ -431,25 +427,54 @@ module Enumerators {
     }
   }
 
-  method CollectToSeq<T>(e: Enumerator<T>) returns (s: seq<T>)
+  method Fold<T, A>(f: (A, T) -> A, init: A, e: Enumerator<T>) returns (result: A)
+    requires e.Valid()
+    requires e.enumerated == []
+    modifies e.Repr
+    ensures e.Valid()
+    ensures !e.HasNext()
+    ensures result == Seq.FoldLeft(f, init, e.enumerated)
+  {
+    reveal Seq.FoldLeft();
+    result := init;
+    while (e.HasNext())
+      invariant e.Valid() && e.Repr <= old(e.Repr)
+      decreases e.Decreases()
+
+      invariant result == Seq.FoldLeft(f, init, e.enumerated)
+    {
+      ghost var enumeratedBefore := e.enumerated;
+      var element := e.Next();
+      result := f(result, element);
+
+      Seq.LemmaFoldLeftDistributesOverConcat(f, init, enumeratedBefore, [element]);
+    }
+  }
+
+  method CollectToSeq<T>(e: Enumerator<T>) returns (result: seq<T>)
     requires e.Valid()
     // TODO: Might remove this
     requires e.enumerated == []
     modifies e.Repr
     ensures e.Valid()
     ensures !e.HasNext()
-    ensures s == e.enumerated
+    ensures result == e.enumerated
   {
-    s := [];
+    result := [];
     while (e.HasNext())
       invariant e.Valid() && e.Repr <= old(e.Repr)
       decreases e.Decreases()
 
-      invariant s == e.enumerated
+      invariant result == e.enumerated
     {
       var element := e.Next();
-      s := s + [element];
+      result := result + [element];
     }
+
+    // TODO: Figure out how to use Fold. Good case study for invariant support!
+    // var f := (s, x) => s + [x];
+    // result := Fold(f, [], e);
+    // Seq.LemmaInvFoldLeft(???, (s, x, s') => s + x == s', f, [], []);
   }
 
   // method Max(s: set<int>) returns (max: int)
