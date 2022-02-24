@@ -26,7 +26,6 @@ module RustStyleExample {
       ensures Valid()
       ensures Repr <= old(Repr)
       ensures res.Some? ==> Decreases() < old(Decreases())
-      ensures old(Decreases()) == 0 ==> res.None?
 
     function Decreases(): nat
       reads Repr

@@ -11,7 +11,6 @@ module Enumerators {
   import opened Wrappers
   import opened Seq
 
-
   // A trait for any value that produces a finite sequence of values.
   trait {:termination false} Enumerator<T> extends Validatable {
     
@@ -73,7 +72,50 @@ module Enumerators {
       ensures enumerated == old(enumerated) + [element]
   }
 
-  class SeqEnumerator<T> extends Enumerator<T> {
+  /**********************************************************
+  *
+  *  Specializations
+  *
+  *  Having these traits separate from the concrete implementations
+  *  allows us to generalize over different cases with common
+  *  tighter specifications of what they enumerate, such as
+  *  knowing the exact seq<T> of values that will be enumerated.
+  *  These can also be attached to external implementations to express
+  *  assumptions about their behavior.
+  *
+  ***********************************************************/
+
+  // TODO: Need a naming convention that clearly distinguishes
+  // "Enumerator where you can tell me the ghost seq<T> value that will be enumerated"
+  // vs.
+  // "Enumerator that enumerates a runtime seq<T> value"
+  trait EnumeratorOfSeq<T> extends Enumerator<T> {
+    ghost var toEnumerate: seq<T>
+
+    predicate method HasNext() 
+      reads Repr
+      requires Valid()
+      decreases Repr, 2
+      ensures !HasNext() ==> enumerated == toEnumerate
+  }
+
+  trait EnumeratorOfSet<T> extends Enumerator<T> {
+    ghost var toEnumerate: set<T>
+
+    predicate method HasNext() 
+      reads Repr
+      requires Valid()
+      decreases Repr, 2
+      ensures !HasNext() ==> multiset(enumerated) == multiset(toEnumerate)
+  }
+
+  /**********************************************************
+  *
+  *  Concrete implementations
+  *
+  ***********************************************************/
+
+  class SeqEnumerator<T> extends EnumeratorOfSeq<T> {
 
     const elements: seq<T>
     var index: nat
@@ -87,6 +129,7 @@ module Enumerators {
       elements := s;
       index := 0;
 
+      toEnumerate := s;
       enumerated := [];
       Repr := {this};
     }
@@ -97,6 +140,7 @@ module Enumerators {
       decreases Repr, 0
     {
       && this in Repr
+      && toEnumerate == elements
       && 0 <= index <= |elements|
       && enumerated == elements[0..index]
     }
@@ -144,9 +188,9 @@ module Enumerators {
   // The good news is that if the Enumerator concept, or a generalized
   // type characteristic it satisfies, is added to Dafny itself, then
   // the various runtimes can provide a much more efficient implementation
-  // of this enumerator based on iteration features in the underlying set
+  // of EnumeratorOfSet<T> based on iteration features in the underlying set
   // implementation.
-  class SetEnumerator<T(==)> extends Enumerator<T> {
+  class SetEnumerator<T(==)> extends EnumeratorOfSet<T> {
     ghost const original: set<T>
     var remaining: set<T>
 
@@ -159,6 +203,7 @@ module Enumerators {
       this.original := s;
       this.remaining := s;
 
+      toEnumerate := s;
       enumerated := [];
       Repr := {this};
     }
@@ -169,6 +214,7 @@ module Enumerators {
       decreases Repr, 0
     {
       && this in Repr
+      && toEnumerate == original
       && multiset(enumerated) + multiset(remaining) == multiset(original)
     }
 
@@ -184,7 +230,7 @@ module Enumerators {
       requires Valid()
       reads this, Repr
       decreases Repr, 2
-      ensures HasNext() ==> Decreases() > 0
+      ensures !HasNext() ==> multiset(enumerated) == multiset(toEnumerate)
     {
       |remaining| > 0
     }
@@ -204,6 +250,12 @@ module Enumerators {
       enumerated := enumerated + [element];
     }
   }
+
+  /**********************************************************
+  *
+  *  Higher-order operations
+  *
+  ***********************************************************/
 
   class MappingEnumerator<T, R> extends Enumerator<R> {
     const wrapped: Enumerator<T>
@@ -266,6 +318,7 @@ module Enumerators {
     }
   }
 
+  // TODO: Generalize to a FlattenEnumerator that wraps an Enumerator<Enumerator<T>> instead?
   class ConcatEnumerator<T> extends Enumerator<T> {
 
     const first: Enumerator<T>

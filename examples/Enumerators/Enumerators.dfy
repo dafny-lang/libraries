@@ -121,23 +121,6 @@ module Demo {
     assert concatenated.Valid();
   }
 
-  // TODO: The examples above work because Dafny is aware of the concrete
-  // types of the various enumerator values, and hence knows the additional post-conditions
-  // of Valid() and !HasNext() necessary to support the more specific assertions.
-  // That's why we need to explicitly attach a more specific type than Enumerator
-  // to some variables, when type inference would otherwise choose Enumerator.
-  // This will be an issue when trying to add more higher-order operations on enumerators,
-  // or on linking to external implementations that don't have specific Dafny types to
-  // attach their invariants on. 
-  //
-  // We'd like to have signatures like this, that ensures the Valid() and HasNext() 
-  // implementations on the result have the desired properties, so we don't need the 
-  // verifier to know the concrete type of the result:
-  //
-  // method MakeSeqEnumerator<T>(s: seq<T>) returns (result: Enumerator<T>)
-  //   ensures forall e :: (result's HasNext applied to e) == false ==> e.enumerated == s)
-  //
-  // There isn't currently any way to refer to the HasNext function on the result that doesn't
-  // bind result as the function receiver, though, and my attempts to define ghost vars that
-  // hold onto such function references haven't worked out well so far.
+  // TODO: Add examples that use external implementations of specialized traits
+  // like EnumeratorOfSeq<T>.
 }
