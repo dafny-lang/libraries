@@ -12,7 +12,7 @@ module Enumerators {
   import opened Seq
 
 
-  // A trait for any value that produces a finite set of value.
+  // A trait for any value that produces a finite sequence of values.
   trait {:termination false} Enumerator<T> extends Validatable {
     
     // The Valid() predicate from the Validatable trait ends up
@@ -55,7 +55,6 @@ module Enumerators {
       reads Repr
       requires Valid()
       decreases Repr, 2
-      ensures HasNext() ==> Decreases() > 0
 
     method Next() returns (element: T)
       requires Valid()
@@ -239,9 +238,7 @@ module Enumerators {
       reads Repr
       requires Valid()
       decreases Repr, 2
-      ensures HasNext() ==> Decreases() > 0
     {
-      assert wrapped.HasNext() ==> Decreases() > 0;
       wrapped.HasNext()
     }
 
@@ -307,10 +304,7 @@ module Enumerators {
       requires Valid()
       reads this, Repr
       decreases Repr, 2
-      ensures HasNext() ==> Decreases() > 0
     {
-      assert first.HasNext() ==> Decreases() > 0;
-      assert second.HasNext() ==> Decreases() > 0;
       first.HasNext() || second.HasNext()
     }
 
