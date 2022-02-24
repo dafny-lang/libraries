@@ -200,8 +200,7 @@ module Enumerators {
       ensures Decreases() < old(Decreases())
       ensures enumerated == old(enumerated) + [element]
     {
-      var picked: T :| picked in remaining;
-      element := picked;
+      element :| element in remaining;
       remaining := remaining - {element};
       enumerated := enumerated + [element];
     }
@@ -433,7 +432,7 @@ module Enumerators {
       ensures unchanged(this`enumerated)
       ensures unchanged(this`Repr)
     {
-      while (wrapped.HasNext() && next.None?)
+      while wrapped.HasNext() && next.None?
         invariant AlmostValid()
         invariant wrapped.Repr < old(Repr)
         invariant Repr == old(Repr)
@@ -478,7 +477,7 @@ module Enumerators {
   {
     reveal Seq.FoldLeft();
     result := init;
-    while (e.HasNext())
+    while e.HasNext()
       invariant e.Valid() && e.Repr <= old(e.Repr)
       decreases e.Decreases()
 
@@ -502,7 +501,7 @@ module Enumerators {
     ensures result == e.enumerated
   {
     result := [];
-    while (e.HasNext())
+    while e.HasNext()
       invariant e.Valid() && e.Repr <= old(e.Repr)
       decreases e.Decreases()
 

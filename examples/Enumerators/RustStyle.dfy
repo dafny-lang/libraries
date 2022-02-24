@@ -162,7 +162,7 @@ module RustStyleExample {
     var iter := new SeqRustStyleIterator([1,2,3,4,5]);
 
     var enum: Enumerator<int> := new RustStyleIteratorEnumerator(iter);
-    while (enum.HasNext()) 
+    while enum.HasNext()
       invariant enum.Valid() && fresh(enum.Repr)
       decreases enum.Decreases()
     {

@@ -16,14 +16,11 @@ module DatatypeEnumerator {
   // TODO: Could define a Enumerable<T> trait as well, although datatypes
   // can't yet implement that anyway.
   datatype List<T> = Cons(value: T, tail: List<T>) | Nil {
-    method Enumerator() returns (e: Enumerator<T>) {
+    method Enumerator() returns (e: Enumerator<T>) 
+      ensures e.Valid()
+      ensures fresh(e.Repr)
+    {
       e := new ListEnumerator(this);
-    }
-
-    function Length(): nat {
-      match this
-      case Cons(_, tail) => 1 + tail.Length()
-      case Nil => 0
     }
   }
 
@@ -56,7 +53,14 @@ module DatatypeEnumerator {
     {
       // TODO: This is where I wish I could just say "next" and 
       // rely on the well-founded ordering.
-      next.Length()
+      Length(next)
+    }
+
+
+    static function Length(l: List<T>): nat {
+      match l
+      case Cons(_, tail) => 1 + Length(tail)
+      case Nil => 0
     }
 
     predicate method HasNext() 
@@ -82,6 +86,20 @@ module DatatypeEnumerator {
       next := next.tail;
 
       enumerated := enumerated + [element];
+    }
+  }
+
+  method Main() {
+    var list := Cons(1, Cons(2, Cons(3, Cons(4, Cons(5, Nil)))));
+
+    var e := list.Enumerator();
+    while e.HasNext()
+      invariant e.Valid() && fresh(e.Repr)
+      decreases e.Decreases()
+    {
+      var x := e.Next();
+
+      print x;
     }
   }
 }

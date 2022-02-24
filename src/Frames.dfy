@@ -1,3 +1,6 @@
+// RUN: %dafny /compile:0 "%s" > "%t"
+// RUN: %diff "%s.expect" "%t"
+
 module Frames {
 
   // A trait for objects with a Valid() predicate. Necessary in order to

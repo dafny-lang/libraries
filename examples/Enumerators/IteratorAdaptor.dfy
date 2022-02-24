@@ -26,7 +26,7 @@ module IteratorAdaptorExample {
     // This is necessary to prove the Repr <= old(Repr) post-condition
     // of Next(). Iterators that instantiate and "hand off" objects
     // will need a weaker post-condition.
-    yield ensures _new == {};
+    yield ensures _new == {}
     ensures |elements| == end - start
   {
     for i := start to end
@@ -50,9 +50,6 @@ module IteratorAdaptorExample {
       iter := new RangeIterator(start, end);
       remaining := end - start;
       enumerated := [];
-      
-      new;
-      
       Repr := {this, iter};
     }
 
@@ -63,7 +60,7 @@ module IteratorAdaptorExample {
     {
       && this in Repr
       && iter in Repr
-      && iter._modifies + iter._reads + iter._new == {}
+      && iter._modifies == iter._reads == iter._new == {}
       && iter.Valid()
       && remaining == (iter.end - iter.start) - |iter.elements|
     } 

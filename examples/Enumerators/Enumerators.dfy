@@ -15,7 +15,7 @@ module Demo {
     var numbers := [1, 2, 3, 4, 5];
 
     var e: Enumerator<int> := new SeqEnumerator(numbers);
-    while (e.HasNext()) 
+    while e.HasNext()
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
@@ -32,7 +32,7 @@ module Demo {
     var e2 := new SeqEnumerator(second);
     var e := new ConcatEnumerator(e1, e2);
    
-    while (e.HasNext()) 
+    while e.HasNext()
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
@@ -46,7 +46,7 @@ module Demo {
     var first := [1, 2, 3, 4, 5];
     var e := new SeqEnumerator(first);
    
-    while (e.HasNext()) 
+    while e.HasNext()
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
@@ -66,7 +66,7 @@ module Demo {
     var e := new MappingEnumerator(x => x + 2, e1);
    
     var result: seq<int> := [];
-    while (e.HasNext()) 
+    while e.HasNext()
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
