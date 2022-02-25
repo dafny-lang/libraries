@@ -60,13 +60,14 @@ module DatatypeEnumerator {
 
     var traversal := InorderTraversal(tree);
     var e := traversal.Enumerator();
-    while e.HasNext()
+    while true
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
       var x := e.Next();
+      if x.None? { break; }
 
-      print x;
+      print x.value;
     }
 
     // With foreach loop support, the above could just be:

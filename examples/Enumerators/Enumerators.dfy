@@ -15,13 +15,14 @@ module Demo {
     var numbers := [1, 2, 3, 4, 5];
 
     var e: Enumerator<int> := new SeqEnumerator(numbers);
-    while e.HasNext()
+    while true
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
       var element := e.Next();
+      if element.None? { break; }
 
-      print element, "\n";
+      print element.value, "\n";
     }
   }
 
@@ -30,32 +31,34 @@ module Demo {
     var second := [6, 7, 8];
     var e1 := new SeqEnumerator(first);
     var e2 := new SeqEnumerator(second);
-    var e := new ConcatEnumerator(e1, e2);
+    var e: Enumerator := new ConcatEnumerator(e1, e2);
    
-    while e.HasNext()
+    while true
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
       var element := e.Next();
+      if element.None? { break; }
 
-      print element, "\n";
+      print element.value, "\n";
     }
   }
 
   method PrintWithCommas() {
     var first := [1, 2, 3, 4, 5];
-    var e := new SeqEnumerator(first);
+    var e: Enumerator := new SeqEnumerator(first);
    
-    while e.HasNext()
+    for index := 0 to *
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
       var element := e.Next();
+      if element.None? { break; }
 
-      print element;
-      if e.HasNext() {
+      if index > 0 {
         print ", ";
       }
+      print element;
     }
     print "\n";
   }
@@ -63,16 +66,17 @@ module Demo {
   method MappingExample() {
     var first := [1, 2, 3, 4, 5];
     var e1 := new SeqEnumerator(first);
-    var e := new MappingEnumerator(x => x + 2, e1);
+    var e: Enumerator := new MappingEnumerator(x => x + 2, e1);
    
     var result: seq<int> := [];
-    while e.HasNext()
+    while true
       invariant e.Valid() && fresh(e.Repr)
       decreases e.Decreases()
     {
       var element := e.Next();
+      if element.None? { break; }
 
-      result := result + [element];
+      result := result + [element.value];
     }
     assert e.enumerated == Seq.Map(x => x + 2, first);
   }

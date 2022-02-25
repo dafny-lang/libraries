@@ -40,6 +40,7 @@ module IteratorAdaptorExample {
   class RangeEnumerator extends Enumerator<int> {
 
     const iter: RangeIterator
+    var iterDone: bool
     var remaining: nat
 
     constructor(start: int, end: int) 
@@ -61,33 +62,42 @@ module IteratorAdaptorExample {
       && this in Repr
       && iter in Repr
       && iter._modifies == iter._reads == iter._new == {}
-      && iter.Valid()
+      && (!iterDone ==> iter.Valid())
       && remaining == (iter.end - iter.start) - |iter.elements|
     } 
 
-    predicate method HasNext()
+    method Next() returns (element: Option<int>)
       requires Valid()
-      reads this, Repr
-      decreases Repr, 2
-      ensures HasNext() ==> Decreases() > 0
-    {
-      remaining > 0
-    }
-
-    method Next() returns (element: int)
-      requires Valid()
-      requires HasNext()
       modifies Repr
       decreases Repr
       ensures Valid()
       ensures Repr <= old(Repr) 
-      ensures Decreases() < old(Decreases())
-      ensures enumerated == old(enumerated) + [element]
+      ensures ienumerated == old(ienumerated) + [element]
+      ensures element.Some? ==> (
+        && Decreases() < old(Decreases())
+        && enumerated == old(enumerated) + [element.value]
+      )
+      ensures element.None? ==> (
+        && Decreases() == 0
+        && enumerated == old(enumerated)
+      )
     {
-      var more := iter.MoveNext();
-      element := iter.element;
-      enumerated := enumerated + [element];
-      remaining := remaining - 1;
+      if iterDone {
+        element := None;
+      } else {
+        assert remaining == (iter.end - iter.start) - |iter.elements|;
+        var more := iter.MoveNext();
+        if more {
+          assert |iter.elements| == old(|iter.elements|) + 1;
+          assert remaining > 0;
+          element := Some(iter.element);
+          remaining := remaining - 1;
+        } else {
+          iterDone := true;
+          element := None;
+        }
+      }
+      Enumerated(element);
     }
 
     function Decreases(): nat 
