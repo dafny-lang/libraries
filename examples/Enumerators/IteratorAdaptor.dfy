@@ -89,7 +89,8 @@ module IteratorAdaptorExample {
         var more := iter.MoveNext();
         if more {
           assert |iter.elements| == old(|iter.elements|) + 1;
-          assert remaining > 0;
+          
+          assert remaining == (iter.end - iter.start) - old(|iter.elements|);
           element := Some(iter.element);
           remaining := remaining - 1;
         } else {

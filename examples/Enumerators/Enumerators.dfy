@@ -6,6 +6,7 @@ include "../../src/Enumerators/Enumerators.dfy"
 module Demo {
 
   import opened Enumerators
+  import opened Wrappers
 
   // Note the common template for using a while loop on
   // an arbitrary Enumerator. This will likely be what we
@@ -127,4 +128,55 @@ module Demo {
 
   // TODO: Add examples that use external implementations of specialized traits
   // like EnumeratorOfSeq<T>.
+
+  class Cell {
+    constructor() {}
+  }
+
+  // An enumerator that produces newly allocated objects.
+  // Test case for framing.
+  class CellEnumerator extends Enumerator<Cell> {
+    var remaining: nat
+    predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
+      && this in Repr
+    }
+
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+      decreases Repr, 1
+    {
+      remaining
+    }
+    
+    method Next() returns (element: Option<Cell>)
+      requires Valid()
+      modifies Repr
+      decreases Repr
+      ensures Valid()
+      ensures Repr <= old(Repr)
+      ensures ienumerated == old(ienumerated) + [element]
+      ensures element.Some? ==> (
+        && Decreases() < old(Decreases())
+        && enumerated == old(enumerated) + [element.value]
+      )
+      ensures element.None? ==> (
+        && Decreases() == 0
+        && enumerated == old(enumerated)
+      )
+    {
+      if remaining > 0 {
+        var cell := new Cell();
+        element := Some(cell);
+        remaining := remaining - 1;
+      } else {
+        element := None;
+      }
+      Enumerated(element);
+    }
+  }
 }
