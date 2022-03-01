@@ -723,6 +723,9 @@ module Enumerators {
   // This would allow a foreach loop to bind the values enumerated so far:
   // 
   // foreach (x, xs) in WithEnumerated(collection) { ... }
+  //
+  // I like this better than the magical definitions iterators provide,
+  // since this way you're not culture-specific. :)
   class WithEnumeratedEnumerator<T> extends Enumerator<(T, ghost seq<T>)> {
     const wrapped: Enumerator<T>
 
