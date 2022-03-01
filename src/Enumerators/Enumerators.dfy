@@ -720,6 +720,71 @@ module Enumerators {
     }
   }
 
+  // This would allow a foreach loop to bind the values enumerated so far:
+  // 
+  // foreach (x, xs) in WithEnumerated(collection) { ... }
+  class WithEnumeratedEnumerator<T> extends Enumerator<(T, ghost seq<T>)> {
+    const wrapped: Enumerator<T>
+
+    constructor(wrapped: Enumerator<T>) 
+      requires wrapped.Valid()
+      requires wrapped.enumerated == []
+      ensures Valid() 
+      ensures fresh(Repr - wrapped.Repr)
+      ensures enumerated == []
+      ensures this.wrapped == wrapped
+    {
+      this.wrapped := wrapped;
+      Repr := {this} + wrapped.Repr;
+      enumerated := [];
+    }
+
+    predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
+      && this in Repr
+      && ValidComponent(wrapped)
+    }
+
+    method Next() returns (element: Option<(T, ghost seq<T>)>)
+      requires Valid()
+      modifies Repr
+      decreases Repr
+      ensures Valid()
+      ensures Repr <= old(Repr)
+      ensures ienumerated == old(ienumerated) + [element]
+      ensures element.Some? ==> (
+        && Decreases() < old(Decreases())
+        && enumerated == old(enumerated) + [element.value]
+      )
+      ensures element.None? ==> (
+        && Decreases() == 0
+        && enumerated == old(enumerated)
+      )
+    {
+      var optT := wrapped.Next();
+      match optT
+      case Some(t) => {
+        element := Some((t, ghost wrapped.enumerated));
+        Enumerated(element);
+      }
+      case None => {
+        element := None;
+        Enumerated(element);
+      }
+    }
+
+    function Decreases(): nat 
+      reads this, Repr
+      requires Valid() 
+      decreases Repr, 1
+    {
+      wrapped.Decreases()
+    }
+  }
+
   method Fold<T, A>(f: (A, T) -> A, init: A, e: Enumerator<T>) returns (result: A)
     requires e.Valid()
     requires e.enumerated == []
