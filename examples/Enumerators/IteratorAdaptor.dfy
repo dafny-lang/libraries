@@ -21,13 +21,14 @@ module IteratorAdaptorExample {
   
   iterator RangeIterator(start: int, end: int) yields (element: int)
     requires start <= end
-    // This is necessary in order to prove termination via Decreases()
-    yield ensures element - start + 1 == |elements|
-    // This is necessary to prove the Repr <= old(Repr) post-condition
-    // of Next(). Iterators that instantiate and "hand off" objects
-    // will need a weaker post-condition.
-    yield ensures _new == {}
+    // These are necessary in order to prove termination via Decreases()
+    yield ensures |elements| <= end - start
     ensures |elements| == end - start
+    // These are necessary to prove the Repr <= old(Repr) post-condition
+    // of Next(). Iterators that instantiate and "hand off" objects
+    // will need weaker post-conditions.
+    yield ensures _new == {}
+    ensures _new == {}
   {
     for i := start to end
       invariant i - start == |elements|
@@ -50,6 +51,7 @@ module IteratorAdaptorExample {
     { 
       iter := new RangeIterator(start, end);
       remaining := end - start;
+      iterDone := false;
       enumerated := [];
       Repr := {this, iter};
     }
@@ -63,6 +65,7 @@ module IteratorAdaptorExample {
       && iter in Repr
       && iter._modifies == iter._reads == iter._new == {}
       && (!iterDone ==> iter.Valid())
+      && (iterDone ==> remaining == 0)
       && remaining == (iter.end - iter.start) - |iter.elements|
     } 
 
@@ -85,12 +88,8 @@ module IteratorAdaptorExample {
       if iterDone {
         element := None;
       } else {
-        assert remaining == (iter.end - iter.start) - |iter.elements|;
         var more := iter.MoveNext();
         if more {
-          assert |iter.elements| == old(|iter.elements|) + 1;
-          
-          assert remaining == (iter.end - iter.start) - old(|iter.elements|);
           element := Some(iter.element);
           remaining := remaining - 1;
         } else {
@@ -98,6 +97,7 @@ module IteratorAdaptorExample {
           element := None;
         }
       }
+      
       Enumerated(element);
     }
 

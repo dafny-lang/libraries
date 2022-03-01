@@ -92,6 +92,14 @@ module Demo {
     result := CollectToSeq(e);
   }
 
+  // method ToArray(s: seq<nat>) returns (result: array<nat>)
+  //   ensures result[..] == s
+  // {
+  //   var e: Enumerator := new SeqEnumerator(s);
+  //   assert Sized(e, |s|);
+  //   result := CollectToArray(e, |s|);
+  // }
+
   method AddTwoToEach(s: seq<nat>) returns (result: seq<nat>)
     ensures result == Seq.Map(x => x + 2, s)
   {
@@ -107,13 +115,29 @@ module Demo {
     result := CollectToSeq(e);
   }
 
+  method SeqEnumerator<T>(s: seq<T>) returns (r: Enumerator<T>) 
+    ensures r.Valid() && fresh(r.Repr)
+    // ensures Sized(r, |s|)
+  {
+    r := new SeqEnumerator(s);
+  }
+
+  // method SizedExample<T>()
+  // {
+  //   var e: Enumerator := SeqEnumerator([1,2,3,4,5]);
+  //   assert Sized(e, 5);
+  //   var one := e.Next();
+  //   assert Sized(e, 5);
+  // }
+
+
   method Filter<T>(s: seq<T>, p: T -> bool) returns (result: seq<T>)
     ensures result == Seq.Filter(p, s)
   {
     var e := new SeqEnumerator(s);
     var filtered: FilteredEnumerator := new FilteredEnumerator(e, p);
     result := CollectToSeq(filtered);
-    assert filtered.Valid();
+    assert e.enumerated == s;
   }
 
   method Concatenate<T>(first: seq<T>, second: seq<T>) returns (result: seq<T>)
@@ -126,8 +150,16 @@ module Demo {
     assert concatenated.Valid();
   }
 
-  // TODO: Add examples that use external implementations of specialized traits
-  // like EnumeratorOfSeq<T>.
+  // method ConcatenateToArray<T(0)>(first: seq<T>, second: seq<T>) returns (result: array<T>)
+  //   ensures result[..] == first + second
+  // {
+  //   var e1 := new SeqEnumerator(first);
+  //   var e2 := new SeqEnumerator(second);
+  //   var concatenated: ConcatEnumerator := new ConcatEnumerator(e1, e2);
+  //   concatenated.CountOfResult(|first|, |second|);
+  //   result := CollectToArray(concatenated, |first| + |second|);
+  //   assert concatenated.Valid();
+  // }
 
   class Cell {
     constructor() {}
@@ -177,6 +209,17 @@ module Demo {
         element := None;
       }
       Enumerated(element);
+    }
+  }
+
+  method EnumerateForever() decreases * {
+    var allNats := new NatEnumerator();
+    while true 
+      invariant allNats.Valid() && fresh(allNats.Repr)
+      decreases * 
+    {
+      var next := allNats.Next();
+      print next;
     }
   }
 }

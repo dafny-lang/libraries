@@ -3,6 +3,7 @@
 
 include "../Frames.dfy"
 include "../Wrappers.dfy"
+include "../Math.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
 module Enumerators {
@@ -10,6 +11,7 @@ module Enumerators {
   import opened Frames
   import opened Wrappers
   import opened Seq
+  import opened Math
 
   // A trait for any value that produces a potentially infinite sequence of values.
   trait {:termination false} IEnumerator<T> extends Validatable {
@@ -43,6 +45,15 @@ module Enumerators {
       && this in Repr
       && next == |ienumerated|
       && ienumerated == seq(|ienumerated|, i => i)
+    }
+
+    constructor() 
+      ensures Valid()
+      ensures fresh(Repr)
+    {
+      next := 0;
+      Repr := {this};
+      ienumerated := [];
     }
 
     method Next() returns (element: nat)
@@ -101,7 +112,7 @@ module Enumerators {
       // FilteredEnumerator below which needs to make a recursive call to
       // Next() inside a loop. 
       ensures Repr <= old(Repr)
-      // TODO: Package up the rest in a twostate predicate
+      // TODO: Package up the rest in a twostate predicate?
       ensures ienumerated == old(ienumerated) + [element]
       ensures element.Some? ==> (
         && Decreases() < old(Decreases())
@@ -117,55 +128,48 @@ module Enumerators {
   *
   *  Specializations
   *
-  *  Having these traits separate from the concrete implementations
-  *  allows us to generalize over different cases with common
-  *  tighter specifications of what they enumerate, such as
-  *  knowing the exact seq<T> of values that will be enumerated.
-  *  These can also be attached to external implementations to express
-  *  assumptions about their behavior.
-  *
   ***********************************************************/
 
-  // TODO: Need a naming convention that clearly distinguishes
-  // "Enumerator where you can tell me the ghost seq<T> value that will be enumerated"
-  // vs.
-  // "Enumerator that enumerates a runtime seq<T> value"
+  // TODO: These aren't actually what we need. They only assert
+  // a property about the current state of an enumerator, but we need
+  // to assert this property holds for the enumerator in the future
+  // as well, as long as it stays Valid().
+  //
+  // An alternate that works is to make these traits with body-less
+  // lemmas that must be proven by subclasses. That will cause an explosion
+  // of concrete types, though, because (for example) the ConcatEnumerator<T>
+  // can't dynamically decide to extend SizedEnumerator<T> whenever
+  // its two children do, so it forces a separate SizedConcatEnumerator<T>
+  // (which can't even share implementation by extending SizedEnumerator<T>)
 
-  trait SizedEnumerator<T> extends Enumerator<T> {
-    var count: nat
-
-    function Decreases(): nat
-      reads Repr
-      decreases Repr, 1
-      requires Valid()
-      ensures Decreases() == 0 <==> |enumerated| == count
+  predicate Sized<T>(e: Enumerator<T>, count: nat) 
+    reads e.Repr
+    requires e.Valid()
+  {
+    e.Decreases() == 0 ==> |e.enumerated| == count
   }
 
-  // Specialization for enumerators where the exact sequence
-  // is known ahead of time.
-  trait EnumeratorOfSeq<T> extends Enumerator<T> {
-    ghost var toEnumerate: seq<T>
-
-    function Decreases(): nat
-      reads Repr
-      decreases Repr, 1
-      requires Valid()
-      ensures Decreases() == 0 ==> enumerated == toEnumerate
+  predicate EnumeratesMultiset<T>(e: Enumerator<T>, enumerated: multiset<T>) 
+    reads e.Repr
+    requires e.Valid()
+  {
+    e.Decreases() == 0 ==> multiset(e.enumerated) == enumerated
   }
 
-  // Specialization for enumerators where the exact elements
-  // are known ahead of time, but not their order.
-  trait EnumeratorOfSet<T> extends Enumerator<T> {
-    ghost var toEnumerate: set<T>
-
-    function Decreases(): nat
-      reads Repr
-      decreases Repr, 1
-      requires Valid()
-      ensures Decreases() == 0 ==> 
-        && multiset(enumerated) == multiset(toEnumerate)
+  predicate EnumeratesSet<T>(e: Enumerator<T>, enumerated: set<T>) 
+    reads e.Repr
+    requires e.Valid()
+  {
+    e.Decreases() == 0 ==> multiset(e.enumerated) == multiset(enumerated)
   }
 
+  predicate EnumeratesSeq<T>(e: Enumerator<T>, enumerated: seq<T>) 
+    reads e.Repr
+    requires e.Valid()
+  {
+    e.Decreases() == 0 ==> e.enumerated == enumerated
+  }
+  
   /**********************************************************
   *
   *  Concrete implementations
@@ -175,7 +179,7 @@ module Enumerators {
   // TODO: Some of these should be IEnumerator adaptors instead,
   // possibly with an Enumerator subclass specialization.
 
-  class SeqEnumerator<T> extends EnumeratorOfSeq<T> {
+  class SeqEnumerator<T> extends Enumerator<T> {
 
     const elements: seq<T>
     var index: nat
@@ -185,12 +189,10 @@ module Enumerators {
       ensures fresh(Repr - {this})
       ensures enumerated == []
       ensures elements == s
-      ensures toEnumerate == s
     {
       elements := s;
       index := 0;
-
-      toEnumerate := s;
+      
       enumerated := [];
       Repr := {this};
     }
@@ -201,7 +203,6 @@ module Enumerators {
       decreases Repr, 0
     {
       && this in Repr
-      && toEnumerate == elements
       && 0 <= index <= |elements|
       && enumerated == elements[0..index]
     }
@@ -251,7 +252,7 @@ module Enumerators {
   // the various runtimes can provide a much more efficient implementation
   // of EnumeratorOfSet<T> based on iteration features in the underlying set
   // implementation.
-  class SetEnumerator<T(==)> extends EnumeratorOfSet<T> {
+  class SetEnumerator<T(==)> extends Enumerator<T> {
     ghost const original: set<T>
     var remaining: set<T>
 
@@ -264,7 +265,6 @@ module Enumerators {
       this.original := s;
       this.remaining := s;
 
-      toEnumerate := s;
       enumerated := [];
       Repr := {this};
     }
@@ -275,7 +275,6 @@ module Enumerators {
       decreases Repr, 0
     {
       && this in Repr
-      && toEnumerate == original
       && multiset(enumerated) + multiset(remaining) == multiset(original)
     }
 
@@ -320,6 +319,7 @@ module Enumerators {
   *
   ***********************************************************/
 
+  // TODO: Great case study for maintaining known properties through this transformation.
   class MappingEnumerator<T, R> extends Enumerator<R> {
     const wrapped: Enumerator<T>
     const f: T -> R
@@ -385,6 +385,12 @@ module Enumerators {
       wrapped.Decreases()
     }
   }
+
+  lemma MappingEnumeratorPreservesLength<T, R>(e: MappingEnumerator<T, R>, count: nat) 
+    requires e.Valid()
+    requires Sized(e.wrapped, count)
+    ensures Sized(e, count)
+  {}
 
   // TODO: Generalize to a FlattenEnumerator that wraps an Enumerator<Enumerator<T>> instead?
   class ConcatEnumerator<T> extends Enumerator<T> {
@@ -460,78 +466,97 @@ module Enumerators {
     {
       first.Decreases() + second.Decreases()
     }
+
+    lemma CountOfResult(firstCount: nat, secondCount: nat)
+      requires Valid()
+      requires Sized(first, firstCount)
+      requires Sized(second, secondCount)
+      ensures Sized(this, firstCount + secondCount)
+    {}
   }
 
-  // class ZipEnumerator<A, B> extends Enumerator<(A, B)> {
+  // This is a tricky one to make fully general:
+  //
+  // * The most general is of type (IEnumerator<A>, IEnumerator<B>) -> IEnumerator<(A, B)>
+  // * If either argument is finte, the result is too
+  // * If both arguments are sized, the result is too
+  //
+  // ...and if the class forgets any useful such properties,
+  // additional code can't add them later since the methods are opaque :(
+  //
+  // May also want an Enumerator2<A, B> variation, to avoid the
+  // pair overhead for common cases like `foreach x, index in`
+  class ZipEnumerator<A, B> extends Enumerator<(A, B)> {
 
-  //   const first: Enumerator<A>
-  //   const second: Enumerator<B>
+    const first: Enumerator<A>
+    const second: Enumerator<B>
 
-  //   constructor(first: Enumerator<A>, second: Enumerator<B>)
-  //     requires first.Valid() && first.enumerated == []
-  //     requires second.Valid() && second.enumerated == []
-  //     requires first.Repr !! second.Repr
-  //     ensures Valid() 
-  //     ensures fresh(Repr - first.Repr - second.Repr) 
-  //     ensures this.first == first
-  //     ensures this.second == second
-  //   {
-  //     this.first := first;
-  //     this.second := second;
+    constructor(first: Enumerator<A>, second: Enumerator<B>, size: nat)
+      requires first.Valid() && first.enumerated == []
+      requires second.Valid() && second.enumerated == []
+      requires first.Repr !! second.Repr
+      ensures Valid() 
+      ensures fresh(Repr - first.Repr - second.Repr) 
+      ensures this.first == first
+      ensures this.second == second
+    {
+      this.first := first;
+      this.second := second;
+
+      enumerated := [];
+      Repr := {this} + first.Repr + second.Repr;
+    }
+
+    predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
+      && this in Repr
+      && ValidComponent(first)
+      && ValidComponent(second)
+      && first.Repr !! second.Repr
+      // TODO: See top-level comment
+      // && |enumerated| == |first.enumerated| == |second.enumerated|
+      // && enumerated == Seq.Zip(first.enumerated, second.enumerated)
+    }
+
+    method Next() returns (element: Option<(A, B)>)
+      requires Valid()
+      modifies Repr
+      decreases Repr
+      ensures Valid()
+      ensures Repr <= old(Repr)
+      ensures ienumerated == old(ienumerated) + [element]
+      ensures element.Some? ==> (
+        && Decreases() < old(Decreases())
+        && enumerated == old(enumerated) + [element.value]
+      )
+      ensures element.None? ==> (
+        && Decreases() == 0
+        && enumerated == old(enumerated)
+      )
+    {
+      var left := first.Next();
+      var right := second.Next();
+      if left.Some? && right.Some? {
+        element := Some((left.value, right.value));
+      } else {
+        element := None;
+      }
       
-  //     enumerated := [];
-  //     Repr := {this} + first.Repr + second.Repr;
-  //   }
+      Repr := {this} + first.Repr + second.Repr;
+      Enumerated(element);
+    }
 
-  //   predicate Valid() 
-  //     reads this, Repr 
-  //     ensures Valid() ==> this in Repr
-  //     decreases Repr, 0
-  //   {
-  //     && this in Repr
-  //     && ValidComponent(first)
-  //     && ValidComponent(second)
-  //     && first.Repr !! second.Repr
-  //     && |first.enumerated| == |second.enumerated|
-  //     && enumerated == Seq.Zip(first.enumerated, second.enumerated)
-  //   }
-
-  //   method Next() returns (element: Option<(A, B)>)
-  //     requires Valid()
-  //     modifies Repr
-  //     decreases Repr
-  //     ensures Valid()
-  //     ensures Repr <= old(Repr)
-  //     ensures ienumerated == old(ienumerated) + [element]
-  //     ensures element.Some? ==> (
-  //       && Decreases() < old(Decreases())
-  //       && enumerated == old(enumerated) + [element.value]
-  //     )
-  //     ensures element.None? ==> (
-  //       && Decreases() == 0
-  //       && enumerated == old(enumerated)
-  //     )
-  //   {
-  //     var left := first.Next();
-  //     var right := second.Next();
-  //     if left.Some? && right.Some? {
-  //       element := Some((left.value, right.value));
-  //     } else {
-  //       element := None;
-  //     }
-      
-  //     Repr := {this} + first.Repr + second.Repr;
-  //     Enumerated(element);
-  //   }
-
-  //   function Decreases(): nat 
-  //     reads this, Repr 
-  //     requires Valid() 
-  //     decreases Repr, 1
-  //   {
-  //     first.Decreases()
-  //   }
-  // }
+    function Decreases(): nat 
+      reads this, Repr 
+      requires Valid() 
+      decreases Repr, 1
+    {
+      Math.Min(first.Decreases(), second.Decreases())
+    }
+  }
 
   class WithIndexEnumerator<T> extends Enumerator<(T, nat)> {
 
@@ -560,7 +585,8 @@ module Enumerators {
     {
       && this in Repr
       && ValidComponent(wrapped)
-      && enumerated == Seq.Zip(wrapped.enumerated, seq(|wrapped.enumerated|, i => i))
+      // TODO: Similar challenge to ZipEnumerator although hopefully not as hard
+      // && enumerated == Seq.Zip(wrapped.enumerated, seq(|wrapped.enumerated|, i => i))
     }
 
     method Next() returns (element: Option<(T, nat)>)
@@ -588,8 +614,8 @@ module Enumerators {
       }
       Enumerated(element);
 
-      reveal Seq.Zip();
-      assert enumerated == Seq.Zip(wrapped.enumerated, seq(|wrapped.enumerated|, i => i));
+      // reveal Seq.Zip();
+      // assert enumerated == Seq.Zip(wrapped.enumerated, seq(|wrapped.enumerated|, i => i));
     }
 
     function Decreases(): nat 
@@ -601,14 +627,9 @@ module Enumerators {
     }
   }
 
-  // Note that to satisfy the Enumerator API, this enumerator has
-  // to eagerly fetch the next value to return from Next().
-  // An alternative is to use a MappingEnumerator that maps to Option<T>
-  // values, and having consumers skip None values.
   class FilteredEnumerator<T> extends Enumerator<T> {
     const wrapped: Enumerator<T>
     const filter: T -> bool
-    var next: Option<T>
 
     constructor(wrapped: Enumerator<T>, filter: T -> bool) 
       requires wrapped.Valid()
@@ -621,7 +642,6 @@ module Enumerators {
     {
       this.wrapped := wrapped;
       this.filter := filter;
-      this.next := None;
       Repr := {this} + wrapped.Repr;
       enumerated := [];
     }
@@ -653,13 +673,17 @@ module Enumerators {
       )
     {
       element := None;
-      while true
+      var more := true;
+      while more
         invariant Valid()
         invariant wrapped.Repr < old(Repr)
         invariant Repr == old(Repr)
         invariant element.Some? ==> Decreases() < old(Decreases())
+        invariant !more && element.None? ==> Decreases() == 0
+        invariant !more && element.None? ==> enumerated == old(enumerated)
+        invariant unchanged(`ienumerated)
         invariant enumerated == Seq.Filter(filter, wrapped.enumerated)
-        decreases wrapped.Decreases()
+        decreases wrapped.Decreases(), more
       {
         var wrappedEnumeratedBefore := wrapped.enumerated;
         // This is where it is very difficult to prove termination if we
@@ -668,22 +692,23 @@ module Enumerators {
         // wrapped.Repr < old(Repr). That means updating Repr after this call
         // wouldn't help.
         var element := wrapped.Next();
-        if element.None? { break; }
+        if element.None? {
+          assert Decreases() == 0;
+          more := false;
+          // break;
+        } else {
+          reveal Seq.Filter();
+          LemmaFilterDistributesOverConcat(filter, wrappedEnumeratedBefore, [element.value]);
 
-        reveal Seq.Filter();
-        LemmaFilterDistributesOverConcat(filter, wrappedEnumeratedBefore, [element.value]);
-
-        if filter(element.value) {
-          Enumerated(element);
-          break;
+          if filter(element.value) {
+            enumerated := enumerated + [element.value];
+            more := false;
+            // break;
+          } else {
+          }
         }
       }
-      if element.None? {
-        Enumerated(element);
-      }
-      assert this in Repr;
-      assert ValidComponent(wrapped);
-      assert enumerated == Seq.Filter(filter, wrapped.enumerated);
+      ienumerated := ienumerated + [element];
     }
 
     function Decreases(): nat 
@@ -752,34 +777,62 @@ module Enumerators {
     // Seq.LemmaInvFoldLeft(???, (s, x, s') => s + x == s', f, [], []);
   }
 
-  method CollectToArray<T(0)>(e: SizedEnumerator<T>) returns (result: array<T>)
-    requires e.Valid()
-    requires e.enumerated == []
-    modifies e.Repr
-    ensures e.Valid()
-    ensures e.Decreases() == 0
-    ensures result[..] == e.enumerated
-  {
-    result := new T[e.count];
-    var eWithIndex: Enumerator := new WithIndexEnumerator(e);
-    while true
-      invariant eWithIndex.Valid() && fresh(eWithIndex.Repr - e.Repr)
-      modifies eWithIndex.Repr
-      decreases eWithIndex.Decreases()
-    {
-      var pair := eWithIndex.Next();
-      if pair.None? { break; }
-      var (element, index) := pair.value;
+  // TODO: Still working on this one, it needs a solid specification of the number of
+  // elements e will enumerate.
+  // method CollectToArray<T(0)>(e: Enumerator<T>, size: nat) returns (result: array<T>)
+  //   requires e.Valid()
+  //   requires e.enumerated == []
+  //   requires Sized(e, size)
+  //   modifies e.Repr
+  //   ensures e.Valid()
+  //   ensures e.Decreases() == 0
+  //   ensures result[..] == e.enumerated
+  // {
+  //   result := new T[size];
+  //   var eWithIndex: Enumerator := new WithIndexEnumerator(e);
+  //   while true
+  //     invariant eWithIndex.Valid() && fresh(eWithIndex.Repr - e.Repr)
+  //     modifies eWithIndex.Repr
+  //     decreases eWithIndex.Decreases()
+  //   {
+  //     var pair := eWithIndex.Next();
+  //     if pair.None? { break; }
+  //     var (element, index) := pair.value;
 
-      result[index] := element;
-    }
-    assert |e.enumerated| == e.count;
+  //     result[index] := element;
+  //   }
+  //   assert |e.enumerated| == size;
+  // }
 
-    // TODO: Figure out how to use Fold instead. Good case study for invariant support!
-    // var f := (s, x) => s + [x];
-    // result := Fold(f, [], e);
-    // Seq.LemmaInvFoldLeft(???, (s, x, s') => s + x == s', f, [], []);
+  trait Enumerable<T> extends Validatable {
+
+    method Enumerator() returns (e: Enumerator<T>)
+      requires Valid()
+      ensures Valid()
+      ensures e.Valid()
+      ensures fresh(e.Repr)
+      // TODO: How to express "will enumerate the contents of this"?
   }
 
+  class SeqEnumerable<T> extends Enumerable<T> {
+    const s: seq<T>
+
+    predicate Valid()
+      reads this, Repr
+      ensures Valid() ==> this in Repr
+      decreases Repr, 0
+    {
+      this in Repr
+    }
+
+    method Enumerator() returns (e: Enumerator<T>)
+      requires Valid()
+      ensures Valid()
+      ensures e.Valid()
+      ensures fresh(e.Repr)
+    {
+      e := new SeqEnumerator(s);
+    }
+  }
 
 }
