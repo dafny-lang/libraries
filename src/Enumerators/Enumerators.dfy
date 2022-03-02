@@ -142,6 +142,7 @@ module Enumerators {
   // its two children do, so it forces a separate SizedConcatEnumerator<T>
   // (which can't even share implementation by extending SizedEnumerator<T>)
 
+  // TODO: Don't use "Size", implies sizeof() semantics
   predicate Sized<T>(e: Enumerator<T>, count: nat) 
     reads e.Repr
     requires e.Valid()
