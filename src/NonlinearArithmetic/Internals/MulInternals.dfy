@@ -99,8 +99,8 @@ module MulInternals {
   predicate MulAuto()
   {
     && (forall x:int, y:int {:trigger x * y} :: x * y == y * x)
-    && (forall x:int, y:int, z:int {:trigger (x + y) * z} :: (x + y) * z == x * z + y * z)
-    && (forall x:int, y:int, z:int {:trigger (x - y) * z} :: (x - y) * z == x * z - y * z)
+    && (forall x:int, y:int, z:int :: (x + y) * z == x * z + y * z)
+    && (forall x:int, y:int, z:int :: (x - y) * z == x * z - y * z)
   }
 
   /* proves that MulAuto is valid */
