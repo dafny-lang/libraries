@@ -19,7 +19,7 @@ jobs:
           dafny-version: "3.4.2"
 
       - name: Verify Dafny Code
-        run: dafny /compile:0 /trace /verificationLogger:trx /verificationLogger:csv src/Sets/**/*.dfy
+        run: dafny /compile:0 /trace /verificationLogger:trx /verificationLogger:csv src/Collections/Sets/**/*.dfy
 
       - uses: actions/upload-artifact@v2  # upload test results
         if: success() || failure()        # run this step even if previous step failed
