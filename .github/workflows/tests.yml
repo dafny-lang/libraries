@@ -18,8 +18,15 @@ jobs:
         with:
           dafny-version: "3.4.2"
 
+      - name: Install Dafny report generator
+        run: dotnet tool install --global dafny-reportgenerator
+
       - name: Verify Dafny Code
         run: dafny /compile:0 /trace /verificationLogger:trx /verificationLogger:csv src/Collections/Sets/*.dfy
+
+      - name: Generate Report
+        # TODO: temporary intentional failure to verify it stops the build
+        run: dafny-reportgenerator summarize-csv-results --max-resource-count 5 TestResults/*.csv
 
       - uses: actions/upload-artifact@v2  # upload test results
         if: success() || failure()        # run this step even if previous step failed
