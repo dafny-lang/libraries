@@ -22,7 +22,7 @@ jobs:
         run: dotnet tool install --global dafny-reportgenerator
 
       - name: Verify Dafny Code
-        run: dafny /compile:0 /trace /verificationLogger:trx /verificationLogger:csv src/NonlinearArithmetic/**/*.dfy
+        run: dafny /compile:0 /trace /noNLarith /verificationLogger:trx /verificationLogger:csv src/NonlinearArithmetic/**/*.dfy
 
       - name: Generate Report
         run: dafny-reportgenerator summarize-csv-results --max-resource-count 1000000 TestResults/*.csv
