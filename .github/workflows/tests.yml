@@ -22,11 +22,10 @@ jobs:
         run: dotnet tool install --global dafny-reportgenerator
 
       - name: Verify Dafny Code
-        run: dafny /compile:0 /trace /verificationLogger:trx /verificationLogger:csv src/Collections/Sets/*.dfy
+        run: dafny /compile:0 /trace /verificationLogger:trx /verificationLogger:csv src/NonlinearArithmetic/**/*.dfy
 
       - name: Generate Report
-        # TODO: temporary intentional failure to verify it stops the build
-        run: dafny-reportgenerator summarize-csv-results --max-resource-count 5 TestResults/*.csv
+        run: dafny-reportgenerator summarize-csv-results --max-resource-count 1000000 TestResults/*.csv
 
       - uses: actions/upload-artifact@v2  # upload test results
         if: success() || failure()        # run this step even if previous step failed
