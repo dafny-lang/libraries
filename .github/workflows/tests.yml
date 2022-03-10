@@ -34,4 +34,5 @@ jobs:
         if: success() || failure()        # run this step even if previous step failed
         with:
           name: verification-results
-          path: 'TestResults/*.trx'
+          path: '**/TestResults/*.trx'
+          if-no-files-found: error
