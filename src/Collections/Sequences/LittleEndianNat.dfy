@@ -1,5 +1,4 @@
-// RUN: %dafny /compile:0 /noNLarith "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
 *  Original: Copyright (c) 2020 Secure Foundations Lab

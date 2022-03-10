@@ -1,5 +1,4 @@
-// RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %dafny /compile:0 "%s"
 
 /*******************************************************************************
 *  Copyright by the contributors to the Dafny Project
