@@ -1,5 +1,4 @@
-// RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %dafny /compile:0 "%s"
 
 module BoundedInts {
   const TWO_TO_THE_0:   int := 1
