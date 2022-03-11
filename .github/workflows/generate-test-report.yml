@@ -1,4 +1,4 @@
-name: 'Test Report'
+name: 'Generate Test Report'
 on:
   workflow_run:
     workflows: ['tests']                     # runs after CI workflow
@@ -11,6 +11,6 @@ jobs:
     - uses: dorny/test-reporter@v1
       with:
         artifact: verification-results
-        name: Verification Tests
+        name: Verification Results
         path: '*.trx'
         reporter: dotnet-trx
