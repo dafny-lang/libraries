@@ -119,7 +119,7 @@ module Seq {
     var r2 := r1[s2..e2];
     var r3 := s[s1+s2..s1+e2];
     assert |r2| == |r3|;
-    forall i {:trigger r2[i], r3[i]}| 0 <= i < |r2| ensures r2[i] == r3[i];
+    forall i | 0 <= i < |r2| ensures r2[i] == r3[i];
     {
     }
   }
@@ -165,7 +165,7 @@ module Seq {
   /* is true if there are no duplicate values in the sequence */
   predicate {:opaque} HasNoDuplicates<T>(s: seq<T>) 
   {
-    (forall i, j {:trigger s[i], s[j]}:: 0 <= i < |s| && 0 <= j < |s| && i != j ==> s[i] != s[j])
+    (forall i, j :: 0 <= i < |s| && 0 <= j < |s| && i != j ==> s[i] != s[j])
   }
 
   /* if sequence a and b don't have duplicates and there are no elements in
@@ -180,7 +180,7 @@ module Seq {
     reveal HasNoDuplicates();
     var c := a + b;
     if |c| > 1 {
-      assert forall i, j {:trigger c[i], c[j]}:: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
+      assert forall i, j :: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
         c[i] in multiset(a) && c[j] in multiset(b) && c[i] != c[j]; 
     }
   }
@@ -225,7 +225,7 @@ module Seq {
   /* proves that there are no duplicate values in the multiset version of the sequence */
   lemma LemmaMultisetHasNoDuplicates<T>(s: seq<T>)
     requires HasNoDuplicates(s)
-    ensures forall x {:trigger multiset(s)[x]} | x in multiset(s):: multiset(s)[x] == 1
+    ensures forall x | x in multiset(s):: multiset(s)[x] == 1
   {
     if |s| == 0 {
     } else {
@@ -244,7 +244,7 @@ module Seq {
   function method {:opaque} IndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
-    ensures forall j {:trigger s[j]} :: 0 <= j < i ==> s[j] != v
+    ensures forall j :: 0 <= j < i ==> s[j] != v
   {
     if s[0] == v then 0 else 1 + IndexOf(s[1..], v)
   }
@@ -253,7 +253,7 @@ module Seq {
   found */
   function method {:opaque} IndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |s| && s[o.value] == v &&
-                            forall j {:trigger s[j]} :: 0 <= j < o.value ==> s[j] != v
+                            forall j :: 0 <= j < o.value ==> s[j] != v
             else v !in s
   {
     if |s| == 0 then None()
@@ -268,7 +268,7 @@ module Seq {
   function method {:opaque} LastIndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
-    ensures forall j {:trigger s[j]} :: i < j < |s| ==> s[j] != v
+    ensures forall j :: i < j < |s| ==> s[j] != v
   {
     if s[|s|-1] == v then |s| - 1 else LastIndexOf(s[..|s|-1], v)
   }
@@ -277,7 +277,7 @@ module Seq {
   found */
   function method {:opaque} LastIndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |s| && s[o.value] == v &&
-                            forall j {:trigger s[j]} :: o.value < j < |s| ==> s[j] != v
+                            forall j :: o.value < j < |s| ==> s[j] != v
             else v !in s
   {
     if |s| == 0 then None()
@@ -288,8 +288,8 @@ module Seq {
   function method {:opaque} Remove<T>(s: seq<T>, pos: nat): (s': seq<T>)
     requires pos < |s|
     ensures |s'| == |s| - 1
-    ensures forall i {:trigger s'[i], s[i]} | 0 <= i < pos :: s'[i] == s[i]
-    ensures forall i {:trigger s'[i]} | pos <= i < |s| - 1 :: s'[i] == s[i+1]
+    ensures forall i | 0 <= i < pos :: s'[i] == s[i]
+    ensures forall i | pos <= i < |s| - 1 :: s'[i] == s[i+1]
   {
     s[..pos] + s[pos+1..]
   }
@@ -314,8 +314,8 @@ module Seq {
   function method {:opaque} Insert<T>(s: seq<T>, a: T, pos: nat): seq<T>
     requires pos <= |s|
     ensures |Insert(s, a, pos)| == |s| + 1
-    ensures forall i {:trigger Insert(s, a, pos)[i], s[i]} :: 0 <= i < pos ==> Insert(s, a, pos)[i] == s[i]
-    ensures forall i {:trigger s[i]} :: pos <= i < |s| ==> Insert(s, a, pos)[i+1] == s[i]
+    ensures forall i :: 0 <= i < pos ==> Insert(s, a, pos)[i] == s[i]
+    ensures forall i :: pos <= i < |s| ==> Insert(s, a, pos)[i+1] == s[i]
     ensures Insert(s, a, pos)[pos] == a
     ensures multiset(Insert(s, a, pos)) == multiset(s) + multiset{a}
   {
@@ -325,14 +325,15 @@ module Seq {
 
   function method {:opaque} Reverse<T>(s: seq<T>): (s': seq<T>)
     ensures |s'| == |s|
-    ensures forall i {:trigger s'[i]}{:trigger s[|s| - i - 1]} :: 0 <= i < |s| ==> s'[i] == s[|s| - i - 1]
+    ensures forall i :: 0 <= i < |s| ==> s'[i] == s[|s| - i - 1]
+    ensures forall i :: 0 <= i < |s| ==> s[i] == s'[|s|' - i - 1]
   {
     if s == [] then [] else [s[|s|-1]] + Reverse(s[0 .. |s|-1])
   }
-    
+
   function method {:opaque} Repeat<T>(v: T, length: nat): (s: seq<T>)
     ensures |s| == length
-    ensures forall i: nat {:trigger s[i]} | i < |s| :: s[i] == v
+    ensures forall i: nat | i < |s| :: s[i] == v
   {
     if length == 0 then
       []
@@ -343,6 +344,7 @@ module Seq {
   /* unzips a sequence that contains ordered pairs into 2 seperate sequences */
   function method {:opaque} Unzip<A,B>(s: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(s).0| == |Unzip(s).1| == |s|
+    /* Dafny selected triggers: {s[i]}, {Unzip(s).1[i]}, {Unzip(s).0[i]} */
     ensures forall i {:trigger Unzip(s).0[i]} {:trigger Unzip(s).1[i]} 
         :: 0 <= i < |s| ==> (Unzip(s).0[i], Unzip(s).1[i]) == s[i]
   {
@@ -357,6 +359,7 @@ module Seq {
   function method {:opaque} Zip<A,B>(a: seq<A>, b: seq<B>): seq<(A, B)>
     requires |a| == |b|
     ensures |Zip(a, b)| == |a|
+    /* Dafny selected triggers: {b[i]}, {a[i]}, {Zip(a, b)[i]} */
     ensures forall i {:trigger Zip(a, b)[i]}:: 0 <= i < |Zip(a, b)| ==> Zip(a, b)[i] == (a[i], b[i])
     ensures Unzip(Zip(a, b)).0 == a
     ensures Unzip(Zip(a, b)).1 == b
@@ -380,7 +383,7 @@ module Seq {
   /* finds the maximum integer value in the sequence */
   function method {:opaque} Max(s: seq<int>): int
     requires 0 < |s|
-    ensures forall k {:trigger k in s} :: k in s ==> Max(s) >= k
+    ensures forall k :: k in s ==> Max(s) >= k
     ensures Max(s) in s
   {
     assert s == [s[0]] + s[1..];
@@ -393,7 +396,7 @@ module Seq {
     requires 0 < |a| && 0 < |b|
     ensures Max(a+b) >= Max(a)
     ensures Max(a+b) >= Max(b)
-    ensures forall i {:trigger i in [Max(a + b)]} :: i in a + b ==> Max(a + b) >= i
+    ensures forall i :: i in a + b ==> Max(a + b) >= i
   {
     reveal Max();
     if |a| == 1 {
@@ -406,7 +409,7 @@ module Seq {
   /* finds the minimum integer value in the sequence */
   function method {:opaque} Min(s: seq<int>): int
     requires 0 < |s|
-    ensures forall k {:trigger k in s} :: k in s ==> Min(s) <= k
+    ensures forall k :: k in s ==> Min(s) <= k
     ensures Min(s) in s
   {
     assert s == [s[0]] + s[1..];
@@ -419,7 +422,7 @@ module Seq {
     requires 0 < |a| && 0 < |b|
     ensures Min(a+b) <= Min(a)
     ensures Min(a+b) <= Min(b)
-    ensures forall i {:trigger i in a + b} :: i in a + b ==> Min(a + b) <= i
+    ensures forall i :: i in a + b ==> Min(a + b) <= i 
   {
     reveal Min();
     if |a| == 1 {
@@ -553,7 +556,7 @@ module Seq {
   than the length of the original sequence of sequences multiplied by the length of 
   the longest sequence */
   lemma LemmaFlattenLengthLeMul<T>(s: seq<seq<T>>, j: int)
-    requires forall i {:trigger s[i]} | 0 <= i < |s| :: |s[i]| <= j
+    requires forall i | 0 <= i < |s| :: |s[i]| <= j
     ensures |FlattenReverse(s)| <= |s| * j
   {
     if |s| == 0 {
@@ -571,10 +574,11 @@ module Seq {
 
   /* applies a transformation function on the sequence */
   function method {:opaque} Map<T,R>(f: (T ~> R), s: seq<T>): (result: seq<R>)
-    requires forall i {:trigger s[i]} :: 0 <= i < |s| ==> f.requires(s[i])
+    requires forall i :: 0 <= i < |s| ==> f.requires(s[i])
     ensures |result| == |s|
+    /* Dafny selected triggers: {s[i]}, {result[i]} */
     ensures forall i {:trigger result[i]}:: 0 <= i < |s| ==> result[i] == f(s[i]);
-    reads set i, o {:trigger o in f.reads(s[i])} | 0 <= i < |s| && o in f.reads(s[i]):: o
+    reads set i, o | 0 <= i < |s| && o in f.reads(s[i]):: o
   {
     if |s| == 0 then []
     else [f(s[0])] + Map(f, s[1..])
@@ -601,8 +605,8 @@ module Seq {
   Map on each sequence  seperately and then concatenating the two resulting
   sequences */
   lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), a: seq<T>, b: seq<T>)
-    requires forall i {:trigger a[i]}:: 0 <= i < |a| ==> f.requires(a[i])
-    requires forall j {:trigger b[j]}:: 0 <= j < |b| ==> f.requires(b[j])
+    requires forall i :: 0 <= i < |a| ==> f.requires(a[i])
+    requires forall j :: 0 <= j < |b| ==> f.requires(b[j])
     ensures Map(f, a + b) == Map(f, a) + Map(f, b)
   {
     reveal Map();
@@ -624,7 +628,7 @@ module Seq {
   function method {:opaque} Filter<T>(f: (T ~> bool), s: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |s| ==> f.requires(s[i])
     ensures |result| <= |s|
-    ensures forall i: nat {:trigger result[i]} :: i < |result| && f.requires(result[i]) ==> f(result[i])
+    ensures forall i: nat :: i < |result| && f.requires(result[i]) ==> f(result[i])
     reads f.reads
   {
     if |s| == 0 then []
@@ -634,8 +638,8 @@ module Seq {
   /* concatenating two sequences and then using "filter" is the same as using "filter" on each sequences
   seperately and then concatenating their resulting sequences */
   lemma {:opaque} LemmaFilterDistributesOverConcat<T>(f: (T ~> bool), a: seq<T>, b: seq<T>)
-    requires forall i {:trigger a[i]}:: 0 <= i < |a| ==> f.requires(a[i])
-    requires forall j {:trigger b[j]}:: 0 <= j < |b| ==> f.requires(b[j])
+    requires forall i :: 0 <= i < |a| ==> f.requires(a[i])
+    requires forall j :: 0 <= j < |b| ==> f.requires(b[j])
     ensures Filter(f, a + b) == Filter(f, a) + Filter(f, b)
   {
     reveal Filter();

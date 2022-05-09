@@ -7,30 +7,33 @@ This style guide provides coding conventions for the Dafny Standard Library code
 ## Naming Convention
 
 Any **variables** are named with `camelCase`.
-
+```
   var minValue := 1;
   var cipherMessage := "Hello World";
-
+```
 
 Any **lemmas**, **predicates**, **functions**, **methods**, **classes**, **modules**, **datatypes**, and **newtypes**
 are named with `PascalCase`.
-
+```
   method FindIndex(arr: seq<int>, k: int)
     ...
-        
+``` 
         
 The **lemma** keyword indicates a ghost method used for proof purposes. Any **lemma** names should be prefixed with `Lemma`.
-
+```
   lemma LemmaValueIsInIndex(arr: seq<int>, k: int)
     ...
+```
         
 Any static or global **constants** are named with `UPPERCASE_WITH_UNDERSCORES`.
-
+```
   static const MONTHS_IN_A_YEAR := 12
+```
     
 ### Method Prefix
 
 Avoid redundant names when variables or methods are in a class/module.
+```
 class Integer {
 
   // The following method converts the given integer
@@ -48,7 +51,7 @@ class Integer {
   method IntegerToString(i: int) returns (s: string)
     ...
   }
-    
+```
 ## Code Layout
 
 ### Braces
@@ -77,14 +80,16 @@ module M {
 ### Imports
 
 By default, import modules without opening them.
-
+```
   import Coffee
   ...
+```
 
 However, if some members of a module are used very frequently, import it using `opened`:
-
+```
   import opened Donut
   ...
+```
     
 When a file uses two modules and both of them define a method of the same name, do not import them `opened`.
 
@@ -369,3 +374,7 @@ lemma LemmaMyLemma <A,B> ( x : seq<seq<A>> , y :B){
   ...
 }
 ```
+
+### Triggers
+
+The `{:trigger}` annotations used in the standard library are an advanced topic and should not be needed when starting out on Dafny projects. For some background on quantifiers and triggers, check [this](https://github.com/dafny-lang/dafny/wiki/FAQ#how-does-dafny-handle-quantifiers-ive-heard-about-triggers-what-are-those) out. 
