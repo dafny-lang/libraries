@@ -1,4 +1,5 @@
 include "JSON.Grammar.dfy"
+include "JSON.Spec.dfy"
 include "Parsers.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Deserializer {
@@ -6,58 +7,61 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     import opened BoundedInts
     import opened Wrappers
 
+    import Spec
+    import Vs = Views.Core
     import opened Cursors
     import opened Parsers
     import opened Grammar
 
     datatype JSONError =
-      | LeadingSeparator
       | UnterminatedSequence
       | EmptyNumber
       | ExpectingEOF
     {
       function ToString() : string {
         match this
-          case LeadingSeparator => "Separator not allowed before first item"
-          case UnterminatedSequence => "Unterminated sequence."
+          case UnterminatedSequence => "Unterminated sequence"
           case EmptyNumber => "Number must contain at least one digit"
           case ExpectingEOF => "Expecting EOF"
       }
     }
     type ParseError = CursorError<JSONError>
     type ParseResult<+T> = SplitResult<T, JSONError>
-    type Parser<+T> = Parsers.Parser<T, JSONError>
-    type SubParser<+T> = Parsers.SubParser<T, JSONError>
+    type Parser<!T> = Parsers.Parser<T, JSONError>
+    type SubParser<!T> = Parsers.SubParser<T, JSONError>
+
+    // BUG(https://github.com/dafny-lang/dafny/issues/2179)
+    const SpecView := (v: Vs.View) => Spec.View(v);
 
     // FIXME make more things opaque
 
-    function {:opaque} Get(ps: FreshCursor, err: JSONError): (pr: ParseResult<jchar>)
-      ensures pr.Success? ==> pr.value.t.Length() == 1
-      ensures pr.Success? ==> ps.Bytes() == pr.value.t.Bytes() + pr.value.ps.Bytes()
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps) // FIXME splitfrom should be on pp
+    function {:opaque} Get(cs: FreshCursor, err: JSONError): (pr: ParseResult<jchar>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
-      var ps :- ps.Get(err);
-      Success(ps.Split())
+      var cs :- cs.Get(err);
+      Success(cs.Split())
     }
 
-    function {:opaque} WS(ps: FreshCursor): (pp: Split<jblanks>)
-      ensures ps.Bytes() == pp.t.Bytes() + pp.ps.Bytes()
-      ensures pp.ps.SplitFrom?(ps)
+    function {:opaque} WS(cs: FreshCursor): (sp: Split<jblanks>)
+      ensures sp.SplitFrom?(cs, SpecView)
     {
-      ps.SkipWhile(Blank?).Split()
+      cs.SkipWhile(Blank?).Split()
     }
 
-    function Structural<T>(ps: FreshCursor, parser: Parser<T>)
+    function Structural<T>(cs: FreshCursor, parser: Parser<T>)
       : (pr: ParseResult<Structural<T>>)
-      requires forall ps :: parser.fn.requires(ps)
-      // PROOF: pass spec in here ensures pr.Success? ==> ps.Bytes() == pr.value.t.Bytes() + pr.value.ps.Bytes()
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+      requires forall cs :: parser.fn.requires(cs)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, st => Spec.Structural(st, parser.spec))
     {
-      var SP(before, ps) := WS(ps);
-      var SP(val, ps) :- parser.fn(ps);
-      var SP(after, ps) := WS(ps);
-      Success(SP(Grammar.Structural(before, val, after), ps))
+      var SP(before, cs) := WS(cs);
+      var SP(val, cs) :- parser.fn(cs);
+      var SP(after, cs) := WS(cs);
+      Success(SP(Grammar.Structural(before, val, after), cs))
     }
+
+    type ValueParser = sp: SubParser<Value> |
+      forall t :: sp.spec(t) == Spec.Value(t)
+      witness *
   }
 
   abstract module SequenceParams {
@@ -71,13 +75,13 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     const CLOSE: byte
     const SEPARATOR: byte
 
-    type TElement // LATER: With traits, make sure that TElement is convertible to bytes
-    function Element(ps: FreshCursor, json: SubParser<Value>)
+    type TElement
+    ghost function ElementSpec(t: TElement) : bytes
+    function Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
-      requires ps.StrictlySplitFrom?(json.ps)
-      decreases ps.Length()
-      // PROOF pass spec here
-      ensures pr.Success? ==> pr.value.ps.SplitFrom?(ps)
+      requires cs.StrictlySplitFrom?(json.cs)
+      decreases cs.Length()
+      ensures pr.Success? ==> pr.value.SplitFrom?(cs, ElementSpec)
   }
 
   abstract module Sequences {
@@ -94,92 +98,84 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     type jopen = v: View | v.Byte?(OPEN) witness View.OfBytes([OPEN])
     type jclose = v: View | v.Byte?(CLOSE) witness View.OfBytes([CLOSE])
     type jsep = v: View | v.Byte?(SEPARATOR) witness View.OfBytes([SEPARATOR])
-    type TSeq = Bracketed<jopen, jsep, TElement, jclose>
+    type TSeq = Bracketed<jopen, TElement, jsep, jclose>
 
-    function {:tailrecursion} SeparatorPrefixedElements(
-      ps: FreshCursor, json: SubParser<Value>,
-      open: Structural<jopen>,
-      items: PrefixedSequence<jsep, TElement>
-    ): (pr: ParseResult<TSeq>)
-      requires ps.StrictlySplitFrom?(json.ps)
-      requires NoLeadingPrefix(items)
-      decreases ps.Length()
-      // PROOF ensures pr.Success? ==> ps.Bytes() == pr.value.t.Bytes() + pr.value.ps.Bytes()
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+    function Open(cs: FreshCursor)
+      : (pr: ParseResult<jopen>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, _ => [OPEN])
     {
-      var SP(sep, ps) :- Core.Structural(ps, Parsers.Parser(ps => Get(ps, UnterminatedSequence)));
+      var cs :- cs.AssertByte(OPEN);
+      Success(cs.Split())
+    }
+
+    function Close(cs: FreshCursor)
+      : (pr: ParseResult<jclose>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, _ => [CLOSE])
+    {
+      var cs :- cs.AssertByte(CLOSE);
+      Success(cs.Split())
+    }
+
+    function {:tailrecursion} Elements(
+      cs: FreshCursor, json: ValueParser,
+      open: Structural<jopen>,
+      items: seq<Suffixed<TElement, jsep>> := []
+    )
+      : (pr: ParseResult<TSeq>)
+      requires cs.StrictlySplitFrom?(json.cs)
+      requires forall x | x in items :: x.suffix.NonEmpty?
+      decreases cs.Length()
+      ensures pr.Success? ==> pr.value.cs.StrictlySplitFrom?(cs)
+      // PROOF
+    {
+      var SP(item, cs) :- Element(cs, json);
+      var SP(sep, cs) :- Core.Structural(cs,
+        Parsers.Parser(cs => Get(cs, UnterminatedSequence), SpecView));
       var s0 := sep.t.At(0);
       if s0 == CLOSE then
-        Success(SP(Grammar.Bracketed(open, items, sep), ps))
+        var items := items + [Suffixed(item, Empty())];
+        Success(SP(Grammar.Bracketed(open, items, sep), cs))
       else if s0 == SEPARATOR then
-        :- Need(|items| > 0, OtherError(LeadingSeparator));
-        var SP(item, ps) :- Element(ps, json);
-        var items := items + [Prefixed(NonEmpty(sep), item)];
-        ghost var pr' := SeparatorPrefixedElements(ps, json, open, items); // DISCUSS: Why is this needed?
-        assert pr'.Success? ==> pr'.value.ps.StrictlySplitFrom?(ps);
-        SeparatorPrefixedElements(ps, json, open, items)
+        var SP(item, cs) :- Element(cs, json);
+        var items := items + [Suffixed(item, NonEmpty(sep))];
+        ghost var pr' := Elements(cs, json, open, items); // DISCUSS: Why is this needed?
+        assert pr'.Success? ==> pr'.value.cs.StrictlySplitFrom?(cs);
+        Elements(cs, json, open, items)
       else
         Failure(ExpectingAnyByte([CLOSE, SEPARATOR], s0 as opt_byte))
     }
 
-    function Open(ps: FreshCursor)
-      : (pr: ParseResult<jopen>)
-    {
-      var ps :- ps.AssertByte(OPEN);
-      Success(ps.Split())
-    }
-
-    function Close(ps: FreshCursor)
-      : (pr: ParseResult<jclose>)
-    {
-      var ps :- ps.AssertByte(CLOSE);
-      Success(ps.Split())
-    }
-
-    function Elements(ps: FreshCursor, json: SubParser<Value>, open: Structural<jopen>)
+    function Bracketed(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TSeq>)
-      requires ps.StrictlySplitFrom?(json.ps)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+      requires cs.SplitFrom?(json.cs)
+      ensures pr.Success? ==> pr.value.cs.StrictlySplitFrom?(cs)
     {
-      if ps.Peek() == CLOSE as opt_byte then
-        var SP(close, ps) :- Core.Structural(ps, Parsers.Parser(Close));
-        Success(SP(Grammar.Bracketed(open, [], close), ps))
+      var SP(open, cs) :- Core.Structural(cs, Parsers.Parser(Open, SpecView));
+      if cs.Peek() == CLOSE as opt_byte then
+        var SP(close, cs) :- Core.Structural(cs, Parsers.Parser(Close, SpecView));
+        Success(SP(Grammar.Bracketed(open, [], close), cs))
       else
-        var SP(item, ps) :- Element(ps, json);
-        var items := [Prefixed(Empty(), item)];
-        ghost var pr' := SeparatorPrefixedElements(ps, json, open, items); // DISCUSS: Why is this needed?
-        assert pr'.Success? ==> pr'.value.ps.StrictlySplitFrom?(ps);
-        SeparatorPrefixedElements(ps, json, open, items)
+        ghost var pr := Elements(cs, json, open); // DISCUSS: Why is this needed?
+        assert pr.Success? ==> pr.value.cs.StrictlySplitFrom?(cs);
+        Elements(cs, json, open)
     }
 
     lemma Valid(x: TSeq)
       ensures x.l.t.Byte?(OPEN)
       ensures x.r.t.Byte?(CLOSE)
-      ensures NoLeadingPrefix(x.data)
+      ensures NoTrailingSuffix(x.data)
       ensures forall pf | pf in x.data ::
-        pf.prefix.NonEmpty? ==> pf.prefix.t.t.Byte?(SEPARATOR)
+        pf.suffix.NonEmpty? ==> pf.suffix.t.t.Byte?(SEPARATOR)
     { // DISCUSS: Why is this lemma needed?  Why does it require a body?
       var xlt: jopen := x.l.t;
       var xrt: jclose := x.r.t;
       forall pf | pf in x.data
-        ensures pf.prefix.NonEmpty? ==> pf.prefix.t.t.Byte?(SEPARATOR)
+        ensures pf.suffix.NonEmpty? ==> pf.suffix.t.t.Byte?(SEPARATOR)
       {
-        if pf.prefix.NonEmpty? {
-          var xtt := pf.prefix.t.t;
+        if pf.suffix.NonEmpty? {
+          var xtt := pf.suffix.t.t;
         }
       }
-    }
-
-    function Bracketed(ps: FreshCursor, json: SubParser<Value>)
-      : (pr: ParseResult<TSeq>)
-      requires ps.SplitFrom?(json.ps)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
-      // ensures pr.Success? ==> Valid?(pr.value.t)
-    {
-      var SP(open, ps) :- Core.Structural(ps, Parsers.Parser(Open));
-      ghost var pr := Elements(ps, json, open); // DISCUSS: Why is this needed?
-      assert pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps);
-      Elements(ps, json, open)
     }
   }
 
@@ -192,15 +188,15 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     import opened Core
     import Values
 
-    function JSON(ps: FreshCursor) : (pr: ParseResult<JSON>)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+    function JSON(cs: FreshCursor) : (pr: ParseResult<JSON>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
     {
-      Core.Structural(ps, Parsers.Parser(Values.Value))
+      Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value))
     }
 
     function Text(v: View) : (pr: Result<JSON, ParseError>) {
-      var SP(text, ps) :- JSON(Cursor.OfView(v));
-      :- Need(ps.EOF?, OtherError(ExpectingEOF));
+      var SP(text, cs) :- JSON(Cursor.OfView(v));
+      :- Need(cs.EOF?, OtherError(ExpectingEOF));
       Success(text)
     }
   }
@@ -219,42 +215,43 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     import Arrays
     import Constants
 
-    function Value(ps: FreshCursor) : (pr: ParseResult<Value>)
-      decreases ps.Length(), 1
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+    function {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
+      decreases cs.Length(), 1
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Value)
     {
-      var c := ps.Peek();
-      if c == '{' as opt_byte then
-        var SP(obj, ps) :- Objects.Bracketed(ps, ValueParser(ps));
+      var c := cs.Peek();
+      if c == '{' as opt_byte then assume false;
+        var SP(obj, cs) :- Objects.Bracketed(cs, ValueParser(cs));
         Objects.Valid(obj);
-        Success(SP(Grammar.Object(obj), ps))
-      else if c == '[' as opt_byte then
-        var SP(arr, ps) :- Arrays.Bracketed(ps, ValueParser(ps));
+        Success(SP(Grammar.Object(obj), cs))
+      else if c == '[' as opt_byte then assume false;
+        var SP(arr, cs) :- Arrays.Bracketed(cs, ValueParser(cs));
         Arrays.Valid(arr);
-        Success(SP(Grammar.Array(arr), ps))
+        Success(SP(Grammar.Array(arr), cs))
       else if c == '\"' as opt_byte then
-        var SP(str, ps) :- Strings.String(ps);
-        Success(SP(Grammar.String(str), ps))
+        var SP(str, cs) :- Strings.String(cs);
+        Success(SP(Grammar.String(str), cs))
       else if c == 't' as opt_byte then
-        var SP(cst, ps) :- Constants.Constant(ps, TRUE);
-        Success(SP(Grammar.Bool(cst), ps))
+        var SP(cst, cs) :- Constants.Constant(cs, TRUE);
+        Success(SP(Grammar.Bool(cst), cs))
       else if c == 'f' as opt_byte then
-        var SP(cst, ps) :- Constants.Constant(ps, FALSE);
-        Success(SP(Grammar.Bool(cst), ps))
+        var SP(cst, cs) :- Constants.Constant(cs, FALSE);
+        Success(SP(Grammar.Bool(cst), cs))
       else if c == 'n' as opt_byte then
-        var SP(cst, ps) :- Constants.Constant(ps, NULL);
-        Success(SP(Grammar.Null(cst), ps))
+        var SP(cst, cs) :- Constants.Constant(cs, NULL);
+        Success(SP(Grammar.Null(cst), cs))
       else
-        Numbers.Number(ps)
+        var SP(num, cs) :- Numbers.Number(cs);
+        Success(SP(Grammar.Number(num), cs))
       }
 
-      function ValueParser(ps: FreshCursor) : (p: SubParser<Value>)
-        decreases ps.Length(), 0
-        ensures ps.SplitFrom?(p.ps)
+      function ValueParser(cs: FreshCursor) : (p: ValueParser)
+        decreases cs.Length(), 0
+        ensures cs.SplitFrom?(p.cs)
       {
-        var pre := (ps': FreshCursor) => ps'.Length() < ps.Length();
+        var pre := (ps': FreshCursor) => ps'.Length() < cs.Length();
         var fn := (ps': FreshCursor) requires pre(ps') => Value(ps');
-        Parsers.SubParser(ps, pre, fn)
+        Parsers.SubParser(cs, pre, fn, Spec.Value)
       }
   }
 
@@ -266,12 +263,12 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     import opened Core
     import opened Cursors
 
-    function Constant(ps: FreshCursor, expected: bytes) : (pr: ParseResult<jstring>)
+    function Constant(cs: FreshCursor, expected: bytes) : (pr: ParseResult<jstring>)
       requires |expected| < TWO_TO_THE_32
-      ensures pr.Success? ==> pr.value.t.Bytes() == expected
+      ensures pr.Success? ==> pr.value.SplitFrom?(cs, _ => expected)
     {
-      var ps :- ps.AssertBytes(expected);
-      Success(ps.Split())
+      var cs :- cs.AssertBytes(expected);
+      Success(cs.Split())
     }
   }
 
@@ -285,13 +282,13 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     import opened Parsers
     import opened Core
 
-    function String(ps: FreshCursor): (pr: ParseResult<jstring>)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+    function String(cs: FreshCursor): (pr: ParseResult<jstring>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.String)
     {
-      var ps :- ps.AssertChar('\"');
-      var ps :- ps.SkipWhileLexer(StringBody, Partial(StringBodyLexerStart));
-      var ps :- ps.AssertChar('\"');
-      Success(ps.Split())
+      var cs :- cs.AssertChar('\"');
+      var cs :- cs.SkipWhileLexer(StringBody, Partial(StringBodyLexerStart));
+      var cs :- cs.AssertChar('\"');
+      Success(cs.Split())
     }
   }
 
@@ -303,76 +300,97 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     import opened Cursors
     import opened Core
 
-    function Digits(ps: FreshCursor)
-      : (pp: Split<jdigits>)
-      ensures pp.ps.SplitFrom?(ps)
+    function Digits(cs: FreshCursor)
+      : (sp: Split<jdigits>)
+      ensures sp.cs.SplitFrom?(cs)
     {
-      ps.SkipWhile(Digit?).Split()
+      cs.SkipWhile(Digit?).Split()
     }
 
-    function NonEmptyDigits(ps: FreshCursor) : (pr: ParseResult<jnum>)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+    function NonEmptyDigits(cs: FreshCursor) : (pr: ParseResult<jnum>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
-      var pp := Digits(ps);
-      :- Need(!pp.t.Empty?, OtherError(EmptyNumber));
-      Success(pp)
+      var sp := Digits(cs);
+      :- Need(!sp.t.Empty?, OtherError(EmptyNumber));
+      Success(sp)
     }
 
-    function Minus(ps: FreshCursor) : (pp: Split<jminus>)
-      ensures pp.ps.SplitFrom?(ps)
+    function OptionalMinus(cs: FreshCursor) : (sp: Split<jminus>)
+      ensures sp.SplitFrom?(cs, SpecView)
     {
-      ps.SkipIf(c => c == '-' as byte).Split()
+      cs.SkipIf(c => c == '-' as byte).Split()
     }
 
-    function Sign(ps: FreshCursor) : (pp: Split<jsign>)
-      ensures pp.ps.SplitFrom?(ps)
+    function OptionalSign(cs: FreshCursor) : (sp: Split<jsign>)
+      ensures sp.SplitFrom?(cs, SpecView)
     {
-      ps.SkipIf(c => c == '-' as byte || c == '+' as byte).Split()
+      cs.SkipIf(c => c == '-' as byte || c == '+' as byte).Split()
     }
 
-    function TrimmedInt(ps: FreshCursor) : (pr: ParseResult<jint>)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
+    function TrimmedInt(cs: FreshCursor) : (pr: ParseResult<jint>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
-      var pp := ps.SkipIf(c => c == '0' as byte).Split();
-      if pp.t.Empty? then NonEmptyDigits(ps)
-      else Success(pp)
+      var sp := cs.SkipIf(c => c == '0' as byte).Split();
+      if sp.t.Empty? then NonEmptyDigits(cs)
+      else Success(sp)
     }
 
-    function Exp(ps: FreshCursor) : (pr: ParseResult<Maybe<jexp>>)
-      ensures pr.Success? ==> pr.value.ps.SplitFrom?(ps)
+    function Exp(cs: FreshCursor) : (pr: ParseResult<Maybe<jexp>>)
+      ensures pr.Success? ==> pr.value.SplitFrom?(cs, exp => Spec.Maybe(exp, Spec.Exp))
     {
-      var SP(e, ps) :=
-        ps.SkipIf(c => c == 'e' as byte || c == 'E' as byte).Split();
+      var SP(e, cs) :=
+        cs.SkipIf(c => c == 'e' as byte || c == 'E' as byte).Split();
       if e.Empty? then
-        Success(SP(Empty(), ps))
+        Success(SP(Empty(), cs))
       else
         assert e.Char?('e') || e.Char?('E');
-        var SP(sign, ps) := Sign(ps);
-        var SP(num, ps) :- NonEmptyDigits(ps);
-        Success(SP(NonEmpty(JExp(e, sign, num)), ps))
+        var SP(sign, cs) := OptionalSign(cs);
+        var SP(num, cs) :- NonEmptyDigits(cs);
+        Success(SP(NonEmpty(JExp(e, sign, num)), cs))
     }
 
-    function Frac(ps: FreshCursor) : (pr: ParseResult<Maybe<jfrac>>)
-      ensures pr.Success? ==> pr.value.ps.SplitFrom?(ps)
+    function Frac(cs: FreshCursor) : (pr: ParseResult<Maybe<jfrac>>)
+      ensures pr.Success? ==> pr.value.SplitFrom?(cs, frac => Spec.Maybe(frac, Spec.Frac))
     {
-      var SP(period, ps) :=
-        ps.SkipIf(c => c == '.' as byte).Split();
+      var SP(period, cs) :=
+        cs.SkipIf(c => c == '.' as byte).Split();
       if period.Empty? then
-        Success(SP(Empty(), ps))
+        Success(SP(Empty(), cs))
       else
-        var SP(num, ps) :- NonEmptyDigits(ps);
-        Success(SP(NonEmpty(JFrac(period, num)), ps))
+        var SP(num, cs) :- NonEmptyDigits(cs);
+        Success(SP(NonEmpty(JFrac(period, num)), cs))
     }
 
-    function Number(ps: FreshCursor) : (pr: ParseResult<Value>)
-      ensures pr.Success? ==> pr.value.ps.StrictlySplitFrom?(ps)
-      ensures pr.Success? ==> pr.value.t.Number?
+    function NumberFromParts(ghost cs: Cursor,
+                             minus: Split<jminus>, num: Split<jint>,
+                             frac: Split<Maybe<jfrac>>, exp: Split<Maybe<jexp>>)
+      : (sp: Split<jnumber>)
+      requires minus.SplitFrom?(cs, SpecView)
+      requires num.StrictlySplitFrom?(minus.cs, SpecView)
+      requires frac.SplitFrom?(num.cs, frac => Spec.Maybe(frac, Spec.Frac))
+      requires exp.SplitFrom?(frac.cs, exp => Spec.Maybe(exp, Spec.Exp))
+      ensures sp.StrictlySplitFrom?(cs, Spec.Number)
     {
-      var SP(minus, ps) := Minus(ps);
-      var SP(num, ps) :- TrimmedInt(ps);
-      var SP(frac, ps) :- Frac(ps);
-      var SP(exp, ps) :- Exp(ps);
-      Success(SP(Grammar.Number(minus, num, frac, exp), ps))
+      var sp := SP(Grammar.JNumber(minus.t, num.t, frac.t, exp.t), exp.cs);
+      calc { // Dafny/Z3 has a lot of trouble with associativity, so do the steps one by one:
+        cs.Bytes();
+        Spec.View(minus.t) + minus.cs.Bytes();
+        Spec.View(minus.t) + Spec.View(num.t) + num.cs.Bytes();
+        Spec.View(minus.t) + Spec.View(num.t) + Spec.Maybe(frac.t, Spec.Frac) + frac.cs.Bytes();
+        Spec.View(minus.t) + Spec.View(num.t) + Spec.Maybe(frac.t, Spec.Frac) + Spec.Maybe(exp.t, Spec.Exp) + exp.cs.Bytes();
+        Spec.Number(sp.t) + exp.cs.Bytes();
+      }
+      sp
+    }
+
+    function Number(cs: FreshCursor) : (pr: ParseResult<jnumber>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Number)
+    {
+      var minus := OptionalMinus(cs);
+      var num :- TrimmedInt(minus.cs);
+      var frac :- Frac(num.cs);
+      var exp :- Exp(frac.cs);
+      Success(NumberFromParts(cs, minus, num, frac, exp))
     }
   }
 
@@ -386,14 +404,13 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     const CLOSE := ']' as byte
     const SEPARATOR: byte := ',' as byte
 
-    function Element(ps: FreshCursor, json: SubParser<Value>)
+    function ElementSpec(t: TElement) : bytes {
+      Spec.Value(t)
+    }
+    function Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
-      assert ps.StrictlySplitFrom?(json.ps);
-      assert json.Valid?();
-      assert json.Valid?();
-      assert json.fn.requires(ps);
-      json.fn(ps)
+      json.fn(cs)
     }
   }
 
@@ -411,20 +428,42 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     const CLOSE := '}' as byte
     const SEPARATOR: byte := ',' as byte
 
-    function Colon(ps: FreshCursor)
+    function Colon(cs: FreshCursor)
       : (pr: ParseResult<jcolon>)
     {
-      var ps :- ps.AssertChar(':');
-      Success(ps.Split())
+      var cs :- cs.AssertChar(':');
+      Success(cs.Split())
     }
 
-    function Element(ps: FreshCursor, json: SubParser<Value>)
+    function KVFromParts(ghost cs: Cursor, k: Split<jstring>,
+                         colon: Split<Structural<jcolon>>, v: Split<Value>)
+      : (sp: Split<jkv>)
+      requires k.StrictlySplitFrom?(cs, Spec.String)
+      requires colon.StrictlySplitFrom?(k.cs, c => Spec.Structural(c, SpecView))
+      requires v.StrictlySplitFrom?(colon.cs, Spec.Value)
+      ensures sp.StrictlySplitFrom?(cs, Spec.KV)
+    {
+      var sp := SP(Grammar.KV(k.t, colon.t, v.t), v.cs);
+      calc { // Dafny/Z3 has a lot of trouble with associativity, so do the steps one by one:
+        cs.Bytes();
+        Spec.String(k.t) + k.cs.Bytes();
+        Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + colon.cs.Bytes();
+        Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + Spec.Value(v.t) + v.cs.Bytes();
+        Spec.KV(sp.t) + v.cs.Bytes();
+      }
+      sp
+    }
+
+    function ElementSpec(t: TElement) : bytes {
+      Spec.KV(t)
+    }
+    function Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
-      var SP(k, ps) :- Strings.String(ps);
-      var SP(colon, ps) :- Core.Structural(ps, Parsers.Parser(Colon));
-      var SP(v, ps) :- json.fn(ps);
-      Success(SP(KV(k, colon, v), ps))
+      var k :- Strings.String(cs);
+      var colon :- Core.Structural(k.cs, Parsers.Parser(Colon, SpecView));
+      var v :- json.fn(colon.cs);
+      Success(KVFromParts(cs, k, colon, v))
     }
   }
 

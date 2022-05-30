@@ -10,7 +10,19 @@ module {:options "-functionSyntax:4"} Cursors {
   import opened Vs = Views.Core
   import opened Lx = Lexers.Core
 
-  datatype Split<+T> = SP(t: T, ps: FreshCursor)
+  datatype Split<+T> = SP(t: T, cs: FreshCursor) {
+    ghost predicate BytesSplitFrom?(cs0: Cursor, spec: T -> bytes) {
+      cs0.Bytes() == spec(t) + cs.Bytes()
+    }
+
+    ghost predicate SplitFrom?(cs0: Cursor, spec: T -> bytes) {
+      cs.SplitFrom?(cs0) && BytesSplitFrom?(cs0, spec)
+    }
+
+    ghost predicate StrictlySplitFrom?(cs0: Cursor, spec: T -> bytes) {
+      cs.StrictlySplitFrom?(cs0) && BytesSplitFrom?(cs0, spec)
+    }
+  }
 
   // LATER: Make this a newtype and put members here instead of requiring `Valid?` everywhere
   type Cursor = ps: Cursor_ | ps.Valid?
@@ -119,7 +131,10 @@ module {:options "-functionSyntax:4"} Cursors {
       this.(beg := point)
     }
 
-    function Split() : Split<View> requires Valid? {
+    function Split() : (sp: Split<View>) requires Valid?
+      ensures sp.SplitFrom?(this, (v: View) => v.Bytes())
+      ensures beg != point ==> sp.StrictlySplitFrom?(this, (v: View) => v.Bytes())
+    {
       SP(this.Prefix(), this.Suffix())
     }
 

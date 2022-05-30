@@ -32,7 +32,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
     else pt(ts[0]) + ConcatBytes(ts[1..], pt)
   }
 
-  function Bracketed<S, D>(self: Bracketed<Vs.View, S, D, Vs.View>, pdatum: Prefixed<S, D> --> bytes): bytes
+  function Bracketed<D, S>(self: Bracketed<Vs.View, D, S, Vs.View>, pdatum: Suffixed<D, S> --> bytes): bytes
     requires forall d | d in self.data :: pdatum.requires(d)
   {
     StructuralView(self.l) +
@@ -52,30 +52,43 @@ module {:options "-functionSyntax:4"} JSON.Spec {
     View(self.e) + View(self.sign) + View(self.num)
   }
 
-  function Member(self: jmember) : bytes {
+  function Number(self: jnumber): bytes {
+    View(self.minus) + View(self.num) + Maybe(self.frac, Frac) + Maybe(self.exp, Exp)
+  }
+
+  function String(self: jstring): bytes {
+    View(self)
+  }
+
+  function CommaSuffix(c: Maybe<Structural<jcomma>>): bytes {
     // BUG(https://github.com/dafny-lang/dafny/issues/2179)
-    Maybe<Structural<Vs.View>>(self.prefix, StructuralView) + KV(self.t)
+    Maybe<Structural<Vs.View>>(c, StructuralView)
+  }
+
+  function Member(self: jmember) : bytes {
+    KV(self.t) + CommaSuffix(self.suffix)
   }
 
   function Item(self: jitem) : bytes {
-    // BUG(https://github.com/dafny-lang/dafny/issues/2179)
-    Maybe<Structural<Vs.View>>(self.prefix, StructuralView) + Value(self.t)
+    Value(self.t) + CommaSuffix(self.suffix)
   }
 
-  function Value(self: Value): bytes {
+  function Object(obj: jobject) : bytes {
+    Bracketed(obj, (d: jmember) requires d in obj.data => Member(d))
+  }
+
+  function Array(arr: jarray) : bytes {
+    Bracketed(arr, (d: jitem) requires d in arr.data => Item(d))
+  }
+
+  function Value(self: Value) : bytes {
     match self {
-      case Null(n) =>
-        View(n)
-      case Bool(b) =>
-        View(b)
-      case String(str) =>
-        View(str)
-      case Number(minus, num, frac, exp) =>
-        View(minus) + View(num) + Maybe(frac, Frac) + Maybe(exp, Exp)
-      case Object(obj) =>
-        Bracketed(obj, (d: jmember) requires d in obj.data => Member(d))
-      case Array(arr) =>
-        Bracketed(arr, (d: jitem) requires d in arr.data => Item(d))
+      case Null(n) => View(n)
+      case Bool(b) => View(b)
+      case String(str) => String(str)
+      case Number(num) => Number(num)
+      case Object(obj) => Object(obj)
+      case Array(arr) => Array(arr)
     }
   }
 
