@@ -1,5 +1,5 @@
-include "Grammar.dfy"
-include "Deserializer.dfy"
+include "JSON.Serializer.dfy"
+include "JSON.Deserializer.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
 import opened BoundedInts
@@ -7,7 +7,8 @@ import opened BoundedInts
 import opened Vs = Views.Core
 
 import opened JSON.Grammar
-import opened JSON.Deserializer
+import JSON.Serializer
+import JSON.Deserializer
 
 function method bytes_of_ascii(s: string) : bytes {
   Seq.Map((c: char) requires c in s => if c as int < 256 then c as byte else 0 as byte, s)
@@ -47,9 +48,16 @@ method Main() {
         print "Parse error: " + msg.ToString((e: Deserializer.Core.JSONError) => e.ToString()) + "\n";
         expect false;
       case Success(js) =>
-        var bytes' := Grammar.Bytes(js);
-        print "=> " + ascii_of_bytes(bytes') + "\n";
-        expect bytes' == bytes;
+        // var bytes' := Grammar.Bytes(js);
+        var wr := Serializer.JSON(js);
+        print "Count: ", wr.chain.Count(), "\n";
+        var rbytes' := Serializer.Serialize(js);
+        match rbytes' {
+          case Failure(msg) => expect false;
+          case Success(bytes') =>
+            print "=> " + ascii_of_bytes(bytes'[..]) + "\n";
+            expect bytes'[..] == bytes;
+        }
     }
     print "\n";
   }
