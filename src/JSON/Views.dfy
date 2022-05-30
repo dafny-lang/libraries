@@ -8,6 +8,9 @@ module {:options "/functionSyntax:4"} Views.Core {
     ghost const Valid?: bool :=
       0 <= beg as int <= end as int <= |s| < TWO_TO_THE_32;
 
+    static const Empty: View :=
+      View([], 0, 0)
+
     const Empty? :=
       beg == end
 

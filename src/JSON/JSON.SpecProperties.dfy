@@ -7,14 +7,14 @@ module {:options "/functionSyntax:4"} JSON.SpecProperties {
   import opened Grammar
   import Spec
 
-  lemma Bracketed_Morphism<S, D>(bracketed: Bracketed<Vs.View, S, D, Vs.View>) // DISCUSS
-    ensures forall pd0: Prefixed<S, D> --> bytes, pd1: Prefixed<S, D> --> bytes
+  lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>) // DISCUSS
+    ensures forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
       | && (forall d | d in bracketed.data :: pd0.requires(d))
         && (forall d | d in bracketed.data :: pd1.requires(d))
         && (forall d | d in bracketed.data :: pd0(d) == pd1(d))
       :: Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
   {
-    forall pd0: Prefixed<S, D> --> bytes, pd1: Prefixed<S, D> --> bytes
+    forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
       | && (forall d | d in bracketed.data :: pd0.requires(d))
         && (forall d | d in bracketed.data :: pd1.requires(d))
         && (forall d | d in bracketed.data :: pd0(d) == pd1(d))

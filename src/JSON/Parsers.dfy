@@ -11,19 +11,20 @@ module {:options "/functionSyntax:4"} Parsers {
 
   type SplitResult<+T, +R> = CursorResult<Split<T>, R>
 
-  type Parser<+T, +R> = p: Parser_<T, R> | p.Valid?()
+  type Parser<!T, +R> = p: Parser_<T, R> | p.Valid?()
     // BUG(https://github.com/dafny-lang/dafny/issues/2103)
     witness ParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
-  datatype Parser_<+T, +R> = Parser(fn: FreshCursor -> SplitResult<T, R>) {
+  datatype Parser_<!T, +R> = Parser(fn: FreshCursor -> SplitResult<T, R>,
+                                    ghost spec: T -> bytes) {
     ghost predicate Valid?() {
-      forall ps': FreshCursor :: fn(ps').Success? ==> fn(ps').value.ps.StrictlySplitFrom?(ps')
+      forall cs': FreshCursor :: fn(cs').Success? ==> fn(cs').value.StrictlySplitFrom?(cs', spec)
     }
   }
 
   function {:opaque} ParserWitness<T, R>(): (p: Parser_<T, R>)
     ensures p.Valid?()
   {
-    Parser(_ => Failure(EOF))
+    Parser(_ => Failure(EOF), _ => [])
   }
 
   // BUG(): It would be much nicer if `SubParser` was a special case of
@@ -33,25 +34,27 @@ module {:options "/functionSyntax:4"} Parsers {
   // making it unprovable in the `SubParser` case (`fn` for subparsers is
   // typically a lambda, and the `requires` of lambdas are essentially
   // uninformative/opaque).
-  datatype SubParser_<+T, +R> = SubParser(
-    ghost ps: Cursor,
+  datatype SubParser_<!T, +R> = SubParser(
+    ghost cs: Cursor,
     ghost pre: FreshCursor -> bool,
-    fn: FreshCursor --> SplitResult<T, R>)
+    fn: FreshCursor --> SplitResult<T, R>,
+    ghost spec: T -> bytes)
   {
     ghost predicate Valid?() {
-      && (forall ps': FreshCursor | pre(ps') :: fn.requires(ps'))
-      && (forall ps': FreshCursor | ps'.StrictlySplitFrom?(ps) :: pre(ps'))
-      && (forall ps': FreshCursor | pre(ps') :: fn(ps').Success? ==> fn(ps').value.ps.StrictlySplitFrom?(ps'))
+      && (forall cs': FreshCursor | pre(cs') :: fn.requires(cs'))
+      && (forall cs': FreshCursor | cs'.StrictlySplitFrom?(cs) :: pre(cs'))
+      && (forall cs': FreshCursor | pre(cs') :: fn(cs').Success? ==> fn(cs').value.StrictlySplitFrom?(cs', spec))
     }
   }
-  type SubParser<+T, +R> = p: SubParser_<T, R> | p.Valid?()
+  type SubParser<!T, +R> = p: SubParser_<T, R> | p.Valid?()
     witness SubParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
 
   function {:opaque} SubParserWitness<T, R>(): (subp: SubParser_<T, R>)
     ensures subp.Valid?()
   {
     SubParser(Cursor([], 0, 0, 0),
-              (ps: FreshCursor) => false,
-              (ps: FreshCursor) => Failure(EOF))
+              (cs: FreshCursor) => false,
+              (cs: FreshCursor) => Failure(EOF),
+              _ => [])
   }
 }

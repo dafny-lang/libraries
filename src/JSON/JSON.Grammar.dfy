@@ -26,16 +26,16 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
 
   datatype Maybe<+T> = Empty() | NonEmpty(t: T)
 
-  datatype Prefixed<+S, +T> =
-    Prefixed(prefix: Maybe<Structural<S>>, t: T)
+  datatype Suffixed<+T, +S> =
+    Suffixed(t: T, suffix: Maybe<Structural<S>>)
 
-  type PrefixedSequence<+S, +D> = s: seq<Prefixed<S, D>> | NoLeadingPrefix(s)
-  ghost predicate NoLeadingPrefix<S, D>(s: seq<Prefixed<S, D>>) {
-    forall idx | 0 <= idx < |s| :: s[idx].prefix.Empty? <==> idx == 0
+  type SuffixedSequence<+D, +S> = s: seq<Suffixed<D, S>> | NoTrailingSuffix(s)
+  ghost predicate NoTrailingSuffix<S, D>(s: seq<Suffixed<D, S>>) {
+    forall idx | 0 <= idx < |s| :: s[idx].suffix.Empty? <==> idx == |s| - 1
   }
 
-  datatype Bracketed<+L, +S, +D, +R> =
-    Bracketed(l: Structural<L>, data: PrefixedSequence<S, D>, r: Structural<R>)
+  datatype Bracketed<+L, +D, +S, +R> =
+    Bracketed(l: Structural<L>, data: SuffixedSequence<D, S>, r: Structural<R>)
 
   const NULL: bytes := ['n' as byte, 'u' as byte, 'l' as byte, 'l' as byte]
   const TRUE: bytes := ['t' as byte, 'r' as byte, 'u' as byte, 'e' as byte]
@@ -48,7 +48,7 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
   ghost predicate Num?(v: View) { Digits?(v) && !v.Empty? }
   ghost predicate Int?(v: View) { v.Char?('0') || (Num?(v) && v.At(0) != '0' as byte) }
 
-  type jstring = v: View | true witness View.OfBytes([]) // TODO: Enforce correct escaping
+  type jstring = v: View | true witness View.OfBytes([]) // TODO: Enforce quoting and escaping
   type jnull = v: View | Null?(v) witness View.OfBytes(NULL)
   type jbool = v: View | Bool?(v) witness View.OfBytes(TRUE)
   type jdigits = v: View | Digits?(v) witness View.OfBytes([])
@@ -56,21 +56,23 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
   type jint = v: View | Int?(v) witness View.OfBytes(['0' as byte])
   datatype jkv = KV(k: jstring, colon: Structural<jcolon>, v: Value)
 
-  type jobject = Bracketed<jlbrace, jcomma, jkv, jrbrace>
-  type jarray = Bracketed<jlbracket, jcomma, Value, jrbracket>
-  type jmembers = PrefixedSequence<jcomma, jkv>
-  type jmember = Prefixed<jcomma, jkv>
-  type jitems = PrefixedSequence<jcomma, Value>
-  type jitem = Prefixed<jcomma, Value>
+  // TODO enforce no leading space before closing bracket to disambiguate WS { WS WS } WS
+  type jobject = Bracketed<jlbrace, jkv, jcomma, jrbrace>
+  type jarray = Bracketed<jlbracket, Value, jcomma, jrbracket>
+  type jmembers = SuffixedSequence<jkv, jcomma>
+  type jmember = Suffixed<jkv, jcomma>
+  type jitems = SuffixedSequence<Value, jcomma>
+  type jitem = Suffixed<Value, jcomma>
 
   datatype jfrac = JFrac(period: jperiod, num: jnum)
   datatype jexp = JExp(e: je, sign: jsign, num: jnum)
+  datatype jnumber = JNumber(minus: jminus, num: jnum, frac: Maybe<jfrac>, exp: Maybe<jexp>)
 
   datatype Value =
     | Null(n: jnull)
     | Bool(b: jbool)
     | String(str: jstring)
-    | Number(minus: jminus, num: jnum, frac: Maybe<jfrac>, exp: Maybe<jexp>)
+    | Number(num: jnumber)
     | Object(obj: jobject)
     | Array(arr: jarray)
 
