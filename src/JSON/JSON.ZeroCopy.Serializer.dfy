@@ -2,7 +2,7 @@ include "JSON.Spec.dfy"
 include "JSON.SpecProperties.dfy"
 include "Views.Writers.dfy"
 
-module {:options "-functionSyntax:4"} JSON.Serializer {
+module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   import opened BoundedInts
   import opened Wrappers
 
@@ -14,13 +14,34 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
 
   datatype Error = OutOfMemory
 
-  method Serialize(js: JSON) returns (bsr: Result<array<byte>, Error>)
-    ensures bsr.Success? ==> bsr.value[..] == Spec.JSON(js)
+  method Serialize(js: JSON) returns (rbs: Result<array<byte>, Error>)
+    ensures rbs.Success? ==> fresh(rbs.value)
+    ensures rbs.Success? ==> rbs.value[..] == Spec.JSON(js)
   {
-    var writer := JSON(js);
+    var writer := Text(js);
     :- Need(writer.Unsaturated?, OutOfMemory);
     var bs := writer.ToArray();
     return Success(bs);
+  }
+
+  method SerializeTo(js: JSON, bs: array<byte>) returns (len: Result<uint32, Error>)
+    modifies bs
+    ensures len.Success? ==> len.value as int <= bs.Length
+    ensures len.Success? ==> bs[..len.value] == Spec.JSON(js)
+    ensures len.Success? ==> bs[len.value..] == old(bs[len.value..])
+    ensures len.Failure? ==> unchanged(bs)
+  {
+    var writer := Text(js);
+    :- Need(writer.Unsaturated?, OutOfMemory);
+    :- Need(writer.length as int <= bs.Length, OutOfMemory);
+    writer.Blit(bs);
+    return Success(writer.length);
+  }
+
+  function {:opaque} Text(js: JSON) : (wr: Writer)
+    ensures wr.Bytes() == Spec.JSON(js)
+  {
+    JSON(js)
   }
 
   function {:opaque} JSON(js: JSON, writer: Writer := Writer.Empty) : (wr: Writer)

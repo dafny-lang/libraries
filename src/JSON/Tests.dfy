@@ -1,14 +1,12 @@
-include "JSON.Serializer.dfy"
-include "JSON.Deserializer.dfy"
+include "JSON.ZeroCopy.API.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
 import opened BoundedInts
 
-import opened Vs = Views.Core
-
 import opened JSON.Grammar
-import JSON.Serializer
-import JSON.Deserializer
+import JSON.ZeroCopy.Serializer
+import JSON.ZeroCopy.Deserializer
+import JSON.ZeroCopy.API
 
 function method bytes_of_ascii(s: string) : bytes {
   Seq.Map((c: char) requires c in s => if c as int < 256 then c as byte else 0 as byte, s)
@@ -43,15 +41,14 @@ method Main() {
 
     print input, "\n";
     var bytes := bytes_of_ascii(input);
-    match Deserializer.Top.Text(View.OfBytes(bytes)) {
+    match API.Deserialize(bytes) {
       case Failure(msg) =>
         print "Parse error: " + msg.ToString((e: Deserializer.Core.JSONError) => e.ToString()) + "\n";
         expect false;
       case Success(js) =>
-        // var bytes' := Grammar.Bytes(js);
         var wr := Serializer.JSON(js);
         print "Count: ", wr.chain.Count(), "\n";
-        var rbytes' := Serializer.Serialize(js);
+        var rbytes' := API.SerializeAlloc(js);
         match rbytes' {
           case Failure(msg) => expect false;
           case Success(bytes') =>
