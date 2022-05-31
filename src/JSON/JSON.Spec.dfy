@@ -33,7 +33,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   }
 
   function Bracketed<D, S>(self: Bracketed<Vs.View, D, S, Vs.View>, pdatum: Suffixed<D, S> --> bytes): bytes
-    requires forall d | d in self.data :: pdatum.requires(d)
+    requires forall d | d < self :: pdatum.requires(d)
   {
     StructuralView(self.l) +
     ConcatBytes(self.data, pdatum) +
@@ -74,11 +74,11 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   }
 
   function Object(obj: jobject) : bytes {
-    Bracketed(obj, (d: jmember) requires d in obj.data => Member(d))
+    Bracketed(obj, (d: jmember) requires d < obj => Member(d))
   }
 
   function Array(arr: jarray) : bytes {
-    Bracketed(arr, (d: jitem) requires d in arr.data => Item(d))
+    Bracketed(arr, (d: jitem) requires d < arr => Item(d))
   }
 
   function Value(self: Value) : bytes {

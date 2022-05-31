@@ -247,6 +247,16 @@ module {:options "-functionSyntax:4"} Cursors {
       AssertByte(c0 as byte)
     }
 
+    function SkipByte(): (ps: Cursor)
+      requires Valid?
+      decreases SuffixLength()
+      ensures ps.AdvancedFrom?(this)
+      ensures !EOF? ==> ps.StrictlyAdvancedFrom?(this)
+    {
+      if EOF? then this
+      else Skip(1)
+    }
+
     function SkipIf(p: byte -> bool): (ps: Cursor)
       requires Valid?
       decreases SuffixLength()
