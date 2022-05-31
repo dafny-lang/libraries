@@ -53,6 +53,14 @@ module {:options "/functionSyntax:4"} Views.Core {
       s[beg + idx]
     }
 
+    function Peek(): (r: opt_byte)
+      requires Valid?
+      ensures r < 0 <==> Empty?
+    {
+      if Empty? then -1
+      else At(0) as opt_byte
+    }
+
     method Blit(bs: array<byte>, start: uint32 := 0)
       requires Valid?
       requires start as int + Length() as int <= bs.Length

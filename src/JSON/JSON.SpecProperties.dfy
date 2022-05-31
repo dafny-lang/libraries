@@ -9,15 +9,15 @@ module {:options "/functionSyntax:4"} JSON.SpecProperties {
 
   lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>) // DISCUSS
     ensures forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
-      | && (forall d | d in bracketed.data :: pd0.requires(d))
-        && (forall d | d in bracketed.data :: pd1.requires(d))
-        && (forall d | d in bracketed.data :: pd0(d) == pd1(d))
+      | && (forall d | d < bracketed :: pd0.requires(d))
+        && (forall d | d < bracketed :: pd1.requires(d))
+        && (forall d | d < bracketed :: pd0(d) == pd1(d))
       :: Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
   {
     forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
-      | && (forall d | d in bracketed.data :: pd0.requires(d))
-        && (forall d | d in bracketed.data :: pd1.requires(d))
-        && (forall d | d in bracketed.data :: pd0(d) == pd1(d))
+      | && (forall d | d < bracketed :: pd0.requires(d))
+        && (forall d | d < bracketed :: pd1.requires(d))
+        && (forall d | d < bracketed :: pd0(d) == pd1(d))
     {
       calc {
         Spec.Bracketed(bracketed, pd0);

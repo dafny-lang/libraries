@@ -27,13 +27,13 @@ module {:options "/functionSyntax:4"} Parsers {
     Parser(_ => Failure(EOF), _ => [])
   }
 
-  // BUG(): It would be much nicer if `SubParser` was a special case of
-  // `Parser`, but that would require making `fn` in parser a partial
-  // function `-->`.  The problem with that is that we would then have to
-  // restrict the `Valid?` clause of `Parser` on `fn.requires()`, thus
-  // making it unprovable in the `SubParser` case (`fn` for subparsers is
-  // typically a lambda, and the `requires` of lambdas are essentially
-  // uninformative/opaque).
+  // BUG(https://github.com/dafny-lang/dafny/issues/2137): It would be much
+  // nicer if `SubParser` was a special case of `Parser`, but that would require
+  // making `fn` in parser a partial function `-->`.  The problem with that is
+  // that we would then have to restrict the `Valid?` clause of `Parser` on
+  // `fn.requires()`, thus making it unprovable in the `SubParser` case (`fn`
+  // for subparsers is typically a lambda, and the `requires` of lambdas are
+  // essentially uninformative/opaque).
   datatype SubParser_<!T, +R> = SubParser(
     ghost cs: Cursor,
     ghost pre: FreshCursor -> bool,
