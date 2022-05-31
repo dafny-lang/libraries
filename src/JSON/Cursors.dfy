@@ -61,8 +61,14 @@ module {:options "/functionSyntax:4"} Cursors {
     const EOF? :=
       point == end
 
-    static function OfView(v: View) : Cursor {
+    static function OfView(v: View) : FreshCursor {
       Cursor(v.s, v.beg, v.beg, v.end)
+    }
+
+    static function OfBytes(bs: bytes) : FreshCursor
+      requires |bs| < TWO_TO_THE_32
+    {
+      Cursor(bs, 0, |bs| as uint32, |bs| as uint32)
     }
 
     function Bytes() : bytes

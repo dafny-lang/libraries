@@ -3,7 +3,7 @@ include "JSON.Spec.dfy"
 include "JSON.SpecProperties.dfy"
 include "Parsers.dfy"
 
-module {:options "/functionSyntax:4"} JSON.Deserializer {
+module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
   module Core {
     import opened BoundedInts
     import opened Wrappers
@@ -18,15 +18,17 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
       | UnterminatedSequence
       | EmptyNumber
       | ExpectingEOF
+      | IntOverflow
     {
       function ToString() : string {
         match this
           case UnterminatedSequence => "Unterminated sequence"
           case EmptyNumber => "Number must contain at least one digit"
           case ExpectingEOF => "Expecting EOF"
+          case IntOverflow => "Input length does not fit in a 32-bit counter"
       }
     }
-    type ParseError = CursorError<JSONError>
+    type Error = CursorError<JSONError>
     type ParseResult<+T> = SplitResult<T, JSONError>
     type Parser<!T> = Parsers.Parser<T, JSONError>
     type SubParser<!T> = Parsers.SubParser<T, JSONError>
@@ -74,6 +76,7 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
       forall t :: sp.spec(t) == Spec.Value(t)
       witness *
   }
+  type Error = Core.Error
 
   abstract module SequenceParams {
     import opened BoundedInts
@@ -247,7 +250,7 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
       var open :- Core.Structural(cs, Parsers.Parser(Open, SpecView));
       assert open.cs.StrictlySplitFrom?(json.cs);
       var elems := SP([], open.cs);
-      if cs.Peek() == CLOSE as opt_byte then
+      if open.cs.Peek() == CLOSE as opt_byte then
         var close :- Core.Structural(open.cs, Parsers.Parser(Close, SpecView));
         Success(BracketedFromParts(cs, open, elems, close))
       else
@@ -273,7 +276,8 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
     }
   }
 
-  module Top {
+  module API {
+    import opened BoundedInts
     import opened Wrappers
 
     import opened Vs = Views.Core
@@ -288,12 +292,19 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
       Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value))
     }
 
-    function {:opaque} Text(v: View) : (pr: Result<JSON, ParseError>)
-      ensures pr.Success? ==> v.Bytes() == Spec.JSON(pr.value)
+    function {:opaque} Text(v: View) : (jsr: Result<JSON, Error>)
+      ensures jsr.Success? ==> v.Bytes() == Spec.JSON(jsr.value)
     {
       var SP(text, cs) :- JSON(Cursor.OfView(v));
       :- Need(cs.EOF?, OtherError(ExpectingEOF));
       Success(text)
+    }
+
+    function {:opaque} OfBytes(bs: bytes) : (jsr: Result<JSON, Error>)
+      ensures jsr.Success? ==> bs == Spec.JSON(jsr.value)
+    {
+      :- Need(|bs| < TWO_TO_THE_32, OtherError(IntOverflow));
+      Text(Vs.View.OfBytes(bs))
     }
   }
 
@@ -411,6 +422,13 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
       Success(sp)
     }
 
+    function {:opaque} NonZeroInt(cs: FreshCursor) : (pr: ParseResult<jint>)
+      requires cs.Peek() != '0' as opt_byte
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
+    {
+      NonEmptyDigits(cs)
+    }
+
     function {:opaque} OptionalMinus(cs: FreshCursor) : (sp: Split<jminus>)
       ensures sp.SplitFrom?(cs, SpecView)
     {
@@ -427,7 +445,7 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
       var sp := cs.SkipIf(c => c == '0' as byte).Split();
-      if sp.t.Empty? then NonEmptyDigits(cs)
+      if sp.t.Empty? then NonZeroInt(sp.cs)
       else Success(sp)
     }
 

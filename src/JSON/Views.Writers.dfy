@@ -100,6 +100,17 @@ module {:options "/functionSyntax:4"} Views.Writers {
       fn(this)
     }
 
+    method {:tailrecursion} Blit(bs: array<byte>)
+      requires Valid?
+      requires Unsaturated?
+      requires Length() <= bs.Length
+      modifies bs
+      ensures bs[..length] == Bytes()
+      ensures bs[length..] == old(bs[length..])
+    {
+      chain.Blit(bs, length);
+    }
+
     method ToArray() returns (bs: array<byte>)
       requires Valid?
       requires Unsaturated?
@@ -107,7 +118,7 @@ module {:options "/functionSyntax:4"} Views.Writers {
       ensures bs[..] == Bytes()
     {
       bs := new byte[length];
-      chain.Blit(bs, length);
+      Blit(bs);
     }
   }
 }
