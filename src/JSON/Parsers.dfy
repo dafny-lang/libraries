@@ -9,7 +9,7 @@ module {:options "-functionSyntax:4"} Parsers {
   import opened Views.Core
   import opened Cursors
 
-  type SplitResult<+T, +R> = CursorResult<Split<T>, R>
+  type SplitResult<+T, +R> = Result<Split<T>, CursorError<R>>
 
   type Parser<!T, +R> = p: Parser_<T, R> | p.Valid?()
     // BUG(https://github.com/dafny-lang/dafny/issues/2103)
