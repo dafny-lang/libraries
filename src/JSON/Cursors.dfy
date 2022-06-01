@@ -49,7 +49,7 @@ module {:options "/functionSyntax:4"} Cursors {
         case OtherError(err) => pr(err)
     }
   }
-  type CursorResult<+T, +R> = Result<T, CursorError<R>>
+  type CursorResult<+R> = Result<Cursor, CursorError<R>>
 
   datatype Cursor_ = Cursor(s: bytes, beg: uint32, point: uint32, end: uint32) {
     ghost const Valid?: bool :=
@@ -68,7 +68,7 @@ module {:options "/functionSyntax:4"} Cursors {
     static function OfBytes(bs: bytes) : FreshCursor
       requires |bs| < TWO_TO_THE_32
     {
-      Cursor(bs, 0, |bs| as uint32, |bs| as uint32)
+      Cursor(bs, 0, 0, |bs| as uint32)
     }
 
     function Bytes() : bytes
@@ -210,7 +210,7 @@ module {:options "/functionSyntax:4"} Cursors {
       this.(point := point - n)
     }
 
-    function Get<R>(err: R): (ppr: CursorResult<Cursor, R>)
+    function Get<R>(err: R): (ppr: CursorResult<R>)
       requires Valid?
       ensures ppr.Success? ==> ppr.value.StrictlyAdvancedFrom?(this)
     {
@@ -218,7 +218,7 @@ module {:options "/functionSyntax:4"} Cursors {
       else Success(Skip(1))
     }
 
-    function AssertByte<R>(b: byte): (pr: CursorResult<Cursor, R>)
+    function AssertByte<R>(b: byte): (pr: CursorResult<R>)
       requires Valid?
       ensures pr.Success? ==> !EOF?
       ensures pr.Success? ==> s[point] == b
@@ -229,7 +229,7 @@ module {:options "/functionSyntax:4"} Cursors {
       else Failure(ExpectingByte(b, nxt))
     }
 
-    function {:tailrecursion} AssertBytes<R>(bs: bytes, offset: uint32 := 0): (pr: CursorResult<Cursor, R>)
+    function {:tailrecursion} AssertBytes<R>(bs: bytes, offset: uint32 := 0): (pr: CursorResult<R>)
       requires Valid?
       requires |bs| < TWO_TO_THE_32
       requires offset <= |bs| as uint32
@@ -245,7 +245,7 @@ module {:options "/functionSyntax:4"} Cursors {
         ps.AssertBytes(bs, offset + 1)
     }
 
-    function AssertChar<R>(c0: char): (pr: CursorResult<Cursor, R>)
+    function AssertChar<R>(c0: char): (pr: CursorResult<R>)
       requires Valid?
       requires c0 as int < 256
       ensures pr.Success? ==> pr.value.StrictlyAdvancedFrom?(this)
@@ -293,8 +293,8 @@ module {:options "/functionSyntax:4"} Cursors {
       return Cursor(this.s, this.beg, point', this.end);
     }
 
-    function SkipWhileLexer<A, R>(step: Lexer<A, R>, st: LexerState<A, R>)
-      : (pr: CursorResult<Cursor, R>)
+    function SkipWhileLexer<A, R>(step: Lexer<A, R>, st: A)
+      : (pr: CursorResult<R>)
       requires Valid?
       decreases SuffixLength()
       ensures pr.Success? ==> pr.value.AdvancedFrom?(this)
