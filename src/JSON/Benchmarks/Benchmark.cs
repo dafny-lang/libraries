@@ -4396,10 +4396,10 @@ namespace Benchmarks {
       Benchmarks.__default.Deserialize(_263_js, _260_output__array);
     }
     public static uint WARMUP { get {
-      return 0U;
+      return 20U;
     } }
     public static uint REPEATS { get {
-      return 10U;
+      return 80U;
     } }
   }
 } // end of namespace Benchmarks
