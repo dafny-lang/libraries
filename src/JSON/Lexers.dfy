@@ -6,9 +6,9 @@ module {:options "/functionSyntax:4"} Lexers {
     import opened Wrappers
     import opened BoundedInts
 
-    datatype LexerState<+T, +R> = Accept | Reject(err: R) | Partial(st: T)
+    datatype LexerResult<+T, +R> = Accept | Reject(err: R) | Partial(st: T)
 
-    type Lexer<!T, !R> = (LexerState<T, R>, opt_byte) -> LexerState<T, R>
+    type Lexer<!T, +R> = (T, opt_byte) -> LexerResult<T, R>
   }
 
   module Strings {
@@ -18,34 +18,30 @@ module {:options "/functionSyntax:4"} Lexers {
     type StringBodyLexerState = /* escaped: */ bool
     const StringBodyLexerStart: StringBodyLexerState := false;
 
-    function StringBody<R>(st: LexerState<StringBodyLexerState, R>, byte: opt_byte)
-      : LexerState<StringBodyLexerState, R>
+    function StringBody<R>(escaped: StringBodyLexerState, byte: opt_byte)
+      : LexerResult<StringBodyLexerState, R>
     {
-      match st
-        case Partial(escaped) =>
-          if byte == '\\' as opt_byte then Partial(!escaped)
-          else if byte == '\"' as opt_byte && !escaped then Accept
-          else Partial(false)
-        case _ => st
+      if byte == '\\' as opt_byte then Partial(!escaped)
+      else if byte == '\"' as opt_byte && !escaped then Accept
+      else Partial(false)
     }
 
     datatype StringLexerState = Start | Body(escaped: bool) | End
     const StringLexerStart: StringLexerState := Start;
 
-    function String(st: LexerState<StringLexerState, string>, byte: opt_byte)
-      : LexerState<StringLexerState, string>
+    function String(st: StringLexerState, byte: opt_byte)
+      : LexerResult<StringLexerState, string>
     {
       match st
-        case Partial(Start()) =>
+        case Start() =>
           if byte == '\"' as opt_byte then Partial(Body(false))
           else Reject("String must start with double quote")
-        case Partial(End()) =>
+        case End() =>
           Accept
-        case Partial(Body(escaped)) =>
+        case Body(escaped) =>
           if byte == '\\' as opt_byte then Partial(Body(!escaped))
           else if byte == '\"' as opt_byte && !escaped then Partial(End)
           else Partial(Body(false))
-        case _ => st
     }
   }
 }
