@@ -281,6 +281,16 @@ module {:options "-functionSyntax:4"} Cursors {
     {
       if EOF? || !p(SuffixAt(0)) then this
       else Skip(1).SkipWhile(p)
+    } by method {
+      var point' := this.point;
+      var end := this.end;
+      while point' < end && p(this.s[point'])
+        invariant this.(point := point').Valid?
+        invariant this.(point := point').SkipWhile(p) == this.SkipWhile(p)
+      {
+        point' := point' + 1;
+      }
+      return Cursor(this.s, this.beg, point', this.end);
     }
 
     function SkipWhileLexer<A, R>(step: Lexer<A, R>, st: LexerState<A, R>)
@@ -292,9 +302,28 @@ module {:options "-functionSyntax:4"} Cursors {
       match step(st, Peek())
         case Accept => Success(this)
         case Reject(err) => Failure(OtherError(err))
-        case partial =>
+        case Partial(st) =>
           if EOF? then Failure(EOF)
-          else Skip(1).SkipWhileLexer(step, partial)
+          else Skip(1).SkipWhileLexer(step, st)
+    } by method {
+      var point' := point;
+      var end := this.end;
+      var st' := st;
+      while true
+        invariant this.(point := point').Valid?
+        invariant this.(point := point').SkipWhileLexer(step, st') == this.SkipWhileLexer(step, st)
+        decreases this.(point := point').SuffixLength()
+      {
+        var eof := point' == end;
+        var minusone: opt_byte := -1; // BUG(https://github.com/dafny-lang/dafny/issues/2191)
+        var c := if eof then minusone else this.s[point'] as opt_byte;
+        match step(st', c)
+          case Accept => return Success(Cursor(this.s, this.beg, point', this.end));
+          case Reject(err) => return Failure(OtherError(err));
+          case Partial(st'') =>
+            if eof { return Failure(EOF); }
+            else { st' := st''; point' := point' + 1; }
+      }
     }
   }
 }

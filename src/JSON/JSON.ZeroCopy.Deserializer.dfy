@@ -47,6 +47,17 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures sp.SplitFrom?(cs, SpecView)
     {
       cs.SkipWhile(Blank?).Split()
+    } by method {
+      reveal WS();
+      var point' := cs.point;
+      var end := cs.end;
+      while point' < end && Blank?(cs.s[point'])
+        invariant cs.(point := point').Valid?
+        invariant cs.(point := point').SkipWhile(Blank?) == cs.SkipWhile(Blank?)
+      {
+        point' := point' + 1;
+      }
+      return Cursor(cs.s, cs.beg, point', cs.end).Split();
     }
 
     function {:opaque} Structural<T>(cs: FreshCursor, parser: Parser<T>)
@@ -382,6 +393,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
   module Strings {
     import opened Wrappers
+    import opened BoundedInts
 
     import opened Grammar
     import opened Cursors
@@ -390,11 +402,34 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Parsers
     import opened Core
 
+    function {:opaque} StringBody(cs: Cursor): (pr: CursorResult<JSONError>)
+      ensures pr.Success? ==> pr.value.AdvancedFrom?(cs)
+    {
+      cs.SkipWhileLexer(Strings.StringBody, StringBodyLexerStart)
+    } by method {
+      reveal StringBody();
+      var escaped := false;
+      for point' := cs.point to cs.end
+        invariant cs.(point := point').Valid?
+        invariant cs.(point := point').SkipWhileLexer(Strings.StringBody, escaped) == StringBody(cs)
+      {
+        var byte := cs.s[point'];
+        if byte == '\"' as byte && !escaped {
+          return Success(Cursor(cs.s, cs.beg, point', cs.end));
+        } else if byte == '\\' as byte {
+          escaped := !escaped;
+        } else {
+          escaped := false;
+        }
+      }
+      return Failure(EOF);
+    }
+
     function {:opaque} String(cs: FreshCursor): (pr: ParseResult<jstring>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.String)
     {
       var cs :- cs.AssertChar('\"');
-      var cs :- cs.SkipWhileLexer(StringBody, Partial(StringBodyLexerStart));
+      var cs :- StringBody(cs);
       var cs :- cs.AssertChar('\"');
       Success(cs.Split())
     }
