@@ -160,7 +160,7 @@ module {:options "/functionSyntax:4"} Cursors {
       beg as int + idx as int < end as int
     }
 
-    function Ast(idx: uint32) : byte
+    function At(idx: uint32) : byte
       requires Valid?
       requires ValidIndex?(idx)
     {
@@ -185,14 +185,6 @@ module {:options "/functionSyntax:4"} Cursors {
       if EOF? then -1
       else SuffixAt(0) as opt_byte
     }
-
-    // function Peek(n: uint16 := 0): (r: opt_byte)
-    //   requires Valid?
-    //   requires n as int <= end as int
-    // {
-    //   if point + n as uint32 >= end then -1
-    //   else SuffixAt(0) as opt_byte
-    // }
 
     function LookingAt(c: char): (b: bool)
       requires Valid?

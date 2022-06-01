@@ -536,12 +536,10 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Array)
     {
-      var pr := Bracketed(cs, json);
-      ghost var _ := match pr { case Success(sp) => // DISCUSS: Better syntax?
-        SpecProperties.Bracketed_Morphism(sp.t);
-        assert Spec.Bracketed(sp.t, SuffixedElementSpec) == Spec.Array(sp.t); // DISCUSS: Why is this needed?
-        () case _ => () };
-      pr
+      var sp :- Bracketed(cs, json);
+      SpecProperties.Bracketed_Morphism(sp.t);
+      assert Spec.Bracketed(sp.t, SuffixedElementSpec) == Spec.Array(sp.t);
+      Success(sp)
     }
   }
 
@@ -601,12 +599,10 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Object)
     {
-      var pr := Bracketed(cs, json);
-      ghost var _ := match pr { case Success(sp) => // DISCUSS: Better syntax?
-        SpecProperties.Bracketed_Morphism(sp.t);
-        assert Spec.Bracketed(sp.t, SuffixedElementSpec) == Spec.Object(sp.t); // DISCUSS
-        () case _ => () };
-      pr
+      var sp :- Bracketed(cs, json);
+      SpecProperties.Bracketed_Morphism(sp.t);
+      assert Spec.Bracketed(sp.t, SuffixedElementSpec) == Spec.Object(sp.t); // DISCUSS
+      Success(sp)
     }
   }
 }

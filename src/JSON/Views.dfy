@@ -42,7 +42,7 @@ module {:options "/functionSyntax:4"} Views.Core {
       Byte?(c as byte)
     }
 
-    predicate ValidIndex?(idx: uint32) {
+    ghost predicate ValidIndex?(idx: uint32) {
       beg as int + idx as int < end as int
     }
 
