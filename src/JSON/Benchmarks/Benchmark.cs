@@ -380,31 +380,17 @@ namespace BoundedInts_Compile {
 namespace Views_mCore_Compile {
 
   public partial class View {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U);
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U);
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(Views_mCore_Compile.View.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(Views_mCore_Compile.View.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
-  public interface _IView__ {
-    bool is_View { get; }
-    Dafny.ISequence<byte> dtor_s { get; }
-    uint dtor_beg { get; }
-    uint dtor_end { get; }
-    _IView__ DowncastClone();
-    bool Empty_q { get; }
-    uint Length();
-    Dafny.ISequence<byte> Bytes();
-    bool ValidIndex_q(uint idx);
-    byte At(uint idx);
-    short Peek();
-    void Blit(byte[] bs, uint start);
-  }
-  public class View__ : _IView__ {
+  public struct View__ {
     public readonly Dafny.ISequence<byte> s;
     public readonly uint beg;
     public readonly uint end;
@@ -413,13 +399,11 @@ namespace Views_mCore_Compile {
       this.beg = beg;
       this.end = end;
     }
-    public _IView__ DowncastClone() {
-      if (this is _IView__ dt) { return dt; }
-      return new View__(s, beg, end);
+    public View__ DowncastClone() {
+      return this;
     }
     public override bool Equals(object other) {
-      var oth = other as Views_mCore_Compile.View__;
-      return oth != null && object.Equals(this.s, oth.s) && this.beg == oth.beg && this.end == oth.end;
+      return other is Views_mCore_Compile.View__ oth && object.Equals(this.s, oth.s) && this.beg == oth.beg && this.end == oth.end;
     }
     public override int GetHashCode() {
       ulong hash = 5381;
@@ -440,15 +424,15 @@ namespace Views_mCore_Compile {
       ss += ")";
       return ss;
     }
-    private static readonly _IView__ theDefault = create(Dafny.Sequence<byte>.Empty, 0, 0);
-    public static _IView__ Default() {
+    private static readonly View__ theDefault = create(Dafny.Sequence<byte>.Empty, 0, 0);
+    public static View__ Default() {
       return theDefault;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(Views_mCore_Compile.View__.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(Views_mCore_Compile.View__.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _IView__ create(Dafny.ISequence<byte> s, uint beg, uint end) {
+    public static View__ create(Dafny.ISequence<byte> s, uint beg, uint end) {
       return new View__(s, beg, end);
     }
     public bool is_View { get { return true; } }
@@ -473,7 +457,7 @@ namespace Views_mCore_Compile {
     public Dafny.ISequence<byte> Bytes() {
       return ((this).dtor_s).Subsequence((this).dtor_beg, (this).dtor_end);
     }
-    public static Views_mCore_Compile._IView__ OfBytes(Dafny.ISequence<byte> bs) {
+    public static Views_mCore_Compile.View__ OfBytes(Dafny.ISequence<byte> bs) {
       return Views_mCore_Compile.View__.create(bs, (uint)(0U), (uint)(bs).LongCount);
     }
     public bool ValidIndex_q(uint idx) {
@@ -497,7 +481,7 @@ namespace Views_mCore_Compile {
         (bs)[(int)(_index0)] = ((this).dtor_s).Select(((this).dtor_beg) + (_0_idx));
       }
     }
-    public static Views_mCore_Compile._IView__ Empty { get {
+    public static Views_mCore_Compile.View__ Empty { get {
       return Views_mCore_Compile.View__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U);
     } }
     public bool Empty_q { get {
@@ -506,13 +490,13 @@ namespace Views_mCore_Compile {
   }
 
   public partial class __default {
-    public static bool Adjacent(Views_mCore_Compile._IView__ lv, Views_mCore_Compile._IView__ rv)
+    public static bool Adjacent(Views_mCore_Compile.View__ lv, Views_mCore_Compile.View__ rv)
     {
       return (((lv).dtor_s).Equals(((rv).dtor_s))) && (((lv).dtor_end) == ((rv).dtor_beg));
     }
-    public static Views_mCore_Compile._IView__ Merge(Views_mCore_Compile._IView__ lv, Views_mCore_Compile._IView__ rv)
+    public static Views_mCore_Compile.View__ Merge(Views_mCore_Compile.View__ lv, Views_mCore_Compile.View__ rv)
     {
-      Views_mCore_Compile._IView__ _1_dt__update__tmp_h0 = lv;
+      Views_mCore_Compile.View__ _1_dt__update__tmp_h0 = lv;
       uint _2_dt__update_hend_h0 = (rv).dtor_end;
       return Views_mCore_Compile.View__.create((_1_dt__update__tmp_h0).dtor_s, (_1_dt__update__tmp_h0).dtor_beg, _2_dt__update_hend_h0);
     }
@@ -877,12 +861,12 @@ namespace Views_mWriters_Compile {
     bool is_Empty { get; }
     bool is_Chain { get; }
     Views_mWriters_Compile._IChain dtor_previous { get; }
-    Views_mCore_Compile._IView__ dtor_v { get; }
+    Views_mCore_Compile.View__ dtor_v { get; }
     _IChain DowncastClone();
     BigInteger Length();
     BigInteger Count();
     Dafny.ISequence<byte> Bytes();
-    Views_mWriters_Compile._IChain Append(Views_mCore_Compile._IView__ v_k);
+    Views_mWriters_Compile._IChain Append(Views_mCore_Compile.View__ v_k);
     void Blit(byte[] bs, uint end);
   }
   public abstract class Chain : _IChain {
@@ -898,7 +882,7 @@ namespace Views_mWriters_Compile {
     public static _IChain create_Empty() {
       return new Chain_Empty();
     }
-    public static _IChain create_Chain(Views_mWriters_Compile._IChain previous, Views_mCore_Compile._IView__ v) {
+    public static _IChain create_Chain(Views_mWriters_Compile._IChain previous, Views_mCore_Compile.View__ v) {
       return new Chain_Chain(previous, v);
     }
     public bool is_Empty { get { return this is Chain_Empty; } }
@@ -909,7 +893,7 @@ namespace Views_mWriters_Compile {
         return ((Chain_Chain)d).previous;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_v {
+    public Views_mCore_Compile.View__ dtor_v {
       get {
         var d = this;
         return ((Chain_Chain)d).v;
@@ -955,7 +939,7 @@ namespace Views_mWriters_Compile {
         goto TAIL_CALL_START;
       }
     }
-    public Views_mWriters_Compile._IChain Append(Views_mCore_Compile._IView__ v_k) {
+    public Views_mWriters_Compile._IChain Append(Views_mCore_Compile.View__ v_k) {
       if (((this).is_Chain) && (Views_mCore_Compile.__default.Adjacent((this).dtor_v, v_k))) {
         return Views_mWriters_Compile.Chain.create_Chain((this).dtor_previous, Views_mCore_Compile.__default.Merge((this).dtor_v, v_k));
       } else {
@@ -1003,8 +987,8 @@ namespace Views_mWriters_Compile {
   }
   public class Chain_Chain : Chain {
     public readonly Views_mWriters_Compile._IChain previous;
-    public readonly Views_mCore_Compile._IView__ v;
-    public Chain_Chain(Views_mWriters_Compile._IChain previous, Views_mCore_Compile._IView__ v) {
+    public readonly Views_mCore_Compile.View__ v;
+    public Chain_Chain(Views_mWriters_Compile._IChain previous, Views_mCore_Compile.View__ v) {
       this.previous = previous;
       this.v = v;
     }
@@ -1053,7 +1037,7 @@ namespace Views_mWriters_Compile {
     bool Empty_q { get; }
     bool Unsaturated_q { get; }
     Dafny.ISequence<byte> Bytes();
-    Views_mWriters_Compile._IWriter__ Append(Views_mCore_Compile._IView__ v_k);
+    Views_mWriters_Compile._IWriter__ Append(Views_mCore_Compile.View__ v_k);
     Views_mWriters_Compile._IWriter__ Then(Func<Views_mWriters_Compile._IWriter__, Views_mWriters_Compile._IWriter__> fn);
     void Blit(byte[] bs);
     byte[] ToArray();
@@ -1122,7 +1106,7 @@ namespace Views_mWriters_Compile {
         return BoundedInts_Compile.__default.UINT32__MAX;
       }
     }
-    public Views_mWriters_Compile._IWriter__ Append(Views_mCore_Compile._IView__ v_k) {
+    public Views_mWriters_Compile._IWriter__ Append(Views_mCore_Compile.View__ v_k) {
       return Views_mWriters_Compile.Writer__.create(Views_mWriters_Compile.Writer__.SaturatedAddU32((this).dtor_length, (v_k).Length()), ((this).dtor_chain).Append(v_k));
     }
     public Views_mWriters_Compile._IWriter__ Then(Func<Views_mWriters_Compile._IWriter__, Views_mWriters_Compile._IWriter__> fn) {
@@ -1158,149 +1142,149 @@ namespace Views_Compile {
 namespace JSON_mGrammar_Compile {
 
   public partial class jchar {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('b')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('b')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jchar.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jchar.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jperiod {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('.')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('.')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jperiod.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jperiod.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class je {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('e')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('e')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.je.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.je.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jcolon {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)(':')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)(':')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jcolon.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jcolon.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jcomma {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)(',')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)(',')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jcomma.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jcomma.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jlbrace {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('{')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('{')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jlbrace.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jlbrace.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jrbrace {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('}')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('}')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jrbrace.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jrbrace.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jlbracket {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('[')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('[')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jlbracket.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jlbracket.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jrbracket {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)(']')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)(']')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jrbracket.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jrbracket.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jminus {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jminus.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jminus.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jsign {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jsign.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jsign.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jblanks {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jblanks.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jblanks.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public interface _IStructural<out T> {
     bool is_Structural { get; }
-    Views_mCore_Compile._IView__ dtor_before { get; }
+    Views_mCore_Compile.View__ dtor_before { get; }
     T dtor_t { get; }
-    Views_mCore_Compile._IView__ dtor_after { get; }
+    Views_mCore_Compile.View__ dtor_after { get; }
     _IStructural<__T> DowncastClone<__T>(Func<T, __T> converter0);
   }
   public class Structural<T> : _IStructural<T> {
-    public readonly Views_mCore_Compile._IView__ before;
+    public readonly Views_mCore_Compile.View__ before;
     public readonly T t;
-    public readonly Views_mCore_Compile._IView__ after;
-    public Structural(Views_mCore_Compile._IView__ before, T t, Views_mCore_Compile._IView__ after) {
+    public readonly Views_mCore_Compile.View__ after;
+    public Structural(Views_mCore_Compile.View__ before, T t, Views_mCore_Compile.View__ after) {
       this.before = before;
       this.t = t;
       this.after = after;
@@ -1338,11 +1322,11 @@ namespace JSON_mGrammar_Compile {
     public static Dafny.TypeDescriptor<JSON_mGrammar_Compile._IStructural<T>> _TypeDescriptor(Dafny.TypeDescriptor<T> _td_T) {
       return new Dafny.TypeDescriptor<JSON_mGrammar_Compile._IStructural<T>>(JSON_mGrammar_Compile.Structural<T>.Default(_td_T.Default()));
     }
-    public static _IStructural<T> create(Views_mCore_Compile._IView__ before, T t, Views_mCore_Compile._IView__ after) {
+    public static _IStructural<T> create(Views_mCore_Compile.View__ before, T t, Views_mCore_Compile.View__ after) {
       return new Structural<T>(before, t, after);
     }
     public bool is_Structural { get { return true; } }
-    public Views_mCore_Compile._IView__ dtor_before {
+    public Views_mCore_Compile.View__ dtor_before {
       get {
         return this.before;
       }
@@ -1352,7 +1336,7 @@ namespace JSON_mGrammar_Compile {
         return this.t;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_after {
+    public Views_mCore_Compile.View__ dtor_after {
       get {
         return this.after;
       }
@@ -1574,83 +1558,83 @@ namespace JSON_mGrammar_Compile {
   }
 
   public partial class jstring {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jstring.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jstring.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jnull {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(JSON_mGrammar_Compile.__default.NULL);
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(JSON_mGrammar_Compile.__default.NULL);
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jnull.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jnull.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jbool {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(JSON_mGrammar_Compile.__default.TRUE);
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(JSON_mGrammar_Compile.__default.TRUE);
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jbool.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jbool.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jdigits {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jdigits.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jdigits.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jnum {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('0')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('0')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jnum.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jnum.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jint {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('0')));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements((byte)('0')));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mGrammar_Compile.jint.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mGrammar_Compile.jint.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public interface _Ijkv {
     bool is_KV { get; }
-    Views_mCore_Compile._IView__ dtor_k { get; }
-    JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> dtor_colon { get; }
+    Views_mCore_Compile.View__ dtor_k { get; }
+    JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> dtor_colon { get; }
     JSON_mGrammar_Compile._IValue dtor_v { get; }
     _Ijkv DowncastClone();
   }
   public class jkv : _Ijkv {
-    public readonly Views_mCore_Compile._IView__ k;
-    public readonly JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> colon;
+    public readonly Views_mCore_Compile.View__ k;
+    public readonly JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> colon;
     public readonly JSON_mGrammar_Compile._IValue v;
-    public jkv(Views_mCore_Compile._IView__ k, JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> colon, JSON_mGrammar_Compile._IValue v) {
+    public jkv(Views_mCore_Compile.View__ k, JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> colon, JSON_mGrammar_Compile._IValue v) {
       this.k = k;
       this.colon = colon;
       this.v = v;
@@ -1682,7 +1666,7 @@ namespace JSON_mGrammar_Compile {
       s += ")";
       return s;
     }
-    private static readonly _Ijkv theDefault = create(JSON_mGrammar_Compile.jstring.Default(), JSON_mGrammar_Compile.Structural<Views_mCore_Compile._IView__>.Default(JSON_mGrammar_Compile.jcolon.Default()), JSON_mGrammar_Compile.Value.Default());
+    private static readonly _Ijkv theDefault = create(JSON_mGrammar_Compile.jstring.Default(), JSON_mGrammar_Compile.Structural<Views_mCore_Compile.View__>.Default(JSON_mGrammar_Compile.jcolon.Default()), JSON_mGrammar_Compile.Value.Default());
     public static _Ijkv Default() {
       return theDefault;
     }
@@ -1690,16 +1674,16 @@ namespace JSON_mGrammar_Compile {
     public static Dafny.TypeDescriptor<JSON_mGrammar_Compile._Ijkv> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _Ijkv create(Views_mCore_Compile._IView__ k, JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> colon, JSON_mGrammar_Compile._IValue v) {
+    public static _Ijkv create(Views_mCore_Compile.View__ k, JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> colon, JSON_mGrammar_Compile._IValue v) {
       return new jkv(k, colon, v);
     }
     public bool is_KV { get { return true; } }
-    public Views_mCore_Compile._IView__ dtor_k {
+    public Views_mCore_Compile.View__ dtor_k {
       get {
         return this.k;
       }
     }
-    public JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> dtor_colon {
+    public JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> dtor_colon {
       get {
         return this.colon;
       }
@@ -1713,14 +1697,14 @@ namespace JSON_mGrammar_Compile {
 
   public interface _Ijfrac {
     bool is_JFrac { get; }
-    Views_mCore_Compile._IView__ dtor_period { get; }
-    Views_mCore_Compile._IView__ dtor_num { get; }
+    Views_mCore_Compile.View__ dtor_period { get; }
+    Views_mCore_Compile.View__ dtor_num { get; }
     _Ijfrac DowncastClone();
   }
   public class jfrac : _Ijfrac {
-    public readonly Views_mCore_Compile._IView__ period;
-    public readonly Views_mCore_Compile._IView__ num;
-    public jfrac(Views_mCore_Compile._IView__ period, Views_mCore_Compile._IView__ num) {
+    public readonly Views_mCore_Compile.View__ period;
+    public readonly Views_mCore_Compile.View__ num;
+    public jfrac(Views_mCore_Compile.View__ period, Views_mCore_Compile.View__ num) {
       this.period = period;
       this.num = num;
     }
@@ -1756,16 +1740,16 @@ namespace JSON_mGrammar_Compile {
     public static Dafny.TypeDescriptor<JSON_mGrammar_Compile._Ijfrac> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _Ijfrac create(Views_mCore_Compile._IView__ period, Views_mCore_Compile._IView__ num) {
+    public static _Ijfrac create(Views_mCore_Compile.View__ period, Views_mCore_Compile.View__ num) {
       return new jfrac(period, num);
     }
     public bool is_JFrac { get { return true; } }
-    public Views_mCore_Compile._IView__ dtor_period {
+    public Views_mCore_Compile.View__ dtor_period {
       get {
         return this.period;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_num {
+    public Views_mCore_Compile.View__ dtor_num {
       get {
         return this.num;
       }
@@ -1774,16 +1758,16 @@ namespace JSON_mGrammar_Compile {
 
   public interface _Ijexp {
     bool is_JExp { get; }
-    Views_mCore_Compile._IView__ dtor_e { get; }
-    Views_mCore_Compile._IView__ dtor_sign { get; }
-    Views_mCore_Compile._IView__ dtor_num { get; }
+    Views_mCore_Compile.View__ dtor_e { get; }
+    Views_mCore_Compile.View__ dtor_sign { get; }
+    Views_mCore_Compile.View__ dtor_num { get; }
     _Ijexp DowncastClone();
   }
   public class jexp : _Ijexp {
-    public readonly Views_mCore_Compile._IView__ e;
-    public readonly Views_mCore_Compile._IView__ sign;
-    public readonly Views_mCore_Compile._IView__ num;
-    public jexp(Views_mCore_Compile._IView__ e, Views_mCore_Compile._IView__ sign, Views_mCore_Compile._IView__ num) {
+    public readonly Views_mCore_Compile.View__ e;
+    public readonly Views_mCore_Compile.View__ sign;
+    public readonly Views_mCore_Compile.View__ num;
+    public jexp(Views_mCore_Compile.View__ e, Views_mCore_Compile.View__ sign, Views_mCore_Compile.View__ num) {
       this.e = e;
       this.sign = sign;
       this.num = num;
@@ -1823,21 +1807,21 @@ namespace JSON_mGrammar_Compile {
     public static Dafny.TypeDescriptor<JSON_mGrammar_Compile._Ijexp> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _Ijexp create(Views_mCore_Compile._IView__ e, Views_mCore_Compile._IView__ sign, Views_mCore_Compile._IView__ num) {
+    public static _Ijexp create(Views_mCore_Compile.View__ e, Views_mCore_Compile.View__ sign, Views_mCore_Compile.View__ num) {
       return new jexp(e, sign, num);
     }
     public bool is_JExp { get { return true; } }
-    public Views_mCore_Compile._IView__ dtor_e {
+    public Views_mCore_Compile.View__ dtor_e {
       get {
         return this.e;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_sign {
+    public Views_mCore_Compile.View__ dtor_sign {
       get {
         return this.sign;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_num {
+    public Views_mCore_Compile.View__ dtor_num {
       get {
         return this.num;
       }
@@ -1846,18 +1830,18 @@ namespace JSON_mGrammar_Compile {
 
   public interface _Ijnumber {
     bool is_JNumber { get; }
-    Views_mCore_Compile._IView__ dtor_minus { get; }
-    Views_mCore_Compile._IView__ dtor_num { get; }
+    Views_mCore_Compile.View__ dtor_minus { get; }
+    Views_mCore_Compile.View__ dtor_num { get; }
     JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac> dtor_frac { get; }
     JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp> dtor_exp { get; }
     _Ijnumber DowncastClone();
   }
   public class jnumber : _Ijnumber {
-    public readonly Views_mCore_Compile._IView__ minus;
-    public readonly Views_mCore_Compile._IView__ num;
+    public readonly Views_mCore_Compile.View__ minus;
+    public readonly Views_mCore_Compile.View__ num;
     public readonly JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac> frac;
     public readonly JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp> exp;
-    public jnumber(Views_mCore_Compile._IView__ minus, Views_mCore_Compile._IView__ num, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac> frac, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp> exp) {
+    public jnumber(Views_mCore_Compile.View__ minus, Views_mCore_Compile.View__ num, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac> frac, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp> exp) {
       this.minus = minus;
       this.num = num;
       this.frac = frac;
@@ -1901,16 +1885,16 @@ namespace JSON_mGrammar_Compile {
     public static Dafny.TypeDescriptor<JSON_mGrammar_Compile._Ijnumber> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _Ijnumber create(Views_mCore_Compile._IView__ minus, Views_mCore_Compile._IView__ num, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac> frac, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp> exp) {
+    public static _Ijnumber create(Views_mCore_Compile.View__ minus, Views_mCore_Compile.View__ num, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac> frac, JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp> exp) {
       return new jnumber(minus, num, frac, exp);
     }
     public bool is_JNumber { get { return true; } }
-    public Views_mCore_Compile._IView__ dtor_minus {
+    public Views_mCore_Compile.View__ dtor_minus {
       get {
         return this.minus;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_num {
+    public Views_mCore_Compile.View__ dtor_num {
       get {
         return this.num;
       }
@@ -1934,12 +1918,12 @@ namespace JSON_mGrammar_Compile {
     bool is_Number { get; }
     bool is_Object { get; }
     bool is_Array { get; }
-    Views_mCore_Compile._IView__ dtor_n { get; }
-    Views_mCore_Compile._IView__ dtor_b { get; }
-    Views_mCore_Compile._IView__ dtor_str { get; }
+    Views_mCore_Compile.View__ dtor_n { get; }
+    Views_mCore_Compile.View__ dtor_b { get; }
+    Views_mCore_Compile.View__ dtor_str { get; }
     JSON_mGrammar_Compile._Ijnumber dtor_num { get; }
-    JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> dtor_obj { get; }
-    JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> dtor_arr { get; }
+    JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> dtor_obj { get; }
+    JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> dtor_arr { get; }
     _IValue DowncastClone();
   }
   public abstract class Value : _IValue {
@@ -1952,22 +1936,22 @@ namespace JSON_mGrammar_Compile {
     public static Dafny.TypeDescriptor<JSON_mGrammar_Compile._IValue> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _IValue create_Null(Views_mCore_Compile._IView__ n) {
+    public static _IValue create_Null(Views_mCore_Compile.View__ n) {
       return new Value_Null(n);
     }
-    public static _IValue create_Bool(Views_mCore_Compile._IView__ b) {
+    public static _IValue create_Bool(Views_mCore_Compile.View__ b) {
       return new Value_Bool(b);
     }
-    public static _IValue create_String(Views_mCore_Compile._IView__ str) {
+    public static _IValue create_String(Views_mCore_Compile.View__ str) {
       return new Value_String(str);
     }
     public static _IValue create_Number(JSON_mGrammar_Compile._Ijnumber num) {
       return new Value_Number(num);
     }
-    public static _IValue create_Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj) {
+    public static _IValue create_Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj) {
       return new Value_Object(obj);
     }
-    public static _IValue create_Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr) {
+    public static _IValue create_Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr) {
       return new Value_Array(arr);
     }
     public bool is_Null { get { return this is Value_Null; } }
@@ -1976,19 +1960,19 @@ namespace JSON_mGrammar_Compile {
     public bool is_Number { get { return this is Value_Number; } }
     public bool is_Object { get { return this is Value_Object; } }
     public bool is_Array { get { return this is Value_Array; } }
-    public Views_mCore_Compile._IView__ dtor_n {
+    public Views_mCore_Compile.View__ dtor_n {
       get {
         var d = this;
         return ((Value_Null)d).n;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_b {
+    public Views_mCore_Compile.View__ dtor_b {
       get {
         var d = this;
         return ((Value_Bool)d).b;
       }
     }
-    public Views_mCore_Compile._IView__ dtor_str {
+    public Views_mCore_Compile.View__ dtor_str {
       get {
         var d = this;
         return ((Value_String)d).str;
@@ -2000,13 +1984,13 @@ namespace JSON_mGrammar_Compile {
         return ((Value_Number)d).num;
       }
     }
-    public JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> dtor_obj {
+    public JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> dtor_obj {
       get {
         var d = this;
         return ((Value_Object)d).obj;
       }
     }
-    public JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> dtor_arr {
+    public JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> dtor_arr {
       get {
         var d = this;
         return ((Value_Array)d).arr;
@@ -2015,8 +1999,8 @@ namespace JSON_mGrammar_Compile {
     public abstract _IValue DowncastClone();
   }
   public class Value_Null : Value {
-    public readonly Views_mCore_Compile._IView__ n;
-    public Value_Null(Views_mCore_Compile._IView__ n) {
+    public readonly Views_mCore_Compile.View__ n;
+    public Value_Null(Views_mCore_Compile.View__ n) {
       this.n = n;
     }
     public override _IValue DowncastClone() {
@@ -2042,8 +2026,8 @@ namespace JSON_mGrammar_Compile {
     }
   }
   public class Value_Bool : Value {
-    public readonly Views_mCore_Compile._IView__ b;
-    public Value_Bool(Views_mCore_Compile._IView__ b) {
+    public readonly Views_mCore_Compile.View__ b;
+    public Value_Bool(Views_mCore_Compile.View__ b) {
       this.b = b;
     }
     public override _IValue DowncastClone() {
@@ -2069,8 +2053,8 @@ namespace JSON_mGrammar_Compile {
     }
   }
   public class Value_String : Value {
-    public readonly Views_mCore_Compile._IView__ str;
-    public Value_String(Views_mCore_Compile._IView__ str) {
+    public readonly Views_mCore_Compile.View__ str;
+    public Value_String(Views_mCore_Compile.View__ str) {
       this.str = str;
     }
     public override _IValue DowncastClone() {
@@ -2123,8 +2107,8 @@ namespace JSON_mGrammar_Compile {
     }
   }
   public class Value_Object : Value {
-    public readonly JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj;
-    public Value_Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj) {
+    public readonly JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj;
+    public Value_Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj) {
       this.obj = obj;
     }
     public override _IValue DowncastClone() {
@@ -2150,8 +2134,8 @@ namespace JSON_mGrammar_Compile {
     }
   }
   public class Value_Array : Value {
-    public readonly JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr;
-    public Value_Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr) {
+    public readonly JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr;
+    public Value_Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr) {
       this.arr = arr;
     }
     public override _IValue DowncastClone() {
@@ -2198,15 +2182,15 @@ namespace JSON_mGrammar_Compile {
 namespace JSON_mSpec_Compile {
 
   public partial class __default {
-    public static Dafny.ISequence<byte> View(Views_mCore_Compile._IView__ v) {
+    public static Dafny.ISequence<byte> View(Views_mCore_Compile.View__ v) {
       return (v).Bytes();
     }
     public static Dafny.ISequence<byte> Structural<__T>(JSON_mGrammar_Compile._IStructural<__T> self, Func<__T, Dafny.ISequence<byte>> pt)
     {
       return Dafny.Sequence<byte>.Concat(Dafny.Sequence<byte>.Concat(JSON_mSpec_Compile.__default.View((self).dtor_before), Dafny.Helpers.Id<Func<__T, Dafny.ISequence<byte>>>(pt)((self).dtor_t)), JSON_mSpec_Compile.__default.View((self).dtor_after));
     }
-    public static Dafny.ISequence<byte> StructuralView(JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> self) {
-      return JSON_mSpec_Compile.__default.Structural<Views_mCore_Compile._IView__>(self, JSON_mSpec_Compile.__default.View);
+    public static Dafny.ISequence<byte> StructuralView(JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> self) {
+      return JSON_mSpec_Compile.__default.Structural<Views_mCore_Compile.View__>(self, JSON_mSpec_Compile.__default.View);
     }
     public static Dafny.ISequence<byte> Maybe<__T>(JSON_mGrammar_Compile._IMaybe<__T> self, Func<__T, Dafny.ISequence<byte>> pt)
     {
@@ -2231,7 +2215,7 @@ namespace JSON_mSpec_Compile {
         goto TAIL_CALL_START;
       }
     }
-    public static Dafny.ISequence<byte> Bracketed<__D, __S>(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, __D, __S, Views_mCore_Compile._IView__> self, Func<JSON_mGrammar_Compile._ISuffixed<__D, __S>, Dafny.ISequence<byte>> pdatum)
+    public static Dafny.ISequence<byte> Bracketed<__D, __S>(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, __D, __S, Views_mCore_Compile.View__> self, Func<JSON_mGrammar_Compile._ISuffixed<__D, __S>, Dafny.ISequence<byte>> pdatum)
     {
       return Dafny.Sequence<byte>.Concat(Dafny.Sequence<byte>.Concat(JSON_mSpec_Compile.__default.StructuralView((self).dtor_l), JSON_mSpec_Compile.__default.ConcatBytes<JSON_mGrammar_Compile._ISuffixed<__D, __S>>((self).dtor_data, pdatum)), JSON_mSpec_Compile.__default.StructuralView((self).dtor_r));
     }
@@ -2247,53 +2231,53 @@ namespace JSON_mSpec_Compile {
     public static Dafny.ISequence<byte> Number(JSON_mGrammar_Compile._Ijnumber self) {
       return Dafny.Sequence<byte>.Concat(Dafny.Sequence<byte>.Concat(Dafny.Sequence<byte>.Concat(JSON_mSpec_Compile.__default.View((self).dtor_minus), JSON_mSpec_Compile.__default.View((self).dtor_num)), JSON_mSpec_Compile.__default.Maybe<JSON_mGrammar_Compile._Ijfrac>((self).dtor_frac, JSON_mSpec_Compile.__default.Frac)), JSON_mSpec_Compile.__default.Maybe<JSON_mGrammar_Compile._Ijexp>((self).dtor_exp, JSON_mSpec_Compile.__default.Exp));
     }
-    public static Dafny.ISequence<byte> String(Views_mCore_Compile._IView__ self) {
+    public static Dafny.ISequence<byte> String(Views_mCore_Compile.View__ self) {
       return JSON_mSpec_Compile.__default.View(self);
     }
-    public static Dafny.ISequence<byte> CommaSuffix(JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> c) {
-      return JSON_mSpec_Compile.__default.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>(c, JSON_mSpec_Compile.__default.StructuralView);
+    public static Dafny.ISequence<byte> CommaSuffix(JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> c) {
+      return JSON_mSpec_Compile.__default.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>(c, JSON_mSpec_Compile.__default.StructuralView);
     }
-    public static Dafny.ISequence<byte> Member(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__> self) {
+    public static Dafny.ISequence<byte> Member(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__> self) {
       return Dafny.Sequence<byte>.Concat(JSON_mSpec_Compile.__default.KV((self).dtor_t), JSON_mSpec_Compile.__default.CommaSuffix((self).dtor_suffix));
     }
-    public static Dafny.ISequence<byte> Item(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__> self) {
+    public static Dafny.ISequence<byte> Item(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__> self) {
       return Dafny.Sequence<byte>.Concat(JSON_mSpec_Compile.__default.Value((self).dtor_t), JSON_mSpec_Compile.__default.CommaSuffix((self).dtor_suffix));
     }
-    public static Dafny.ISequence<byte> Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj) {
-      return JSON_mSpec_Compile.__default.Bracketed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>(obj, Dafny.Helpers.Id<Func<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>, Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>, Dafny.ISequence<byte>>>>((_24_obj) => ((System.Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>, Dafny.ISequence<byte>>)((_25_d) => {
+    public static Dafny.ISequence<byte> Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj) {
+      return JSON_mSpec_Compile.__default.Bracketed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>(obj, Dafny.Helpers.Id<Func<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>, Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>, Dafny.ISequence<byte>>>>((_24_obj) => ((System.Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>, Dafny.ISequence<byte>>)((_25_d) => {
         return JSON_mSpec_Compile.__default.Member(_25_d);
       })))(obj));
     }
-    public static Dafny.ISequence<byte> Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr) {
-      return JSON_mSpec_Compile.__default.Bracketed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>(arr, Dafny.Helpers.Id<Func<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>, Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>, Dafny.ISequence<byte>>>>((_26_arr) => ((System.Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>, Dafny.ISequence<byte>>)((_27_d) => {
+    public static Dafny.ISequence<byte> Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr) {
+      return JSON_mSpec_Compile.__default.Bracketed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>(arr, Dafny.Helpers.Id<Func<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>, Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>, Dafny.ISequence<byte>>>>((_26_arr) => ((System.Func<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>, Dafny.ISequence<byte>>)((_27_d) => {
         return JSON_mSpec_Compile.__default.Item(_27_d);
       })))(arr));
     }
     public static Dafny.ISequence<byte> Value(JSON_mGrammar_Compile._IValue self) {
       JSON_mGrammar_Compile._IValue _source5 = self;
       if (_source5.is_Null) {
-        Views_mCore_Compile._IView__ _28___mcc_h0 = _source5.dtor_n;
-        Views_mCore_Compile._IView__ _29_n = _28___mcc_h0;
+        Views_mCore_Compile.View__ _28___mcc_h0 = _source5.dtor_n;
+        Views_mCore_Compile.View__ _29_n = _28___mcc_h0;
         return JSON_mSpec_Compile.__default.View(_29_n);
       } else if (_source5.is_Bool) {
-        Views_mCore_Compile._IView__ _30___mcc_h1 = _source5.dtor_b;
-        Views_mCore_Compile._IView__ _31_b = _30___mcc_h1;
+        Views_mCore_Compile.View__ _30___mcc_h1 = _source5.dtor_b;
+        Views_mCore_Compile.View__ _31_b = _30___mcc_h1;
         return JSON_mSpec_Compile.__default.View(_31_b);
       } else if (_source5.is_String) {
-        Views_mCore_Compile._IView__ _32___mcc_h2 = _source5.dtor_str;
-        Views_mCore_Compile._IView__ _33_str = _32___mcc_h2;
+        Views_mCore_Compile.View__ _32___mcc_h2 = _source5.dtor_str;
+        Views_mCore_Compile.View__ _33_str = _32___mcc_h2;
         return JSON_mSpec_Compile.__default.String(_33_str);
       } else if (_source5.is_Number) {
         JSON_mGrammar_Compile._Ijnumber _34___mcc_h3 = _source5.dtor_num;
         JSON_mGrammar_Compile._Ijnumber _35_num = _34___mcc_h3;
         return JSON_mSpec_Compile.__default.Number(_35_num);
       } else if (_source5.is_Object) {
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _36___mcc_h4 = _source5.dtor_obj;
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _37_obj = _36___mcc_h4;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _36___mcc_h4 = _source5.dtor_obj;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _37_obj = _36___mcc_h4;
         return JSON_mSpec_Compile.__default.Object(_37_obj);
       } else {
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _38___mcc_h5 = _source5.dtor_arr;
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _39_arr = _38___mcc_h5;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _38___mcc_h5 = _source5.dtor_arr;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _39_arr = _38___mcc_h5;
         return JSON_mSpec_Compile.__default.Array(_39_arr);
       }
     }
@@ -2405,32 +2389,32 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
     {
       JSON_mGrammar_Compile._IValue _source6 = v;
       if (_source6.is_Null) {
-        Views_mCore_Compile._IView__ _48___mcc_h0 = _source6.dtor_n;
-        Views_mCore_Compile._IView__ _49_n = _48___mcc_h0;
+        Views_mCore_Compile.View__ _48___mcc_h0 = _source6.dtor_n;
+        Views_mCore_Compile.View__ _49_n = _48___mcc_h0;
         return (writer).Append(_49_n);
       } else if (_source6.is_Bool) {
-        Views_mCore_Compile._IView__ _50___mcc_h1 = _source6.dtor_b;
-        Views_mCore_Compile._IView__ _51_b = _50___mcc_h1;
+        Views_mCore_Compile.View__ _50___mcc_h1 = _source6.dtor_b;
+        Views_mCore_Compile.View__ _51_b = _50___mcc_h1;
         return (writer).Append(_51_b);
       } else if (_source6.is_String) {
-        Views_mCore_Compile._IView__ _52___mcc_h2 = _source6.dtor_str;
-        Views_mCore_Compile._IView__ _53_str = _52___mcc_h2;
+        Views_mCore_Compile.View__ _52___mcc_h2 = _source6.dtor_str;
+        Views_mCore_Compile.View__ _53_str = _52___mcc_h2;
         return JSON_mZeroCopy_mSerializer_Compile.__default.String(_53_str, writer);
       } else if (_source6.is_Number) {
         JSON_mGrammar_Compile._Ijnumber _54___mcc_h3 = _source6.dtor_num;
         JSON_mGrammar_Compile._Ijnumber _55_num = _54___mcc_h3;
         return JSON_mZeroCopy_mSerializer_Compile.__default.Number(_55_num, writer);
       } else if (_source6.is_Object) {
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _56___mcc_h4 = _source6.dtor_obj;
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _57_obj = _56___mcc_h4;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _56___mcc_h4 = _source6.dtor_obj;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _57_obj = _56___mcc_h4;
         return JSON_mZeroCopy_mSerializer_Compile.__default.Object(_57_obj, writer);
       } else {
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _58___mcc_h5 = _source6.dtor_arr;
-        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _59_arr = _58___mcc_h5;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _58___mcc_h5 = _source6.dtor_arr;
+        JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _59_arr = _58___mcc_h5;
         return JSON_mZeroCopy_mSerializer_Compile.__default.Array(_59_arr, writer);
       }
     }
-    public static Views_mWriters_Compile._IWriter__ String(Views_mCore_Compile._IView__ str, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ String(Views_mCore_Compile.View__ str, Views_mWriters_Compile._IWriter__ writer)
     {
       return (writer).Append(str);
     }
@@ -2441,25 +2425,25 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
       Views_mWriters_Compile._IWriter__ _62_writer = ((((num).dtor_exp).is_NonEmpty) ? ((((_61_writer).Append((((num).dtor_exp).dtor_t).dtor_e)).Append((((num).dtor_exp).dtor_t).dtor_sign)).Append((((num).dtor_exp).dtor_t).dtor_num)) : (_61_writer));
       return _62_writer;
     }
-    public static Views_mWriters_Compile._IWriter__ StructuralView(JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__> st, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ StructuralView(JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__> st, Views_mWriters_Compile._IWriter__ writer)
     {
       return (((writer).Append((st).dtor_before)).Append((st).dtor_t)).Append((st).dtor_after);
     }
-    public static Views_mWriters_Compile._IWriter__ Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ Object(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ _63_writer = JSON_mZeroCopy_mSerializer_Compile.__default.StructuralView((obj).dtor_l, writer);
       Views_mWriters_Compile._IWriter__ _64_writer = JSON_mZeroCopy_mSerializer_Compile.__default.Members(obj, _63_writer);
       Views_mWriters_Compile._IWriter__ _65_writer = JSON_mZeroCopy_mSerializer_Compile.__default.StructuralView((obj).dtor_r, _64_writer);
       return _65_writer;
     }
-    public static Views_mWriters_Compile._IWriter__ Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ Array(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ _66_writer = JSON_mZeroCopy_mSerializer_Compile.__default.StructuralView((arr).dtor_l, writer);
       Views_mWriters_Compile._IWriter__ _67_writer = JSON_mZeroCopy_mSerializer_Compile.__default.Items(arr, _66_writer);
       Views_mWriters_Compile._IWriter__ _68_writer = JSON_mZeroCopy_mSerializer_Compile.__default.StructuralView((arr).dtor_r, _67_writer);
       return _68_writer;
     }
-    public static Views_mWriters_Compile._IWriter__ Members(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ Members(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ wr = Views_mWriters_Compile.Writer.Default();
       Views_mWriters_Compile._IWriter__ _out1;
@@ -2467,7 +2451,7 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
       wr = _out1;
       return wr;
     }
-    public static Views_mWriters_Compile._IWriter__ Items(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ Items(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ wr = Views_mWriters_Compile.Writer.Default();
       Views_mWriters_Compile._IWriter__ _out2;
@@ -2475,11 +2459,11 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
       wr = _out2;
       return wr;
     }
-    public static Views_mWriters_Compile._IWriter__ MembersImpl(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> obj, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ MembersImpl(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> obj, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ wr = Views_mWriters_Compile.Writer.Default();
       wr = writer;
-      Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>> _69_members;
+      Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>> _69_members;
       _69_members = (obj).dtor_data;
       BigInteger _hi1 = new BigInteger((_69_members).Count);
       for (BigInteger _70_i = BigInteger.Zero; _70_i < _hi1; _70_i++) {
@@ -2487,11 +2471,11 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
       }
       return wr;
     }
-    public static Views_mWriters_Compile._IWriter__ ItemsImpl(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> arr, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ ItemsImpl(JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> arr, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ wr = Views_mWriters_Compile.Writer.Default();
       wr = writer;
-      Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>> _71_items;
+      Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>> _71_items;
       _71_items = (arr).dtor_data;
       BigInteger _hi2 = new BigInteger((_71_items).Count);
       for (BigInteger _72_i = BigInteger.Zero; _72_i < _hi2; _72_i++) {
@@ -2499,7 +2483,7 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
       }
       return wr;
     }
-    public static Views_mWriters_Compile._IWriter__ Member(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__> m, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ Member(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__> m, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ _73_writer = (writer).Append(((m).dtor_t).dtor_k);
       Views_mWriters_Compile._IWriter__ _74_writer = JSON_mZeroCopy_mSerializer_Compile.__default.StructuralView(((m).dtor_t).dtor_colon, _73_writer);
@@ -2510,7 +2494,7 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
         return JSON_mZeroCopy_mSerializer_Compile.__default.StructuralView(((m).dtor_suffix).dtor_t, _75_writer);
       }
     }
-    public static Views_mWriters_Compile._IWriter__ Item(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__> m, Views_mWriters_Compile._IWriter__ writer)
+    public static Views_mWriters_Compile._IWriter__ Item(JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__> m, Views_mWriters_Compile._IWriter__ writer)
     {
       Views_mWriters_Compile._IWriter__ _76_writer = JSON_mZeroCopy_mSerializer_Compile.__default.Value((m).dtor_t, writer);
       if (((m).dtor_suffix).is_Empty) {
@@ -2523,57 +2507,57 @@ namespace JSON_mZeroCopy_mSerializer_Compile {
 } // end of namespace JSON_mZeroCopy_mSerializer_Compile
 namespace Lexers_mCore_Compile {
 
-  public interface _ILexerState<out T, out R> {
+  public interface _ILexerResult<out T, out R> {
     bool is_Accept { get; }
     bool is_Reject { get; }
     bool is_Partial { get; }
     R dtor_err { get; }
     T dtor_st { get; }
-    _ILexerState<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1);
+    _ILexerResult<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1);
   }
-  public abstract class LexerState<T, R> : _ILexerState<T, R> {
-    public LexerState() { }
-    public static _ILexerState<T, R> Default() {
+  public abstract class LexerResult<T, R> : _ILexerResult<T, R> {
+    public LexerResult() { }
+    public static _ILexerResult<T, R> Default() {
       return create_Accept();
     }
-    public static Dafny.TypeDescriptor<Lexers_mCore_Compile._ILexerState<T, R>> _TypeDescriptor() {
-      return new Dafny.TypeDescriptor<Lexers_mCore_Compile._ILexerState<T, R>>(Lexers_mCore_Compile.LexerState<T, R>.Default());
+    public static Dafny.TypeDescriptor<Lexers_mCore_Compile._ILexerResult<T, R>> _TypeDescriptor() {
+      return new Dafny.TypeDescriptor<Lexers_mCore_Compile._ILexerResult<T, R>>(Lexers_mCore_Compile.LexerResult<T, R>.Default());
     }
-    public static _ILexerState<T, R> create_Accept() {
-      return new LexerState_Accept<T, R>();
+    public static _ILexerResult<T, R> create_Accept() {
+      return new LexerResult_Accept<T, R>();
     }
-    public static _ILexerState<T, R> create_Reject(R err) {
-      return new LexerState_Reject<T, R>(err);
+    public static _ILexerResult<T, R> create_Reject(R err) {
+      return new LexerResult_Reject<T, R>(err);
     }
-    public static _ILexerState<T, R> create_Partial(T st) {
-      return new LexerState_Partial<T, R>(st);
+    public static _ILexerResult<T, R> create_Partial(T st) {
+      return new LexerResult_Partial<T, R>(st);
     }
-    public bool is_Accept { get { return this is LexerState_Accept<T, R>; } }
-    public bool is_Reject { get { return this is LexerState_Reject<T, R>; } }
-    public bool is_Partial { get { return this is LexerState_Partial<T, R>; } }
+    public bool is_Accept { get { return this is LexerResult_Accept<T, R>; } }
+    public bool is_Reject { get { return this is LexerResult_Reject<T, R>; } }
+    public bool is_Partial { get { return this is LexerResult_Partial<T, R>; } }
     public R dtor_err {
       get {
         var d = this;
-        return ((LexerState_Reject<T, R>)d).err;
+        return ((LexerResult_Reject<T, R>)d).err;
       }
     }
     public T dtor_st {
       get {
         var d = this;
-        return ((LexerState_Partial<T, R>)d).st;
+        return ((LexerResult_Partial<T, R>)d).st;
       }
     }
-    public abstract _ILexerState<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1);
+    public abstract _ILexerResult<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1);
   }
-  public class LexerState_Accept<T, R> : LexerState<T, R> {
-    public LexerState_Accept() {
+  public class LexerResult_Accept<T, R> : LexerResult<T, R> {
+    public LexerResult_Accept() {
     }
-    public override _ILexerState<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
-      if (this is _ILexerState<__T, __R> dt) { return dt; }
-      return new LexerState_Accept<__T, __R>();
+    public override _ILexerResult<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
+      if (this is _ILexerResult<__T, __R> dt) { return dt; }
+      return new LexerResult_Accept<__T, __R>();
     }
     public override bool Equals(object other) {
-      var oth = other as Lexers_mCore_Compile.LexerState_Accept<T, R>;
+      var oth = other as Lexers_mCore_Compile.LexerResult_Accept<T, R>;
       return oth != null;
     }
     public override int GetHashCode() {
@@ -2582,21 +2566,21 @@ namespace Lexers_mCore_Compile {
       return (int) hash;
     }
     public override string ToString() {
-      string s = "Lexers_mCore_Compile.LexerState.Accept";
+      string s = "Lexers_mCore_Compile.LexerResult.Accept";
       return s;
     }
   }
-  public class LexerState_Reject<T, R> : LexerState<T, R> {
+  public class LexerResult_Reject<T, R> : LexerResult<T, R> {
     public readonly R err;
-    public LexerState_Reject(R err) {
+    public LexerResult_Reject(R err) {
       this.err = err;
     }
-    public override _ILexerState<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
-      if (this is _ILexerState<__T, __R> dt) { return dt; }
-      return new LexerState_Reject<__T, __R>(converter1(err));
+    public override _ILexerResult<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
+      if (this is _ILexerResult<__T, __R> dt) { return dt; }
+      return new LexerResult_Reject<__T, __R>(converter1(err));
     }
     public override bool Equals(object other) {
-      var oth = other as Lexers_mCore_Compile.LexerState_Reject<T, R>;
+      var oth = other as Lexers_mCore_Compile.LexerResult_Reject<T, R>;
       return oth != null && object.Equals(this.err, oth.err);
     }
     public override int GetHashCode() {
@@ -2606,24 +2590,24 @@ namespace Lexers_mCore_Compile {
       return (int) hash;
     }
     public override string ToString() {
-      string s = "Lexers_mCore_Compile.LexerState.Reject";
+      string s = "Lexers_mCore_Compile.LexerResult.Reject";
       s += "(";
       s += Dafny.Helpers.ToString(this.err);
       s += ")";
       return s;
     }
   }
-  public class LexerState_Partial<T, R> : LexerState<T, R> {
+  public class LexerResult_Partial<T, R> : LexerResult<T, R> {
     public readonly T st;
-    public LexerState_Partial(T st) {
+    public LexerResult_Partial(T st) {
       this.st = st;
     }
-    public override _ILexerState<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
-      if (this is _ILexerState<__T, __R> dt) { return dt; }
-      return new LexerState_Partial<__T, __R>(converter0(st));
+    public override _ILexerResult<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
+      if (this is _ILexerResult<__T, __R> dt) { return dt; }
+      return new LexerResult_Partial<__T, __R>(converter0(st));
     }
     public override bool Equals(object other) {
-      var oth = other as Lexers_mCore_Compile.LexerState_Partial<T, R>;
+      var oth = other as Lexers_mCore_Compile.LexerResult_Partial<T, R>;
       return oth != null && object.Equals(this.st, oth.st);
     }
     public override int GetHashCode() {
@@ -2633,7 +2617,7 @@ namespace Lexers_mCore_Compile {
       return (int) hash;
     }
     public override string ToString() {
-      string s = "Lexers_mCore_Compile.LexerState.Partial";
+      string s = "Lexers_mCore_Compile.LexerResult.Partial";
       s += "(";
       s += Dafny.Helpers.ToString(this.st);
       s += ")";
@@ -2752,56 +2736,37 @@ namespace Lexers_mStrings_Compile {
   }
 
   public partial class __default {
-    public static Lexers_mCore_Compile._ILexerState<bool, __R> StringBody<__R>(Lexers_mCore_Compile._ILexerState<bool, __R> st, short @byte)
+    public static Lexers_mCore_Compile._ILexerResult<bool, __R> StringBody<__R>(bool escaped, short @byte)
     {
-      Lexers_mCore_Compile._ILexerState<bool, __R> _source7 = st;
-      if (_source7.is_Accept) {
-        return st;
-      } else if (_source7.is_Reject) {
-        __R _77___mcc_h0 = _source7.dtor_err;
-        return st;
+      if ((@byte) == ((short)('\\'))) {
+        return Lexers_mCore_Compile.LexerResult<bool, __R>.create_Partial(!(escaped));
+      } else if (((@byte) == ((short)('\"'))) && (!(escaped))) {
+        return Lexers_mCore_Compile.LexerResult<bool, __R>.create_Accept();
       } else {
-        bool _78___mcc_h2 = _source7.dtor_st;
-        bool _79_escaped = _78___mcc_h2;
-        if ((@byte) == ((short)('\\'))) {
-          return Lexers_mCore_Compile.LexerState<bool, __R>.create_Partial(!(_79_escaped));
-        } else if (((@byte) == ((short)('\"'))) && (!(_79_escaped))) {
-          return Lexers_mCore_Compile.LexerState<bool, __R>.create_Accept();
-        } else {
-          return Lexers_mCore_Compile.LexerState<bool, __R>.create_Partial(false);
-        }
+        return Lexers_mCore_Compile.LexerResult<bool, __R>.create_Partial(false);
       }
     }
-    public static Lexers_mCore_Compile._ILexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>> String(Lexers_mCore_Compile._ILexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>> st, short @byte)
+    public static Lexers_mCore_Compile._ILexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>> String(Lexers_mStrings_Compile._IStringLexerState st, short @byte)
     {
-      Lexers_mCore_Compile._ILexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>> _source8 = st;
-      if (_source8.is_Accept) {
-        return st;
-      } else if (_source8.is_Reject) {
-        Dafny.ISequence<char> _80___mcc_h0 = _source8.dtor_err;
-        return st;
-      } else {
-        Lexers_mStrings_Compile._IStringLexerState _81___mcc_h2 = _source8.dtor_st;
-        Lexers_mStrings_Compile._IStringLexerState _source9 = _81___mcc_h2;
-        if (_source9.is_Start) {
-          if ((@byte) == ((short)('\"'))) {
-            return Lexers_mCore_Compile.LexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_Body(false));
-          } else {
-            return Lexers_mCore_Compile.LexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Reject(Dafny.Sequence<char>.FromString("String must start with double quote"));
-          }
-        } else if (_source9.is_Body) {
-          bool _82___mcc_h4 = _source9.dtor_escaped;
-          bool _83_escaped = _82___mcc_h4;
-          if ((@byte) == ((short)('\\'))) {
-            return Lexers_mCore_Compile.LexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_Body(!(_83_escaped)));
-          } else if (((@byte) == ((short)('\"'))) && (!(_83_escaped))) {
-            return Lexers_mCore_Compile.LexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_End());
-          } else {
-            return Lexers_mCore_Compile.LexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_Body(false));
-          }
+      Lexers_mStrings_Compile._IStringLexerState _source7 = st;
+      if (_source7.is_Start) {
+        if ((@byte) == ((short)('\"'))) {
+          return Lexers_mCore_Compile.LexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_Body(false));
         } else {
-          return Lexers_mCore_Compile.LexerState<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Accept();
+          return Lexers_mCore_Compile.LexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Reject(Dafny.Sequence<char>.FromString("String must start with double quote"));
         }
+      } else if (_source7.is_Body) {
+        bool _77___mcc_h0 = _source7.dtor_escaped;
+        bool _78_escaped = _77___mcc_h0;
+        if ((@byte) == ((short)('\\'))) {
+          return Lexers_mCore_Compile.LexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_Body(!(_78_escaped)));
+        } else if (((@byte) == ((short)('\"'))) && (!(_78_escaped))) {
+          return Lexers_mCore_Compile.LexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_End());
+        } else {
+          return Lexers_mCore_Compile.LexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Partial(Lexers_mStrings_Compile.StringLexerState.create_Body(false));
+        }
+      } else {
+        return Lexers_mCore_Compile.LexerResult<Lexers_mStrings_Compile._IStringLexerState, Dafny.ISequence<char>>.create_Accept();
       }
     }
     public static bool StringBodyLexerStart { get {
@@ -2817,26 +2782,19 @@ namespace Lexers_Compile {
 } // end of namespace Lexers_Compile
 namespace Cursors_Compile {
 
-  public interface _ISplit<out T> {
-    bool is_SP { get; }
-    T dtor_t { get; }
-    Cursors_Compile._ICursor__ dtor_cs { get; }
-    _ISplit<__T> DowncastClone<__T>(Func<T, __T> converter0);
-  }
-  public class Split<T> : _ISplit<T> {
+  public struct Split<T> {
     public readonly T t;
-    public readonly Cursors_Compile._ICursor__ cs;
-    public Split(T t, Cursors_Compile._ICursor__ cs) {
+    public readonly Cursors_Compile.Cursor__ cs;
+    public Split(T t, Cursors_Compile.Cursor__ cs) {
       this.t = t;
       this.cs = cs;
     }
-    public _ISplit<__T> DowncastClone<__T>(Func<T, __T> converter0) {
-      if (this is _ISplit<__T> dt) { return dt; }
+    public Split<__T> DowncastClone<__T>(Func<T, __T> converter0) {
+      if (this is Split<__T> dt) { return dt; }
       return new Split<__T>(converter0(t), cs);
     }
     public override bool Equals(object other) {
-      var oth = other as Cursors_Compile.Split<T>;
-      return oth != null && object.Equals(this.t, oth.t) && object.Equals(this.cs, oth.cs);
+      return other is Cursors_Compile.Split<T> oth && object.Equals(this.t, oth.t) && object.Equals(this.cs, oth.cs);
     }
     public override int GetHashCode() {
       ulong hash = 5381;
@@ -2854,13 +2812,13 @@ namespace Cursors_Compile {
       s += ")";
       return s;
     }
-    public static _ISplit<T> Default(T _default_T) {
+    public static Split<T> Default(T _default_T) {
       return create(_default_T, Cursors_Compile.FreshCursor.Default());
     }
-    public static Dafny.TypeDescriptor<Cursors_Compile._ISplit<T>> _TypeDescriptor(Dafny.TypeDescriptor<T> _td_T) {
-      return new Dafny.TypeDescriptor<Cursors_Compile._ISplit<T>>(Cursors_Compile.Split<T>.Default(_td_T.Default()));
+    public static Dafny.TypeDescriptor<Cursors_Compile.Split<T>> _TypeDescriptor(Dafny.TypeDescriptor<T> _td_T) {
+      return new Dafny.TypeDescriptor<Cursors_Compile.Split<T>>(Cursors_Compile.Split<T>.Default(_td_T.Default()));
     }
-    public static _ISplit<T> create(T t, Cursors_Compile._ICursor__ cs) {
+    public static Split<T> create(T t, Cursors_Compile.Cursor__ cs) {
       return new Split<T>(t, cs);
     }
     public bool is_SP { get { return true; } }
@@ -2869,7 +2827,7 @@ namespace Cursors_Compile {
         return this.t;
       }
     }
-    public Cursors_Compile._ICursor__ dtor_cs {
+    public Cursors_Compile.Cursor__ dtor_cs {
       get {
         return this.cs;
       }
@@ -2877,23 +2835,23 @@ namespace Cursors_Compile {
   }
 
   public partial class Cursor {
-    private static readonly Cursors_Compile._ICursor__ Witness = Cursors_Compile.Cursor__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U, 0U);
-    public static Cursors_Compile._ICursor__ Default() {
+    private static readonly Cursors_Compile.Cursor__ Witness = Cursors_Compile.Cursor__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U, 0U);
+    public static Cursors_Compile.Cursor__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Cursors_Compile._ICursor__> _TYPE = new Dafny.TypeDescriptor<Cursors_Compile._ICursor__>(Cursors_Compile.Cursor.Default());
-    public static Dafny.TypeDescriptor<Cursors_Compile._ICursor__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Cursors_Compile.Cursor__> _TYPE = new Dafny.TypeDescriptor<Cursors_Compile.Cursor__>(Cursors_Compile.Cursor.Default());
+    public static Dafny.TypeDescriptor<Cursors_Compile.Cursor__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class FreshCursor {
-    private static readonly Cursors_Compile._ICursor__ Witness = Cursors_Compile.Cursor__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U, 0U);
-    public static Cursors_Compile._ICursor__ Default() {
+    private static readonly Cursors_Compile.Cursor__ Witness = Cursors_Compile.Cursor__.create(Dafny.Sequence<byte>.FromElements(), 0U, 0U, 0U);
+    public static Cursors_Compile.Cursor__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Cursors_Compile._ICursor__> _TYPE = new Dafny.TypeDescriptor<Cursors_Compile._ICursor__>(Cursors_Compile.FreshCursor.Default());
-    public static Dafny.TypeDescriptor<Cursors_Compile._ICursor__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Cursors_Compile.Cursor__> _TYPE = new Dafny.TypeDescriptor<Cursors_Compile.Cursor__>(Cursors_Compile.FreshCursor.Default());
+    public static Dafny.TypeDescriptor<Cursors_Compile.Cursor__> _TypeDescriptor() {
       return _TYPE;
     }
   }
@@ -2960,36 +2918,36 @@ namespace Cursors_Compile {
     }
     public abstract _ICursorError<__R> DowncastClone<__R>(Func<R, __R> converter0);
     public static Dafny.ISequence<char> _ToString(Cursors_Compile._ICursorError<R> _this, Func<R, Dafny.ISequence<char>> pr) {
-      Cursors_Compile._ICursorError<R> _source10 = _this;
-      if (_source10.is_EOF) {
+      Cursors_Compile._ICursorError<R> _source8 = _this;
+      if (_source8.is_EOF) {
         return Dafny.Sequence<char>.FromString("Reached EOF");
-      } else if (_source10.is_ExpectingByte) {
-        byte _84___mcc_h0 = _source10.dtor_expected;
-        short _85___mcc_h1 = _source10.dtor_b;
-        short _86_b = _85___mcc_h1;
-        byte _87_b0 = _84___mcc_h0;
+      } else if (_source8.is_ExpectingByte) {
+        byte _79___mcc_h0 = _source8.dtor_expected;
+        short _80___mcc_h1 = _source8.dtor_b;
+        short _81_b = _80___mcc_h1;
+        byte _82_b0 = _79___mcc_h0;
+        Dafny.ISequence<char> _83_c = (((_81_b) > (0)) ? (Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("'"), Dafny.Sequence<char>.FromElements((char)(_81_b))), Dafny.Sequence<char>.FromString("'"))) : (Dafny.Sequence<char>.FromString("EOF")));
+        return Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("Expecting '"), Dafny.Sequence<char>.FromElements((char)(_82_b0))), Dafny.Sequence<char>.FromString("', read ")), _83_c);
+      } else if (_source8.is_ExpectingAnyByte) {
+        Dafny.ISequence<byte> _84___mcc_h2 = _source8.dtor_expected__sq;
+        short _85___mcc_h3 = _source8.dtor_b;
+        short _86_b = _85___mcc_h3;
+        Dafny.ISequence<byte> _87_bs0 = _84___mcc_h2;
         Dafny.ISequence<char> _88_c = (((_86_b) > (0)) ? (Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("'"), Dafny.Sequence<char>.FromElements((char)(_86_b))), Dafny.Sequence<char>.FromString("'"))) : (Dafny.Sequence<char>.FromString("EOF")));
-        return Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("Expecting '"), Dafny.Sequence<char>.FromElements((char)(_87_b0))), Dafny.Sequence<char>.FromString("', read ")), _88_c);
-      } else if (_source10.is_ExpectingAnyByte) {
-        Dafny.ISequence<byte> _89___mcc_h2 = _source10.dtor_expected__sq;
-        short _90___mcc_h3 = _source10.dtor_b;
-        short _91_b = _90___mcc_h3;
-        Dafny.ISequence<byte> _92_bs0 = _89___mcc_h2;
-        Dafny.ISequence<char> _93_c = (((_91_b) > (0)) ? (Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("'"), Dafny.Sequence<char>.FromElements((char)(_91_b))), Dafny.Sequence<char>.FromString("'"))) : (Dafny.Sequence<char>.FromString("EOF")));
-        Dafny.ISequence<char> _94_c0s = ((System.Func<Dafny.ISequence<char>>) (() => {
-          BigInteger dim0 = new BigInteger((_92_bs0).Count);
+        Dafny.ISequence<char> _89_c0s = ((System.Func<Dafny.ISequence<char>>) (() => {
+          BigInteger dim0 = new BigInteger((_87_bs0).Count);
           var arr0 = new char[Dafny.Helpers.ToIntChecked(dim0,"C# array size must not be larger than max 32-bit int")];
           for (int i0 = 0; i0 < dim0; i0++) {
-            var _95_idx = (BigInteger) i0;
-            arr0[(int)(_95_idx)] = (char)((_92_bs0).Select(_95_idx));
+            var _90_idx = (BigInteger) i0;
+            arr0[(int)(_90_idx)] = (char)((_87_bs0).Select(_90_idx));
           }
           return Dafny.Sequence<char>.FromArray(arr0);
         }))();
-        return Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("Expecting one of '"), _94_c0s), Dafny.Sequence<char>.FromString("', read ")), _93_c);
+        return Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.Concat(Dafny.Sequence<char>.FromString("Expecting one of '"), _89_c0s), Dafny.Sequence<char>.FromString("', read ")), _88_c);
       } else {
-        R _96___mcc_h4 = _source10.dtor_err;
-        R _97_err = _96___mcc_h4;
-        return Dafny.Helpers.Id<Func<R, Dafny.ISequence<char>>>(pr)(_97_err);
+        R _91___mcc_h4 = _source8.dtor_err;
+        R _92_err = _91___mcc_h4;
+        return Dafny.Helpers.Id<Func<R, Dafny.ISequence<char>>>(pr)(_92_err);
       }
     }
   }
@@ -3106,38 +3064,7 @@ namespace Cursors_Compile {
     }
   }
 
-  public interface _ICursor__ {
-    bool is_Cursor { get; }
-    Dafny.ISequence<byte> dtor_s { get; }
-    uint dtor_beg { get; }
-    uint dtor_point { get; }
-    uint dtor_end { get; }
-    _ICursor__ DowncastClone();
-    bool BOF_q { get; }
-    bool EOF_q { get; }
-    Dafny.ISequence<byte> Bytes();
-    Views_mCore_Compile._IView__ Prefix();
-    Cursors_Compile._ICursor__ Suffix();
-    Cursors_Compile._ISplit<Views_mCore_Compile._IView__> Split();
-    uint PrefixLength();
-    uint SuffixLength();
-    uint Length();
-    byte At(uint idx);
-    byte SuffixAt(uint idx);
-    short Peek();
-    bool LookingAt(char c);
-    Cursors_Compile._ICursor__ Skip(uint n);
-    Cursors_Compile._ICursor__ Unskip(uint n);
-    Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> Get<__R>(__R err);
-    Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> AssertByte<__R>(byte b);
-    Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> AssertBytes<__R>(Dafny.ISequence<byte> bs, uint offset);
-    Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> AssertChar<__R>(char c0);
-    Cursors_Compile._ICursor__ SkipByte();
-    Cursors_Compile._ICursor__ SkipIf(Func<byte, bool> p);
-    Cursors_Compile._ICursor__ SkipWhile(Func<byte, bool> p);
-    Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> SkipWhileLexer<__A, __R>(Func<Lexers_mCore_Compile._ILexerState<__A, __R>, short, Lexers_mCore_Compile._ILexerState<__A, __R>> step, Lexers_mCore_Compile._ILexerState<__A, __R> st);
-  }
-  public class Cursor__ : _ICursor__ {
+  public struct Cursor__ {
     public readonly Dafny.ISequence<byte> s;
     public readonly uint beg;
     public readonly uint point;
@@ -3148,13 +3075,11 @@ namespace Cursors_Compile {
       this.point = point;
       this.end = end;
     }
-    public _ICursor__ DowncastClone() {
-      if (this is _ICursor__ dt) { return dt; }
-      return new Cursor__(s, beg, point, end);
+    public Cursor__ DowncastClone() {
+      return this;
     }
     public override bool Equals(object other) {
-      var oth = other as Cursors_Compile.Cursor__;
-      return oth != null && object.Equals(this.s, oth.s) && this.beg == oth.beg && this.point == oth.point && this.end == oth.end;
+      return other is Cursors_Compile.Cursor__ oth && object.Equals(this.s, oth.s) && this.beg == oth.beg && this.point == oth.point && this.end == oth.end;
     }
     public override int GetHashCode() {
       ulong hash = 5381;
@@ -3178,15 +3103,15 @@ namespace Cursors_Compile {
       ss += ")";
       return ss;
     }
-    private static readonly _ICursor__ theDefault = create(Dafny.Sequence<byte>.Empty, 0, 0, 0);
-    public static _ICursor__ Default() {
+    private static readonly Cursor__ theDefault = create(Dafny.Sequence<byte>.Empty, 0, 0, 0);
+    public static Cursor__ Default() {
       return theDefault;
     }
-    private static readonly Dafny.TypeDescriptor<Cursors_Compile._ICursor__> _TYPE = new Dafny.TypeDescriptor<Cursors_Compile._ICursor__>(Cursors_Compile.Cursor__.Default());
-    public static Dafny.TypeDescriptor<Cursors_Compile._ICursor__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Cursors_Compile.Cursor__> _TYPE = new Dafny.TypeDescriptor<Cursors_Compile.Cursor__>(Cursors_Compile.Cursor__.Default());
+    public static Dafny.TypeDescriptor<Cursors_Compile.Cursor__> _TypeDescriptor() {
       return _TYPE;
     }
-    public static _ICursor__ create(Dafny.ISequence<byte> s, uint beg, uint point, uint end) {
+    public static Cursor__ create(Dafny.ISequence<byte> s, uint beg, uint point, uint end) {
       return new Cursor__(s, beg, point, end);
     }
     public bool is_Cursor { get { return true; } }
@@ -3210,25 +3135,25 @@ namespace Cursors_Compile {
         return this.end;
       }
     }
-    public static Cursors_Compile._ICursor__ OfView(Views_mCore_Compile._IView__ v) {
+    public static Cursors_Compile.Cursor__ OfView(Views_mCore_Compile.View__ v) {
       return Cursors_Compile.Cursor__.create((v).dtor_s, (v).dtor_beg, (v).dtor_beg, (v).dtor_end);
     }
-    public static Cursors_Compile._ICursor__ OfBytes(Dafny.ISequence<byte> bs) {
-      return Cursors_Compile.Cursor__.create(bs, 0U, (uint)(bs).LongCount, (uint)(bs).LongCount);
+    public static Cursors_Compile.Cursor__ OfBytes(Dafny.ISequence<byte> bs) {
+      return Cursors_Compile.Cursor__.create(bs, 0U, 0U, (uint)(bs).LongCount);
     }
     public Dafny.ISequence<byte> Bytes() {
       return ((this).dtor_s).Subsequence((this).dtor_beg, (this).dtor_end);
     }
-    public Views_mCore_Compile._IView__ Prefix() {
+    public Views_mCore_Compile.View__ Prefix() {
       return Views_mCore_Compile.View__.create((this).dtor_s, (this).dtor_beg, (this).dtor_point);
     }
-    public Cursors_Compile._ICursor__ Suffix() {
-      Cursors_Compile._ICursor__ _98_dt__update__tmp_h0 = this;
-      uint _99_dt__update_hbeg_h0 = (this).dtor_point;
-      return Cursors_Compile.Cursor__.create((_98_dt__update__tmp_h0).dtor_s, _99_dt__update_hbeg_h0, (_98_dt__update__tmp_h0).dtor_point, (_98_dt__update__tmp_h0).dtor_end);
+    public Cursors_Compile.Cursor__ Suffix() {
+      Cursors_Compile.Cursor__ _93_dt__update__tmp_h0 = this;
+      uint _94_dt__update_hbeg_h0 = (this).dtor_point;
+      return Cursors_Compile.Cursor__.create((_93_dt__update__tmp_h0).dtor_s, _94_dt__update_hbeg_h0, (_93_dt__update__tmp_h0).dtor_point, (_93_dt__update__tmp_h0).dtor_end);
     }
-    public Cursors_Compile._ISplit<Views_mCore_Compile._IView__> Split() {
-      return Cursors_Compile.Split<Views_mCore_Compile._IView__>.create((this).Prefix(), (this).Suffix());
+    public Cursors_Compile.Split<Views_mCore_Compile.View__> Split() {
+      return Cursors_Compile.Split<Views_mCore_Compile.View__>.create((this).Prefix(), (this).Suffix());
     }
     public uint PrefixLength() {
       return ((this).dtor_point) - ((this).dtor_beg);
@@ -3255,44 +3180,44 @@ namespace Cursors_Compile {
     public bool LookingAt(char c) {
       return ((this).Peek()) == ((short)(c));
     }
-    public Cursors_Compile._ICursor__ Skip(uint n) {
-      Cursors_Compile._ICursor__ _100_dt__update__tmp_h0 = this;
-      uint _101_dt__update_hpoint_h0 = ((this).dtor_point) + (n);
-      return Cursors_Compile.Cursor__.create((_100_dt__update__tmp_h0).dtor_s, (_100_dt__update__tmp_h0).dtor_beg, _101_dt__update_hpoint_h0, (_100_dt__update__tmp_h0).dtor_end);
+    public Cursors_Compile.Cursor__ Skip(uint n) {
+      Cursors_Compile.Cursor__ _95_dt__update__tmp_h0 = this;
+      uint _96_dt__update_hpoint_h0 = ((this).dtor_point) + (n);
+      return Cursors_Compile.Cursor__.create((_95_dt__update__tmp_h0).dtor_s, (_95_dt__update__tmp_h0).dtor_beg, _96_dt__update_hpoint_h0, (_95_dt__update__tmp_h0).dtor_end);
     }
-    public Cursors_Compile._ICursor__ Unskip(uint n) {
-      Cursors_Compile._ICursor__ _102_dt__update__tmp_h0 = this;
-      uint _103_dt__update_hpoint_h0 = ((this).dtor_point) - (n);
-      return Cursors_Compile.Cursor__.create((_102_dt__update__tmp_h0).dtor_s, (_102_dt__update__tmp_h0).dtor_beg, _103_dt__update_hpoint_h0, (_102_dt__update__tmp_h0).dtor_end);
+    public Cursors_Compile.Cursor__ Unskip(uint n) {
+      Cursors_Compile.Cursor__ _97_dt__update__tmp_h0 = this;
+      uint _98_dt__update_hpoint_h0 = ((this).dtor_point) - (n);
+      return Cursors_Compile.Cursor__.create((_97_dt__update__tmp_h0).dtor_s, (_97_dt__update__tmp_h0).dtor_beg, _98_dt__update_hpoint_h0, (_97_dt__update__tmp_h0).dtor_end);
     }
-    public Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> Get<__R>(__R err) {
+    public Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>> Get<__R>(__R err) {
       if ((this).EOF_q) {
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_OtherError(err));
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_OtherError(err));
       } else {
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Success((this).Skip(1U));
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Success((this).Skip(1U));
       }
     }
-    public Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> AssertByte<__R>(byte b) {
-      short _104_nxt = (this).Peek();
-      if ((_104_nxt) == ((short)(b))) {
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Success((this).Skip(1U));
+    public Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>> AssertByte<__R>(byte b) {
+      short _99_nxt = (this).Peek();
+      if ((_99_nxt) == ((short)(b))) {
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Success((this).Skip(1U));
       } else {
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_ExpectingByte(b, _104_nxt));
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_ExpectingByte(b, _99_nxt));
       }
     }
-    public Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> AssertBytes<__R>(Dafny.ISequence<byte> bs, uint offset)
+    public Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>> AssertBytes<__R>(Dafny.ISequence<byte> bs, uint offset)
     {
-      _ICursor__ _this = this;
+      Cursor__ _this = this;
     TAIL_CALL_START: ;
       if ((offset) == ((uint)(bs).LongCount)) {
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Success(_this);
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Success(_this);
       } else {
-        Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> _105_valueOrError0 = (_this).AssertByte<__R>((byte)((bs).Select(offset)));
-        if ((_105_valueOrError0).IsFailure()) {
-          return (_105_valueOrError0).PropagateFailure<Cursors_Compile._ICursor__>();
+        Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>> _100_valueOrError0 = (_this).AssertByte<__R>((byte)((bs).Select(offset)));
+        if ((_100_valueOrError0).IsFailure()) {
+          return (_100_valueOrError0).PropagateFailure<Cursors_Compile.Cursor__>();
         } else {
-          Cursors_Compile._ICursor__ _106_ps = (_105_valueOrError0).Extract();
-          var _in8 = _106_ps;
+          Cursors_Compile.Cursor__ _101_ps = (_100_valueOrError0).Extract();
+          var _in8 = _101_ps;
           Dafny.ISequence<byte> _in9 = bs;
           uint _in10 = (offset) + (1U);
           _this = _in8;
@@ -3302,25 +3227,25 @@ namespace Cursors_Compile {
         }
       }
     }
-    public Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> AssertChar<__R>(char c0) {
+    public Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>> AssertChar<__R>(char c0) {
       return (this).AssertByte<__R>((byte)(c0));
     }
-    public Cursors_Compile._ICursor__ SkipByte() {
+    public Cursors_Compile.Cursor__ SkipByte() {
       if ((this).EOF_q) {
         return this;
       } else {
         return (this).Skip(1U);
       }
     }
-    public Cursors_Compile._ICursor__ SkipIf(Func<byte, bool> p) {
+    public Cursors_Compile.Cursor__ SkipIf(Func<byte, bool> p) {
       if (((this).EOF_q) || (!(Dafny.Helpers.Id<Func<byte, bool>>(p)((this).SuffixAt(0U))))) {
         return this;
       } else {
         return (this).Skip(1U);
       }
     }
-    public Cursors_Compile._ICursor__ SkipWhile(Func<byte, bool> p) {
-      _ICursor__ _this = this;
+    public Cursors_Compile.Cursor__ SkipWhile(Func<byte, bool> p) {
+      Cursor__ _this = this;
     TAIL_CALL_START: ;
       if (((_this).EOF_q) || (!(Dafny.Helpers.Id<Func<byte, bool>>(p)((_this).SuffixAt(0U))))) {
         return _this;
@@ -3332,26 +3257,26 @@ namespace Cursors_Compile {
         goto TAIL_CALL_START;
       }
     }
-    public Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>> SkipWhileLexer<__A, __R>(Func<Lexers_mCore_Compile._ILexerState<__A, __R>, short, Lexers_mCore_Compile._ILexerState<__A, __R>> step, Lexers_mCore_Compile._ILexerState<__A, __R> st)
+    public Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>> SkipWhileLexer<__A, __R>(Func<__A, short, Lexers_mCore_Compile._ILexerResult<__A, __R>> step, __A st)
     {
-      _ICursor__ _this = this;
+      Cursor__ _this = this;
     TAIL_CALL_START: ;
-      Lexers_mCore_Compile._ILexerState<__A, __R> _source11 = Dafny.Helpers.Id<Func<Lexers_mCore_Compile._ILexerState<__A, __R>, short, Lexers_mCore_Compile._ILexerState<__A, __R>>>(step)(st, (_this).Peek());
-      if (_source11.is_Accept) {
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Success(_this);
-      } else if (_source11.is_Reject) {
-        __R _107___mcc_h0 = _source11.dtor_err;
-        __R _108_err = _107___mcc_h0;
-        return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_OtherError(_108_err));
+      Lexers_mCore_Compile._ILexerResult<__A, __R> _source9 = Dafny.Helpers.Id<Func<__A, short, Lexers_mCore_Compile._ILexerResult<__A, __R>>>(step)(st, (_this).Peek());
+      if (_source9.is_Accept) {
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Success(_this);
+      } else if (_source9.is_Reject) {
+        __R _102___mcc_h0 = _source9.dtor_err;
+        __R _103_err = _102___mcc_h0;
+        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_OtherError(_103_err));
       } else {
-        __A _109___mcc_h2 = _source11.dtor_st;
-        Lexers_mCore_Compile._ILexerState<__A, __R> _110_partial = Dafny.Helpers.Id<Func<Lexers_mCore_Compile._ILexerState<__A, __R>, short, Lexers_mCore_Compile._ILexerState<__A, __R>>>(step)(st, (_this).Peek());
+        __A _104___mcc_h1 = _source9.dtor_st;
+        __A _105_st = _104___mcc_h1;
         if ((_this).EOF_q) {
-          return Wrappers_Compile.Result<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
+          return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
         } else {
           var _in13 = (_this).Skip(1U);
-          Func<Lexers_mCore_Compile._ILexerState<__A, __R>, short, Lexers_mCore_Compile._ILexerState<__A, __R>> _in14 = step;
-          Lexers_mCore_Compile._ILexerState<__A, __R> _in15 = _110_partial;
+          Func<__A, short, Lexers_mCore_Compile._ILexerResult<__A, __R>> _in14 = step;
+          __A _in15 = _105_st;
           _this = _in13;
           step = _in14;
           st = _in15;
@@ -3381,17 +3306,17 @@ namespace Parsers_Compile {
 
   public interface _IParser__<T, out R> {
     bool is_Parser { get; }
-    Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> dtor_fn { get; }
+    Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> dtor_fn { get; }
     _IParser__<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1);
   }
   public class Parser__<T, R> : _IParser__<T, R> {
-    public readonly Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> fn;
-    public Parser__(Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> fn) {
+    public readonly Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> fn;
+    public Parser__(Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> fn) {
       this.fn = fn;
     }
     public _IParser__<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
       if (this is _IParser__<__T, __R> dt) { return dt; }
-      return new Parser__<__T, __R>((fn).DowncastClone<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>, Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>>(Dafny.Helpers.Id<Cursors_Compile._ICursor__>, Dafny.Helpers.CastConverter<Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>>));
+      return new Parser__<__T, __R>((fn).DowncastClone<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>, Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>>(Dafny.Helpers.Id<Cursors_Compile.Cursor__>, Dafny.Helpers.CastConverter<Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>>));
     }
     public override bool Equals(object other) {
       var oth = other as Parsers_Compile.Parser__<T, R>;
@@ -3411,16 +3336,16 @@ namespace Parsers_Compile {
       return s;
     }
     public static _IParser__<T, R> Default(T _default_T) {
-      return create(((Cursors_Compile._ICursor__ x0) => Wrappers_Compile.Result<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>.Default(Cursors_Compile.Split<T>.Default(_default_T))));
+      return create(((Cursors_Compile.Cursor__ x0) => Wrappers_Compile.Result<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>.Default(Cursors_Compile.Split<T>.Default(_default_T))));
     }
     public static Dafny.TypeDescriptor<Parsers_Compile._IParser__<T, R>> _TypeDescriptor(Dafny.TypeDescriptor<T> _td_T) {
       return new Dafny.TypeDescriptor<Parsers_Compile._IParser__<T, R>>(Parsers_Compile.Parser__<T, R>.Default(_td_T.Default()));
     }
-    public static _IParser__<T, R> create(Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> fn) {
+    public static _IParser__<T, R> create(Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> fn) {
       return new Parser__<T, R>(fn);
     }
     public bool is_Parser { get { return true; } }
-    public Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> dtor_fn {
+    public Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> dtor_fn {
       get {
         return this.fn;
       }
@@ -3429,17 +3354,17 @@ namespace Parsers_Compile {
 
   public interface _ISubParser__<T, out R> {
     bool is_SubParser { get; }
-    Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> dtor_fn { get; }
+    Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> dtor_fn { get; }
     _ISubParser__<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1);
   }
   public class SubParser__<T, R> : _ISubParser__<T, R> {
-    public readonly Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> fn;
-    public SubParser__(Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> fn) {
+    public readonly Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> fn;
+    public SubParser__(Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> fn) {
       this.fn = fn;
     }
     public _ISubParser__<__T, __R> DowncastClone<__T, __R>(Func<T, __T> converter0, Func<R, __R> converter1) {
       if (this is _ISubParser__<__T, __R> dt) { return dt; }
-      return new SubParser__<__T, __R>((fn).DowncastClone<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>, Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>>(Dafny.Helpers.Id<Cursors_Compile._ICursor__>, Dafny.Helpers.CastConverter<Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>>));
+      return new SubParser__<__T, __R>((fn).DowncastClone<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>, Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>>(Dafny.Helpers.Id<Cursors_Compile.Cursor__>, Dafny.Helpers.CastConverter<Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>>));
     }
     public override bool Equals(object other) {
       var oth = other as Parsers_Compile.SubParser__<T, R>;
@@ -3459,16 +3384,16 @@ namespace Parsers_Compile {
       return s;
     }
     public static _ISubParser__<T, R> Default() {
-      return create(((Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>>)null));
+      return create(((Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>>)null));
     }
     public static Dafny.TypeDescriptor<Parsers_Compile._ISubParser__<T, R>> _TypeDescriptor() {
       return new Dafny.TypeDescriptor<Parsers_Compile._ISubParser__<T, R>>(Parsers_Compile.SubParser__<T, R>.Default());
     }
-    public static _ISubParser__<T, R> create(Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> fn) {
+    public static _ISubParser__<T, R> create(Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> fn) {
       return new SubParser__<T, R>(fn);
     }
     public bool is_SubParser { get { return true; } }
-    public Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<T>, Cursors_Compile._ICursorError<R>>> dtor_fn {
+    public Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<T>, Cursors_Compile._ICursorError<R>>> dtor_fn {
       get {
         return this.fn;
       }
@@ -3486,13 +3411,13 @@ namespace Parsers_Compile {
 
   public partial class __default {
     public static Parsers_Compile._IParser__<__T, __R> ParserWitness<__T, __R>() {
-      return Parsers_Compile.Parser__<__T, __R>.create(((System.Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>>)((_111___v0) => {
-  return Wrappers_Compile.Result<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
+      return Parsers_Compile.Parser__<__T, __R>.create(((System.Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>>)((_106___v0) => {
+  return Wrappers_Compile.Result<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
 })));
     }
     public static Parsers_Compile._ISubParser__<__T, __R> SubParserWitness<__T, __R>() {
-      return Parsers_Compile.SubParser__<__T, __R>.create(((System.Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>>)((_112_cs) => {
-  return Wrappers_Compile.Result<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
+      return Parsers_Compile.SubParser__<__T, __R>.create(((System.Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>>)((_107_cs) => {
+  return Wrappers_Compile.Result<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
 })));
     }
   }
@@ -3543,12 +3468,12 @@ namespace JSON_mZeroCopy_mDeserializer_mCore_Compile {
     }
     public abstract _IJSONError DowncastClone();
     public Dafny.ISequence<char> _ToString() {
-      JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError _source12 = this;
-      if (_source12.is_UnterminatedSequence) {
+      JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError _source10 = this;
+      if (_source10.is_UnterminatedSequence) {
         return Dafny.Sequence<char>.FromString("Unterminated sequence");
-      } else if (_source12.is_EmptyNumber) {
+      } else if (_source10.is_EmptyNumber) {
         return Dafny.Sequence<char>.FromString("Number must contain at least one digit");
-      } else if (_source12.is_ExpectingEOF) {
+      } else if (_source10.is_ExpectingEOF) {
         return Dafny.Sequence<char>.FromString("Expecting EOF");
       } else {
         return Dafny.Sequence<char>.FromString("Input length does not fit in a 32-bit counter");
@@ -3641,12 +3566,12 @@ namespace JSON_mZeroCopy_mDeserializer_mCore_Compile {
   }
 
   public partial class jopt {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements());
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mZeroCopy_mDeserializer_mCore_Compile.jopt.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mZeroCopy_mDeserializer_mCore_Compile.jopt.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
@@ -3659,52 +3584,52 @@ namespace JSON_mZeroCopy_mDeserializer_mCore_Compile {
   }
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Get(Cursors_Compile._ICursor__ cs, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError err)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Get(Cursors_Compile.Cursor__ cs, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError err)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _113_valueOrError0 = (cs).Get<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(err);
-      if ((_113_valueOrError0).IsFailure()) {
-        return (_113_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _108_valueOrError0 = (cs).Get<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(err);
+      if ((_108_valueOrError0).IsFailure()) {
+        return (_108_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _114_cs = (_113_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_114_cs).Split());
+        Cursors_Compile.Cursor__ _109_cs = (_108_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_109_cs).Split());
       }
     }
-    public static Cursors_Compile._ISplit<Views_mCore_Compile._IView__> WS(Cursors_Compile._ICursor__ cs) {
+    public static Cursors_Compile.Split<Views_mCore_Compile.View__> WS(Cursors_Compile.Cursor__ cs) {
       return ((cs).SkipWhile(JSON_mGrammar_Compile.__default.Blank_q)).Split();
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<__T>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Structural<__T>(Cursors_Compile._ICursor__ cs, Parsers_Compile._IParser__<__T, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> parser)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<__T>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Structural<__T>(Cursors_Compile.Cursor__ cs, Parsers_Compile._IParser__<__T, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> parser)
     {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs0 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(cs);
-      Views_mCore_Compile._IView__ _115_before = _let_tmp_rhs0.dtor_t;
-      Cursors_Compile._ICursor__ _116_cs = _let_tmp_rhs0.dtor_cs;
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _117_valueOrError0 = Dafny.Helpers.Id<Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<__T>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>((parser).dtor_fn)(_116_cs);
-      if ((_117_valueOrError0).IsFailure()) {
-        return (_117_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<__T>>>();
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs0 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(cs);
+      Views_mCore_Compile.View__ _110_before = _let_tmp_rhs0.dtor_t;
+      Cursors_Compile.Cursor__ _111_cs = _let_tmp_rhs0.dtor_cs;
+      Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _112_valueOrError0 = Dafny.Helpers.Id<Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<__T>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>((parser).dtor_fn)(_111_cs);
+      if ((_112_valueOrError0).IsFailure()) {
+        return (_112_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<__T>>>();
       } else {
-        Cursors_Compile._ISplit<__T> _let_tmp_rhs1 = (_117_valueOrError0).Extract();
-        __T _118_val = _let_tmp_rhs1.dtor_t;
-        Cursors_Compile._ICursor__ _119_cs = _let_tmp_rhs1.dtor_cs;
-        Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs2 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(_119_cs);
-        Views_mCore_Compile._IView__ _120_after = _let_tmp_rhs2.dtor_t;
-        Cursors_Compile._ICursor__ _121_cs = _let_tmp_rhs2.dtor_cs;
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<__T>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<__T>>.create(JSON_mGrammar_Compile.Structural<__T>.create(_115_before, _118_val, _120_after), _121_cs));
+        Cursors_Compile.Split<__T> _let_tmp_rhs1 = (_112_valueOrError0).Extract();
+        __T _113_val = _let_tmp_rhs1.dtor_t;
+        Cursors_Compile.Cursor__ _114_cs = _let_tmp_rhs1.dtor_cs;
+        Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs2 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(_114_cs);
+        Views_mCore_Compile.View__ _115_after = _let_tmp_rhs2.dtor_t;
+        Cursors_Compile.Cursor__ _116_cs = _let_tmp_rhs2.dtor_cs;
+        return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<__T>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<__T>>.create(JSON_mGrammar_Compile.Structural<__T>.create(_110_before, _113_val, _115_after), _116_cs));
       }
     }
-    public static Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> TryStructural(Cursors_Compile._ICursor__ cs) {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs3 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(cs);
-      Views_mCore_Compile._IView__ _122_before = _let_tmp_rhs3.dtor_t;
-      Cursors_Compile._ICursor__ _123_cs = _let_tmp_rhs3.dtor_cs;
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs4 = ((_123_cs).SkipByte()).Split();
-      Views_mCore_Compile._IView__ _124_val = _let_tmp_rhs4.dtor_t;
-      Cursors_Compile._ICursor__ _125_cs = _let_tmp_rhs4.dtor_cs;
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs5 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(_125_cs);
-      Views_mCore_Compile._IView__ _126_after = _let_tmp_rhs5.dtor_t;
-      Cursors_Compile._ICursor__ _127_cs = _let_tmp_rhs5.dtor_cs;
-      return Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>.create(JSON_mGrammar_Compile.Structural<Views_mCore_Compile._IView__>.create(_122_before, _124_val, _126_after), _127_cs);
+    public static Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> TryStructural(Cursors_Compile.Cursor__ cs) {
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs3 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(cs);
+      Views_mCore_Compile.View__ _117_before = _let_tmp_rhs3.dtor_t;
+      Cursors_Compile.Cursor__ _118_cs = _let_tmp_rhs3.dtor_cs;
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs4 = ((_118_cs).SkipByte()).Split();
+      Views_mCore_Compile.View__ _119_val = _let_tmp_rhs4.dtor_t;
+      Cursors_Compile.Cursor__ _120_cs = _let_tmp_rhs4.dtor_cs;
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs5 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.WS(_120_cs);
+      Views_mCore_Compile.View__ _121_after = _let_tmp_rhs5.dtor_t;
+      Cursors_Compile.Cursor__ _122_cs = _let_tmp_rhs5.dtor_cs;
+      return Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>.create(JSON_mGrammar_Compile.Structural<Views_mCore_Compile.View__>.create(_117_before, _119_val, _121_after), _122_cs);
     }
-    public static Func<Views_mCore_Compile._IView__, Dafny.ISequence<byte>> SpecView { get {
-      return ((System.Func<Views_mCore_Compile._IView__, Dafny.ISequence<byte>>)((_128_v) => {
-        return JSON_mSpec_Compile.__default.View(_128_v);
+    public static Func<Views_mCore_Compile.View__, Dafny.ISequence<byte>> SpecView { get {
+      return ((System.Func<Views_mCore_Compile.View__, Dafny.ISequence<byte>>)((_123_v) => {
+        return JSON_mSpec_Compile.__default.View(_123_v);
       }));
     } }
   }
@@ -3712,23 +3637,23 @@ namespace JSON_mZeroCopy_mDeserializer_mCore_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mStrings_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> String(Cursors_Compile._ICursor__ cs) {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _129_valueOrError0 = (cs).AssertChar<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>('\"');
-      if ((_129_valueOrError0).IsFailure()) {
-        return (_129_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> String(Cursors_Compile.Cursor__ cs) {
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _124_valueOrError0 = (cs).AssertChar<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>('\"');
+      if ((_124_valueOrError0).IsFailure()) {
+        return (_124_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _130_cs = (_129_valueOrError0).Extract();
-        Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _131_valueOrError1 = (_130_cs).SkipWhileLexer<bool, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>((Lexers_mCore_Compile._ILexerState<bool, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> _eta0, short _eta1) => Lexers_mStrings_Compile.__default.StringBody<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(_eta0, _eta1), Lexers_mCore_Compile.LexerState<bool, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_Partial(Lexers_mStrings_Compile.__default.StringBodyLexerStart));
-        if ((_131_valueOrError1).IsFailure()) {
-          return (_131_valueOrError1).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+        Cursors_Compile.Cursor__ _125_cs = (_124_valueOrError0).Extract();
+        Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _126_valueOrError1 = (_125_cs).SkipWhileLexer<bool, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>((bool _eta0, short _eta1) => Lexers_mStrings_Compile.__default.StringBody<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(_eta0, _eta1), Lexers_mStrings_Compile.__default.StringBodyLexerStart);
+        if ((_126_valueOrError1).IsFailure()) {
+          return (_126_valueOrError1).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
         } else {
-          Cursors_Compile._ICursor__ _132_cs = (_131_valueOrError1).Extract();
-          Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _133_valueOrError2 = (_132_cs).AssertChar<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>('\"');
-          if ((_133_valueOrError2).IsFailure()) {
-            return (_133_valueOrError2).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+          Cursors_Compile.Cursor__ _127_cs = (_126_valueOrError1).Extract();
+          Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _128_valueOrError2 = (_127_cs).AssertChar<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>('\"');
+          if ((_128_valueOrError2).IsFailure()) {
+            return (_128_valueOrError2).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
           } else {
-            Cursors_Compile._ICursor__ _134_cs = (_133_valueOrError2).Extract();
-            return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_134_cs).Split());
+            Cursors_Compile.Cursor__ _129_cs = (_128_valueOrError2).Extract();
+            return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_129_cs).Split());
           }
         }
       }
@@ -3738,107 +3663,107 @@ namespace JSON_mZeroCopy_mDeserializer_mStrings_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mNumbers_Compile {
 
   public partial class __default {
-    public static Cursors_Compile._ISplit<Views_mCore_Compile._IView__> Digits(Cursors_Compile._ICursor__ cs) {
+    public static Cursors_Compile.Split<Views_mCore_Compile.View__> Digits(Cursors_Compile.Cursor__ cs) {
       return ((cs).SkipWhile(JSON_mGrammar_Compile.__default.Digit_q)).Split();
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> NonEmptyDigits(Cursors_Compile._ICursor__ cs) {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _135_sp = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Digits(cs);
-      Wrappers_Compile._IOutcome<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _136_valueOrError0 = Wrappers_Compile.__default.Need<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>(!(((_135_sp).dtor_t).Empty_q), Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_OtherError(JSON_mZeroCopy_mDeserializer_mCore_Compile.JSONError.create_EmptyNumber()));
-      if ((_136_valueOrError0).IsFailure()) {
-        return (_136_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> NonEmptyDigits(Cursors_Compile.Cursor__ cs) {
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _130_sp = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Digits(cs);
+      Wrappers_Compile._IOutcome<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _131_valueOrError0 = Wrappers_Compile.__default.Need<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>(!(((_130_sp).dtor_t).Empty_q), Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_OtherError(JSON_mZeroCopy_mDeserializer_mCore_Compile.JSONError.create_EmptyNumber()));
+      if ((_131_valueOrError0).IsFailure()) {
+        return (_131_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_135_sp);
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_130_sp);
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> NonZeroInt(Cursors_Compile._ICursor__ cs) {
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> NonZeroInt(Cursors_Compile.Cursor__ cs) {
       return JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonEmptyDigits(cs);
     }
-    public static Cursors_Compile._ISplit<Views_mCore_Compile._IView__> OptionalMinus(Cursors_Compile._ICursor__ cs) {
-      return ((cs).SkipIf(((System.Func<byte, bool>)((_137_c) => {
-        return (_137_c) == ((byte)('-'));
+    public static Cursors_Compile.Split<Views_mCore_Compile.View__> OptionalMinus(Cursors_Compile.Cursor__ cs) {
+      return ((cs).SkipIf(((System.Func<byte, bool>)((_132_c) => {
+        return (_132_c) == ((byte)('-'));
       })))).Split();
     }
-    public static Cursors_Compile._ISplit<Views_mCore_Compile._IView__> OptionalSign(Cursors_Compile._ICursor__ cs) {
-      return ((cs).SkipIf(((System.Func<byte, bool>)((_138_c) => {
-        return ((_138_c) == ((byte)('-'))) || ((_138_c) == ((byte)('+')));
+    public static Cursors_Compile.Split<Views_mCore_Compile.View__> OptionalSign(Cursors_Compile.Cursor__ cs) {
+      return ((cs).SkipIf(((System.Func<byte, bool>)((_133_c) => {
+        return ((_133_c) == ((byte)('-'))) || ((_133_c) == ((byte)('+')));
       })))).Split();
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> TrimmedInt(Cursors_Compile._ICursor__ cs) {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _139_sp = ((cs).SkipIf(((System.Func<byte, bool>)((_140_c) => {
-        return (_140_c) == ((byte)('0'));
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> TrimmedInt(Cursors_Compile.Cursor__ cs) {
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _134_sp = ((cs).SkipIf(((System.Func<byte, bool>)((_135_c) => {
+        return (_135_c) == ((byte)('0'));
       })))).Split();
-      if (((_139_sp).dtor_t).Empty_q) {
-        return JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonZeroInt((_139_sp).dtor_cs);
+      if (((_134_sp).dtor_t).Empty_q) {
+        return JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonZeroInt((_134_sp).dtor_cs);
       } else {
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_139_sp);
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_134_sp);
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Exp(Cursors_Compile._ICursor__ cs) {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs6 = ((cs).SkipIf(((System.Func<byte, bool>)((_141_c) => {
-        return ((_141_c) == ((byte)('e'))) || ((_141_c) == ((byte)('E')));
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Exp(Cursors_Compile.Cursor__ cs) {
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs6 = ((cs).SkipIf(((System.Func<byte, bool>)((_136_c) => {
+        return ((_136_c) == ((byte)('e'))) || ((_136_c) == ((byte)('E')));
       })))).Split();
-      Views_mCore_Compile._IView__ _142_e = _let_tmp_rhs6.dtor_t;
-      Cursors_Compile._ICursor__ _143_cs = _let_tmp_rhs6.dtor_cs;
-      if ((_142_e).Empty_q) {
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijexp>.create_Empty(), _143_cs));
+      Views_mCore_Compile.View__ _137_e = _let_tmp_rhs6.dtor_t;
+      Cursors_Compile.Cursor__ _138_cs = _let_tmp_rhs6.dtor_cs;
+      if ((_137_e).Empty_q) {
+        return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijexp>.create_Empty(), _138_cs));
       } else {
-        Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs7 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.OptionalSign(_143_cs);
-        Views_mCore_Compile._IView__ _144_sign = _let_tmp_rhs7.dtor_t;
-        Cursors_Compile._ICursor__ _145_cs = _let_tmp_rhs7.dtor_cs;
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _146_valueOrError0 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonEmptyDigits(_145_cs);
-        if ((_146_valueOrError0).IsFailure()) {
-          return (_146_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>>();
+        Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs7 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.OptionalSign(_138_cs);
+        Views_mCore_Compile.View__ _139_sign = _let_tmp_rhs7.dtor_t;
+        Cursors_Compile.Cursor__ _140_cs = _let_tmp_rhs7.dtor_cs;
+        Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _141_valueOrError0 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonEmptyDigits(_140_cs);
+        if ((_141_valueOrError0).IsFailure()) {
+          return (_141_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>>();
         } else {
-          Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs8 = (_146_valueOrError0).Extract();
-          Views_mCore_Compile._IView__ _147_num = _let_tmp_rhs8.dtor_t;
-          Cursors_Compile._ICursor__ _148_cs = _let_tmp_rhs8.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijexp>.create_NonEmpty(JSON_mGrammar_Compile.jexp.create(_142_e, _144_sign, _147_num)), _148_cs));
+          Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs8 = (_141_valueOrError0).Extract();
+          Views_mCore_Compile.View__ _142_num = _let_tmp_rhs8.dtor_t;
+          Cursors_Compile.Cursor__ _143_cs = _let_tmp_rhs8.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijexp>.create_NonEmpty(JSON_mGrammar_Compile.jexp.create(_137_e, _139_sign, _142_num)), _143_cs));
         }
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Frac(Cursors_Compile._ICursor__ cs) {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs9 = ((cs).SkipIf(((System.Func<byte, bool>)((_149_c) => {
-        return (_149_c) == ((byte)('.'));
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Frac(Cursors_Compile.Cursor__ cs) {
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs9 = ((cs).SkipIf(((System.Func<byte, bool>)((_144_c) => {
+        return (_144_c) == ((byte)('.'));
       })))).Split();
-      Views_mCore_Compile._IView__ _150_period = _let_tmp_rhs9.dtor_t;
-      Cursors_Compile._ICursor__ _151_cs = _let_tmp_rhs9.dtor_cs;
-      if ((_150_period).Empty_q) {
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijfrac>.create_Empty(), _151_cs));
+      Views_mCore_Compile.View__ _145_period = _let_tmp_rhs9.dtor_t;
+      Cursors_Compile.Cursor__ _146_cs = _let_tmp_rhs9.dtor_cs;
+      if ((_145_period).Empty_q) {
+        return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijfrac>.create_Empty(), _146_cs));
       } else {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _152_valueOrError0 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonEmptyDigits(_151_cs);
-        if ((_152_valueOrError0).IsFailure()) {
-          return (_152_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>>();
+        Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _147_valueOrError0 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NonEmptyDigits(_146_cs);
+        if ((_147_valueOrError0).IsFailure()) {
+          return (_147_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>>();
         } else {
-          Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs10 = (_152_valueOrError0).Extract();
-          Views_mCore_Compile._IView__ _153_num = _let_tmp_rhs10.dtor_t;
-          Cursors_Compile._ICursor__ _154_cs = _let_tmp_rhs10.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijfrac>.create_NonEmpty(JSON_mGrammar_Compile.jfrac.create(_150_period, _153_num)), _154_cs));
+          Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs10 = (_147_valueOrError0).Extract();
+          Views_mCore_Compile.View__ _148_num = _let_tmp_rhs10.dtor_t;
+          Cursors_Compile.Cursor__ _149_cs = _let_tmp_rhs10.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>.create(JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._Ijfrac>.create_NonEmpty(JSON_mGrammar_Compile.jfrac.create(_145_period, _148_num)), _149_cs));
         }
       }
     }
-    public static Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber> NumberFromParts(Cursors_Compile._ISplit<Views_mCore_Compile._IView__> minus, Cursors_Compile._ISplit<Views_mCore_Compile._IView__> num, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>> frac, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>> exp)
+    public static Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber> NumberFromParts(Cursors_Compile.Split<Views_mCore_Compile.View__> minus, Cursors_Compile.Split<Views_mCore_Compile.View__> num, Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>> frac, Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>> exp)
     {
-      Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber> _155_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>.create(JSON_mGrammar_Compile.jnumber.create((minus).dtor_t, (num).dtor_t, (frac).dtor_t, (exp).dtor_t), (exp).dtor_cs);
-      return _155_sp;
+      Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber> _150_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>.create(JSON_mGrammar_Compile.jnumber.create((minus).dtor_t, (num).dtor_t, (frac).dtor_t, (exp).dtor_t), (exp).dtor_cs);
+      return _150_sp;
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Number(Cursors_Compile._ICursor__ cs) {
-      Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _156_minus = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.OptionalMinus(cs);
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _157_valueOrError0 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.TrimmedInt((_156_minus).dtor_cs);
-      if ((_157_valueOrError0).IsFailure()) {
-        return (_157_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Number(Cursors_Compile.Cursor__ cs) {
+      Cursors_Compile.Split<Views_mCore_Compile.View__> _151_minus = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.OptionalMinus(cs);
+      Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _152_valueOrError0 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.TrimmedInt((_151_minus).dtor_cs);
+      if ((_152_valueOrError0).IsFailure()) {
+        return (_152_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>>();
       } else {
-        Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _158_num = (_157_valueOrError0).Extract();
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _159_valueOrError1 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Frac((_158_num).dtor_cs);
-        if ((_159_valueOrError1).IsFailure()) {
-          return (_159_valueOrError1).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber>>();
+        Cursors_Compile.Split<Views_mCore_Compile.View__> _153_num = (_152_valueOrError0).Extract();
+        Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _154_valueOrError1 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Frac((_153_num).dtor_cs);
+        if ((_154_valueOrError1).IsFailure()) {
+          return (_154_valueOrError1).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>>();
         } else {
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>> _160_frac = (_159_valueOrError1).Extract();
-          Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _161_valueOrError2 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Exp((_160_frac).dtor_cs);
-          if ((_161_valueOrError2).IsFailure()) {
-            return (_161_valueOrError2).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber>>();
+          Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijfrac>> _155_frac = (_154_valueOrError1).Extract();
+          Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _156_valueOrError2 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Exp((_155_frac).dtor_cs);
+          if ((_156_valueOrError2).IsFailure()) {
+            return (_156_valueOrError2).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>>();
           } else {
-            Cursors_Compile._ISplit<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>> _162_exp = (_161_valueOrError2).Extract();
-            return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NumberFromParts(_156_minus, _158_num, _160_frac, _162_exp));
+            Cursors_Compile.Split<JSON_mGrammar_Compile._IMaybe<JSON_mGrammar_Compile._Ijexp>> _157_exp = (_156_valueOrError2).Extract();
+            return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.NumberFromParts(_151_minus, _153_num, _155_frac, _157_exp));
           }
         }
       }
@@ -3848,41 +3773,41 @@ namespace JSON_mZeroCopy_mDeserializer_mNumbers_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mObjectParams_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Colon(Cursors_Compile._ICursor__ cs) {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _163_valueOrError0 = (cs).AssertChar<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(':');
-      if ((_163_valueOrError0).IsFailure()) {
-        return (_163_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Colon(Cursors_Compile.Cursor__ cs) {
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _158_valueOrError0 = (cs).AssertChar<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(':');
+      if ((_158_valueOrError0).IsFailure()) {
+        return (_158_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _164_cs = (_163_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_164_cs).Split());
+        Cursors_Compile.Cursor__ _159_cs = (_158_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_159_cs).Split());
       }
     }
-    public static Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv> KVFromParts(Cursors_Compile._ISplit<Views_mCore_Compile._IView__> k, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> colon, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue> v)
+    public static Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv> KVFromParts(Cursors_Compile.Split<Views_mCore_Compile.View__> k, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> colon, Cursors_Compile.Split<JSON_mGrammar_Compile._IValue> v)
     {
-      Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv> _165_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>.create(JSON_mGrammar_Compile.jkv.create((k).dtor_t, (colon).dtor_t, (v).dtor_t), (v).dtor_cs);
-      return _165_sp;
+      Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv> _160_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>.create(JSON_mGrammar_Compile.jkv.create((k).dtor_t, (colon).dtor_t, (v).dtor_t), (v).dtor_cs);
+      return _160_sp;
     }
     public static Dafny.ISequence<byte> ElementSpec(JSON_mGrammar_Compile._Ijkv t) {
       return JSON_mSpec_Compile.__default.KV(t);
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Element(Cursors_Compile._ICursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Element(Cursors_Compile.Cursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _166_valueOrError0 = JSON_mZeroCopy_mDeserializer_mStrings_Compile.__default.String(cs);
-      if ((_166_valueOrError0).IsFailure()) {
-        return (_166_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _161_valueOrError0 = JSON_mZeroCopy_mDeserializer_mStrings_Compile.__default.String(cs);
+      if ((_161_valueOrError0).IsFailure()) {
+        return (_161_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>>();
       } else {
-        Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _167_k = (_166_valueOrError0).Extract();
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _168_valueOrError1 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile._IView__>((_167_k).dtor_cs, Parsers_Compile.Parser__<Views_mCore_Compile._IView__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.Colon));
-        if ((_168_valueOrError1).IsFailure()) {
-          return (_168_valueOrError1).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv>>();
+        Cursors_Compile.Split<Views_mCore_Compile.View__> _162_k = (_161_valueOrError0).Extract();
+        Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _163_valueOrError1 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile.View__>((_162_k).dtor_cs, Parsers_Compile.Parser__<Views_mCore_Compile.View__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.Colon));
+        if ((_163_valueOrError1).IsFailure()) {
+          return (_163_valueOrError1).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>>();
         } else {
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _169_colon = (_168_valueOrError1).Extract();
-          Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _170_valueOrError2 = Dafny.Helpers.Id<Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>((json).dtor_fn)((_169_colon).dtor_cs);
-          if ((_170_valueOrError2).IsFailure()) {
-            return (_170_valueOrError2).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv>>();
+          Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _164_colon = (_163_valueOrError1).Extract();
+          Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _165_valueOrError2 = Dafny.Helpers.Id<Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>((json).dtor_fn)((_164_colon).dtor_cs);
+          if ((_165_valueOrError2).IsFailure()) {
+            return (_165_valueOrError2).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>>();
           } else {
-            Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue> _171_v = (_170_valueOrError2).Extract();
-            return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.KVFromParts(_167_k, _169_colon, _171_v));
+            Cursors_Compile.Split<JSON_mGrammar_Compile._IValue> _166_v = (_165_valueOrError2).Extract();
+            return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.KVFromParts(_162_k, _164_colon, _166_v));
           }
         }
       }
@@ -3898,96 +3823,96 @@ namespace JSON_mZeroCopy_mDeserializer_mObjectParams_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mObjects_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Object(Cursors_Compile._ICursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Object(Cursors_Compile.Cursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _172_valueOrError0 = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Bracketed(cs, json);
-      if ((_172_valueOrError0).IsFailure()) {
-        return (_172_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _167_valueOrError0 = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Bracketed(cs, json);
+      if ((_167_valueOrError0).IsFailure()) {
+        return (_167_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> _173_sp = (_172_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_173_sp);
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> _168_sp = (_167_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_168_sp);
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Open(Cursors_Compile._ICursor__ cs) {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _174_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.OPEN);
-      if ((_174_valueOrError0).IsFailure()) {
-        return (_174_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Open(Cursors_Compile.Cursor__ cs) {
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _169_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.OPEN);
+      if ((_169_valueOrError0).IsFailure()) {
+        return (_169_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _175_cs = (_174_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_175_cs).Split());
+        Cursors_Compile.Cursor__ _170_cs = (_169_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_170_cs).Split());
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Close(Cursors_Compile._ICursor__ cs) {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _176_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE);
-      if ((_176_valueOrError0).IsFailure()) {
-        return (_176_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Close(Cursors_Compile.Cursor__ cs) {
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _171_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE);
+      if ((_171_valueOrError0).IsFailure()) {
+        return (_171_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _177_cs = (_176_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_177_cs).Split());
+        Cursors_Compile.Cursor__ _172_cs = (_171_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_172_cs).Split());
       }
     }
-    public static Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> BracketedFromParts(Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> open, Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> elems, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> close)
+    public static Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> BracketedFromParts(Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> open, Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> elems, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> close)
     {
-      Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> _178_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>.create(JSON_mGrammar_Compile.Bracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>.create((open).dtor_t, (elems).dtor_t, (close).dtor_t), (close).dtor_cs);
-      return _178_sp;
+      Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> _173_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>.create(JSON_mGrammar_Compile.Bracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>.create((open).dtor_t, (elems).dtor_t, (close).dtor_t), (close).dtor_cs);
+      return _173_sp;
     }
-    public static Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> AppendWithSuffix(Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> elems, Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv> elem, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> sep)
+    public static Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> AppendWithSuffix(Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> elems, Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv> elem, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> sep)
     {
-      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__> _179_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>.create_NonEmpty((sep).dtor_t));
-      Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> _180_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>.FromElements(_179_suffixed)), (sep).dtor_cs);
-      return _180_elems_k;
+      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__> _174_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>.create_NonEmpty((sep).dtor_t));
+      Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> _175_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>.FromElements(_174_suffixed)), (sep).dtor_cs);
+      return _175_elems_k;
     }
-    public static Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> AppendLast(Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> elems, Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv> elem, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> sep)
+    public static Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> AppendLast(Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> elems, Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv> elem, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> sep)
     {
-      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__> _181_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>.create_Empty());
-      Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> _182_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>.FromElements(_181_suffixed)), (elem).dtor_cs);
-      return _182_elems_k;
+      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__> _176_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>.create_Empty());
+      Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> _177_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>.FromElements(_176_suffixed)), (elem).dtor_cs);
+      return _177_elems_k;
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Elements(Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> open, Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> elems)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Elements(Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> open, Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> elems)
     {
     TAIL_CALL_START: ;
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _183_valueOrError0 = JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.Element((elems).dtor_cs, json);
-      if ((_183_valueOrError0).IsFailure()) {
-        return (_183_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _178_valueOrError0 = JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.Element((elems).dtor_cs, json);
+      if ((_178_valueOrError0).IsFailure()) {
+        return (_178_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijkv> _184_elem = (_183_valueOrError0).Extract();
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _185_sep = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.TryStructural((_184_elem).dtor_cs);
-        short _186_s0 = (((_185_sep).dtor_t).dtor_t).Peek();
-        if ((_186_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.SEPARATOR))) {
-          Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> _187_elems = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.AppendWithSuffix(elems, _184_elem, _185_sep);
+        Cursors_Compile.Split<JSON_mGrammar_Compile._Ijkv> _179_elem = (_178_valueOrError0).Extract();
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _180_sep = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.TryStructural((_179_elem).dtor_cs);
+        short _181_s0 = (((_180_sep).dtor_t).dtor_t).Peek();
+        if ((_181_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.SEPARATOR))) {
+          Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> _182_elems = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.AppendWithSuffix(elems, _179_elem, _180_sep);
           Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> _in16 = json;
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _in17 = open;
-          Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> _in18 = _187_elems;
+          Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _in17 = open;
+          Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> _in18 = _182_elems;
           json = _in16;
           open = _in17;
           elems = _in18;
           goto TAIL_CALL_START;
-        } else if ((_186_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE))) {
-          Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> _188_elems = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.AppendLast(elems, _184_elem, _185_sep);
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.BracketedFromParts(open, _188_elems, _185_sep));
+        } else if ((_181_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE))) {
+          Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> _183_elems = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.AppendLast(elems, _179_elem, _180_sep);
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.BracketedFromParts(open, _183_elems, _180_sep));
         } else {
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Failure(Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_ExpectingAnyByte(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE, JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.SEPARATOR), _186_s0));
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Failure(Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_ExpectingAnyByte(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE, JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.SEPARATOR), _181_s0));
         }
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Bracketed(Cursors_Compile._ICursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Bracketed(Cursors_Compile.Cursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _189_valueOrError0 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile._IView__>(cs, Parsers_Compile.Parser__<Views_mCore_Compile._IView__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Open));
-      if ((_189_valueOrError0).IsFailure()) {
-        return (_189_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _184_valueOrError0 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile.View__>(cs, Parsers_Compile.Parser__<Views_mCore_Compile.View__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Open));
+      if ((_184_valueOrError0).IsFailure()) {
+        return (_184_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _190_open = (_189_valueOrError0).Extract();
-        Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>> _191_elems = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__>>.FromElements(), (_190_open).dtor_cs);
-        if ((((_190_open).dtor_cs).Peek()) == ((short)(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE))) {
-          Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _192_valueOrError1 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile._IView__>((_190_open).dtor_cs, Parsers_Compile.Parser__<Views_mCore_Compile._IView__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Close));
-          if ((_192_valueOrError1).IsFailure()) {
-            return (_192_valueOrError1).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _185_open = (_184_valueOrError0).Extract();
+        Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>> _186_elems = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__>>.FromElements(), (_185_open).dtor_cs);
+        if ((((_185_open).dtor_cs).Peek()) == ((short)(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE))) {
+          Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _187_valueOrError1 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile.View__>((_185_open).dtor_cs, Parsers_Compile.Parser__<Views_mCore_Compile.View__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Close));
+          if ((_187_valueOrError1).IsFailure()) {
+            return (_187_valueOrError1).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
           } else {
-            Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _193_close = (_192_valueOrError1).Extract();
-            return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.BracketedFromParts(_190_open, _191_elems, _193_close));
+            Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _188_close = (_187_valueOrError1).Extract();
+            return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.BracketedFromParts(_185_open, _186_elems, _188_close));
           }
         } else {
-          return JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Elements(json, _190_open, _191_elems);
+          return JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Elements(json, _185_open, _186_elems);
         }
       }
     }
@@ -3997,23 +3922,23 @@ namespace JSON_mZeroCopy_mDeserializer_mObjects_Compile {
   }
 
   public partial class jopen {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.OPEN));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.OPEN));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mZeroCopy_mDeserializer_mObjects_Compile.jopen.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mZeroCopy_mDeserializer_mObjects_Compile.jopen.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jclose {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mObjectParams_Compile.__default.CLOSE));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mZeroCopy_mDeserializer_mObjects_Compile.jclose.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mZeroCopy_mDeserializer_mObjects_Compile.jclose.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
@@ -4024,9 +3949,9 @@ namespace JSON_mZeroCopy_mDeserializer_mArrayParams_Compile {
     public static Dafny.ISequence<byte> ElementSpec(JSON_mGrammar_Compile._IValue t) {
       return JSON_mSpec_Compile.__default.Value(t);
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Element(Cursors_Compile._ICursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Element(Cursors_Compile.Cursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
     {
-      return Dafny.Helpers.Id<Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>((json).dtor_fn)(cs);
+      return Dafny.Helpers.Id<Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>((json).dtor_fn)(cs);
     }
     public static byte OPEN { get {
       return (byte)('[');
@@ -4039,96 +3964,96 @@ namespace JSON_mZeroCopy_mDeserializer_mArrayParams_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mArrays_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Array(Cursors_Compile._ICursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Array(Cursors_Compile.Cursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _194_valueOrError0 = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Bracketed(cs, json);
-      if ((_194_valueOrError0).IsFailure()) {
-        return (_194_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _189_valueOrError0 = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Bracketed(cs, json);
+      if ((_189_valueOrError0).IsFailure()) {
+        return (_189_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> _195_sp = (_194_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_195_sp);
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> _190_sp = (_189_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_190_sp);
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Open(Cursors_Compile._ICursor__ cs) {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _196_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.OPEN);
-      if ((_196_valueOrError0).IsFailure()) {
-        return (_196_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Open(Cursors_Compile.Cursor__ cs) {
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _191_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.OPEN);
+      if ((_191_valueOrError0).IsFailure()) {
+        return (_191_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _197_cs = (_196_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_197_cs).Split());
+        Cursors_Compile.Cursor__ _192_cs = (_191_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_192_cs).Split());
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Close(Cursors_Compile._ICursor__ cs) {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _198_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE);
-      if ((_198_valueOrError0).IsFailure()) {
-        return (_198_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Close(Cursors_Compile.Cursor__ cs) {
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _193_valueOrError0 = (cs).AssertByte<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE);
+      if ((_193_valueOrError0).IsFailure()) {
+        return (_193_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _199_cs = (_198_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_199_cs).Split());
+        Cursors_Compile.Cursor__ _194_cs = (_193_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_194_cs).Split());
       }
     }
-    public static Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> BracketedFromParts(Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> open, Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> elems, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> close)
+    public static Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> BracketedFromParts(Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> open, Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> elems, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> close)
     {
-      Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> _200_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>.create(JSON_mGrammar_Compile.Bracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>.create((open).dtor_t, (elems).dtor_t, (close).dtor_t), (close).dtor_cs);
-      return _200_sp;
+      Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> _195_sp = Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>.create(JSON_mGrammar_Compile.Bracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>.create((open).dtor_t, (elems).dtor_t, (close).dtor_t), (close).dtor_cs);
+      return _195_sp;
     }
-    public static Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> AppendWithSuffix(Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> elems, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue> elem, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> sep)
+    public static Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> AppendWithSuffix(Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> elems, Cursors_Compile.Split<JSON_mGrammar_Compile._IValue> elem, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> sep)
     {
-      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__> _201_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>.create_NonEmpty((sep).dtor_t));
-      Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> _202_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>.FromElements(_201_suffixed)), (sep).dtor_cs);
-      return _202_elems_k;
+      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__> _196_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>.create_NonEmpty((sep).dtor_t));
+      Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> _197_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>.FromElements(_196_suffixed)), (sep).dtor_cs);
+      return _197_elems_k;
     }
-    public static Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> AppendLast(Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> elems, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue> elem, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> sep)
+    public static Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> AppendLast(Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> elems, Cursors_Compile.Split<JSON_mGrammar_Compile._IValue> elem, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> sep)
     {
-      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__> _203_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>.create_Empty());
-      Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> _204_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>.FromElements(_203_suffixed)), (elem).dtor_cs);
-      return _204_elems_k;
+      JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__> _198_suffixed = JSON_mGrammar_Compile.Suffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>.create((elem).dtor_t, JSON_mGrammar_Compile.Maybe<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>.create_Empty());
+      Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> _199_elems_k = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>.Concat((elems).dtor_t, Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>.FromElements(_198_suffixed)), (elem).dtor_cs);
+      return _199_elems_k;
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Elements(Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json, Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> open, Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> elems)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Elements(Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json, Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> open, Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> elems)
     {
     TAIL_CALL_START: ;
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _205_valueOrError0 = JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.Element((elems).dtor_cs, json);
-      if ((_205_valueOrError0).IsFailure()) {
-        return (_205_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _200_valueOrError0 = JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.Element((elems).dtor_cs, json);
+      if ((_200_valueOrError0).IsFailure()) {
+        return (_200_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue> _206_elem = (_205_valueOrError0).Extract();
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _207_sep = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.TryStructural((_206_elem).dtor_cs);
-        short _208_s0 = (((_207_sep).dtor_t).dtor_t).Peek();
-        if ((_208_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.SEPARATOR))) {
-          Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> _209_elems = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.AppendWithSuffix(elems, _206_elem, _207_sep);
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IValue> _201_elem = (_200_valueOrError0).Extract();
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _202_sep = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.TryStructural((_201_elem).dtor_cs);
+        short _203_s0 = (((_202_sep).dtor_t).dtor_t).Peek();
+        if ((_203_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.SEPARATOR))) {
+          Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> _204_elems = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.AppendWithSuffix(elems, _201_elem, _202_sep);
           Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> _in19 = json;
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _in20 = open;
-          Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> _in21 = _209_elems;
+          Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _in20 = open;
+          Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> _in21 = _204_elems;
           json = _in19;
           open = _in20;
           elems = _in21;
           goto TAIL_CALL_START;
-        } else if ((_208_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE))) {
-          Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> _210_elems = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.AppendLast(elems, _206_elem, _207_sep);
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.BracketedFromParts(open, _210_elems, _207_sep));
+        } else if ((_203_s0) == ((short)(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE))) {
+          Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> _205_elems = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.AppendLast(elems, _201_elem, _202_sep);
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.BracketedFromParts(open, _205_elems, _202_sep));
         } else {
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Failure(Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_ExpectingAnyByte(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE, JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.SEPARATOR), _208_s0));
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Failure(Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_ExpectingAnyByte(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE, JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.SEPARATOR), _203_s0));
         }
       }
     }
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Bracketed(Cursors_Compile._ICursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Bracketed(Cursors_Compile.Cursor__ cs, Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> json)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _211_valueOrError0 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile._IView__>(cs, Parsers_Compile.Parser__<Views_mCore_Compile._IView__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Open));
-      if ((_211_valueOrError0).IsFailure()) {
-        return (_211_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _206_valueOrError0 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile.View__>(cs, Parsers_Compile.Parser__<Views_mCore_Compile.View__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Open));
+      if ((_206_valueOrError0).IsFailure()) {
+        return (_206_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _212_open = (_211_valueOrError0).Extract();
-        Cursors_Compile._ISplit<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>> _213_elems = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__>>.FromElements(), (_212_open).dtor_cs);
-        if ((((_212_open).dtor_cs).Peek()) == ((short)(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE))) {
-          Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _214_valueOrError1 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile._IView__>((_212_open).dtor_cs, Parsers_Compile.Parser__<Views_mCore_Compile._IView__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Close));
-          if ((_214_valueOrError1).IsFailure()) {
-            return (_214_valueOrError1).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>>();
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _207_open = (_206_valueOrError0).Extract();
+        Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>> _208_elems = Cursors_Compile.Split<Dafny.ISequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>>.create(Dafny.Sequence<JSON_mGrammar_Compile._ISuffixed<JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__>>.FromElements(), (_207_open).dtor_cs);
+        if ((((_207_open).dtor_cs).Peek()) == ((short)(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE))) {
+          Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _209_valueOrError1 = JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<Views_mCore_Compile.View__>((_207_open).dtor_cs, Parsers_Compile.Parser__<Views_mCore_Compile.View__, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Close));
+          if ((_209_valueOrError1).IsFailure()) {
+            return (_209_valueOrError1).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>>();
           } else {
-            Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile._IView__>> _215_close = (_214_valueOrError1).Extract();
-            return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.BracketedFromParts(_212_open, _213_elems, _215_close));
+            Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<Views_mCore_Compile.View__>> _210_close = (_209_valueOrError1).Extract();
+            return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.BracketedFromParts(_207_open, _208_elems, _210_close));
           }
         } else {
-          return JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Elements(json, _212_open, _213_elems);
+          return JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Elements(json, _207_open, _208_elems);
         }
       }
     }
@@ -4138,23 +4063,23 @@ namespace JSON_mZeroCopy_mDeserializer_mArrays_Compile {
   }
 
   public partial class jopen {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.OPEN));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.OPEN));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mZeroCopy_mDeserializer_mArrays_Compile.jopen.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mZeroCopy_mDeserializer_mArrays_Compile.jopen.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
 
   public partial class jclose {
-    private static readonly Views_mCore_Compile._IView__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE));
-    public static Views_mCore_Compile._IView__ Default() {
+    private static readonly Views_mCore_Compile.View__ Witness = Views_mCore_Compile.View__.OfBytes(Dafny.Sequence<byte>.FromElements(JSON_mZeroCopy_mDeserializer_mArrayParams_Compile.__default.CLOSE));
+    public static Views_mCore_Compile.View__ Default() {
       return Witness;
     }
-    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile._IView__>(JSON_mZeroCopy_mDeserializer_mArrays_Compile.jclose.Default());
-    public static Dafny.TypeDescriptor<Views_mCore_Compile._IView__> _TypeDescriptor() {
+    private static readonly Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TYPE = new Dafny.TypeDescriptor<Views_mCore_Compile.View__>(JSON_mZeroCopy_mDeserializer_mArrays_Compile.jclose.Default());
+    public static Dafny.TypeDescriptor<Views_mCore_Compile.View__> _TypeDescriptor() {
       return _TYPE;
     }
   }
@@ -4162,14 +4087,14 @@ namespace JSON_mZeroCopy_mDeserializer_mArrays_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mConstants_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Constant(Cursors_Compile._ICursor__ cs, Dafny.ISequence<byte> expected)
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Constant(Cursors_Compile.Cursor__ cs, Dafny.ISequence<byte> expected)
     {
-      Wrappers_Compile._IResult<Cursors_Compile._ICursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _216_valueOrError0 = (cs).AssertBytes<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(expected, 0U);
-      if ((_216_valueOrError0).IsFailure()) {
-        return (_216_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>>();
+      Wrappers_Compile._IResult<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _211_valueOrError0 = (cs).AssertBytes<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>(expected, 0U);
+      if ((_211_valueOrError0).IsFailure()) {
+        return (_211_valueOrError0).PropagateFailure<Cursors_Compile.Split<Views_mCore_Compile.View__>>();
       } else {
-        Cursors_Compile._ICursor__ _217_cs = (_216_valueOrError0).Extract();
-        return Wrappers_Compile.Result<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_217_cs).Split());
+        Cursors_Compile.Cursor__ _212_cs = (_211_valueOrError0).Extract();
+        return Wrappers_Compile.Result<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success((_212_cs).Split());
       }
     }
   }
@@ -4177,117 +4102,117 @@ namespace JSON_mZeroCopy_mDeserializer_mConstants_Compile {
 namespace JSON_mZeroCopy_mDeserializer_mValues_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Value(Cursors_Compile._ICursor__ cs) {
-      short _218_c = (cs).Peek();
-      if ((_218_c) == ((short)('{'))) {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _219_valueOrError0 = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Object(cs, JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.ValueParser(cs));
-        if ((_219_valueOrError0).IsFailure()) {
-          return (_219_valueOrError0).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Value(Cursors_Compile.Cursor__ cs) {
+      short _213_c = (cs).Peek();
+      if ((_213_c) == ((short)('{'))) {
+        Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _214_valueOrError0 = JSON_mZeroCopy_mDeserializer_mObjects_Compile.__default.Object(cs, JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.ValueParser(cs));
+        if ((_214_valueOrError0).IsFailure()) {
+          return (_214_valueOrError0).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> _let_tmp_rhs11 = (_219_valueOrError0).Extract();
-          JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _220_obj = _let_tmp_rhs11.dtor_t;
-          Cursors_Compile._ICursor__ _221_cs = _let_tmp_rhs11.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Object(_220_obj), _221_cs));
+          Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> _let_tmp_rhs11 = (_214_valueOrError0).Extract();
+          JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._Ijkv, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _215_obj = _let_tmp_rhs11.dtor_t;
+          Cursors_Compile.Cursor__ _216_cs = _let_tmp_rhs11.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Object(_215_obj), _216_cs));
         }
-      } else if ((_218_c) == ((short)('['))) {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _222_valueOrError1 = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Array(cs, JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.ValueParser(cs));
-        if ((_222_valueOrError1).IsFailure()) {
-          return (_222_valueOrError1).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+      } else if ((_213_c) == ((short)('['))) {
+        Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _217_valueOrError1 = JSON_mZeroCopy_mDeserializer_mArrays_Compile.__default.Array(cs, JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.ValueParser(cs));
+        if ((_217_valueOrError1).IsFailure()) {
+          return (_217_valueOrError1).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__>> _let_tmp_rhs12 = (_222_valueOrError1).Extract();
-          JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile._IView__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile._IView__, Views_mCore_Compile._IView__> _223_arr = _let_tmp_rhs12.dtor_t;
-          Cursors_Compile._ICursor__ _224_cs = _let_tmp_rhs12.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Array(_223_arr), _224_cs));
+          Cursors_Compile.Split<JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__>> _let_tmp_rhs12 = (_217_valueOrError1).Extract();
+          JSON_mGrammar_Compile._IBracketed<Views_mCore_Compile.View__, JSON_mGrammar_Compile._IValue, Views_mCore_Compile.View__, Views_mCore_Compile.View__> _218_arr = _let_tmp_rhs12.dtor_t;
+          Cursors_Compile.Cursor__ _219_cs = _let_tmp_rhs12.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Array(_218_arr), _219_cs));
         }
-      } else if ((_218_c) == ((short)('\"'))) {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _225_valueOrError2 = JSON_mZeroCopy_mDeserializer_mStrings_Compile.__default.String(cs);
-        if ((_225_valueOrError2).IsFailure()) {
-          return (_225_valueOrError2).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+      } else if ((_213_c) == ((short)('\"'))) {
+        Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _220_valueOrError2 = JSON_mZeroCopy_mDeserializer_mStrings_Compile.__default.String(cs);
+        if ((_220_valueOrError2).IsFailure()) {
+          return (_220_valueOrError2).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs13 = (_225_valueOrError2).Extract();
-          Views_mCore_Compile._IView__ _226_str = _let_tmp_rhs13.dtor_t;
-          Cursors_Compile._ICursor__ _227_cs = _let_tmp_rhs13.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_String(_226_str), _227_cs));
+          Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs13 = (_220_valueOrError2).Extract();
+          Views_mCore_Compile.View__ _221_str = _let_tmp_rhs13.dtor_t;
+          Cursors_Compile.Cursor__ _222_cs = _let_tmp_rhs13.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_String(_221_str), _222_cs));
         }
-      } else if ((_218_c) == ((short)('t'))) {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _228_valueOrError3 = JSON_mZeroCopy_mDeserializer_mConstants_Compile.__default.Constant(cs, JSON_mGrammar_Compile.__default.TRUE);
-        if ((_228_valueOrError3).IsFailure()) {
-          return (_228_valueOrError3).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+      } else if ((_213_c) == ((short)('t'))) {
+        Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _223_valueOrError3 = JSON_mZeroCopy_mDeserializer_mConstants_Compile.__default.Constant(cs, JSON_mGrammar_Compile.__default.TRUE);
+        if ((_223_valueOrError3).IsFailure()) {
+          return (_223_valueOrError3).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs14 = (_228_valueOrError3).Extract();
-          Views_mCore_Compile._IView__ _229_cst = _let_tmp_rhs14.dtor_t;
-          Cursors_Compile._ICursor__ _230_cs = _let_tmp_rhs14.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Bool(_229_cst), _230_cs));
+          Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs14 = (_223_valueOrError3).Extract();
+          Views_mCore_Compile.View__ _224_cst = _let_tmp_rhs14.dtor_t;
+          Cursors_Compile.Cursor__ _225_cs = _let_tmp_rhs14.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Bool(_224_cst), _225_cs));
         }
-      } else if ((_218_c) == ((short)('f'))) {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _231_valueOrError4 = JSON_mZeroCopy_mDeserializer_mConstants_Compile.__default.Constant(cs, JSON_mGrammar_Compile.__default.FALSE);
-        if ((_231_valueOrError4).IsFailure()) {
-          return (_231_valueOrError4).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+      } else if ((_213_c) == ((short)('f'))) {
+        Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _226_valueOrError4 = JSON_mZeroCopy_mDeserializer_mConstants_Compile.__default.Constant(cs, JSON_mGrammar_Compile.__default.FALSE);
+        if ((_226_valueOrError4).IsFailure()) {
+          return (_226_valueOrError4).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs15 = (_231_valueOrError4).Extract();
-          Views_mCore_Compile._IView__ _232_cst = _let_tmp_rhs15.dtor_t;
-          Cursors_Compile._ICursor__ _233_cs = _let_tmp_rhs15.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Bool(_232_cst), _233_cs));
+          Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs15 = (_226_valueOrError4).Extract();
+          Views_mCore_Compile.View__ _227_cst = _let_tmp_rhs15.dtor_t;
+          Cursors_Compile.Cursor__ _228_cs = _let_tmp_rhs15.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Bool(_227_cst), _228_cs));
         }
-      } else if ((_218_c) == ((short)('n'))) {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<Views_mCore_Compile._IView__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _234_valueOrError5 = JSON_mZeroCopy_mDeserializer_mConstants_Compile.__default.Constant(cs, JSON_mGrammar_Compile.__default.NULL);
-        if ((_234_valueOrError5).IsFailure()) {
-          return (_234_valueOrError5).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+      } else if ((_213_c) == ((short)('n'))) {
+        Wrappers_Compile._IResult<Cursors_Compile.Split<Views_mCore_Compile.View__>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _229_valueOrError5 = JSON_mZeroCopy_mDeserializer_mConstants_Compile.__default.Constant(cs, JSON_mGrammar_Compile.__default.NULL);
+        if ((_229_valueOrError5).IsFailure()) {
+          return (_229_valueOrError5).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<Views_mCore_Compile._IView__> _let_tmp_rhs16 = (_234_valueOrError5).Extract();
-          Views_mCore_Compile._IView__ _235_cst = _let_tmp_rhs16.dtor_t;
-          Cursors_Compile._ICursor__ _236_cs = _let_tmp_rhs16.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Null(_235_cst), _236_cs));
+          Cursors_Compile.Split<Views_mCore_Compile.View__> _let_tmp_rhs16 = (_229_valueOrError5).Extract();
+          Views_mCore_Compile.View__ _230_cst = _let_tmp_rhs16.dtor_t;
+          Cursors_Compile.Cursor__ _231_cs = _let_tmp_rhs16.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Null(_230_cst), _231_cs));
         }
       } else {
-        Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _237_valueOrError6 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Number(cs);
-        if ((_237_valueOrError6).IsFailure()) {
-          return (_237_valueOrError6).PropagateFailure<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>>();
+        Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _232_valueOrError6 = JSON_mZeroCopy_mDeserializer_mNumbers_Compile.__default.Number(cs);
+        if ((_232_valueOrError6).IsFailure()) {
+          return (_232_valueOrError6).PropagateFailure<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>>();
         } else {
-          Cursors_Compile._ISplit<JSON_mGrammar_Compile._Ijnumber> _let_tmp_rhs17 = (_237_valueOrError6).Extract();
-          JSON_mGrammar_Compile._Ijnumber _238_num = _let_tmp_rhs17.dtor_t;
-          Cursors_Compile._ICursor__ _239_cs = _let_tmp_rhs17.dtor_cs;
-          return Wrappers_Compile.Result<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Number(_238_num), _239_cs));
+          Cursors_Compile.Split<JSON_mGrammar_Compile._Ijnumber> _let_tmp_rhs17 = (_232_valueOrError6).Extract();
+          JSON_mGrammar_Compile._Ijnumber _233_num = _let_tmp_rhs17.dtor_t;
+          Cursors_Compile.Cursor__ _234_cs = _let_tmp_rhs17.dtor_cs;
+          return Wrappers_Compile.Result<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>.create(JSON_mGrammar_Compile.Value.create_Number(_233_num), _234_cs));
         }
       }
     }
-    public static Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> ValueParser(Cursors_Compile._ICursor__ cs) {
-      Func<Cursors_Compile._ICursor__, bool> _240_pre = Dafny.Helpers.Id<Func<Cursors_Compile._ICursor__, Func<Cursors_Compile._ICursor__, bool>>>((_241_cs) => ((System.Func<Cursors_Compile._ICursor__, bool>)((_242_ps_k) => {
-        return ((_242_ps_k).Length()) < ((_241_cs).Length());
+    public static Parsers_Compile._ISubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError> ValueParser(Cursors_Compile.Cursor__ cs) {
+      Func<Cursors_Compile.Cursor__, bool> _235_pre = Dafny.Helpers.Id<Func<Cursors_Compile.Cursor__, Func<Cursors_Compile.Cursor__, bool>>>((_236_cs) => ((System.Func<Cursors_Compile.Cursor__, bool>)((_237_ps_k) => {
+        return ((_237_ps_k).Length()) < ((_236_cs).Length());
       })))(cs);
-      Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>> _243_fn = Dafny.Helpers.Id<Func<Func<Cursors_Compile._ICursor__, bool>, Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>>((_244_pre) => ((System.Func<Cursors_Compile._ICursor__, Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>)((_245_ps_k) => {
-        return JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.Value(_245_ps_k);
-      })))(_240_pre);
-      return Parsers_Compile.SubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(_243_fn);
+      Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>> _238_fn = Dafny.Helpers.Id<Func<Func<Cursors_Compile.Cursor__, bool>, Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>>>((_239_pre) => ((System.Func<Cursors_Compile.Cursor__, Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>>)((_240_ps_k) => {
+        return JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.Value(_240_ps_k);
+      })))(_235_pre);
+      return Parsers_Compile.SubParser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(_238_fn);
     }
   }
 } // end of namespace JSON_mZeroCopy_mDeserializer_mValues_Compile
 namespace JSON_mZeroCopy_mDeserializer_mAPI_Compile {
 
   public partial class __default {
-    public static Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> JSON(Cursors_Compile._ICursor__ cs) {
+    public static Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> JSON(Cursors_Compile.Cursor__ cs) {
       return JSON_mZeroCopy_mDeserializer_mCore_Compile.__default.Structural<JSON_mGrammar_Compile._IValue>(cs, Parsers_Compile.Parser__<JSON_mGrammar_Compile._IValue, JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create(JSON_mZeroCopy_mDeserializer_mValues_Compile.__default.Value));
     }
-    public static Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Text(Views_mCore_Compile._IView__ v) {
-      Wrappers_Compile._IResult<Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _246_valueOrError0 = JSON_mZeroCopy_mDeserializer_mAPI_Compile.__default.JSON(Cursors_Compile.Cursor__.OfView(v));
-      if ((_246_valueOrError0).IsFailure()) {
-        return (_246_valueOrError0).PropagateFailure<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>();
+    public static Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> Text(Views_mCore_Compile.View__ v) {
+      Wrappers_Compile._IResult<Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _241_valueOrError0 = JSON_mZeroCopy_mDeserializer_mAPI_Compile.__default.JSON(Cursors_Compile.Cursor__.OfView(v));
+      if ((_241_valueOrError0).IsFailure()) {
+        return (_241_valueOrError0).PropagateFailure<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>();
       } else {
-        Cursors_Compile._ISplit<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>> _let_tmp_rhs18 = (_246_valueOrError0).Extract();
-        JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue> _247_text = _let_tmp_rhs18.dtor_t;
-        Cursors_Compile._ICursor__ _248_cs = _let_tmp_rhs18.dtor_cs;
-        Wrappers_Compile._IOutcome<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _249_valueOrError1 = Wrappers_Compile.__default.Need<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>((_248_cs).EOF_q, Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_OtherError(JSON_mZeroCopy_mDeserializer_mCore_Compile.JSONError.create_ExpectingEOF()));
-        if ((_249_valueOrError1).IsFailure()) {
-          return (_249_valueOrError1).PropagateFailure<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>();
+        Cursors_Compile.Split<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>> _let_tmp_rhs18 = (_241_valueOrError0).Extract();
+        JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue> _242_text = _let_tmp_rhs18.dtor_t;
+        Cursors_Compile.Cursor__ _243_cs = _let_tmp_rhs18.dtor_cs;
+        Wrappers_Compile._IOutcome<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _244_valueOrError1 = Wrappers_Compile.__default.Need<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>((_243_cs).EOF_q, Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_OtherError(JSON_mZeroCopy_mDeserializer_mCore_Compile.JSONError.create_ExpectingEOF()));
+        if ((_244_valueOrError1).IsFailure()) {
+          return (_244_valueOrError1).PropagateFailure<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>();
         } else {
-          return Wrappers_Compile.Result<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_247_text);
+          return Wrappers_Compile.Result<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>.create_Success(_242_text);
         }
       }
     }
     public static Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> OfBytes(Dafny.ISequence<byte> bs) {
-      Wrappers_Compile._IOutcome<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _250_valueOrError0 = Wrappers_Compile.__default.Need<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>((new BigInteger((bs).Count)) < (BoundedInts_Compile.__default.TWO__TO__THE__32), Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_OtherError(JSON_mZeroCopy_mDeserializer_mCore_Compile.JSONError.create_IntOverflow()));
-      if ((_250_valueOrError0).IsFailure()) {
-        return (_250_valueOrError0).PropagateFailure<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>();
+      Wrappers_Compile._IOutcome<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _245_valueOrError0 = Wrappers_Compile.__default.Need<Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>>((new BigInteger((bs).Count)) < (BoundedInts_Compile.__default.TWO__TO__THE__32), Cursors_Compile.CursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>.create_OtherError(JSON_mZeroCopy_mDeserializer_mCore_Compile.JSONError.create_IntOverflow()));
+      if ((_245_valueOrError0).IsFailure()) {
+        return (_245_valueOrError0).PropagateFailure<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>>();
       } else {
         return JSON_mZeroCopy_mDeserializer_mAPI_Compile.__default.Text(Views_mCore_Compile.View__.OfBytes(bs));
       }
@@ -4336,64 +4261,64 @@ namespace Benchmarks {
     public static void Serialize(Dafny.ISequence<byte> bytes)
     {
       uint _hi3 = Benchmarks.__default.WARMUP;
-      for (uint _251_i = 0U; _251_i < _hi3; _251_i++) {
-        Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _252___v0;
-        _252___v0 = JSON_mZeroCopy_mAPI_Compile.__default.Deserialize(bytes);
+      for (uint _246_i = 0U; _246_i < _hi3; _246_i++) {
+        Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _247___v0;
+        _247___v0 = JSON_mZeroCopy_mAPI_Compile.__default.Deserialize(bytes);
       }
       Benchmarks.Interop.StartTimer();
       uint _hi4 = Benchmarks.__default.REPEATS;
-      for (uint _253_i = 0U; _253_i < _hi4; _253_i++) {
-        Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _254___v1;
-        _254___v1 = JSON_mZeroCopy_mAPI_Compile.__default.Deserialize(bytes);
+      for (uint _248_i = 0U; _248_i < _hi4; _248_i++) {
+        Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _249___v1;
+        _249___v1 = JSON_mZeroCopy_mAPI_Compile.__default.Deserialize(bytes);
       }
       Benchmarks.Interop.ReportTimer(Dafny.Sequence<char>.FromString("Serialize"), new BigInteger((bytes).Count), Benchmarks.__default.REPEATS);
     }
     public static void Deserialize(JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue> js, byte[] target)
     {
       uint _hi5 = Benchmarks.__default.WARMUP;
-      for (uint _255_i = 0U; _255_i < _hi5; _255_i++) {
-        Wrappers_Compile._IResult<uint, JSON_mZeroCopy_mSerializer_Compile._IError> _256___v2;
+      for (uint _250_i = 0U; _250_i < _hi5; _250_i++) {
+        Wrappers_Compile._IResult<uint, JSON_mZeroCopy_mSerializer_Compile._IError> _251___v2;
         Wrappers_Compile._IResult<uint, JSON_mZeroCopy_mSerializer_Compile._IError> _out5;
         _out5 = JSON_mZeroCopy_mAPI_Compile.__default.SerializeBlit(js, target);
-        _256___v2 = _out5;
+        _251___v2 = _out5;
       }
       Benchmarks.Interop.StartTimer();
       uint _hi6 = Benchmarks.__default.REPEATS;
-      for (uint _257_i = 0U; _257_i < _hi6; _257_i++) {
-        Wrappers_Compile._IResult<uint, JSON_mZeroCopy_mSerializer_Compile._IError> _258___v3;
+      for (uint _252_i = 0U; _252_i < _hi6; _252_i++) {
+        Wrappers_Compile._IResult<uint, JSON_mZeroCopy_mSerializer_Compile._IError> _253___v3;
         Wrappers_Compile._IResult<uint, JSON_mZeroCopy_mSerializer_Compile._IError> _out6;
         _out6 = JSON_mZeroCopy_mAPI_Compile.__default.SerializeBlit(js, target);
-        _258___v3 = _out6;
+        _253___v3 = _out6;
       }
       Benchmarks.Interop.ReportTimer(Dafny.Sequence<char>.FromString("Deserialize"), new BigInteger((target).Length), Benchmarks.__default.REPEATS);
     }
     public static void _Main()
     {
-      byte[] _259_input__array;
+      byte[] _254_input__array;
       byte[] _out7;
       _out7 = Benchmarks.Interop.ReadInput();
-      _259_input__array = _out7;
-      byte[] _260_output__array;
-      byte[] _nw1 = new byte[Dafny.Helpers.ToIntChecked(Dafny.Helpers.ToIntChecked(new BigInteger((_259_input__array).Length), "C# arrays may not be larger than the max 32-bit integer"),"C# array size must not be larger than max 32-bit int")];
-      _260_output__array = _nw1;
-      Dafny.ISequence<byte> _261_bytes;
-      _261_bytes = Dafny.Helpers.SeqFromArray(_259_input__array);
-      Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _262_jsr;
-      _262_jsr = JSON_mZeroCopy_mAPI_Compile.__default.Deserialize(_261_bytes);
-      if (!((_262_jsr).is_Success)) {
+      _254_input__array = _out7;
+      byte[] _255_output__array;
+      byte[] _nw1 = new byte[Dafny.Helpers.ToIntChecked(Dafny.Helpers.ToIntChecked(new BigInteger((_254_input__array).Length), "C# arrays may not be larger than the max 32-bit integer"),"C# array size must not be larger than max 32-bit int")];
+      _255_output__array = _nw1;
+      Dafny.ISequence<byte> _256_bytes;
+      _256_bytes = Dafny.Helpers.SeqFromArray(_254_input__array);
+      Wrappers_Compile._IResult<JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue>, Cursors_Compile._ICursorError<JSON_mZeroCopy_mDeserializer_mCore_Compile._IJSONError>> _257_jsr;
+      _257_jsr = JSON_mZeroCopy_mAPI_Compile.__default.Deserialize(_256_bytes);
+      if (!((_257_jsr).is_Success)) {
         throw new Dafny.HaltException("c:\\Users\\cpitcla\\git\\dafny\\libraries\\src\\JSON\\Benchmarks\\Benchmark.dfy(50,4): " + Dafny.Sequence<char>.FromString("expectation violation"));
       }
-      JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue> _263_js;
-      _263_js = (_262_jsr).dtor_value;
-      Wrappers_Compile._IResult<byte[], JSON_mZeroCopy_mSerializer_Compile._IError> _264_output;
+      JSON_mGrammar_Compile._IStructural<JSON_mGrammar_Compile._IValue> _258_js;
+      _258_js = (_257_jsr).dtor_value;
+      Wrappers_Compile._IResult<byte[], JSON_mZeroCopy_mSerializer_Compile._IError> _259_output;
       Wrappers_Compile._IResult<byte[], JSON_mZeroCopy_mSerializer_Compile._IError> _out8;
-      _out8 = JSON_mZeroCopy_mAPI_Compile.__default.SerializeAlloc(_263_js);
-      _264_output = _out8;
-      if (!((_264_output).is_Success)) {
+      _out8 = JSON_mZeroCopy_mAPI_Compile.__default.SerializeAlloc(_258_js);
+      _259_output = _out8;
+      if (!((_259_output).is_Success)) {
         throw new Dafny.HaltException("c:\\Users\\cpitcla\\git\\dafny\\libraries\\src\\JSON\\Benchmarks\\Benchmark.dfy(54,4): " + Dafny.Sequence<char>.FromString("expectation violation"));
       }
-      Benchmarks.__default.Serialize(_261_bytes);
-      Benchmarks.__default.Deserialize(_263_js, _260_output__array);
+      Benchmarks.__default.Serialize(_256_bytes);
+      Benchmarks.__default.Deserialize(_258_js, _255_output__array);
     }
     public static uint WARMUP { get {
       return 20U;
