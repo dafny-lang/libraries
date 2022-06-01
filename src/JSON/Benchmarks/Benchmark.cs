@@ -7,6 +7,7 @@
 
 using System;
 using System.Numerics;
+using Lexers_mCore_Compile;
 
 namespace Dafny {
   internal class ArrayHelpers {
@@ -3262,27 +3263,29 @@ namespace Cursors_Compile {
       Cursor__ _this = this;
     TAIL_CALL_START: ;
       Lexers_mCore_Compile._ILexerResult<__A, __R> _source9 = Dafny.Helpers.Id<Func<__A, short, Lexers_mCore_Compile._ILexerResult<__A, __R>>>(step)(st, (_this).Peek());
-      if (_source9.is_Accept) {
-        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Success(_this);
-      } else if (_source9.is_Reject) {
-        __R _102___mcc_h0 = _source9.dtor_err;
-        __R _103_err = _102___mcc_h0;
-        return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_OtherError(_103_err));
-      } else {
-        __A _104___mcc_h1 = _source9.dtor_st;
-        __A _105_st = _104___mcc_h1;
-        if ((_this).EOF_q) {
-          return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
-        } else {
-          var _in13 = (_this).Skip(1U);
-          Func<__A, short, Lexers_mCore_Compile._ILexerResult<__A, __R>> _in14 = step;
-          __A _in15 = _105_st;
-          _this = _in13;
-          step = _in14;
-          st = _in15;
-          goto TAIL_CALL_START;
-        }
+      switch (_source9)
+      {
+        case LexerResult_Accept<__A, __R> accept:
+          return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Success(_this);
+        case LexerResult_Reject<__A, __R> { err: var _102___mcc_h0 }:
+          __R _103_err = _102___mcc_h0;
+          return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_OtherError(_103_err));
+        case LexerResult_Partial<__A, __R> { st: var _104___mcc_h1 }:
+          __A _105_st = _104___mcc_h1;
+          if ((_this).EOF_q) {
+            return Wrappers_Compile.Result<Cursors_Compile.Cursor__, Cursors_Compile._ICursorError<__R>>.create_Failure(Cursors_Compile.CursorError<__R>.create_EOF());
+          } else {
+            var _in13 = (_this).Skip(1U);
+            Func<__A, short, Lexers_mCore_Compile._ILexerResult<__A, __R>> _in14 = step;
+            __A _in15 = _105_st;
+            _this = _in13;
+            step = _in14;
+            st = _in15;
+            goto TAIL_CALL_START;
+          }
       }
+      // Unreachable
+      return null;
     }
     public bool BOF_q { get {
       return ((this).dtor_point) == ((this).dtor_beg);
