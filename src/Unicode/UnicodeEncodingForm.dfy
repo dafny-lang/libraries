@@ -260,13 +260,31 @@ abstract module UnicodeEncodingForm {
    * Returns the scalar value sequence encoded by the given code unit sequence, or None if the given Unicode string
    * is not well-formed.
    */
-  function method DecodeCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeVs: Option<seq<Unicode.ScalarValue>>)
+  function DecodeCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeVs: Option<seq<Unicode.ScalarValue>>)
     ensures IsWellFormedCodeUnitSequence(s) ==>
       && maybeVs.Some?
       && maybeVs.Extract() == DecodeCodeUnitSequence(s)
     ensures !IsWellFormedCodeUnitSequence(s) ==> && maybeVs.None?
   {
+    // IsWellFormedCodeUnitSequence and DecodeCodeUnitSequence each call PartitionCodeUnitSequence,
+    // so for efficiency we avoid recomputing the partition in the by-method.
     if IsWellFormedCodeUnitSequence(s) then Some(DecodeCodeUnitSequence(s))
     else None
+  }
+  by method {
+    var maybeParts := PartitionCodeUnitSequenceChecked(s);
+    if maybeParts.None? {
+      return None;
+    }
+    var parts := maybeParts.value;
+    var vs := Seq.Map(DecodeMinimalWellFormedCodeUnitSubsequence, parts);
+    calc == {
+      s;
+      Seq.Flatten(parts);
+      { assert parts == Seq.Map(EncodeScalarValue, vs); }
+      Seq.Flatten(Seq.Map(EncodeScalarValue, vs));
+      EncodeScalarSequence(vs);
+    }
+    return Some(vs);
   }
 }
