@@ -140,7 +140,7 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
   }
 
   //
-  // Tests
+  // Test lemmas
   //
 
   const TEST_SCALAR_VALUES: seq<(Unicode.ScalarValue, WellFormedCodeUnitSeq)> := [
@@ -153,5 +153,18 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
   lemma TestEncodeScalarValue()
     ensures forall pair | pair in TEST_SCALAR_VALUES
       :: EncodeScalarValue(pair.0) == pair.1
+  {}
+
+  // Because surrogate code points are not Unicode scalar values, isolated UTF-16 code units in the range
+  // D800_16 .. DFFF_16 are ill-formed. (Section 3.9 D91)
+  const TEST_ILL_FORMED_SEQUENCES: seq<CodeUnitSeq> := [
+    [0xD800],
+    [0xDABC],
+    [0xDFFF]
+  ]
+
+  lemma TestDecodeIllFormedSequence()
+    ensures forall s | s in TEST_ILL_FORMED_SEQUENCES
+      :: DecodeCodeUnitSequenceChecked(s).None?
   {}
 }

@@ -256,7 +256,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
   }
 
   //
-  // Tests
+  // Test lemmas
   //
 
   const TEST_SCALAR_VALUES: seq<(Unicode.ScalarValue, WellFormedCodeUnitSeq)> := [
@@ -273,5 +273,18 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
   lemma TestEncodeScalarValue()
     ensures forall pair | pair in TEST_SCALAR_VALUES
       :: EncodeScalarValue(pair.0) == pair.1
+  {}
+
+  // Examples taken from description of Table 3-7.
+  const TEST_ILL_FORMED_SEQUENCES: seq<CodeUnitSeq> := [
+    // C0 is not well-formed as a first byte
+    [0xC0, 0xAF],
+    // 9F is not well-formed as a second byte when E0 is a well-formed first byte
+    [0xE0, 0x9F, 0x80]
+  ]
+
+  lemma TestDecodeIllFormedSequence()
+    ensures forall s | s in TEST_ILL_FORMED_SEQUENCES
+      :: DecodeCodeUnitSequenceChecked(s).None?
   {}
 }
