@@ -138,4 +138,20 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
     assert EncodeScalarValueDoubleWord(v) == m;
     v
   }
+
+  //
+  // Tests
+  //
+
+  const TEST_SCALAR_VALUES: seq<(Unicode.ScalarValue, WellFormedCodeUnitSeq)> := [
+    // One code unit: dollar sign
+    (0x0024, [0x0024]),
+    // Two code units: money bag emoji
+    (0x1F4B0, [0xD83D, 0xDCB0])
+  ]
+
+  lemma TestEncodeScalarValue()
+    ensures forall pair | pair in TEST_SCALAR_VALUES
+      :: EncodeScalarValue(pair.0) == pair.1
+  {}
 }

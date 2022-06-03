@@ -254,4 +254,24 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     assert EncodeScalarValueQuadrupleByte(v) == m;
     v
   }
+
+  //
+  // Tests
+  //
+
+  const TEST_SCALAR_VALUES: seq<(Unicode.ScalarValue, WellFormedCodeUnitSeq)> := [
+    // One byte: dollar sign
+    (0x0024, [0x24]),
+    // Two bytes: pound sign
+    (0x00A3, [0xC2, 0xA3]),
+    // Three bytes: euro sign
+    (0x20AC, [0xE2, 0x82, 0xAC]),
+    // Four bytes: money bag emoji
+    (0x1F4B0, [0xF0, 0x9F, 0x92, 0xB0])
+  ]
+
+  lemma TestEncodeScalarValue()
+    ensures forall pair | pair in TEST_SCALAR_VALUES
+      :: EncodeScalarValue(pair.0) == pair.1
+  {}
 }
