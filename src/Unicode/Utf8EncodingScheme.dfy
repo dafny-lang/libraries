@@ -11,18 +11,19 @@ include "../BoundedInts.dfy"
 include "Unicode.dfy"
 include "Utf8EncodingForm.dfy"
 
-// TODO this should refine an abstract UnicodeEncodingScheme module,
-// but defining such a module seems impossible so long as dafny-lang/dafny#1639 is unresolved.
-// See <https://github.com/dafny-lang/dafny/issues/1639>.
 /**
  * The Unicode encoding scheme that serializes a UTF-8 code unit sequence in exactly the same order as the code unit
  * sequence itself.
-
+ *
  * Because the UTF-8 encoding form already deals in ordered byte sequences, the UTF-8 encoding scheme is trivial. The
  * byte ordering is already obvious and completely defined by the UTF-8 code unit sequence itself. The UTF-8
  * encoding scheme is defined merely for completeness of the Unicode character encoding model.
-
+ *
  * (Section 3.10 D95)
+ *
+ * TODO: this should refine an abstract UnicodeEncodingScheme module,
+ * but defining such a module seems impossible so long as dafny-lang/dafny#1639 is unresolved.
+ * See <https://github.com/dafny-lang/dafny/issues/1639>.
  */
 module Utf8EncodingScheme {
   import opened Wrappers
