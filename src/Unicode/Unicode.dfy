@@ -42,7 +42,7 @@ module Unicode {
     && (p < HIGH_SURROGATE_MIN || p > HIGH_SURROGATE_MAX)
     && (p < LOW_SURROGATE_MIN || p > LOW_SURROGATE_MAX)
 
-  const ASSIGNED_PLANES: seq<bv8> := [
+  const ASSIGNED_PLANES: set<bv8> := {
     0,  // Basic Multilingual Plane
     1,  // Supplementary Multilingual Plane
     2,  // Supplementary Ideographic Plane
@@ -50,7 +50,7 @@ module Unicode {
     14, // Supplementary Special Purpose Plane
     15, // Supplementary Private Use Area A
     16  // Supplementary Private Use Area B
-  ]
+  }
 
   predicate {:opaque} IsInAssignedPlane(i: CodePoint) {
     var plane := (i >> 16) as bv8;
