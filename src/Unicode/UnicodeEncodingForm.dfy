@@ -76,9 +76,9 @@ abstract module UnicodeEncodingForm {
 
   /**
    * Returns the minimal well-formed code unit subsequence that this encoding form assigns to the given scalar value.
+   * The Unicode standard requires that this is injective.
    *
-   * TODO: This needs to be injective by the Unicode standard. I'm not sure how to state this.
-   * For now functions that rely on injectivity should simply `requires` it.
+   * TODO: enforce that implementations satisfy Functions.Injective
    */
   function method EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
 
