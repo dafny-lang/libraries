@@ -123,6 +123,10 @@ abstract module UnicodeEncodingForm {
       if maybePrefix.None? then None
       else (
         var prefix := maybePrefix.Extract();
+        // Recursing on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
+        // This definition (and others in the Unicode modules) emphasizes clarify and correctness,
+        // but should be supplemented with a by-method for improved performance,
+        // so long as Dafny runtimes' lack optimizations for subsequence recursion.
         var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
         if restParts.Some? then Some([prefix] + restParts.Extract())
         else None
