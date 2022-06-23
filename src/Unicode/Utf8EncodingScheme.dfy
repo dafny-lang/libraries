@@ -15,9 +15,10 @@ include "Utf8EncodingForm.dfy"
  * The Unicode encoding scheme that serializes a UTF-8 code unit sequence in exactly the same order as the code unit
  * sequence itself.
  *
- * Because the UTF-8 encoding form already deals in ordered byte sequences, the UTF-8 encoding scheme is trivial. The
- * byte ordering is already obvious and completely defined by the UTF-8 code unit sequence itself. The UTF-8
- * encoding scheme is defined merely for completeness of the Unicode character encoding model.
+ * Because the UTF-8 encoding form deals in ordered byte sequences, the UTF-8 encoding scheme is trivial.
+ * The byte ordering is completely defined by the UTF-8 code unit sequence itself.
+ * We implement the encoding scheme here for completeness of the Unicode character encoding model,
+ * and to perform the (trivial) conversion between `uint8`/`byte` and `bv8` values.
  *
  * (Section 3.10 D95)
  *
