@@ -60,7 +60,7 @@ module Unicode {
   // These are actually supersets of the Unicode planes,
   // since not all code points in a plane are assigned.
   //
-  // TODO: correctly check code points against the list of assigned code points
+  // TODO: check against the list of assigned code points, instead of only checking their plane
   // (https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt)
   type AssignedCodePoint = p: CodePoint | IsInAssignedPlane(p) witness *
 }
