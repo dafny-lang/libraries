@@ -1,0 +1,34 @@
+@@ -1,13 +1,23 @@
+ // RUN: %dafny /compile:0 "%s"
+ 
++// Assert that this file is minimally different from Wrappers.dfy,
++// to ensure they are mostly drop-in replacements for each other.
++// RUN: %diff "%S/Wrappers.dfy" "%s" | tail -n +3 > "%t" || true
++// RUN: %diff "%t" "%s".diff.expect
++
+ /*******************************************************************************
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
+ 
++// Copy of Wrappers.dfy without covariance on type parameters.
++// This version can be useful to work around the lack of variance support
++// for particular compilation targets, especially since variance
++// is not necessary for these datatypes most of the time.
++// E.g. https://github.com/dafny-lang/dafny/issues/2013.
+ module Wrappers {
+   
+-  datatype Option<+T> = None | Some(value: T) {
++  datatype Option<T> = None | Some(value: T) {
+     function method ToResult(): Result<T, string> {
+       match this
+       case Some(v) => Success(v)
+@@ -37,7 +47,7 @@
+     }
+   }
+ 
+-  datatype Result<+T, +R> = | Success(value: T) | Failure(error: R) {
++  datatype Result<T, R> = | Success(value: T) | Failure(error: R) {
+     function method ToOption(): Option<T> 
+     {
+       match this
