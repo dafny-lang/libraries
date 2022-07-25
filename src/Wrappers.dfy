@@ -76,7 +76,7 @@ module Wrappers {
     }
   }
 
-  datatype Outcome<E> = Pass | Fail(error: E)
+  datatype Outcome<+E> = Pass | Fail(error: E)
   {
     predicate method IsFailure() {
       Fail?
