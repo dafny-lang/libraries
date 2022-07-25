@@ -13,7 +13,7 @@
 // Copy of Wrappers.dfy without covariance on type parameters.
 // This version can be useful to work around the lack of variance support
 // for particular compilation targets, especially since variance
-// is not necessary for these datatypes most of the time.
+// is often not necessary for these datatypes (see examples/NonVariantWrappers.dfy).
 // E.g. https://github.com/dafny-lang/dafny/issues/2013.
 module Wrappers {
   
