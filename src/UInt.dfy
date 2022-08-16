@@ -1,3 +1,6 @@
+// RUN: %dafny /compile:0 "%s"
+
+
 module StandardLibrary.UInt {
 
   // TODO: Depend on types defined in dafny-lang/libraries instead

@@ -1,3 +1,6 @@
+// RUN: %dafny /compile:0 "%s"
+
+
 include "../../libraries/src/Wrappers.dfy"
 include "UInt.dfy"
 
