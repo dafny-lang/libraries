@@ -1,3 +1,5 @@
+// RUN: %dafny /compile:0 "%s"
+
 include "../../StandardLibrary.dfy"
 include "../../UInt.dfy"
 include "../Sequences/Seq.dfy"
