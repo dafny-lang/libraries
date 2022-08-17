@@ -14,7 +14,7 @@ module BinarySearch{
 
   import StandardLibrary
   import opened UInt = StandardLibrary.UInt
-
+  import opened Wrappers = StandardLibrary.Wrappers
   
 
 predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
@@ -111,15 +111,13 @@ predicate method LexicographicByteSeqBelow(x: seq<uint8>, y: seq<uint8>) {
   {
   }
 
-datatype Option<T> = None | Some(T)
-
-method BinarySearch<T>(a: array<T>, key: T,compare: (T, T) -> bool) returns (r:Option<nat>)
+method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> bool) returns (r:Option<nat>)
   requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]) || a[i] == a[j]
   requires StandardLibrary.Trichotomous(compare)
-  ensures 0 <= r ==> r <= a.Length && a[r] == key
-  ensures r < 0 ==> key !in a[..]
+  ensures r.Some? ==> r.value < a.Length && a[r.value] == key
+  ensures r.None? ==> key !in a[..]
 {
-  var lo, hi : Option<nat> := Some(0), Some(a.Length);
+  var lo, hi : nat := 0, a.Length;
   while lo < hi
     invariant 0 <= lo <= hi <= a.Length
     invariant key !in a[..lo] && key !in a[hi..]
@@ -130,7 +128,7 @@ method BinarySearch<T>(a: array<T>, key: T,compare: (T, T) -> bool) returns (r:O
     } else if compare(a[mid] , key) {
       lo := mid + 1;
     } else {
-      return mid;
+      return Some(mid);
     }
   }
   return None;
