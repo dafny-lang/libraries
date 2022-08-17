@@ -1,12 +1,12 @@
 // RUN: %dafny /compile:0 "%s"
 
-include "../../StandardLibrary.dfy"
-include "../../UInt.dfy"
-
 /*******************************************************************************
 *  Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
+
+include "../../StandardLibrary.dfy"
+include "../../UInt.dfy"
 
 module BinarySearch {
   export
