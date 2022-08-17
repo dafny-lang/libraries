@@ -1,5 +1,9 @@
 // RUN: %dafny /compile:0 "%s"
 
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+*******************************************************************************/
 
 module StandardLibrary.UInt {
 

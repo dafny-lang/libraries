@@ -1,10 +1,15 @@
 // RUN: %dafny /compile:0 "%s"
 
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+*******************************************************************************/
+
 include "../../StandardLibrary.dfy"
 include "../../UInt.dfy"
 include "../Sequences/Seq.dfy"
 
-module sorting{
+module Sorting {
   export
     reveals Reflexive, AntiSymmetric, Connected, TotalOrdering
     reveals LexicographicByteSeqBelow, LexicographicByteSeqBelowAux
@@ -16,19 +21,23 @@ module sorting{
   import opened UInt = StandardLibrary.UInt
   import opened Seq
 
-predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
+  predicate Reflexive<T(!new)>(R: (T, T) -> bool) 
+  {
     forall x :: R(x, x)
   }
 
-predicate AntiSymmetric<T(!new)>(R: (T, T) -> bool) {
+  predicate AntiSymmetric<T(!new)>(R: (T, T) -> bool) 
+  {
     forall x, y :: R(x, y) && R(y, x) ==> x == y
   }
 
-predicate Connected<T(!new)>(R: (T, T) -> bool) {
+  predicate Connected<T(!new)>(R: (T, T) -> bool) 
+  {
     forall x, y :: R(x, y) || R(y, x)
   }
 
-predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
+  predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) 
+  {
     && Reflexive(R)
     && AntiSymmetric(R)
     && StandardLibrary.Transitive(R)
@@ -40,7 +49,8 @@ predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
    */
 
   // reflexivelexicographical comparison of byte sequences
-  predicate method LexicographicByteSeqBelow(x: seq<uint8>, y: seq<uint8>) {
+  predicate method LexicographicByteSeqBelow(x: seq<uint8>, y: seq<uint8>) 
+  {
     LexicographicByteSeqBelowAux(x, y, 0)
   }
 
@@ -116,7 +126,7 @@ predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
   }
 
   predicate method SortedBy<T>(a: seq<T>,compare: (T, T) -> bool )
-   {
+  {
     forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j])
   }
 
@@ -125,7 +135,7 @@ predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
     requires |s| == 0 || compare(x,s[0])
   {}
 
-function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool ): (result :seq<T>)
+  function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool ): (result :seq<T>)
     requires StandardLibrary.Transitive(compare)
     requires Connected(compare)
     ensures multiset(a) == multiset(result)
@@ -146,7 +156,7 @@ function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool ): (result :se
       MergeSortedBy(leftSorted, rightSorted, compare)
   }
 
- function method {:tailrecursion} MergeSortedBy<T>(left: seq<T>, right: seq<T>,  compare: (T, T) -> bool) : (result :seq<T>)
+  function method {:tailrecursion} MergeSortedBy<T>(left: seq<T>, right: seq<T>,  compare: (T, T) -> bool) : (result :seq<T>)
     requires SortedBy(left,compare)
     requires SortedBy(right,compare)
     requires StandardLibrary.Transitive(compare)
@@ -171,7 +181,7 @@ function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool ): (result :se
       [left[0]] +  MergeSortedBy(left[1..], right, compare)
   }
 
-method Sort<T>(s: seq<T>, compare: (T, T) -> bool) returns (result :seq<T>)
+  method Sort<T>(s: seq<T>, compare: (T, T) -> bool) returns (result :seq<T>)
     ensures multiset(s) == multiset(result)
     requires StandardLibrary.Transitive(compare)
     requires Connected(compare)
