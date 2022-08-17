@@ -9,12 +9,12 @@ module sorting{
     reveals Reflexive, AntiSymmetric, Connected, TotalOrdering
     reveals LexicographicByteSeqBelow, LexicographicByteSeqBelowAux
     provides AboutLexicographicByteSeqBelow
-    provides MergeSortBy
+    provides SortedBy, MergeSortBy, MergeSortedBy
     provides StandardLibrary, UInt
 
   import StandardLibrary
   import opened UInt = StandardLibrary.UInt
-  import Seq
+  import opened Seq
 
 predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
     forall x :: R(x, x)
@@ -115,7 +115,8 @@ predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
   {
   }
 
-  predicate method SortedBy<T>(a: seq<T>,compare: (T, T) -> bool ) {
+  predicate method SortedBy<T>(a: seq<T>,compare: (T, T) -> bool )
+   {
     forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j])
   }
 
@@ -125,7 +126,11 @@ predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
   {}
 
 function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool ): (result :seq<T>)
+    requires StandardLibrary.Transitive(compare)
+    requires Connected(compare)
     ensures multiset(a) == multiset(result)
+    ensures SortedBy(result,compare)
+
   {
     if |a| <= 1 then
       a
@@ -144,7 +149,10 @@ function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool ): (result :se
  function method {:tailrecursion} MergeSortedBy<T>(left: seq<T>, right: seq<T>,  compare: (T, T) -> bool) : (result :seq<T>)
     requires SortedBy(left,compare)
     requires SortedBy(right,compare)
+    requires StandardLibrary.Transitive(compare)
+    requires Connected(compare)
     ensures multiset(left + right) == multiset(result)
+    ensures SortedBy(result,compare)
   {
     if |left| == 0 then
       right
@@ -168,6 +176,6 @@ method Sort<T>(s: seq<T>, compare: (T, T) -> bool) returns (result :seq<T>)
     requires StandardLibrary.Transitive(compare)
     requires Connected(compare)
  { 
-    MergeSortBy(s,compare)
+    result := MergeSortBy(s,compare);
  }
 }
