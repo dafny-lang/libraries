@@ -14,6 +14,7 @@ module BinarySearch{
 
   import StandardLibrary
   import opened UInt = StandardLibrary.UInt
+
   
 
 predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
@@ -110,14 +111,15 @@ predicate method LexicographicByteSeqBelow(x: seq<uint8>, y: seq<uint8>) {
   {
   }
 
-method BinarySearch<T>(a: array<T>, key: T,compare: (T, T) -> bool) returns (r : nat)
-  requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j])
-  ensures 0 <= r ==> r < a.Length && a[r] == key
+datatype Option<T> = None | Some(T)
+
+method BinarySearch<T>(a: array<T>, key: T,compare: (T, T) -> bool) returns (r:Option<nat>)
+  requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]) || a[i] == a[j]
+  requires StandardLibrary.Trichotomous(compare)
+  ensures 0 <= r ==> r <= a.Length && a[r] == key
   ensures r < 0 ==> key !in a[..]
-  requires StandardLibrary.Transitive(compare)
-  requires Connected(compare)
 {
- var lo, hi : nat := 0, a.Length;
+  var lo, hi : Option<nat> := Some(0), Some(a.Length);
   while lo < hi
     invariant 0 <= lo <= hi <= a.Length
     invariant key !in a[..lo] && key !in a[hi..]
@@ -131,5 +133,6 @@ method BinarySearch<T>(a: array<T>, key: T,compare: (T, T) -> bool) returns (r :
       return mid;
     }
   }
+  return None;
 }
 }
