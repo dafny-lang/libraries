@@ -6,10 +6,6 @@
 //-----------------------------------------------------------------------------
 
 #define ISDAFNYRUNTIMELIB
-#if ISDAFNYRUNTIMELIB
-using System; // for Func
-using System.Numerics;
-#endif
 
 namespace DafnyAssembly {
   [AttributeUsage(AttributeTargets.Assembly)]
@@ -20,6 +16,8 @@ namespace DafnyAssembly {
 }
 
 namespace Dafny {
+  using System.Numerics;
+  using System.Collections;
   using System.Collections.Generic;
   using System.Collections.Immutable;
   using System.Linq;
@@ -163,10 +161,12 @@ namespace Dafny {
     }
 
     public bool Equals(ISet<T> other) {
+      if (ReferenceEquals(this, other)) {
+        return true;
+      }
+
       if (other == null || Count != other.Count) {
         return false;
-      } else if (this == other) {
-        return true;
       }
 
       foreach (var elmt in Elements) {
@@ -703,16 +703,20 @@ namespace Dafny {
     }
 
     public bool Equals(IMap<U, V> other) {
-      if (other == null || LongCount != other.LongCount) {
-        return false;
-      } else if (this == other) {
+      if (ReferenceEquals(this, other)) {
         return true;
       }
+
+      if (other == null || LongCount != other.LongCount) {
+        return false;
+      }
+
       if (hasNullKey) {
         if (!other.Contains(default(U)) || !object.Equals(nullValue, Select(other, default(U)))) {
           return false;
         }
       }
+
       foreach (var item in dict) {
         if (!other.Contains(item.Key) || !object.Equals(item.Value, Select(other, item.Key))) {
           return false;
@@ -721,10 +725,11 @@ namespace Dafny {
       return true;
     }
     public bool EqualsObjObj(IMap<object, object> other) {
+      if (ReferenceEquals(this, other)) {
+        return true;
+      }
       if (!(this is IMap<object, object>) || other == null || LongCount != other.LongCount) {
         return false;
-      } else if (this == other) {
-        return true;
       }
       var oth = Map<object, object>.FromIMap(other);
       if (hasNullKey) {
@@ -851,7 +856,7 @@ namespace Dafny {
     }
   }
 
-  public interface ISequence<out T> {
+  public interface ISequence<out T> : IEnumerable<T> {
     long LongCount { get; }
     int Count { get; }
     T[] CloneAsArray();
@@ -882,7 +887,7 @@ namespace Dafny {
   }
 
   public abstract class Sequence<T> : ISequence<T> {
-    public static readonly ISequence<T> Empty = new ArraySequence<T>(new T[0]);
+    public static readonly ISequence<T> Empty = new ArraySequence<T>(Array.Empty<T>());
 
     private static readonly TypeDescriptor<ISequence<T>> _TYPE = new Dafny.TypeDescriptor<ISequence<T>>(Empty);
     public static TypeDescriptor<ISequence<T>> _TypeDescriptor() {
@@ -891,11 +896,11 @@ namespace Dafny {
 
     public static ISequence<T> Create(BigInteger length, System.Func<BigInteger, T> init) {
       var len = (int)length;
-      var values = new T[len];
+      var builder = ImmutableArray.CreateBuilder<T>(len);
       for (int i = 0; i < len; i++) {
-        values[i] = init(new BigInteger(i));
+        builder.Add(init(new BigInteger(i)));
       }
-      return new ArraySequence<T>(values);
+      return new ArraySequence<T>(builder.MoveToImmutable());
     }
     public static ISequence<T> FromArray(T[] values) {
       return new ArraySequence<T>(values);
@@ -930,9 +935,6 @@ namespace Dafny {
       return Update(sequence, (long)index, t);
     }
     public static bool EqualUntil(ISequence<T> left, ISequence<T> right, int n) {
-      if (ReferenceEquals(left, right)) {
-        return true;
-      }
       for (int i = 0; i < n; i++) {
         if (!Equals(left.Select(i), right.Select(i))) {
           return false;
@@ -967,7 +969,7 @@ namespace Dafny {
     // ImmutableElements cannot be public in the interface since ImmutableArray<T> leads to a
     // "covariant type T occurs in invariant position" error. There do not appear to be interfaces for ImmutableArray<T>
     // that resolve this.
-    protected abstract ImmutableArray<T> ImmutableElements { get; }
+    internal abstract ImmutableArray<T> ImmutableElements { get; }
 
     public T[] CloneAsArray() {
       return ImmutableElements.ToArray();
@@ -975,9 +977,18 @@ namespace Dafny {
 
     public IEnumerable<T> UniqueElements {
       get {
-        var st = Set<T>.FromCollection(ImmutableElements);
-        return st.Elements;
+        return Set<T>.FromCollection(this).Elements;
       }
+    }
+
+    public IEnumerator<T> GetEnumerator() {
+      foreach (var el in ImmutableElements) {
+        yield return el;
+      }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() {
+      return GetEnumerator();
     }
 
     public T Select(ulong index) {
@@ -996,9 +1007,13 @@ namespace Dafny {
       return ImmutableElements[(int)index];
     }
     public bool Equals(ISequence<T> other) {
-      int n = ImmutableElements.Length;
+      int n = Count;
+      if (ReferenceEquals(this, other)) {
+        return true;
+      }
       return n == other.Count && EqualUntil(this, other, n);
     }
+
     public override bool Equals(object other) {
       if (other is ISequence<T>) {
         return Equals((ISequence<T>)other);
@@ -1034,25 +1049,13 @@ namespace Dafny {
       return hashCode;
     }
     public override string ToString() {
-      // This is required because (ImmutableElements is ImmutableArray<char>) is not a valid type check
-      var typeCheckTmp = new T[0];
-      ImmutableArray<T> elmts = ImmutableElements;
-      if (typeCheckTmp is char[]) {
-        var s = "";
-        foreach (var t in elmts) {
-          s += t.ToString();
-        }
-        return s;
+      if (typeof(T) == typeof(char)) {
+        return String.Concat(this);
       } else {
-        var s = "[";
-        var sep = "";
-        foreach (var t in elmts) {
-          s += sep + Dafny.Helpers.ToString(t);
-          sep = ", ";
-        }
-        return s + "]";
+        return "[" + String.Join(", ", this) + "]";
       }
     }
+
     public bool Contains<G>(G g) {
       if (g == null || g is T) {
         var t = (T)(object)g;
@@ -1061,14 +1064,7 @@ namespace Dafny {
       return false;
     }
     public ISequence<T> Take(long m) {
-      if (ImmutableElements.Length == m) {
-        return this;
-      }
-
-      int length = checked((int)m);
-      T[] tmp = new T[length];
-      ImmutableElements.CopyTo(0, tmp, 0, length);
-      return new ArraySequence<T>(tmp);
+      return Subsequence(0, m);
     }
     public ISequence<T> Take(ulong n) {
       return Take((long)n);
@@ -1077,36 +1073,21 @@ namespace Dafny {
       return Take((long)n);
     }
     public ISequence<T> Drop(long m) {
-      int startingElement = checked((int)m);
-      if (startingElement == 0) {
-        return this;
-      }
-
-      int length = ImmutableElements.Length - startingElement;
-      T[] tmp = new T[length];
-      ImmutableElements.CopyTo(startingElement, tmp, 0, length);
-      return new ArraySequence<T>(tmp);
+      return Subsequence(m, Count);
     }
     public ISequence<T> Drop(ulong n) {
       return Drop((long)n);
     }
     public ISequence<T> Drop(BigInteger n) {
-      if (n.IsZero) {
-        return this;
-      }
-
       return Drop((long)n);
     }
     public ISequence<T> Subsequence(long lo, long hi) {
-      if (lo == 0 && hi == ImmutableElements.Length) {
+      if (lo == 0 && hi == Count) {
         return this;
       }
       int startingIndex = checked((int)lo);
-      int endingIndex = checked((int)hi);
-      var length = endingIndex - startingIndex;
-      T[] tmp = new T[length];
-      ImmutableElements.CopyTo(startingIndex, tmp, 0, length);
-      return new ArraySequence<T>(tmp);
+      var length = checked((int)hi) - startingIndex;
+      return new ArraySequence<T>(ImmutableArray.Create<T>(ImmutableElements, startingIndex, length));
     }
     public ISequence<T> Subsequence(long lo, ulong hi) {
       return Subsequence(lo, (long)hi);
@@ -1144,11 +1125,12 @@ namespace Dafny {
       elmts = ImmutableArray.Create<T>(ee);
     }
 
-    protected override ImmutableArray<T> ImmutableElements {
+    internal override ImmutableArray<T> ImmutableElements {
       get {
         return elmts;
       }
     }
+
     public override int Count {
       get {
         return elmts.Length;
@@ -1169,7 +1151,7 @@ namespace Dafny {
       this.count = left.Count + right.Count;
     }
 
-    protected override ImmutableArray<T> ImmutableElements {
+    internal override ImmutableArray<T> ImmutableElements {
       get {
         // IsDefault returns true if the underlying array is a null reference
         // https://devblogs.microsoft.com/dotnet/please-welcome-immutablearrayt/
@@ -1213,13 +1195,13 @@ namespace Dafny {
             toVisit.Push(rightBuffer);
             toVisit.Push(leftBuffer);
           }
+        } else if (seq is Sequence<T> { ImmutableElements: var seqElmts }) {
+          ansBuilder.AddRange(seqElmts); // Optimized path for ImmutableArray
         } else {
-          for (long idx = 0; idx < seq.LongCount; idx++) {
-            ansBuilder.Add(seq.Select(idx));
-          }
+          ansBuilder.AddRange(seq); // Slower path using IEnumerable
         }
       }
-      return ansBuilder.ToImmutable();
+      return ansBuilder.MoveToImmutable();
     }
   }
 
@@ -1468,7 +1450,7 @@ namespace Dafny {
     }
 
     public static Sequence<T> SeqFromArray<T>(T[] array) {
-      return new ArraySequence<T>((T[])array.Clone());
+      return new ArraySequence<T>(array);
     }
     // In .NET version 4.5, it is possible to mark a method with "AggressiveInlining", which says to inline the
     // method if possible.  Method "ExpressionSequence" would be a good candidate for it:
@@ -1515,7 +1497,7 @@ namespace Dafny {
     // We need to deal with the special case "num == 0 && den == 0", because
     // that's what C#'s default struct constructor will produce for BigRational. :(
     // To deal with it, we ignore "den" when "num" is 0.
-    BigInteger num, den;  // invariant 1 <= den || (num == 0 && den == 0)
+    internal readonly BigInteger num, den;  // invariant 1 <= den || (num == 0 && den == 0)
     public override string ToString() {
       int log10;
       if (num.IsZero || den.IsOne) {
@@ -1670,6 +1652,48 @@ namespace Dafny {
         bReciprocal = new BigRational(-b.den, -b.num);
       }
       return a * bReciprocal;
+    }
+
+    public BigRational(double n) {
+      if (Double.IsNaN(n)) {
+        throw new ArgumentException("Can't convert NaN to a rational.");
+      }
+      if (Double.IsInfinity(n)) {
+        throw new ArgumentException(
+          "Can't convert +/- infinity to a rational.");
+      }
+      if (Double.IsSubnormal(n)) {
+        throw new ArgumentException(
+          "Can't convert a subnormal value to a rational (yet).");
+      }
+
+      // Double-specific values
+      const int exptBias = 1023;
+      const ulong signMask = 0x8000000000000000;
+      const ulong exptMask = 0x7FF0000000000000;
+      const ulong mantMask = 0x000FFFFFFFFFFFFF;
+      const int mantBits = 52;
+      ulong bits = BitConverter.DoubleToUInt64Bits(n);
+
+      // Generic conversion
+      bool isNeg = (bits & signMask) != 0;
+      int expt = ((int)((bits & exptMask) >> mantBits)) - exptBias;
+      var mant = (bits & mantMask);
+      var one = BigInteger.One;
+      var negFactor = isNeg ? BigInteger.Negate(one) : one;
+      var two = new BigInteger(2);
+      var exptBI = BigInteger.Pow(two, Math.Abs(expt));
+      var twoToMantBits = BigInteger.Pow(two, mantBits);
+      var mantNum = negFactor * (twoToMantBits + new BigInteger(mant));
+      if (expt == -exptBias && mant == 0) {
+        num = den = 0;
+      } else if (expt < 0) {
+        num = mantNum;
+        den = twoToMantBits * exptBI;
+      } else {
+        num = exptBI * mantNum;
+        den = twoToMantBits;
+      }
     }
   }
 

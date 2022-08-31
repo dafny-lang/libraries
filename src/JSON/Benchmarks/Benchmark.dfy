@@ -17,7 +17,7 @@ module {:extern "Benchmarks"} Benchmarks {
     static method {:extern} ReportTimer(lbl: string, nBytes: int, repeats: uint32)
   }
 
-  method Serialize(bytes: seq<byte>) {
+  method Deserialize(bytes: seq<byte>) {
     for i := 0 to WARMUP {
       var _ := API.Deserialize(bytes);
     }
@@ -25,10 +25,10 @@ module {:extern "Benchmarks"} Benchmarks {
     for i := 0 to REPEATS {
       var _ := API.Deserialize(bytes);
     }
-    Interop.ReportTimer("Serialize", |bytes|, REPEATS);
+    Interop.ReportTimer("Deserialize", |bytes|, REPEATS);
   }
 
-  method Deserialize(js: JSON, target: array<byte>)
+  method Serialize(js: JSON, target: array<byte>)
     modifies target
   {
     for i := 0 to WARMUP {
@@ -38,22 +38,21 @@ module {:extern "Benchmarks"} Benchmarks {
     for i := 0 to REPEATS {
       var _ := API.SerializeBlit(js, target);
     }
-    Interop.ReportTimer("Deserialize", target.Length, REPEATS);
+    Interop.ReportTimer("Serialize", target.Length, REPEATS);
   }
 
   method Main() {
     var input_array := Interop.ReadInput();
-    var output_array := new byte[input_array.Length];
-
     var bytes := input_array[..];
+
+    var output_array := new byte[input_array.Length];
     var jsr := API.Deserialize(bytes);
     expect jsr.Success?;
+    Deserialize(bytes);
 
     var js := jsr.value;
     var output := API.SerializeAlloc(js);
     expect output.Success?;
-
-    Serialize(bytes);
-    Deserialize(js, output_array);
+    Serialize(js, output_array);
   }
 }

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -10,7 +11,7 @@ namespace Benchmarks {
     }
 
     public static void StartTimer() {
-      Chrono.Start();
+      Chrono.Restart();
     }
 
     public static void ReportTimer(Dafny.ISequence<char> label, BigInteger nBytes, uint repeats) {

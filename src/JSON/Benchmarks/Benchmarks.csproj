@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>CS3021; CS0162</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- <Nullable>enable</Nullable> -->
   </PropertyGroup>
 
@@ -13,9 +14,26 @@
   </ItemGroup>
   -->
 
+  <PropertyGroup>
+    <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+    <IlcTrimMetadata>true</IlcTrimMetadata>
+    <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+    <IlcInstructionSet>avx2,bmi2,fma,pclmul,popcnt,aes</IlcInstructionSet>
+
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>link</TrimMode>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Update="twitter.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0-preview.4.22229.4" />
   </ItemGroup>
 </Project>
