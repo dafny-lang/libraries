@@ -1,6 +1,6 @@
-include "JSON.Spec.dfy"
+include "JSON.LowLevel.Spec.dfy"
 
-module {:options "-functionSyntax:4"} JSON.SpecProperties {
+module {:options "-functionSyntax:4"} JSON.LowLevel.SpecProperties {
   import opened BoundedInts
 
   import Vs = Views.Core

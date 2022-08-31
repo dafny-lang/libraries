@@ -1,5 +1,5 @@
 include "JSON.Grammar.dfy"
-include "JSON.Spec.dfy"
+include "JSON.LowLevel.Spec.dfy"
 include "JSON.ZeroCopy.Serializer.dfy"
 include "JSON.ZeroCopy.Deserializer.dfy"
 

@@ -29,6 +29,25 @@ module {:options "-functionSyntax:4"} Views.Core {
       View(bs, 0 as uint32, |bs| as uint32)
     }
 
+    static function OfString(s: string) : bytes
+      requires forall c: char | c in s :: c as int < 256
+    {
+      seq(|s|, i requires 0 <= i < |s| =>
+        assert s[i] in s; s[i] as byte)
+    }
+
+    ghost predicate SliceOf?(v': View) {
+      v'.s == s && v'.beg <= beg && end <= v'.end
+    }
+
+    ghost predicate StrictPrefixOf?(v': View) {
+      v'.s == s && v'.beg == beg && end < v'.end
+    }
+
+    ghost predicate StrictSuffixOf?(v': View) {
+      v'.s == s && v'.beg < beg && end == v'.end
+    }
+
     ghost predicate Byte?(c: byte)
       requires Valid?
     {
@@ -79,8 +98,16 @@ module {:options "-functionSyntax:4"} Views.Core {
   }
 
   predicate Adjacent(lv: View, rv: View) {
-    lv.s == rv.s &&
-    lv.end == rv.beg
+    // Compare endpoints first to short-circuit the potentially-costly string
+    // comparison
+    && lv.end == rv.beg
+    // We would prefer to use reference equality here, but doing so in a sound
+    // way is tricky (see chapter 9 of ‘Verasco: a Formally Verified C Static
+    // Analyzer’ by Jacques-Henri Jourdan for details).  The runtime optimizes
+    // the common case of physical equality and otherwise performs a length
+    // check, so the worst case (checking for adjacency in two slices that have
+    // equal but not physically-equal contents) is hopefully not too common.
+    && lv.s == rv.s
   }
 
   function Merge(lv: View, rv: View) : View
