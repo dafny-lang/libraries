@@ -5,7 +5,7 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module StandardLibrary.UInt {
+module Helpers.UInt {
 
   newtype uint8 = x | 0 <= x < 0x100
   newtype uint16 = x | 0 <= x < 0x1_0000

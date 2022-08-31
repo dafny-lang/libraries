@@ -13,13 +13,23 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../Wrappers.dfy"
 include "../../Math.dfy"
+include "../../Helpers.dfy"
+include "../../Lexicographics.dfy"
 
 module Seq {
+  export 
+    provides SortedBy, MergeSortBy, MergeSortedWith
+    provides Helpers, UInt, Lexicographics, Relations
 
-  import opened Wrappers
+  
+  import opened Wrappers = Helpers.Wrappers
   import Math
+  import Helpers
+  import opened Comparison
+  import opened UInt = Helpers.UInt
+  import opened Lexicographics
+  import opened Relations = Lexicographics.Relations
 
   /**********************************************************
   *
@@ -764,5 +774,162 @@ module Seq {
       assert [xs[0]] + xs[1..] == xs;
     }
   }
+
+
+/**********************************************************
+  *
+  *  Splitting of Sequences
+  *
+  ***********************************************************/
+
+
+ lemma SeqTakeAppend<A>(s: seq<A>, i: int)
+    requires 0 <= i < |s|
+    ensures s[..i] + [s[i]] == s[..i + 1]
+  {}
+
+  function method {:tailrecursion} Join<T>(ss: seq<seq<T>>, joiner: seq<T>): (s: seq<T>)
+    requires 0 < |ss|
+  {
+    if |ss| == 1 then ss[0] else ss[0] + joiner + Join(ss[1..], joiner)
+  }
+
+  function method {:tailrecursion} Split<T(==)>(s: seq<T>, delim: T): (res: seq<seq<T>>)
+    ensures delim !in s ==> res == [s]
+    ensures s == [] ==> res == [[]]
+    ensures 0 < |res|
+    ensures forall i :: 0 <= i < |res| ==> delim !in res[i]
+    ensures Join(res, [delim]) == s
+    decreases |s|
+  {
+    var i := FindIndexMatching(s, delim, 0);
+    if i.Some? then [s[..i.value]] + Split(s[(i.value + 1)..], delim) else [s]
+  }
+
+  lemma WillSplitOnDelim<T>(s: seq<T>, delim: T, prefix: seq<T>)
+    requires |prefix| < |s|
+    requires forall i :: 0 <= i < |prefix| ==> prefix[i] == s[i]
+    requires delim !in prefix && s[|prefix|] == delim
+    ensures Split(s, delim) == [prefix] + Split(s[|prefix| + 1..], delim)
+  {
+    calc {
+      Split(s, delim);
+    ==
+      var i := FindIndexMatching(s, delim, 0);
+      if i.Some? then [s[..i.value]] + Split(s[i.value + 1..], delim) else [s];
+    ==  { FindIndexMatchingLocatesElem(s, delim, 0, |prefix|); assert FindIndexMatching(s, delim, 0).Some?; }
+      [s[..|prefix|]] + Split(s[|prefix| + 1..], delim);
+    ==  { assert s[..|prefix|] == prefix; }
+      [prefix] + Split(s[|prefix| + 1..], delim);
+    }
+  }
+
+  lemma WillNotSplitWithOutDelim<T>(s: seq<T>, delim: T)
+    requires delim !in s
+    ensures Split(s, delim) == [s]
+  {
+    calc {
+      Split(s, delim);
+    ==
+      var i := FindIndexMatching(s, delim, 0);
+      if i.Some? then [s[..i.value]] + Split(s[i.value+1..], delim) else [s];
+    ==  { FindIndexMatchingLocatesElem(s, delim, 0, |s|); }
+      [s];
+    }
+  }
+
+  lemma FindIndexMatchingLocatesElem<T>(s: seq<T>, c: T, start: nat, elemIndex: nat)
+    requires start <= elemIndex <= |s|
+    requires forall i :: start <= i < elemIndex ==> s[i] != c
+    requires elemIndex == |s| || s[elemIndex] == c
+    ensures FindIndexMatching(s, c, start) == if elemIndex == |s| then None else Some(elemIndex)
+    decreases elemIndex - start
+    {}
+
+  function method FindIndexMatching<T(==)>(s: seq<T>, c: T, i: nat): (index: Option<nat>)
+    requires i <= |s|
+    ensures index.Some? ==>  i <= index.value < |s| && s[index.value] == c && c !in s[i..index.value]
+    ensures index.None? ==> c !in s[i..]
+    decreases |s| - i
+  {
+    FindIndex(s, x => x == c, i)
+  }
+
+  function method {:tailrecursion} FindIndex<T>(s: seq<T>, f: T -> bool, i: nat): (index: Option<nat>)
+    requires i <= |s|
+    ensures index.Some? ==> i <= index.value < |s| && f(s[index.value]) && (forall j :: i <= j < index.value ==> !f(s[j]))
+    ensures index.None? ==> forall j :: i <= j < |s| ==> !f(s[j])
+    decreases |s| - i
+  {
+    if i == |s| then None
+    else if f(s[i]) then Some(i)
+    else FindIndex(s, f, i + 1)
+  }
+
+  /**********************************************************
+  *
+  *  Sorting of Sequences
+  *
+  ***********************************************************/
+
+
+  predicate method SortedBy<T>(a: seq<T>)
+  {
+    forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j])
+  }
+
+  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>,  compare: (T, T) -> Comparison.CompResult) 
+    requires SortedBy(s, compare)
+    requires |s| == 0 || compare(x,s[0])
+  {}
+
+  //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedBy`
+  function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> Comparison.CompResult): (result :seq<T>)
+    requires Helpers.Transitive(compare)
+    requires Connected(compare)
+    ensures multiset(a) == multiset(result)
+    ensures SortedBy(result,compare)
+
+  {
+    if |a| <= 1 then
+      a
+    else
+      var splitIndex := |a| / 2;
+      var left, right := a[..splitIndex], a[splitIndex..];
+
+      assert a == left + right;
+
+      var leftSorted := MergeSortBy(left, compare);
+      var rightSorted := MergeSortBy(right, compare);
+      
+      MergeSortedBy(leftSorted, rightSorted, compare)
+  }
+
+  function method {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>,  compare: (T, T) -> Comparison.CompResult) : (result :seq<T>)
+    requires SortedBy(left,compare)
+    requires SortedBy(right,compare)
+    requires Helpers.Transitive(compare)
+    requires Connected(compare)
+    ensures multiset(left + right) == multiset(result)
+    ensures SortedBy(result,compare)
+  {
+    if |left| == 0 then
+      right
+    else if |right| == 0 then
+      left
+    else if compare(left[0],right[0]).LessThan? then
+      LemmaNewFirstElementStillSortedBy(left[0], MergeSortedBy(left[1..], right, compare), compare);
+      assert left == [left[0]] + left[1..];
+
+      [left[0]] +  MergeSortedBy(left[1..], right, compare)
+      
+
+      else
+        LemmaNewFirstElementStillSortedBy(right[0], MergeSortedBy(left, right[1..], compare), compare);
+        assert right == [right[0]] + right[1..];
+
+      [right[0]] + MergeSortedBy(left, right[1..], compare)
+  }
+
 
 }
