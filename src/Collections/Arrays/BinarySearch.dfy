@@ -5,18 +5,18 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../StandardLibrary.dfy"
+include "../../Helpers.dfy"
 
 module Search {
   export
-    provides BinarySearch, Wrappers, StandardLibrary
+    provides BinarySearch, Wrappers, Helpers
   
-  import StandardLibrary
-  import opened Wrappers = StandardLibrary.Wrappers
+  import Helpers, Comparison, Datatypes
+  import opened Wrappers = Helpers.Wrappers
 
   method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> bool) returns (r:Option<nat>)
     requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]) || a[i] == a[j]
-    requires StandardLibrary.Trichotomous(compare)
+    requires Helpers.Trichotomous(compare)
     ensures r.Some? ==> r.value < a.Length && a[r.value] == key
     ensures r.None? ==> key !in a[..]
   {
