@@ -1,3 +1,9 @@
+/// ========================
+///  Low-level JSON grammar
+/// ========================
+///
+/// See ``JSON.AST`` for the high-level interface.
+
 include "../BoundedInts.dfy"
 include "Views.dfy"
 
@@ -5,17 +11,28 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
   import opened BoundedInts
   import opened Views.Core
 
+  const EMPTY := View.OfBytes([])
+  const PERIOD := View.OfBytes(['.' as byte])
+  const E := View.OfBytes(['e' as byte])
+  const COLON := View.OfBytes([':' as byte])
+  const COMMA := View.OfBytes([',' as byte])
+  const LBRACE := View.OfBytes(['{' as byte])
+  const RBRACE := View.OfBytes(['}' as byte])
+  const LBRACKET := View.OfBytes(['[' as byte])
+  const RBRACKET := View.OfBytes([']' as byte])
+  const MINUS := View.OfBytes(['-' as byte])
+
   type jchar = v: View | v.Length() == 1 witness View.OfBytes(['b' as byte])
-  type jperiod = v: View | v.Char?('.') witness View.OfBytes(['.' as byte])
-  type je = v: View | v.Char?('e') || v.Char?('E') witness View.OfBytes(['e' as byte])
-  type jcolon = v: View | v.Char?(':') witness View.OfBytes([':' as byte])
-  type jcomma = v: View | v.Char?(',') witness View.OfBytes([',' as byte])
-  type jlbrace = v: View | v.Char?('{') witness View.OfBytes(['{' as byte])
-  type jrbrace = v: View | v.Char?('}') witness View.OfBytes(['}' as byte])
-  type jlbracket = v: View | v.Char?('[') witness View.OfBytes(['[' as byte])
-  type jrbracket = v: View | v.Char?(']') witness View.OfBytes([']' as byte])
-  type jminus = v: View | v.Char?('-') || v.Empty? witness View.OfBytes([])
-  type jsign = v: View | v.Char?('-') || v.Char?('+') || v.Empty? witness View.OfBytes([])
+  type jperiod = v: View | v.Char?('.') witness PERIOD
+  type je = v: View | v.Char?('e') || v.Char?('E') witness E
+  type jcolon = v: View | v.Char?(':') witness COLON
+  type jcomma = v: View | v.Char?(',') witness COMMA
+  type jlbrace = v: View | v.Char?('{') witness LBRACE
+  type jrbrace = v: View | v.Char?('}') witness RBRACE
+  type jlbracket = v: View | v.Char?('[') witness LBRACKET
+  type jrbracket = v: View | v.Char?(']') witness RBRACKET
+  type jminus = v: View | v.Char?('-') || v.Empty? witness MINUS
+  type jsign = v: View | v.Char?('-') || v.Char?('+') || v.Empty? witness EMPTY
 
   predicate Blank?(b: byte) { b == 0x20 || b == 0x09 || b == 0x0A || b == 0x0D }
   ghost predicate Blanks?(v: View) { forall b | b in v.Bytes() :: Blank?(b) }

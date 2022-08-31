@@ -1,5 +1,5 @@
-include "JSON.Spec.dfy"
-include "JSON.SpecProperties.dfy"
+include "JSON.LowLevel.Spec.dfy"
+include "JSON.LowLevel.SpecProperties.dfy"
 include "Views.Writers.dfy"
 
 module {:options "/functionSyntax:4"} JSON.ZeroCopy.Serializer {

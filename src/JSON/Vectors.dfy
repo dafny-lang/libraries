@@ -1,13 +1,13 @@
 include "../BoundedInts.dfy"
 include "../Wrappers.dfy"
 
-module {:options "/functionSyntax:4"} Stacks {
+module {:options "/functionSyntax:4"} Vectors {
   import opened BoundedInts
   import opened Wrappers
 
   datatype Error = OutOfMemory
 
-  class Stack<A> {
+  class Vector<A> {
     ghost var Repr : seq<A>
 
     const a: A
@@ -67,7 +67,7 @@ module {:options "/functionSyntax:4"} Stacks {
     method Realloc(new_capacity: uint32)
       requires Valid?()
       requires new_capacity > capacity
-      modifies this, data
+      modifies this, `data
       ensures Valid?()
       ensures Repr == old(Repr)
       ensures size == old(size)
@@ -77,6 +77,66 @@ module {:options "/functionSyntax:4"} Stacks {
       var old_data, old_capacity := data, capacity;
       data, capacity := new A[new_capacity](_ => a), new_capacity;
       Blit(old_data, old_capacity);
+    }
+
+    function DefaultNewCapacity(capacity: uint32) : uint32 {
+      if capacity < MAX_CAPACITY_BEFORE_DOUBLING
+      then 2 * capacity
+      else MAX_CAPACITY
+    }
+
+    method ReallocDefault() returns (o: Outcome<Error>)
+      requires Valid?()
+      modifies this, `data
+      ensures Valid?()
+      ensures Repr == old(Repr)
+      ensures size == old(size)
+      ensures old(capacity) == MAX_CAPACITY <==> o.Fail?
+      ensures o.Fail? ==>
+        && unchanged(this)
+        && unchanged(data)
+      ensures o.Pass? ==>
+        && fresh(data)
+        && old(capacity) < MAX_CAPACITY
+        && capacity == old(if capacity < MAX_CAPACITY_BEFORE_DOUBLING
+                          then 2 * capacity else MAX_CAPACITY)
+
+    {
+      if capacity == MAX_CAPACITY {
+        return Fail(OutOfMemory);
+      }
+      Realloc(DefaultNewCapacity(capacity));
+      return Pass;
+    }
+
+    method Ensure(reserved: uint32) returns (o: Outcome<Error>)
+      requires Valid?()
+      modifies this, `data
+      ensures Valid?()
+      ensures Repr == old(Repr)
+      ensures size == old(size)
+      ensures reserved <= capacity - size ==>
+        o.Pass?
+      ensures o.Pass? ==>
+        old(size as int + reserved as int) <= capacity as int
+      ensures o.Fail? ==>
+        reserved > MAX_CAPACITY - size
+    {
+      if reserved > MAX_CAPACITY - size {
+        return Fail(OutOfMemory);
+      }
+      if reserved <= capacity - size {
+        return Pass;
+      }
+      var new_capacity := capacity;
+      while reserved > new_capacity - size
+        decreases MAX_CAPACITY - new_capacity
+        invariant new_capacity >= capacity
+      {
+        new_capacity := DefaultNewCapacity(new_capacity);
+      }
+      Realloc(new_capacity);
+      return Pass;
     }
 
     method PopFast(a: A)
@@ -117,14 +177,8 @@ module {:options "/functionSyntax:4"} Stacks {
         && Repr == old(Repr) + [a]
     {
       if size == capacity {
-        if capacity < MAX_CAPACITY_BEFORE_DOUBLING {
-          Realloc(2 * capacity);
-        } else {
-          if capacity == MAX_CAPACITY {
-            return Fail(OutOfMemory);
-          }
-          Realloc(MAX_CAPACITY);
-        }
+        var d := ReallocDefault();
+        if d.Fail? { return d; }
       }
       PushFast(a);
       return Pass;

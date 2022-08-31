@@ -1,6 +1,6 @@
 include "JSON.Grammar.dfy"
-include "JSON.Spec.dfy"
-include "JSON.SpecProperties.dfy"
+include "JSON.LowLevel.Spec.dfy"
+include "JSON.LowLevel.SpecProperties.dfy"
 include "Parsers.dfy"
 
 module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
