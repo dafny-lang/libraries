@@ -41,10 +41,25 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
     View.OfBytes(if b then TRUE else FALSE)
   }
 
-  // method Utf8Encode(st: Vector<uint8>, cp: uint32)
+  function Escape(str: string, start: nat := 0): string
+    decreases |str| - start
+  {
+    if start >= |str| then []
+    else
+      (match str[start] as uint16
+         case 0x22 => "\\\"" // quotation mark
+         case 0x5C => "\\\\"  // reverse solidus
+         case 0x62 => "\\b"  // backspace
+         case 0x66 => "\\f"  // form feed
+         case 0x6E => "\\n"  // line feed
+         case 0x72 => "\\r"  // carriage return
+         case 0x74 => "\\t"  // tab
+         case _ => [str[0]])
+      + Escape(str, start + 1)
+  }
 
   function Transcode16To8Escaped(str: string32, start: uint32 := 0): bytes {
-    UtfUtils.Transcode16To8(Str.EscapeQuotes(str))
+    UtfUtils.Transcode16To8(Escape(str))
   }
   // by method {
   //   var len := |str| as uint32;
@@ -133,14 +148,13 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
     Success(Grammar.KV(k, COLON, v))
   }
 
-  function MkSuffixedSequence<D, S>(ds: seq<D>, suffix: Structural<S>)
+  function MkSuffixedSequence<D, S>(ds: seq<D>, suffix: Structural<S>, start: nat := 0)
     : SuffixedSequence<D, S>
+    decreases |ds| - start
   {
-    match |ds|
-      case 0 => []
-      case 1 => [Suffixed(ds[0], Empty)]
-      case _ => [Suffixed(ds[0], NonEmpty(suffix))]
-        + MkSuffixedSequence(ds[1..], suffix)
+    if start >= |ds| then []
+    else if start == |ds| - 1 then [Suffixed(ds[start], Empty)]
+    else [Suffixed(ds[start], NonEmpty(suffix))] + MkSuffixedSequence(ds, suffix, start + 1)
   }
 
   const COMMA: Structural<jcomma> :=

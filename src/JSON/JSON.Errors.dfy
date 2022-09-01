@@ -5,6 +5,7 @@ module {:options "-functionSyntax:4"} JSON.Errors {
 
   datatype DeserializationError =
     | UnterminatedSequence
+    | UnsupportedEscape
     | EscapeAtEOS
     | EmptyNumber
     | ExpectingEOF
@@ -12,8 +13,9 @@ module {:options "-functionSyntax:4"} JSON.Errors {
   {
     function ToString() : string {
       match this
-        case EscapeAtEOS => "Escape character at end of string"
         case UnterminatedSequence => "Unterminated sequence"
+        case UnsupportedEscape => "Unsupported escape sequence"
+        case EscapeAtEOS => "Escape character at end of string"
         case EmptyNumber => "Number must contain at least one digit"
         case ExpectingEOF => "Expecting EOF"
         case IntOverflow => "Input length does not fit in a 32-bit counter"

@@ -32,14 +32,15 @@ module {:options "-functionSyntax:4"} UtfUtils {
       (0xFFFD, 1) // Replacement character
   }
 
-  function Utf16Decode(str: string): seq<uint32> {
-    if str == [] then
-      []
+  function Utf16Decode(str: string, start: nat := 0): seq<uint32>
+    decreases |str| - start
+  {
+    if start >= |str| then []
     else
-      var c0 := str[0] as uint16;
-      var c1 := if |str| > 1 then str[1] as opt_uint16 else -1;
+      var c0 := str[start] as uint16;
+      var c1 := if |str| > start + 1 then str[start + 1] as opt_uint16 else -1;
       var (cp, delta) := Utf16DecodeChars(c0, c1);
-      [cp] + Utf16Decode(str[delta..])
+      [cp] + Utf16Decode(str, start + delta as nat)
   }
 
   function Utf16Encode2(cp: uint32): seq<char>
@@ -59,9 +60,11 @@ module {:options "-functionSyntax:4"} UtfUtils {
       [] // Invalid: drop // TODO
   }
 
-  function Utf16Encode(codepoints: seq<uint32>): seq<char> {
-    if codepoints == [] then []
-    else Utf16Encode1(codepoints[0]) + Utf16Encode(codepoints[1..])
+  function Utf16Encode(codepoints: seq<uint32>, start: nat := 0): seq<char>
+    decreases |codepoints| - start
+  {
+    if start >= |codepoints| then []
+    else Utf16Encode1(codepoints[start]) + Utf16Encode(codepoints, start + 1)
   }
 
   function Utf8Encode1(cp: uint32): seq<uint8> {
@@ -113,21 +116,24 @@ module {:options "-functionSyntax:4"} UtfUtils {
       (0xFFFD, 1) // Replacement character
   }
 
-  function Utf8Decode(str: seq<uint8>): seq<uint32> {
-    if str == [] then
-      []
+  function Utf8Decode(str: seq<uint8>, start: nat := 0): seq<uint32>
+    decreases |str| - start
+  {
+    if start >= |str| then []
     else
-      var c0 := str[0] as uint8;
-      var c1 := if |str| > 1 then str[1] as opt_uint8 else -1;
-      var c2 := if |str| > 2 then str[2] as opt_uint8 else -1;
-      var c3 := if |str| > 3 then str[3] as opt_uint8 else -1;
+      var c0 := str[start] as uint8;
+      var c1 := if |str| > start + 1 then str[start + 1] as opt_uint8 else -1;
+      var c2 := if |str| > start + 2 then str[start + 2] as opt_uint8 else -1;
+      var c3 := if |str| > start + 3 then str[start + 3] as opt_uint8 else -1;
       var (cp, delta) := Utf8DecodeChars(c0, c1, c2, c3);
-      [cp] + Utf8Decode(str[delta..])
+      [cp] + Utf8Decode(str, start + delta as nat)
   }
 
-  function Utf8Encode(codepoints: seq<uint32>): seq<uint8> {
-    if codepoints == [] then []
-    else Utf8Encode1(codepoints[0]) + Utf8Encode(codepoints[1..])
+  function Utf8Encode(codepoints: seq<uint32>, start: nat := 0): seq<uint8>
+    decreases |codepoints| - start
+  {
+    if start >= |codepoints| then []
+    else Utf8Encode1(codepoints[start]) + Utf8Encode(codepoints, start + 1)
   }
 
   function Transcode16To8(s: string): seq<uint8> {

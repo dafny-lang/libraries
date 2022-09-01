@@ -37,10 +37,51 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     js.At(0) == 't' as byte
   }
 
+  function Unescape(str: string, start: nat := 0): DeserializationResult<string>
+    decreases |str| - start
+  { // Assumes UTF-16 strings
+    if start >= |str| then Success([])
+    else if str[start] == '\\' then
+      if |str| == start + 1 then
+        Failure(EscapeAtEOS)
+      else
+        var c := str[start + 1];
+        if str[start + 1] == 'u' then
+          if |str| <= start + 5 then
+            Failure(EscapeAtEOS)
+          else
+            var code := str[start + 1..start + 5];
+            if exists c | c in str :: c !in Str.HEX_TABLE then
+              Failure(UnsupportedEscape)
+            else
+              var tl :- Unescape(str, start + 5);
+              reveal Math.IntPow();
+              Success([Str.ToNat(code, 16) as char] + tl)
+        else
+          var unescaped: uint16 := match c
+             case '\"' => 0x22 // quotation mark
+             case '\\' => 0x5C // reverse solidus
+             case 'b'  => 0x62 // backspace
+             case 'f'  => 0x66 // form feed
+             case 'n'  => 0x6E // line feed
+             case 'r'  => 0x72 // carriage return
+             case 't'  => 0x74 // tab
+             case _    => 0;
+          if unescaped == 0 then
+            Failure(UnsupportedEscape)
+          else
+            var tl :- Unescape(str, start + 1);
+            Success([unescaped as char] + tl)
+    else
+      var tl :- Unescape(str, start + 1);
+      Success([str[start]] + tl)
+  }
+
+
   function Transcode8To16Unescaped(str: seq<byte>): DeserializationResult<string>
     // TODO Optimize with a function by method
-  { // FIXME unescape unicode
-    Str.UnescapeQuotes(UtfUtils.Transcode8To16(str)).MapFailure(_ => EscapeAtEOS)
+  {
+    Unescape(UtfUtils.Transcode8To16(str)).MapFailure(_ => EscapeAtEOS)
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {
