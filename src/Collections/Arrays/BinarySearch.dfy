@@ -5,18 +5,24 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
+include "../../LexicographicHelpers.dfy"
 include "../../Helpers.dfy"
+include "../../Wrappers.dfy"
+include "../../Relations.dfy"
 
 module Search {
   export
     provides BinarySearch, Wrappers, Helpers
-  
-  import Helpers, Comparison, Datatypes
-  import opened Wrappers = Helpers.Wrappers
+    provides Helpers, Wrappers 
 
-  method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> bool) returns (r:Option<nat>)
-    requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]) || a[i] == a[j]
-    requires Helpers.Trichotomous(compare)
+    import Helpers
+    import opened Relations
+    import opened Wrappers
+    import opened Comparison = Helpers.Comparison
+
+  method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> Comparison.CompResult) returns (r:Option<nat>)
+    requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]).LessThan? || a[i] == a[j]
+    requires Trichotomous(compare)
     ensures r.Some? ==> r.value < a.Length && a[r.value] == key
     ensures r.None? ==> key !in a[..]
   {
@@ -25,17 +31,15 @@ module Search {
       invariant 0 <= lo <= hi <= a.Length
       invariant key !in a[..lo] && key !in a[hi..]
     {
-      var mid := (lo + hi) / 2;
-      if compare(key , a[mid]) {
-        hi := mid;
-      } 
-      else if compare(a[mid] , key) {
-        lo := mid + 1;
-      } 
-      else {
-        return Some(mid);
-      }
-    }
+    var mid := (lo + hi) / 2;
+
+    var comp := compare(key , a[mid]);
+    match comp
+      case LessThan => hi := mid;
+      case GreaterThan => lo:= mid + 1;
+      case _ => return Some(mid);
+
     return None;
-  }
-}
+    }
+  } 
+} 
