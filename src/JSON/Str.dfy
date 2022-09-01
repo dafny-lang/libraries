@@ -1,11 +1,14 @@
 include "../BoundedInts.dfy"
 include "../Wrappers.dfy"
+include "../Math.dfy"
 
 module {:options "/functionSyntax:4"} Str {
   import opened Wrappers
+  import Math
 
   abstract module ParametricConversion {
     import opened Wrappers
+    import Math
 
     type Char(==)
     type String = seq<Char>
@@ -69,17 +72,36 @@ module {:options "/functionSyntax:4"} Str {
     }
 
     function ToNat_any(str: String, base: nat, digits: map<Char, nat>) : (n: nat)
-      requires forall c | c in str :: c in digits
       requires base > 0
+      requires forall c | c in str :: c in digits
     {
       if str == [] then 0
       else ToNat_any(str[..|str| - 1], base, digits) * base + digits[str[|str| - 1]]
     }
 
-    function ToInt_any(str: String, minus: Char, base: nat, digits: map<Char, nat>) : (s: int)
-      requires NumberStr(str, minus, c => c in digits)
-      requires str != [minus]
+    lemma {:induction false} ToNat_bound(str: String, base: nat, digits: map<Char, nat>)
       requires base > 0
+      requires forall c | c in str :: c in digits
+      requires forall c | c in str :: digits[c] < base
+      ensures ToNat_any(str, base, digits) < Math.IntPow(base, |str|)
+    {
+      reveal Math.IntPow();
+      if str == [] {
+      } else {
+        calc <= {
+          ToNat_any(str, base, digits);
+          ToNat_any(str[..|str| - 1], base, digits) * base + digits[str[|str| - 1]];
+          { ToNat_bound(str[..|str| - 1], base, digits); }
+          (Math.IntPow(base, |str| - 1) - 1) * base + base - 1;
+          Math.IntPow(base, |str| - 1) * base - 1;
+        }
+      }
+    }
+
+    function ToInt_any(str: String, minus: Char, base: nat, digits: map<Char, nat>) : (s: int)
+      requires base > 0
+      requires str != [minus]
+      requires NumberStr(str, minus, c => c in digits)
     {
       if [minus] <= str then -(ToNat_any(str[1..], base, digits) as int)
       else
@@ -133,9 +155,13 @@ module {:options "/functionSyntax:4"} Str {
 
   const HEX_DIGITS := [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'A', 'B', 'C', 'D', 'E', 'F']
-  const HEX_TABLE :=
-    CharStrConversion.DigitsTable(HEX_DIGITS);
+    'A', 'B', 'C', 'D', 'E', 'F'
+  ]
+  const HEX_TABLE := map[
+    '0' := 0, '1' := 1, '2' := 2, '3' := 3, '4' := 4, '5' := 5, '6' := 6, '7' := 7, '8' := 8, '9' := 9,
+    'a' := 0xA, 'b' := 0xB, 'c' := 0xC, 'd' := 0xD, 'e' := 0xE, 'f' := 0xF,
+    'A' := 0xA, 'B' := 0xB, 'C' := 0xC, 'D' := 0xD, 'E' := 0xE, 'F' := 0xF
+  ]
 
   function OfInt(n: int, base: int := 10) : (str: string)
     requires 2 <= base <= 16
@@ -144,10 +170,19 @@ module {:options "/functionSyntax:4"} Str {
     CharStrConversion.OfInt_any(n, HEX_DIGITS[..base], '-')
   }
 
+  function ToNat(str: string, base: int := 10) : (n: nat)
+    requires 2 <= base <= 16
+    requires forall c | c in str :: c in HEX_TABLE && HEX_TABLE[c] as int < base
+    ensures n < Math.IntPow(base, |str|)
+  {
+    CharStrConversion.ToNat_bound(str, base, HEX_TABLE);
+    CharStrConversion.ToNat_any(str, base, HEX_TABLE)
+  }
+
   function ToInt(str: string, base: int := 10) : (n: int)
     requires str != "-"
     requires 2 <= base <= 16
-    requires CharStrConversion.NumberStr(str, '-', c => c in HEX_DIGITS[..base])
+    requires CharStrConversion.NumberStr(str, '-', (c: char) => c in HEX_TABLE && HEX_TABLE[c] as int < base)
   {
     CharStrConversion.ToInt_any(str, '-', base, HEX_TABLE)
   }
