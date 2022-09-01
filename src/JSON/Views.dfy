@@ -48,13 +48,15 @@ module {:options "/functionSyntax:4"} Views.Core {
       v'.s == s && v'.beg < beg && end == v'.end
     }
 
-    ghost predicate Byte?(c: byte)
+    predicate Byte?(c: byte)
       requires Valid?
     {
       Bytes() == [c]
+    } by method {
+      return Length() == 1 && At(0) == c;
     }
 
-    ghost predicate Char?(c: char)
+    predicate Char?(c: char)
       requires Valid?
       requires c as int < 256
     {

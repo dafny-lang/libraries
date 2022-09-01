@@ -27,4 +27,9 @@ module Math {
   {
     if a >= 0 then a else -a
   }
+
+  function method {:opaque} IntPow(x: int, n: nat) : int {
+    if n == 0 then 1
+    else x * IntPow(x, n - 1)
+  }
 }

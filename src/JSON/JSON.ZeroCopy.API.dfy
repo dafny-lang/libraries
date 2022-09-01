@@ -1,3 +1,4 @@
+include "JSON.Errors.dfy"
 include "JSON.Grammar.dfy"
 include "JSON.LowLevel.Spec.dfy"
 include "JSON.ZeroCopy.Serializer.dfy"
@@ -9,7 +10,7 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.API {
   import Vs = Views.Core
 
   import opened Grammar
-  import Spec
+  import LowLevel.Spec
   import Serializer
   import Deserializer
 
@@ -19,14 +20,14 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.API {
     Serializer.Text(js).Bytes()
   }
 
-  method SerializeAlloc(js: JSON) returns (bs: Result<array<byte>, Serializer.Error>)
+  method SerializeAlloc(js: JSON) returns (bs: SerializationResult<array<byte>>)
     ensures bs.Success? ==> fresh(bs.value)
     ensures bs.Success? ==> bs.value[..] == Spec.JSON(js)
   {
     bs := Serializer.Serialize(js);
   }
 
-  method SerializeBlit(js: JSON, bs: array<byte>) returns (len: Result<uint32, Serializer.Error>)
+  method SerializeBlit(js: JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
     modifies bs
     ensures len.Success? ==> len.value as int <= bs.Length
     ensures len.Success? ==> bs[..len.value] == Spec.JSON(js)
@@ -36,7 +37,7 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.API {
     len := Serializer.SerializeTo(js, bs);
   }
 
-  function {:opaque} Deserialize(bs: seq<byte>) : (js: Result<JSON, Deserializer.Error>)
+  function {:opaque} Deserialize(bs: seq<byte>) : (js: DeserializationResult<JSON>)
     ensures js.Success? ==> bs == Spec.JSON(js.value)
   {
     Deserializer.API.OfBytes(bs)
