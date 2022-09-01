@@ -5,7 +5,7 @@ module {:options "-functionSyntax:4"} Vectors {
   import opened BoundedInts
   import opened Wrappers
 
-  datatype Error = OutOfMemory
+  datatype VectorError = OutOfMemory
 
   class Vector<A> {
     ghost var Repr : seq<A>
@@ -85,7 +85,7 @@ module {:options "-functionSyntax:4"} Vectors {
       else MAX_CAPACITY
     }
 
-    method ReallocDefault() returns (o: Outcome<Error>)
+    method ReallocDefault() returns (o: Outcome<VectorError>)
       requires Valid?()
       modifies this, `data
       ensures Valid?()
@@ -109,7 +109,7 @@ module {:options "-functionSyntax:4"} Vectors {
       return Pass;
     }
 
-    method Ensure(reserved: uint32) returns (o: Outcome<Error>)
+    method Ensure(reserved: uint32) returns (o: Outcome<VectorError>)
       requires Valid?()
       modifies this, `data
       ensures Valid?()
@@ -164,7 +164,7 @@ module {:options "-functionSyntax:4"} Vectors {
       Repr := Repr + [a];
     }
 
-    method Push(a: A) returns (o: Outcome<Error>)
+    method Push(a: A) returns (o: Outcome<VectorError>)
       requires Valid?()
       modifies this, data
       ensures Valid?()

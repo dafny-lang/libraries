@@ -1,3 +1,4 @@
+include "JSON.Errors.dfy"
 include "JSON.Grammar.dfy"
 include "JSON.LowLevel.Spec.dfy"
 include "JSON.LowLevel.SpecProperties.dfy"
@@ -8,26 +9,13 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
     import opened Wrappers
 
-    import Spec
+    import LowLevel.Spec
     import Vs = Views.Core
     import opened Cursors
     import opened Parsers
     import opened Grammar
 
-    datatype JSONError =
-      | UnterminatedSequence
-      | EmptyNumber
-      | ExpectingEOF
-      | IntOverflow
-    {
-      function ToString() : string {
-        match this
-          case UnterminatedSequence => "Unterminated sequence"
-          case EmptyNumber => "Number must contain at least one digit"
-          case ExpectingEOF => "Expecting EOF"
-          case IntOverflow => "Input length does not fit in a 32-bit counter"
-      }
-    }
+    type JSONError = Errors.DeserializationError
     type Error = CursorError<JSONError>
     type ParseResult<+T> = SplitResult<T, JSONError>
     type Parser<!T> = Parsers.Parser<T, JSONError>
@@ -115,7 +103,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
     import opened Params: SequenceParams
 
-    import SpecProperties
+    import LowLevel.SpecProperties
     import opened Vs = Views.Core
     import opened Grammar
     import opened Cursors
@@ -333,7 +321,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import Arrays
     import Constants
 
-    import SpecProperties
+    import LowLevel.SpecProperties
 
     function {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1

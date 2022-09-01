@@ -38,14 +38,14 @@ module Wrappers {
   }
 
   datatype Result<+T, +R> = | Success(value: T) | Failure(error: R) {
-    function method ToOption(): Option<T> 
+    function method ToOption(): Option<T>
     {
       match this
       case Success(s) => Some(s)
       case Failure(e) => None()
     }
 
-    function method UnwrapOr(default: T): T 
+    function method UnwrapOr(default: T): T
     {
       match this
       case Success(s) => s
