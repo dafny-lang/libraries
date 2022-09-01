@@ -11,11 +11,11 @@ include "UInt.dfy"
 module Lexicographics {
     export 
         reveals ByteSeqBelow, ByteSeqBelowAux
-        provides  LessOrEqual, LessOrEqualAux
         provides Relations, UInt
 
     import opened Relations
     import opened UInt = Helpers.UInt
+
 
   // reflexivelexicographical comparison of byte sequences
   predicate method ByteSeqBelow(x: seq<uint8>, y: seq<uint8>) 
@@ -109,16 +109,6 @@ module Lexicographics {
    *      -- `a[k]` is strictly less (using `less`) than `b[k]`
    */
 
-  predicate method LessOrEqual<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool) {
-    exists k :: 0 <= k <= |a| && LessOrEqualAux(a, b, less, k)
-  }
-
-  predicate method LessOrEqualAux<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool, lengthOfCommonPrefix: nat)
-    requires 0 <= lengthOfCommonPrefix <= |a|
-  {
-    lengthOfCommonPrefix <= |b|
-    && (forall i :: 0 <= i < lengthOfCommonPrefix ==> a[i] == b[i])
-    && (lengthOfCommonPrefix == |a| || (lengthOfCommonPrefix < |b| && less(a[lengthOfCommonPrefix], b[lengthOfCommonPrefix])))
-  }
+  
 
 }

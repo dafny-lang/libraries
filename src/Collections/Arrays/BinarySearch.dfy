@@ -5,7 +5,6 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../LexicographicHelpers.dfy"
 include "../../Helpers.dfy"
 include "../../Wrappers.dfy"
 include "../../Relations.dfy"
