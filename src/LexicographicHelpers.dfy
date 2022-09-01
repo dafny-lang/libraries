@@ -7,27 +7,50 @@
 
 include "Relations.dfy"
 include "Lexicographics.dfy"
+include "UInt.dfy"
 
 module LexicographicHelpers{
     export 
-        provides UInt
+        provides LexIsReflexive, LexIsAntisymmetric, LexIsTransitive, LexIsTotal, UInt8LessIsTrichotomousTransitive
+        provides ThereIsAMinimum, MinimumIsUnique, FindMinimum
+        provides SetToOrderedSequence, IsMinimum
+        provides UInt, Relations, Lexicographics
+        provides  LessOrEqual, LessOrEqualAux
 
     import opened Relations
     import opened Lexicographics
+    import U = UInt
     import opened Lexicographics.UInt
 
-    lemma LexIsReflexive<T>(a: seq<T>, less: (T, T) -> bool)
-    ensures LessOrEqual(a, a, less)
-    {
-    assert LessOrEqualAux(a, a, less, |a|);
+    predicate method LessOrEqual<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool) {
+        exists k :: 0 <= k <= |a| && LessOrEqualAux(a, b, less, k)
     }
 
-  lemma LexIsAntisymmetric<T>(a: seq<T>, b: seq<T>, less: (T, T) -> bool)
-    requires Trich: Trichotomous(less)
-    requires LessOrEqual(a, b, less)
-    requires LessOrEqual(b, a, less)
-    ensures a == b
-  {
+    predicate method LessOrEqualAux<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool, lengthOfCommonPrefix: nat)
+        requires 0 <= lengthOfCommonPrefix <= |a|
+    {
+        lengthOfCommonPrefix <= |b|
+        && (forall i :: 0 <= i < lengthOfCommonPrefix ==> a[i] == b[i])
+        && (lengthOfCommonPrefix == |a| || (lengthOfCommonPrefix < |b| && less(a[lengthOfCommonPrefix], b[lengthOfCommonPrefix])))
+    }
+
+    /*
+    * As the following lemmas show, the lexicographic ordering is reflexive, antisymmetric, transitive, and total.
+    * The proofs are a bit pedantic and include steps that can be automated.
+    */
+
+    lemma LexIsReflexive<T>(a: seq<T>, less: (T, T) -> bool)
+        ensures LessOrEqual(a, a, less)
+    {
+        assert LessOrEqualAux(a, a, less, |a|);
+    }
+
+    lemma LexIsAntisymmetric<T>(a: seq<T>, b: seq<T>, less: (T, T) -> bool)
+        requires Trich: Trichotomous(less)
+        requires LessOrEqual(a, b, less)
+        requires LessOrEqual(b, a, less)
+        ensures a == b
+    {
     assert LessIrreflexive: forall x,y :: less(x, y) ==> x != y by {
       reveal Trich;
     }
@@ -205,5 +228,16 @@ module LexicographicHelpers{
         }
       }
     }
+  }
+  
+    /*
+   * Here is an example relation and a lemma that says the relation is appropriate for use in
+   * lexicographic orderings.
+   */
+
+    lemma UInt8LessIsTrichotomousTransitive()
+    ensures Relations.Trichotomous(UInt8Less)
+    ensures Relations.Transitive(UInt8Less)
+  {
   }
 }

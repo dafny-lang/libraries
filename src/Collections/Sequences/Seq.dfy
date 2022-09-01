@@ -14,24 +14,22 @@
 *******************************************************************************/
 
 include "../../Math.dfy"
-include "../../LexicographicHelpers.dfy"
-include "../../Lexicographics.dfy"
 include "../../Wrappers.dfy"
 include "../../Helpers.dfy"
+include "../../UInt.dfy"
+include "../../Relations.dfy"
 
 module Seq {
   export 
     provides SortedBy, MergeSortBy, MergeSortedWith
-    provides Helpers, UInt, Lexicographics, Relations
+    provides Helpers, Relations
 
   
   import opened Wrappers
   import Math
   import Helpers
   import opened Helpers.Comparison
-  import opened UInt = Helpers.UInt
-  import Lexicographics
-  import opened Relations = Lexicographics.Relations
+  import opened Relations
 
   /**********************************************************
   *
@@ -896,7 +894,7 @@ module Seq {
 
   //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedBy`
   function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> Comparison.CompResult): (result :seq<T>)
-    requires Helpers.Transitive(compare)
+    requires Relations.Transitive(compare)
     requires Connected(compare)
     ensures multiset(a) == multiset(result)
     ensures SortedBy(result,compare)
@@ -919,7 +917,7 @@ module Seq {
   function method {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>,  compare: (T, T) -> Comparison.CompResult) : (result :seq<T>)
     requires SortedBy(left,compare)
     requires SortedBy(right,compare)
-    requires Helpers.Transitive(compare)
+    requires Relations.Transitive(compare)
     requires Connected(compare)
     ensures multiset(left + right) == multiset(result)
     ensures SortedBy(result,compare)
