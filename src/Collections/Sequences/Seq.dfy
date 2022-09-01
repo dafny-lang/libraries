@@ -14,8 +14,10 @@
 *******************************************************************************/
 
 include "../../Math.dfy"
-include "../../Helpers.dfy"
+include "../../LexicographicHelpers.dfy"
 include "../../Lexicographics.dfy"
+include "../../Wrappers.dfy"
+include "../../Helpers.dfy"
 
 module Seq {
   export 
@@ -23,12 +25,12 @@ module Seq {
     provides Helpers, UInt, Lexicographics, Relations
 
   
-  import opened Wrappers = Helpers.Wrappers
+  import opened Wrappers
   import Math
   import Helpers
-  import opened Comparison
+  import opened Helpers.Comparison
   import opened UInt = Helpers.UInt
-  import opened Lexicographics
+  import Lexicographics
   import opened Relations = Lexicographics.Relations
 
   /**********************************************************
@@ -380,6 +382,15 @@ module Seq {
     ensures Zip(Unzip(s).0, Unzip(s).1) == s
   {
   }
+
+  /*makes sequence of length n filled with given Value */
+  function method Fill<T>(value: T, n: nat): seq<T>
+    ensures |Fill(value, n)| == n
+    ensures forall i :: 0 <= i < n ==> Fill(value, n)[i] == value
+  {
+    seq(n, _ => value)
+  }
+
 
   /**********************************************************
   *
@@ -873,14 +884,14 @@ module Seq {
   ***********************************************************/
 
 
-  predicate method SortedBy<T>(a: seq<T>)
+  predicate method SortedBy<T>(a: seq<T>,compare: (T, T) -> Comparison.CompResult)
   {
-    forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j])
+    forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j]).LessThan?
   }
 
   lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>,  compare: (T, T) -> Comparison.CompResult) 
     requires SortedBy(s, compare)
-    requires |s| == 0 || compare(x,s[0])
+    requires |s| == 0 || compare(x,s[0]).LessThan?
   {}
 
   //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedBy`
@@ -902,7 +913,7 @@ module Seq {
       var leftSorted := MergeSortBy(left, compare);
       var rightSorted := MergeSortBy(right, compare);
       
-      MergeSortedBy(leftSorted, rightSorted, compare)
+      MergeSortedWith(leftSorted, rightSorted, compare)
   }
 
   function method {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>,  compare: (T, T) -> Comparison.CompResult) : (result :seq<T>)
@@ -918,17 +929,17 @@ module Seq {
     else if |right| == 0 then
       left
     else if compare(left[0],right[0]).LessThan? then
-      LemmaNewFirstElementStillSortedBy(left[0], MergeSortedBy(left[1..], right, compare), compare);
+      LemmaNewFirstElementStillSortedBy(left[0], MergeSortedWith(left[1..], right, compare), compare);
       assert left == [left[0]] + left[1..];
 
-      [left[0]] +  MergeSortedBy(left[1..], right, compare)
+      [left[0]] +  MergeSortedWith(left[1..], right, compare)
       
 
       else
-        LemmaNewFirstElementStillSortedBy(right[0], MergeSortedBy(left, right[1..], compare), compare);
+        LemmaNewFirstElementStillSortedBy(right[0], MergeSortedWith(left, right[1..], compare), compare);
         assert right == [right[0]] + right[1..];
 
-      [right[0]] + MergeSortedBy(left, right[1..], compare)
+      [right[0]] + MergeSortedWith(left, right[1..], compare)
   }
 
 

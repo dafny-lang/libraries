@@ -6,90 +6,119 @@
 *******************************************************************************/
 
 include "Relations.dfy"
+include "UInt.dfy"
 
 module Lexicographics {
     export 
-    reveals LexicographicByteSeqBelow, LexicographicByteSeqBelowAux 
-    provides Helpers, UInt, Relations
+        reveals ByteSeqBelow, ByteSeqBelowAux
+        provides  LessOrEqual, LessOrEqualAux
+        provides Relations, UInt
 
-    import Helpers = Relations.Helpers
-    import opened UInt = Helpers.UInt
     import opened Relations
+    import opened UInt = Helpers.UInt
 
   // reflexivelexicographical comparison of byte sequences
-  predicate method LexicographicByteSeqBelow(x: seq<uint8>, y: seq<uint8>) 
+  predicate method ByteSeqBelow(x: seq<uint8>, y: seq<uint8>) 
   {
-    LexicographicByteSeqBelowAux(x, y, 0)
+    ByteSeqBelowAux(x, y, 0)
   }
 
-  predicate method LexicographicByteSeqBelowAux(x: seq<uint8>, y: seq<uint8>, n: nat)
+  predicate method ByteSeqBelowAux(x: seq<uint8>, y: seq<uint8>, n: nat)
     requires n <= |x| && n <= |y|
     decreases |x| - n
   {
     || n == |x|
     || (n != |y| && x[n] < y[n])
-    || (n != |y| && x[n] == y[n] && LexicographicByteSeqBelowAux(x, y, n + 1))
+    || (n != |y| && x[n] == y[n] && ByteSeqBelowAux(x, y, n + 1))
   }
 
-  lemma AboutLexicographicByteSeqBelow()
-    ensures TotalOrdering(LexicographicByteSeqBelow)
+  lemma AboutByteSeqBelow()
+    ensures TotalOrdering(ByteSeqBelow)
   {
-    assert Reflexive(LexicographicByteSeqBelow) by {
+    assert Reflexive(ByteSeqBelow) by {
       forall x, n | 0 <= n <= |x| {
-        AboutLexicographicByteSeqBelowAux_Reflexive(x, n);
+        AboutByteSeqBelowAux_Reflexive(x, n);
       }
     }
-    assert AntiSymmetric(LexicographicByteSeqBelow) by {
+    assert AntiSymmetric(ByteSeqBelow) by {
       forall x, y, n: nat |
         n <= |x| && n <= |y| && x[..n] == y[..n] &&
-        LexicographicByteSeqBelowAux(x, y, n) && LexicographicByteSeqBelowAux(y, x, n)
+        ByteSeqBelowAux(x, y, n) && ByteSeqBelowAux(y, x, n)
       {
-        AboutLexicographicByteSeqBelowAux_AntiSymmetric(x, y, n);
+        AboutByteSeqBelowAux_AntiSymmetric(x, y, n);
       }
     }
-    assert Helpers.Transitive(LexicographicByteSeqBelow) by {
+    assert Relations.Transitive(ByteSeqBelow) by {
       forall x, y, z, n: nat |
         n <= |x| && n <= |y| && n <= |z| &&
-        LexicographicByteSeqBelowAux(x, y, n) && LexicographicByteSeqBelowAux(y, z, n)
+        ByteSeqBelowAux(x, y, n) && ByteSeqBelowAux(y, z, n)
       {
-        AboutLexicographicByteSeqBelowAux_Transitive(x, y, z, n);
+        AboutByteSeqBelowAux_Transitive(x, y, z, n);
       }
     }
-    assert Connected(LexicographicByteSeqBelow) by {
+    assert Connected(ByteSeqBelow) by {
       forall x, y, n: nat | n <= |x| && n <= |y| {
-        AboutLexicographicByteSeqBelowAux_Connected(x, y, n);
+        AboutByteSeqBelowAux_Connected(x, y, n);
       }
     }
   }
 
-  lemma AboutLexicographicByteSeqBelowAux_Reflexive(x: seq<uint8>, n: nat)
+  lemma AboutByteSeqBelowAux_Reflexive(x: seq<uint8>, n: nat)
     requires n <= |x|
-    ensures LexicographicByteSeqBelowAux(x, x, n)
+    ensures ByteSeqBelowAux(x, x, n)
     decreases |x| - n
   {
   }
 
-  lemma AboutLexicographicByteSeqBelowAux_AntiSymmetric(x: seq<uint8>, y: seq<uint8>, n: nat)
+  lemma AboutByteSeqBelowAux_AntiSymmetric(x: seq<uint8>, y: seq<uint8>, n: nat)
     requires n <= |x| && n <= |y|
     requires x[..n] == y[..n]
-    requires LexicographicByteSeqBelowAux(x, y, n) && LexicographicByteSeqBelowAux(y, x, n)
+    requires ByteSeqBelowAux(x, y, n) && ByteSeqBelowAux(y, x, n)
     ensures x == y
     decreases |x| - n
   {
   }
 
-  lemma AboutLexicographicByteSeqBelowAux_Transitive(x: seq<uint8>, y: seq<uint8>, z: seq<uint8>, n: nat)
+  lemma AboutByteSeqBelowAux_Transitive(x: seq<uint8>, y: seq<uint8>, z: seq<uint8>, n: nat)
     requires n <= |x| && n <= |y| && n <= |z|
-    requires LexicographicByteSeqBelowAux(x, y, n) && LexicographicByteSeqBelowAux(y, z, n)
-    ensures LexicographicByteSeqBelowAux(x, z, n)
+    requires ByteSeqBelowAux(x, y, n) && ByteSeqBelowAux(y, z, n)
+    ensures ByteSeqBelowAux(x, z, n)
     decreases |x| - n
   {
   }
 
-  lemma AboutLexicographicByteSeqBelowAux_Connected(x: seq<uint8>, y: seq<uint8>, n: nat)
+  lemma AboutByteSeqBelowAux_Connected(x: seq<uint8>, y: seq<uint8>, n: nat)
     requires n <= |x| && n <= |y|
-    ensures LexicographicByteSeqBelowAux(x, y, n) || LexicographicByteSeqBelowAux(y, x, n)
+    ensures ByteSeqBelowAux(x, y, n) || ByteSeqBelowAux(y, x, n)
     decreases |x| - n
   {
   }
+
+  /*
+   * Lexicographic comparison of sequences.
+   *
+   * Given two sequences `a` and `b` and a strict (that is, irreflexive)
+   * ordering `less` on the elements of these sequences, determine whether or not
+   * `a` is lexicographically "less than or equal to" `b`.
+   *
+   * `a` is lexicographically "less than or equal to" `b` holds iff
+   *   there exists a `k` such that
+   *   - the first `k` elements of `a` and `b` are the same
+   *   - either:
+   *      -- `a` has length `k` (that is, `a` is a prefix of `b`)
+   *      -- `a[k]` is strictly less (using `less`) than `b[k]`
+   */
+
+  predicate method LessOrEqual<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool) {
+    exists k :: 0 <= k <= |a| && LessOrEqualAux(a, b, less, k)
+  }
+
+  predicate method LessOrEqualAux<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool, lengthOfCommonPrefix: nat)
+    requires 0 <= lengthOfCommonPrefix <= |a|
+  {
+    lengthOfCommonPrefix <= |b|
+    && (forall i :: 0 <= i < lengthOfCommonPrefix ==> a[i] == b[i])
+    && (lengthOfCommonPrefix == |a| || (lengthOfCommonPrefix < |b| && less(a[lengthOfCommonPrefix], b[lengthOfCommonPrefix])))
+  }
+
 }

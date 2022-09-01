@@ -21,5 +21,4 @@ module Math {
     else
       a
   }
-
 }
