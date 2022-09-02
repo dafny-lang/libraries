@@ -12,6 +12,7 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
   import opened Views.Core
 
   const EMPTY := View.OfBytes([])
+  const DOUBLEQUOTE := View.OfBytes(['\"' as byte])
   const PERIOD := View.OfBytes(['.' as byte])
   const E := View.OfBytes(['e' as byte])
   const COLON := View.OfBytes([':' as byte])
@@ -23,6 +24,7 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
   const MINUS := View.OfBytes(['-' as byte])
 
   type jchar = v: View | v.Length() == 1 witness View.OfBytes(['b' as byte])
+  type jquote = v: View | v.Char?('\"') witness DOUBLEQUOTE
   type jperiod = v: View | v.Char?('.') witness PERIOD
   type je = v: View | v.Char?('e') || v.Char?('E') witness E
   type jcolon = v: View | v.Char?(':') witness COLON
@@ -65,12 +67,13 @@ module {:options "/functionSyntax:4"} JSON.Grammar {
   ghost predicate Num?(v: View) { Digits?(v) && !v.Empty? }
   ghost predicate Int?(v: View) { v.Char?('0') || (Num?(v) && v.At(0) != '0' as byte) }
 
-  type jstring = v: View | true witness View.OfBytes([]) // TODO: Enforce quoting and escaping
   type jnull = v: View | Null?(v) witness View.OfBytes(NULL)
   type jbool = v: View | Bool?(v) witness View.OfBytes(TRUE)
   type jdigits = v: View | Digits?(v) witness View.OfBytes([])
   type jnum = v: View | Num?(v) witness View.OfBytes(['0' as byte])
   type jint = v: View | Int?(v) witness View.OfBytes(['0' as byte])
+  type jstr = v: View | true witness View.OfBytes([]) // TODO: Enforce quoting and escaping
+  datatype jstring = JString(lq: jquote, contents: jstr, rq: jquote)
   datatype jkv = KV(k: jstring, colon: Structural<jcolon>, v: Value)
 
   // TODO enforce no leading space before closing bracket to disambiguate WS { WS WS } WS

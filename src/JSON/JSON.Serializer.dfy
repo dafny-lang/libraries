@@ -41,26 +41,9 @@ module {:options "/functionSyntax:4"} JSON.Serializer {
     View.OfBytes(if b then TRUE else FALSE)
   }
 
-  function Escape(str: string, start: nat := 0): string
-    decreases |str| - start
-  {
-    if start >= |str| then []
-    else
-      (match str[start] as uint16
-         case 0x22 => "\\\"" // quotation mark
-         case 0x5C => "\\\\"  // reverse solidus
-         case 0x62 => "\\b"  // backspace
-         case 0x66 => "\\f"  // form feed
-         case 0x6E => "\\n"  // line feed
-         case 0x72 => "\\r"  // carriage return
-         case 0x74 => "\\t"  // tab
-         case _ => [str[0]])
-      + Escape(str, start + 1)
-  }
-
-  function Transcode16To8Escaped(str: string32, start: uint32 := 0): bytes {
-    UtfUtils.Transcode16To8(Escape(str))
-  }
+  function Transcode16To8Escaped(str: string, start: uint32 := 0): bytes {
+    UtfUtils.Transcode16To8(Spec.Escape(str))
+  } // FIXME speed up using a `by method`
   // by method {
   //   var len := |str| as uint32;
   //   if len == 0 {
@@ -88,10 +71,9 @@ module {:options "/functionSyntax:4"} JSON.Serializer {
   }
 
   function String(str: string): Result<jstring> {
-    :- CheckLength(str, StringTooLong(str));
     var bs := Transcode16To8Escaped(str);
     :- CheckLength(bs, StringTooLong(str));
-    Success(View.OfBytes(bs))
+    Success(Grammar.JString(Grammar.DOUBLEQUOTE, View.OfBytes(bs), Grammar.DOUBLEQUOTE))
   }
 
   function Sign(n: int): jminus {
@@ -126,13 +108,16 @@ module {:options "/functionSyntax:4"} JSON.Serializer {
   function Number(dec: AST.Decimal): Result<jnumber> {
     var minus: jminus := Sign(dec.n);
     var num: jnum :- Int(Math.Abs(dec.n));
-    var frac: Maybe<jexp> := Empty();
-    var exp: jexp :-
-      var e: je := View.OfBytes(['e' as byte]);
-      var sign: jsign := Sign(dec.e10);
-      var num: jnum :- Int(Math.Abs(dec.e10));
-      Success(JExp(e, sign, num));
-    Success(JNumber(minus, num, Empty, NonEmpty(exp)))
+    var frac: Maybe<jfrac> := Empty();
+    var exp: Maybe<jexp> :-
+      if dec.e10 == 0 then
+        Success(Empty())
+      else
+        var e: je := View.OfBytes(['e' as byte]);
+        var sign: jsign := Sign(dec.e10);
+        var num: jnum :- Int(Math.Abs(dec.e10));
+        Success(NonEmpty(JExp(e, sign, num)));
+    Success(JNumber(minus, num, Empty, exp))
   }
 
   function MkStructural<T>(v: T): Structural<T> {

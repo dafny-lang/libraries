@@ -14,6 +14,7 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Cursors
     import opened Parsers
     import opened Grammar
+    import Errors
 
     type JSONError = Errors.DeserializationError
     type Error = CursorError<JSONError>
@@ -281,28 +282,37 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import opened Vs = Views.Core
     import opened Grammar
-    import opened Cursors
     import opened Core
+    import opened Errors
+    import Cursors
     import Values
 
-    function {:opaque} JSON(cs: FreshCursor) : (pr: ParseResult<JSON>)
-      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
-    {
-      Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value))
+    function LiftCursorError(err: Cursors.CursorError<DeserializationError>): DeserializationError {
+      match err
+        case EOF => ReachedEOF
+        case ExpectingByte(expected, b) => ExpectingByte(expected, b)
+        case ExpectingAnyByte(expected_sq, b) => ExpectingAnyByte(expected_sq, b)
+        case OtherError(err) => err
     }
 
-    function {:opaque} Text(v: View) : (jsr: Result<JSON, Error>)
+    function {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
+    {
+      Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value)).MapFailure(LiftCursorError)
+    }
+
+    function {:opaque} Text(v: View) : (jsr: DeserializationResult<JSON>)
       ensures jsr.Success? ==> v.Bytes() == Spec.JSON(jsr.value)
     {
-      var SP(text, cs) :- JSON(Cursor.OfView(v));
-      :- Need(cs.EOF?, OtherError(ExpectingEOF));
+      var SP(text, cs) :- JSON(Cursors.Cursor.OfView(v));
+      :- Need(cs.EOF?, Errors.ExpectingEOF);
       Success(text)
     }
 
-    function {:opaque} OfBytes(bs: bytes) : (jsr: Result<JSON, Error>)
+    function {:opaque} OfBytes(bs: bytes) : (jsr: DeserializationResult<JSON>)
       ensures jsr.Success? ==> bs == Spec.JSON(jsr.value)
     {
-      :- Need(|bs| < TWO_TO_THE_32, OtherError(IntOverflow));
+      :- Need(|bs| < TWO_TO_THE_32, Errors.IntOverflow);
       Text(Vs.View.OfBytes(bs))
     }
   }
@@ -369,7 +379,7 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Core
     import opened Cursors
 
-    function {:opaque} Constant(cs: FreshCursor, expected: bytes) : (pr: ParseResult<jstring>)
+    function {:opaque} Constant(cs: FreshCursor, expected: bytes) : (pr: ParseResult<Vs.View>)
       requires |expected| < TWO_TO_THE_32
       ensures pr.Success? ==> pr.value.t.Bytes() == expected
       ensures pr.Success? ==> pr.value.SplitFrom?(cs, _ => expected)
@@ -413,13 +423,21 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Failure(EOF);
     }
 
+    function Quote(cs: FreshCursor) : (pr: ParseResult<jquote>)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
+    {
+      var cs :- cs.AssertChar('\"');
+      Success(cs.Split())
+    }
+
     function {:opaque} String(cs: FreshCursor): (pr: ParseResult<jstring>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.String)
     {
-      var cs :- cs.AssertChar('\"');
-      var cs :- StringBody(cs);
-      var cs :- cs.AssertChar('\"');
-      Success(cs.Split())
+      var SP(lq, cs) :- Quote(cs);
+      var contents :- StringBody(cs);
+      var SP(contents, cs) := contents.Split();
+      var SP(rq, cs) :- Quote(cs);
+      Success(SP(Grammar.JString(lq, contents, rq), cs))
     }
   }
 
@@ -441,7 +459,7 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
       var sp := Digits(cs);
-      :- Need(!sp.t.Empty?, OtherError(EmptyNumber));
+      :- Need(!sp.t.Empty?, OtherError(Errors.EmptyNumber));
       Success(sp)
     }
 
