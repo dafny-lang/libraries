@@ -6,9 +6,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
   import opened Wrappers
 
   datatype VectorError = OutOfMemory
+  const OOM_FAILURE := Fail(OutOfMemory)
 
   class Vector<A> {
-    ghost var Repr : seq<A>
+    ghost var items : seq<A>
+    ghost var Repr : set<object>
 
     const a: A
     var size: uint32
@@ -19,31 +21,59 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
     const MAX_CAPACITY_BEFORE_DOUBLING: uint32 := UINT32_MAX / 2
 
     ghost predicate Valid?()
-      reads this, data
+      reads this, Repr
+      ensures Valid?() ==> this in Repr
     {
+      && Repr == {this, data}
       && capacity != 0
       && data.Length == capacity as int
       && size <= capacity
-      && Repr == data[..size]
+      && size as int == |items|
+      && items == data[..size]
     }
 
     constructor(a0: A, initial_capacity: uint32 := 8)
       requires initial_capacity > 0
+      ensures size == 0
+      ensures items == []
+      ensures fresh(Repr)
       ensures Valid?()
     {
       a := a0;
-      Repr := [];
+      items := [];
       size := 0;
       capacity := initial_capacity;
       data := new A[initial_capacity](_ => a0);
+      Repr := {this, data};
     }
 
-    method At(idx: uint32) returns (a: A)
+    function At(idx: uint32) : (a: A)
+      reads this, this.data
       requires idx < size
       requires Valid?()
-      ensures a == data[idx] == Repr[idx]
+      ensures a == data[idx] == items[idx]
     {
-      return data[idx];
+      data[idx]
+    }
+
+    function Top() : (a: A)
+      reads this, this.data
+      requires 0 < size
+      requires Valid?()
+      ensures a == data[size - 1] == items[size - 1]
+    {
+      data[size - 1]
+    }
+
+    method Put(idx: uint32, a: A)
+      requires idx < size
+      requires Valid?()
+      modifies data, `items
+      ensures Valid?()
+      ensures items == old(items)[idx := a]
+    {
+      data[idx] := a;
+      items := items[idx := a];
     }
 
     method Blit(new_data: array<A>, count: uint32)
@@ -67,16 +97,15 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
     method Realloc(new_capacity: uint32)
       requires Valid?()
       requires new_capacity > capacity
-      modifies this, `data
+      modifies `capacity, `data, `Repr, data
       ensures Valid?()
-      ensures Repr == old(Repr)
-      ensures size == old(size)
       ensures capacity == new_capacity
       ensures fresh(data)
     {
       var old_data, old_capacity := data, capacity;
       data, capacity := new A[new_capacity](_ => a), new_capacity;
       Blit(old_data, old_capacity);
+      Repr := {this, data};
     }
 
     function DefaultNewCapacity(capacity: uint32) : uint32 {
@@ -87,11 +116,9 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
 
     method ReallocDefault() returns (o: Outcome<VectorError>)
       requires Valid?()
-      modifies this, `data
+      modifies `capacity, `data, `Repr, data
       ensures Valid?()
-      ensures Repr == old(Repr)
-      ensures size == old(size)
-      ensures old(capacity) == MAX_CAPACITY <==> o.Fail?
+      ensures o.Fail? <==> old(capacity) == MAX_CAPACITY
       ensures o.Fail? ==>
         && unchanged(this)
         && unchanged(data)
@@ -113,8 +140,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       requires Valid?()
       modifies this, `data
       ensures Valid?()
-      ensures Repr == old(Repr)
-      ensures size == old(size)
+      modifies `capacity, `data, `Repr, data
       ensures reserved <= capacity - size ==>
         o.Pass?
       ensures o.Pass? ==>
@@ -139,29 +165,29 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       return Pass;
     }
 
-    method PopFast(a: A)
+    method PopFast()
       requires Valid?()
       requires size > 0
-      modifies this, data
+      modifies `size, `items
       ensures Valid?()
       ensures size == old(size) - 1
-      ensures Repr == old(Repr[..|Repr| - 1])
+      ensures items == old(items[..|items| - 1])
     {
       size := size - 1;
-      Repr := Repr[..|Repr| - 1];
+      items := items[..|items| - 1];
     }
 
     method PushFast(a: A)
       requires Valid?()
       requires size < capacity
-      modifies this, data
+      modifies `size, `items, data
       ensures Valid?()
       ensures size == old(size) + 1
-      ensures Repr == old(Repr) + [a]
+      ensures items == old(items) + [a]
     {
       data[size] := a;
       size := size + 1;
-      Repr := Repr + [a];
+      items := items + [a];
     }
 
     method Push(a: A) returns (o: Outcome<VectorError>)
@@ -174,7 +200,9 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       ensures o.Pass? ==>
         && old(size) < MAX_CAPACITY
         && size == old(size) + 1
-        && Repr == old(Repr) + [a]
+        && items == old(items) + [a]
+        && capacity >= old(capacity)
+        && if old(size == capacity) then fresh(data) else unchanged(`data)
     {
       if size == capacity {
         var d := ReallocDefault();
