@@ -8,7 +8,7 @@
 include "../BoundedInts.dfy"
 
 include "JSON.AST.dfy"
-include "UtfUtils.dfy"
+include "Unicode.dfy"
 include "Str.dfy"
 
 module {:options "/functionSyntax:4"} JSON.Spec {
@@ -16,7 +16,7 @@ module {:options "/functionSyntax:4"} JSON.Spec {
 
   import opened Str
   import opened AST
-  import opened UtfUtils
+  import opened Unicode
 
   type bytes = seq<uint8>
 

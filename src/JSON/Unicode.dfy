@@ -1,6 +1,6 @@
 include "../BoundedInts.dfy"
 
-module {:options "/functionSyntax:4"} UtfUtils {
+module {:options "/functionSyntax:4"} JSON.Unicode {
   import opened BoundedInts
 
   function Utf16Decode1(c: uint16): uint32

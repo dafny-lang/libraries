@@ -10,7 +10,7 @@ include "../Math.dfy"
 
 include "Views.dfy"
 include "Vectors.dfy"
-include "UtfUtils.dfy"
+include "Unicode.dfy"
 include "JSON.Errors.dfy"
 include "JSON.AST.dfy"
 include "JSON.Grammar.dfy"
@@ -22,7 +22,7 @@ module {:options "/functionSyntax:4"} JSON.Serializer {
   import opened Wrappers
   import opened BoundedInts
   import opened Str
-  import UtfUtils
+  import Unicode
 
   import AST
   import Spec
@@ -42,7 +42,7 @@ module {:options "/functionSyntax:4"} JSON.Serializer {
   }
 
   function Transcode16To8Escaped(str: string, start: uint32 := 0): bytes {
-    UtfUtils.Transcode16To8(Spec.Escape(str))
+    Unicode.Transcode16To8(Spec.Escape(str))
   } // FIXME speed up using a `by method`
   // by method {
   //   var len := |str| as uint32;
@@ -57,10 +57,10 @@ module {:options "/functionSyntax:4"} JSON.Serializer {
   //     var c0 := c1;
   //     var c1 := str[idx + 1] as uint16;
   //     if c0 < 0xD800 || c0 > 0xDBFF {
-  //       Utf8Encode(st, UtfUtils.Utf16Decode1(c0));
+  //       Utf8Encode(st, Unicode.Utf16Decode1(c0));
   //       idx := idx +1;
   //     } else {
-  //       Utf8Encode(st, UtfUtils.Utf16Decode2(c0, c1));
+  //       Utf8Encode(st, Unicode.Utf16Decode2(c0, c1));
   //       idx := idx + 2;
   //     }
   //   }

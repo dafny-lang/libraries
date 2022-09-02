@@ -10,7 +10,7 @@ include "../Math.dfy"
 
 include "Views.dfy"
 include "Vectors.dfy"
-include "UtfUtils.dfy"
+include "Unicode.dfy"
 include "JSON.Errors.dfy"
 include "JSON.AST.dfy"
 include "JSON.Grammar.dfy"
@@ -23,7 +23,7 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
   import opened Wrappers
   import opened BoundedInts
   import opened Str
-  import UtfUtils
+  import Unicode
 
   import AST
   import Spec
@@ -81,7 +81,7 @@ module {:options "/functionSyntax:4"} JSON.Deserializer {
   function Transcode8To16Unescaped(str: seq<byte>): DeserializationResult<string>
     // TODO Optimize with a function by method
   {
-    Unescape(UtfUtils.Transcode8To16(str))
+    Unescape(Unicode.Transcode8To16(str))
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {
