@@ -46,7 +46,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Unicode {
   function Utf16Encode2(cp: uint32): seq<char>
     requires cp < 0x100000
   {
-    var bv := cp as bv32;
+    var bv := cp as bv20;
     [(0xD800 | (bv >> 10))     as char,
      (0xDC00 | (bv  & 0x03FF)) as char]
   }
