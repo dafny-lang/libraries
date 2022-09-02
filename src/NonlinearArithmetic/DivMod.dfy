@@ -111,6 +111,22 @@ module DivMod {
     }
   }
 
+  lemma LemmaDivNonZero(x: int, d: int)
+    requires x >= d > 0
+    ensures x / d > 0
+  {
+    LemmaDivPosIsPosAuto();
+    if x / d == 0 {
+      LemmaSmallDivConverseAuto();
+    }
+  }
+
+  lemma LemmaDivNonZeroAuto()
+    ensures forall x, d {:trigger x / d } | x >= d > 0 :: x / d > 0
+  {
+    forall x, d | x >= d > 0 { LemmaDivNonZero(x, d); }
+  }
+
   /* given two fractions with the same numerator, the order of numbers is determined by 
   the denominators. However, if the numerator is 0, the fractions are equal regardless of 
   the denominators' values */

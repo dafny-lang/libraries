@@ -6,6 +6,7 @@
 /// ``JSON.Serializer.dfy``.
 
 include "../BoundedInts.dfy"
+include "../NonlinearArithmetic/Logarithm.dfy"
 
 include "AST.dfy"
 include "Utils/Unicode.dfy"
@@ -17,6 +18,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   import opened Utils.Str
   import opened AST
   import opened Utils.Unicode
+  import opened Logarithm
 
   type bytes = seq<uint8>
 
@@ -24,10 +26,10 @@ module {:options "-functionSyntax:4"} JSON.Spec {
     var s := Str.OfNat(c as nat, 16);
     assert |s| <= 4 by {
       assert c as nat <= 0xFFFF;
-      assert Math.IntLog(16, c as nat) <= Math.IntLog(16, 0xFFFF) by {
-        Math.IntLog_Increasing(16, c as nat, 0xFFFF);
+      assert Log(16, c as nat) <= Log(16, 0xFFFF) by {
+        LemmaLogIsOrdered(16, c as nat, 0xFFFF);
       }
-      assert Math.IntLog(16, 0xFFFF) == 3 by { reveal Math.IntLog(); }
+      assert Log(16, 0xFFFF) == 3 by { reveal Log(); }
     }
     s + seq(4 - |s|, _ => ' ')
   }

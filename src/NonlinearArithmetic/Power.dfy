@@ -18,7 +18,6 @@ include "Mul.dfy"
 include "Internals/MulInternals.dfy"
 
 module Power {
-  import Math
   import opened DivMod
   import opened GeneralInternals
   import opened Mul

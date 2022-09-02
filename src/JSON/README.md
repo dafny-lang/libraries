@@ -55,8 +55,6 @@ Most of the contents of the `Utils/` directory are not specific to JSON.  They a
 
 - [`Str.dfy`](Utils/Str.dfy) implements functions to convert between (big-endian) strings and numbers.  This module shares similarities with [LittleEndianNat.dfy](../Collections/Sequences/LittleEndianNat.dfy) (except for the digit order), although `LittleEndianNat.dfy` makes the base a module parameter instead of a function argument.
 
-- [`Math.dfy`](Utils/Math.dfy) implements `IntPow` and its left inverse `IntLog`.  These functions are used to characterize the length of strings produced from numbers and the value of numbers produced from strings.  They could be migrated to [`NonlinearArithmetic/Power.dfy`](../NonlinearArithmetic/Power.dfy), but the `Nonlinear` part of the library uses custom Dafny flags for arithmetic and Dafny does not (yet) support specifying these flags per-module.
-
 - [`Parsers.dfy`](Utils/Parsers.dfy) has definitions of well-formedness for parsers (stating that they must consume part of their input).  This file would have to be significantly expanded to create a composable library of parsing combinators to be useful as part of the main library.
 
 ## Caveats

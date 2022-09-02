@@ -6,7 +6,6 @@
 
 include "../Collections/Sequences/Seq.dfy"
 include "../BoundedInts.dfy"
-include "Utils/Math.dfy"
 
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
@@ -18,10 +17,11 @@ include "Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Deserializer {
   import Seq
-  import Utils.Math
 
   import opened Wrappers
   import opened BoundedInts
+  import opened Logarithm
+  import opened Power
   import opened Utils.Str
   import Utils.Unicode
 
@@ -56,7 +56,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
             else
               var tl :- Unescape(str, start + 6);
               var hd := Str.ToNat(code, 16);
-              assert hd < 0x10000 by { reveal Math.IntPow(); }
+              assert hd < 0x10000 by { reveal Pow(); }
               Success([hd as char] + tl)
         else
           var unescaped: uint16 := match c
@@ -118,7 +118,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
       case NonEmpty(JFrac(_, num)) =>
         var pow10 := num.Length() as int;
         var frac :- ToInt(minus, num);
-        Success(AST.Decimal(n * Math.IntPow(10, pow10) + frac, e10 - pow10))
+        Success(AST.Decimal(n * Pow(10, pow10) + frac, e10 - pow10))
   }
 
   function KV(js: Grammar.jkv): DeserializationResult<(string, AST.JSON)> {

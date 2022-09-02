@@ -1,14 +1,23 @@
+// RUN: %dafny /compile:0 /noNLarith "%s"
+
 include "../../BoundedInts.dfy"
 include "../../Wrappers.dfy"
-include "Math.dfy"
+include "../../NonlinearArithmetic/Mul.dfy"
+include "../../NonlinearArithmetic/DivMod.dfy"
+include "../../NonlinearArithmetic/Logarithm.dfy"
+include "../../NonlinearArithmetic/Power.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Utils.Str {
   import opened Wrappers
-  import Math
+  import opened Power
+  import opened Logarithm
 
   abstract module ParametricConversion {
     import opened Wrappers
-    import Math
+    import opened Mul
+    import opened DivMod
+    import opened Power
+    import opened Logarithm
 
     type Char(==)
     type String = seq<Char>
@@ -19,24 +28,24 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
       requires base > 1
       decreases n
       ensures n == 0 ==> |digits| == 0
-      ensures n > 0 ==> |digits| == Math.IntLog(base, n) + 1
+      ensures n > 0 ==> |digits| == Log(base, n) + 1
       ensures forall d | d in digits :: 0 <= d < base
     {
       if n == 0 then
-        assert Math.IntPow(base, 0) == 1 by { reveal Math.IntPow(); }
+        assert Pow(base, 0) == 1 by { reveal Pow(); }
         []
       else
-        assert n < base * n;
-        assert n / base < n;
+        LemmaDivPosIsPosAuto(); LemmaDivDecreasesAuto();
         var digits' := Digits(n / base, base);
         var digits := digits' + [n % base];
-        assert |digits| == Math.IntLog(base, n) + 1 by {
+        assert |digits| == Log(base, n) + 1 by {
+          assert |digits| == |digits'| + 1;
           if n < base {
-            assert |digits| == 1;
-            assert Math.IntLog(base, n) == 0 by { reveal Math.IntLog(); }
+            LemmaLog0(base, n);
+            assert n / base == 0 by { LemmaBasicDiv(base); }
           } else {
-            assert |digits'| == |digits| - 1;
-            assert Math.IntLog(base, n) == Math.IntLog(base, n / base) + 1 by { reveal Math.IntLog(); }
+            LemmaLogS(base, n);
+            assert n / base > 0 by { LemmaDivNonZeroAuto(); }
           }
         }
         digits
@@ -56,11 +65,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
 
     function OfNat_any(n: nat, chars: seq<Char>) : (str: String)
       requires |chars| > 1
-      ensures |str| == Math.IntLog(|chars|, n) + 1
+      ensures |str| == Log(|chars|, n) + 1
       ensures forall c | c in str :: c in chars
     {
       var base := |chars|;
-      if n == 0 then reveal Math.IntLog(); [chars[0]]
+      if n == 0 then reveal Log(); [chars[0]]
       else OfDigits(Digits(n, base), chars)
     }
 
@@ -89,24 +98,31 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
       requires forall c | c in str :: c in digits
     {
       if str == [] then 0
-      else ToNat_any(str[..|str| - 1], base, digits) * base + digits[str[|str| - 1]]
+      else
+        LemmaMulNonnegativeAuto();
+        ToNat_any(str[..|str| - 1], base, digits) * base + digits[str[|str| - 1]]
     }
 
     lemma {:induction false} ToNat_bound(str: String, base: nat, digits: map<Char, nat>)
       requires base > 0
       requires forall c | c in str :: c in digits
       requires forall c | c in str :: digits[c] < base
-      ensures ToNat_any(str, base, digits) < Math.IntPow(base, |str|)
+      ensures ToNat_any(str, base, digits) < Pow(base, |str|)
     {
-      reveal Math.IntPow();
       if str == [] {
+        reveal Pow();
       } else {
         calc <= {
           ToNat_any(str, base, digits);
           ToNat_any(str[..|str| - 1], base, digits) * base + digits[str[|str| - 1]];
-          { ToNat_bound(str[..|str| - 1], base, digits); }
-          (Math.IntPow(base, |str| - 1) - 1) * base + base - 1;
-          Math.IntPow(base, |str| - 1) * base - 1;
+          ToNat_any(str[..|str| - 1], base, digits) * base + (base - 1);
+          { ToNat_bound(str[..|str| - 1], base, digits);
+            LemmaMulInequalityAuto(); }
+            (Pow(base, |str| - 1) - 1) * base + base - 1;
+          { LemmaMulIsDistributiveAuto(); }
+          Pow(base, |str| - 1) * base - 1;
+          { reveal Pow(); LemmaMulIsCommutativeAuto(); }
+          Pow(base, |str|) - 1;
         }
       }
     }
@@ -178,7 +194,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
 
   function OfNat(n: nat, base: int := 10) : (str: string)
     requires 2 <= base <= 16
-    ensures |str| == Math.IntLog(base, n) + 1
+    ensures |str| == Log(base, n) + 1
     ensures forall c | c in str :: c in HEX_DIGITS[..base]
   {
     CharStrConversion.OfNat_any(n, HEX_DIGITS[..base])
@@ -194,7 +210,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
   function ToNat(str: string, base: int := 10) : (n: nat)
     requires 2 <= base <= 16
     requires forall c | c in str :: c in HEX_TABLE && HEX_TABLE[c] as int < base
-    ensures n < Math.IntPow(base, |str|)
+    ensures n < Pow(base, |str|)
   {
     CharStrConversion.ToNat_bound(str, base, HEX_TABLE);
     CharStrConversion.ToNat_any(str, base, HEX_TABLE)
