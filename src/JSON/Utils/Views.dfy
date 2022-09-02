@@ -112,8 +112,9 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Core {
     && lv.s == rv.s
   }
 
-  function Merge(lv: View, rv: View) : View
+  function Merge(lv: View, rv: View) : (v: View)
     requires Adjacent(lv, rv)
+    ensures v.Bytes() == lv.Bytes() + rv.Bytes()
   {
     lv.(end := rv.end)
   }
