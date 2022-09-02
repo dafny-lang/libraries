@@ -143,4 +143,12 @@ module {:options "-functionSyntax:4"} JSON.Utils.Unicode {
   function Transcode8To16(s: seq<uint8>): string {
     Utf16Encode(Utf8Decode(s))
   }
+
+  function ASCIIToBytes(s: string): seq<uint8>
+    // Keep ASCII characters in `s` and discard all other characters
+  {
+    seq(|s|, idx requires 0 <= idx < |s| =>
+      if s[idx] as uint16 < 128 then s[idx] as uint8
+      else 0 as uint8)
+  }
 }

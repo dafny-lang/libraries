@@ -1,6 +1,11 @@
 module {:options "-functionSyntax:4"} JSON.AST {
   datatype Decimal =
     Decimal(n: int, e10: int) // (n) * 10^(e10)
+
+  function Int(n: int): Decimal {
+    Decimal(n, 0)
+  }
+
   datatype JSON =
     | Null
     | Bool(b: bool)
