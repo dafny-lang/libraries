@@ -1,4 +1,3 @@
-include "../Errors.dfy"
 include "../Grammar.dfy"
 include "../LowLevel.Spec.dfy"
 include "Serializer.dfy"
@@ -7,28 +6,27 @@ include "Deserializer.dfy"
 module {:options "-functionSyntax:4"} JSON.ZeroCopy.API {
   import opened BoundedInts
   import opened Wrappers
-  import Vs = Utils.Views.Core
 
-  import opened Grammar
   import opened Errors
+  import Grammar
   import LowLevel.Spec
   import Serializer
   import Deserializer
 
-  function {:opaque} Serialize(js: JSON) : (bs: seq<byte>)
-    ensures bs == Spec.JSON(js)
+  function {:opaque} Serialize(js: Grammar.JSON) : (bs: SerializationResult<seq<byte>>)
+    ensures bs == Success(Spec.JSON(js))
   {
-    Serializer.Text(js).Bytes()
+    Success(Serializer.Text(js).Bytes())
   }
 
-  method SerializeAlloc(js: JSON) returns (bs: SerializationResult<array<byte>>)
+  method SerializeAlloc(js: Grammar.JSON) returns (bs: SerializationResult<array<byte>>)
     ensures bs.Success? ==> fresh(bs.value)
     ensures bs.Success? ==> bs.value[..] == Spec.JSON(js)
   {
     bs := Serializer.Serialize(js);
   }
 
-  method SerializeBlit(js: JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
+  method SerializeBlit(js: Grammar.JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
     modifies bs
     ensures len.Success? ==> len.value as int <= bs.Length
     ensures len.Success? ==> bs[..len.value] == Spec.JSON(js)
@@ -38,7 +36,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.API {
     len := Serializer.SerializeTo(js, bs);
   }
 
-  function {:opaque} Deserialize(bs: seq<byte>) : (js: DeserializationResult<JSON>)
+  function {:opaque} Deserialize(bs: seq<byte>) : (js: DeserializationResult<Grammar.JSON>)
     ensures js.Success? ==> bs == Spec.JSON(js.value)
   {
     Deserializer.API.OfBytes(bs)

@@ -1,46 +1,37 @@
-include "Errors.dfy"
-include "Grammar.dfy"
-include "Spec.dfy"
 include "Serializer.dfy"
 include "Deserializer.dfy"
 include "ZeroCopy/API.dfy"
 
 module {:options "-functionSyntax:4"} JSON.API {
-  // TODO: Propagate proofs
-
   import opened BoundedInts
-  import opened Wrappers
-  import Vs = Utils.Views.Core
-
   import opened Errors
-  import opened AST
-  import Spec
-  import S = Serializer
-  import DS = Deserializer
-  import ZAPI = ZeroCopy.API
+  import AST
+  import Serializer
+  import Deserializer
+  import ZeroCopy = ZeroCopy.API
 
-  function {:opaque} Serialize(js: JSON) : (bs: SerializationResult<seq<byte>>)
+  function {:opaque} Serialize(js: AST.JSON) : (bs: SerializationResult<seq<byte>>)
   {
-    var js :- S.JSON(js);
-    Success(ZAPI.Serialize(js))
+    var js :- Serializer.JSON(js);
+    ZeroCopy.Serialize(js)
   }
 
-  method SerializeAlloc(js: JSON) returns (bs: SerializationResult<array<byte>>)
+  method SerializeAlloc(js: AST.JSON) returns (bs: SerializationResult<array<byte>>)
   {
-    var js :- S.JSON(js);
-    bs := ZAPI.SerializeAlloc(js);
+    var js :- Serializer.JSON(js);
+    bs := ZeroCopy.SerializeAlloc(js);
   }
 
-  method SerializeBlit(js: JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
+  method SerializeBlit(js: AST.JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
     modifies bs
   {
-    var js :- S.JSON(js);
-    len := ZAPI.SerializeBlit(js, bs);
+    var js :- Serializer.JSON(js);
+    len := ZeroCopy.SerializeBlit(js, bs);
   }
 
-  function {:opaque} Deserialize(bs: seq<byte>) : (js: DeserializationResult<JSON>)
+  function {:opaque} Deserialize(bs: seq<byte>) : (js: DeserializationResult<AST.JSON>)
   {
-    var js :- ZAPI.Deserialize(bs);
-    DS.JSON(js)
+    var js :- ZeroCopy.Deserialize(bs);
+    Deserializer.JSON(js)
   }
 }

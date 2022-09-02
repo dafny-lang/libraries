@@ -59,7 +59,7 @@ module JSON.Tests.ZeroCopyWrapper refines Wrapper {
 
   method Serialize(js: JSON) returns (bs: SerializationResult<bytes>) {
     // print "Count: ", wr.chain.Count(), "\n";
-    bs := Success(API.Serialize(js));
+    bs := API.Serialize(js);
   }
 
   method SpecSerialize(js: JSON) returns (bs: SerializationResult<bytes>) {
