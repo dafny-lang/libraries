@@ -1,16 +1,16 @@
-include "JSON.Errors.dfy"
-include "JSON.Grammar.dfy"
-include "JSON.Spec.dfy"
-include "JSON.Serializer.dfy"
-include "JSON.Deserializer.dfy"
-include "JSON.ZeroCopy.API.dfy"
+include "Errors.dfy"
+include "Grammar.dfy"
+include "Spec.dfy"
+include "Serializer.dfy"
+include "Deserializer.dfy"
+include "ZeroCopy/API.dfy"
 
 module {:options "-functionSyntax:4"} JSON.API {
   // TODO: Propagate proofs
 
   import opened BoundedInts
   import opened Wrappers
-  import Vs = Views.Core
+  import Vs = Utils.Views.Core
 
   import opened Errors
   import opened AST

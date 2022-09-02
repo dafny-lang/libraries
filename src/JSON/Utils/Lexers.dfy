@@ -1,7 +1,7 @@
-include "../Wrappers.dfy"
-include "../BoundedInts.dfy"
+include "../../Wrappers.dfy"
+include "../../BoundedInts.dfy"
 
-module {:options "-functionSyntax:4"} Lexers {
+module {:options "-functionSyntax:4"} JSON.Utils.Lexers {
   module Core {
     import opened Wrappers
     import opened BoundedInts

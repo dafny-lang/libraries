@@ -1,13 +1,13 @@
-include "JSON.Errors.dfy"
-include "JSON.Grammar.dfy"
-include "JSON.LowLevel.Spec.dfy"
-include "JSON.ZeroCopy.Serializer.dfy"
-include "JSON.ZeroCopy.Deserializer.dfy"
+include "../Errors.dfy"
+include "../Grammar.dfy"
+include "../LowLevel.Spec.dfy"
+include "Serializer.dfy"
+include "Deserializer.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ZeroCopy.API {
   import opened BoundedInts
   import opened Wrappers
-  import Vs = Views.Core
+  import Vs = Utils.Views.Core
 
   import opened Grammar
   import opened Errors

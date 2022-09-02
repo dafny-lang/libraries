@@ -8,13 +8,13 @@ include "../Collections/Sequences/Seq.dfy"
 include "../BoundedInts.dfy"
 include "../Math.dfy"
 
-include "Views.dfy"
-include "Vectors.dfy"
-include "UtfUtils.dfy"
-include "JSON.Errors.dfy"
-include "JSON.AST.dfy"
-include "JSON.Grammar.dfy"
-include "JSON.Spec.dfy"
+include "Utils/Views.dfy"
+include "Utils/Vectors.dfy"
+include "Utils/Unicode.dfy"
+include "Errors.dfy"
+include "AST.dfy"
+include "Grammar.dfy"
+include "Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Deserializer {
   import Seq
@@ -22,15 +22,15 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
 
   import opened Wrappers
   import opened BoundedInts
-  import opened Str
-  import UtfUtils
+  import opened Utils.Str
+  import Utils.Unicode
 
   import AST
   import Spec
   import opened Errors
-  import opened Vectors
+  import opened Utils.Vectors
   import opened Grammar
-  import opened Views.Core
+  import opened Utils.Views.Core
 
   function Bool(js: Grammar.jbool): bool {
     assert js.Bytes() in {Grammar.TRUE, Grammar.FALSE};
@@ -81,7 +81,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   function Transcode8To16Unescaped(str: seq<byte>): DeserializationResult<string>
     // TODO Optimize with a function by method
   {
-    Unescape(UtfUtils.Transcode8To16(str))
+    Unescape(Unicode.Transcode8To16(str))
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {

@@ -1,8 +1,8 @@
-include "JSON.Errors.dfy"
-include "JSON.Grammar.dfy"
-include "JSON.LowLevel.Spec.dfy"
-include "JSON.LowLevel.SpecProperties.dfy"
-include "Parsers.dfy"
+include "../Errors.dfy"
+include "../Grammar.dfy"
+include "../LowLevel.Spec.dfy"
+include "../LowLevel.SpecProperties.dfy"
+include "../Utils/Parsers.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
   module Core {
@@ -10,9 +10,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Wrappers
 
     import LowLevel.Spec
-    import Vs = Views.Core
-    import opened Cursors
-    import opened Parsers
+    import Vs = Utils.Views.Core
+    import opened Utils.Cursors
+    import opened Utils.Parsers
     import opened Grammar
     import Errors
 
@@ -82,7 +82,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
 
     import opened Grammar
-    import opened Cursors
+    import opened Utils.Cursors
     import opened Core
 
     const OPEN: byte
@@ -105,10 +105,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Params: SequenceParams
 
     import LowLevel.SpecProperties
-    import opened Vs = Views.Core
+    import opened Vs = Utils.Views.Core
     import opened Grammar
-    import opened Cursors
-    import Parsers
+    import opened Utils.Cursors
+    import Utils.Parsers
     import opened Core
 
     const SEPARATOR: byte := ',' as byte
@@ -280,11 +280,11 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
     import opened Wrappers
 
-    import opened Vs = Views.Core
+    import opened Vs = Utils.Views.Core
     import opened Grammar
     import opened Core
     import opened Errors
-    import Cursors
+    import Utils.Cursors
     import Values
 
     function LiftCursorError(err: Cursors.CursorError<DeserializationError>): DeserializationError {
@@ -322,7 +322,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Wrappers
 
     import opened Grammar
-    import opened Cursors
+    import opened Utils.Cursors
     import opened Core
 
     import Strings
@@ -377,7 +377,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import opened Grammar
     import opened Core
-    import opened Cursors
+    import opened Utils.Cursors
 
     function {:opaque} Constant(cs: FreshCursor, expected: bytes) : (pr: ParseResult<Vs.View>)
       requires |expected| < TWO_TO_THE_32
@@ -394,10 +394,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
 
     import opened Grammar
-    import opened Cursors
-    import opened LC = Lexers.Core
-    import opened Lexers.Strings
-    import opened Parsers
+    import opened Utils.Cursors
+    import opened LC = Utils.Lexers.Core
+    import opened Utils.Lexers.Strings
+    import opened Utils.Parsers
     import opened Core
 
     function {:opaque} StringBody(cs: Cursor): (pr: CursorResult<JSONError>)
@@ -446,7 +446,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Wrappers
 
     import opened Grammar
-    import opened Cursors
+    import opened Utils.Cursors
     import opened Core
 
     function {:opaque} Digits(cs: FreshCursor) : (sp: Split<jdigits>)

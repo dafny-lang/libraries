@@ -1,9 +1,9 @@
-include "../BoundedInts.dfy"
-include "../Wrappers.dfy"
+include "../../BoundedInts.dfy"
+include "../../Wrappers.dfy"
 include "Views.dfy"
 include "Lexers.dfy"
 
-module {:options "-functionSyntax:4"} Cursors {
+module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
   import opened BoundedInts
   import opened Wrappers
 

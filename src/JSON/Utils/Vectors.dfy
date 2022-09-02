@@ -1,7 +1,7 @@
-include "../BoundedInts.dfy"
-include "../Wrappers.dfy"
+include "../../BoundedInts.dfy"
+include "../../Wrappers.dfy"
 
-module {:options "-functionSyntax:4"} Vectors {
+module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
   import opened BoundedInts
   import opened Wrappers
 

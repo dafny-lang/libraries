@@ -1,11 +1,11 @@
 include "../Wrappers.dfy"
 include "../BoundedInts.dfy"
-include "Str.dfy"
+include "Utils/Str.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Errors {
   import Wrappers
   import opened BoundedInts
-  import Str
+  import Utils.Str
 
   datatype DeserializationError =
     | UnterminatedSequence
