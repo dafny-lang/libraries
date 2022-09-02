@@ -46,46 +46,46 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
         Failure(EscapeAtEOS)
       else
         var c := str[start + 1];
-        if str[start + 1] == 'u' then
-          if |str| <= start + 5 then
+        if c == 'u' then
+          if |str| <= start + 6 then
             Failure(EscapeAtEOS)
           else
-            var code := str[start + 1..start + 5];
-            if exists c | c in str :: c !in Str.HEX_TABLE then
-              Failure(UnsupportedEscape)
+            var code := str[start + 2..start + 6];
+            if exists c | c in code :: c !in Str.HEX_TABLE then
+              Failure(UnsupportedEscape(code))
             else
-              var tl :- Unescape(str, start + 5);
-              reveal Math.IntPow();
-              Success([Str.ToNat(code, 16) as char] + tl)
+              var tl :- Unescape(str, start + 6);
+              var hd := Str.ToNat(code, 16);
+              assert hd < 0x10000 by { reveal Math.IntPow(); }
+              Success([hd as char] + tl)
         else
           var unescaped: uint16 := match c
-             case '\"' => 0x22 // quotation mark
-             case '\\' => 0x5C // reverse solidus
-             case 'b'  => 0x62 // backspace
-             case 'f'  => 0x66 // form feed
-             case 'n'  => 0x6E // line feed
-             case 'r'  => 0x72 // carriage return
-             case 't'  => 0x74 // tab
-             case _    => 0;
-          if unescaped == 0 then
-            Failure(UnsupportedEscape)
+             case '\"' => 0x22 as uint16 // quotation mark
+             case '\\' => 0x5C as uint16 // reverse solidus
+             case 'b'  => 0x08 as uint16 // backspace
+             case 'f'  => 0x0C as uint16 // form feed
+             case 'n'  => 0x0A as uint16 // line feed
+             case 'r'  => 0x0D as uint16 // carriage return
+             case 't'  => 0x09 as uint16 // tab
+             case _    => 0 as uint16;
+          if unescaped == 0 as uint16 then
+            Failure(UnsupportedEscape(str[start..start+2]))
           else
-            var tl :- Unescape(str, start + 1);
+            var tl :- Unescape(str, start + 2);
             Success([unescaped as char] + tl)
     else
       var tl :- Unescape(str, start + 1);
       Success([str[start]] + tl)
   }
 
-
   function Transcode8To16Unescaped(str: seq<byte>): DeserializationResult<string>
     // TODO Optimize with a function by method
   {
-    Unescape(UtfUtils.Transcode8To16(str)).MapFailure(_ => EscapeAtEOS)
+    Unescape(UtfUtils.Transcode8To16(str))
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {
-    Transcode8To16Unescaped(js.Bytes())
+    Transcode8To16Unescaped(js.contents.Bytes())
   }
 
   module ByteStrConversion refines Str.ParametricConversion {
@@ -117,7 +117,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
       case Empty => Success(AST.Decimal(n, e10))
       case NonEmpty(JFrac(_, num)) =>
         var pow10 := num.Length() as int;
-        var frac :- ToInt(View.Empty, num);
+        var frac :- ToInt(minus, num);
         Success(AST.Decimal(n * Math.IntPow(10, pow10) + frac, e10 - pow10))
   }
 
@@ -143,5 +143,9 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
       case Number(dec) => var n :- Number(dec); Success(AST.Number(n))
       case Object(obj) => var o :- Object(obj); Success(AST.Object(o))
       case Array(arr) => var a :- Array(arr); Success(AST.Array(a))
+  }
+
+  function JSON(js: Grammar.JSON): DeserializationResult<AST.JSON> {
+    Value(js.t)
   }
 }

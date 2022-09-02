@@ -41,7 +41,7 @@ module {:options "-functionSyntax:4"} JSON.LowLevel.Spec {
   }
 
   function KV(self: jkv): bytes {
-    View(self.k) + StructuralView(self.colon) + Value(self.v)
+    String(self.k) + StructuralView(self.colon) + Value(self.v)
   }
 
   function Frac(self: jfrac): bytes {
@@ -57,7 +57,7 @@ module {:options "-functionSyntax:4"} JSON.LowLevel.Spec {
   }
 
   function String(self: jstring): bytes {
-    View(self)
+    View(self.lq) + View(self.contents) + View(self.rq)
   }
 
   function CommaSuffix(c: Maybe<Structural<jcomma>>): bytes {

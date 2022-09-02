@@ -10,6 +10,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.API {
   import Vs = Views.Core
 
   import opened Grammar
+  import opened Errors
   import LowLevel.Spec
   import Serializer
   import Deserializer

@@ -15,25 +15,37 @@ module {:options "-functionSyntax:4"} Str {
 
     // FIXME the design in LittleEndianNat makes BASE a module-level constant
     // instead of a function argument
-    function Digits(n: int, base: int): (digits: seq<int>)
+    function Digits(n: nat, base: int): (digits: seq<int>)
       requires base > 1
-      requires n >= 0
       decreases n
+      ensures n == 0 ==> |digits| == 0
+      ensures n > 0 ==> |digits| == Math.IntLog(base, n) + 1
       ensures forall d | d in digits :: 0 <= d < base
     {
       if n == 0 then
+        assert Math.IntPow(base, 0) == 1 by { reveal Math.IntPow(); }
         []
       else
-        assert n > 0;
-        assert base > 1;
         assert n < base * n;
         assert n / base < n;
-        Digits(n / base, base) + [n % base]
+        var digits' := Digits(n / base, base);
+        var digits := digits' + [n % base];
+        assert |digits| == Math.IntLog(base, n) + 1 by {
+          if n < base {
+            assert |digits| == 1;
+            assert Math.IntLog(base, n) == 0 by { reveal Math.IntLog(); }
+          } else {
+            assert |digits'| == |digits| - 1;
+            assert Math.IntLog(base, n) == Math.IntLog(base, n / base) + 1 by { reveal Math.IntLog(); }
+          }
+        }
+        digits
     }
 
     function OfDigits(digits: seq<int>, chars: seq<Char>) : (str: String)
       requires forall d | d in digits :: 0 <= d < |chars|
       ensures forall c | c in str :: c in chars
+      ensures |str| == |digits|
     {
       if digits == [] then []
       else
@@ -44,10 +56,11 @@ module {:options "-functionSyntax:4"} Str {
 
     function OfNat_any(n: nat, chars: seq<Char>) : (str: String)
       requires |chars| > 1
+      ensures |str| == Math.IntLog(|chars|, n) + 1
       ensures forall c | c in str :: c in chars
     {
       var base := |chars|;
-      if n == 0 then [chars[0]]
+      if n == 0 then reveal Math.IntLog(); [chars[0]]
       else OfDigits(Digits(n, base), chars)
     }
 
@@ -162,6 +175,14 @@ module {:options "-functionSyntax:4"} Str {
     'a' := 0xA, 'b' := 0xB, 'c' := 0xC, 'd' := 0xD, 'e' := 0xE, 'f' := 0xF,
     'A' := 0xA, 'B' := 0xB, 'C' := 0xC, 'D' := 0xD, 'E' := 0xE, 'F' := 0xF
   ]
+
+  function OfNat(n: nat, base: int := 10) : (str: string)
+    requires 2 <= base <= 16
+    ensures |str| == Math.IntLog(base, n) + 1
+    ensures forall c | c in str :: c in HEX_DIGITS[..base]
+  {
+    CharStrConversion.OfNat_any(n, HEX_DIGITS[..base])
+  }
 
   function OfInt(n: int, base: int := 10) : (str: string)
     requires 2 <= base <= 16

@@ -70,7 +70,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     decreases str, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.String(str)
   {
-    writer.Append(str)
+    writer
+      .Append(str.lq)
+      .Append(str.contents)
+      .Append(str.rq)
   }
 
   function {:opaque} Number(num: jnumber, writer: Writer) : (wr: Writer)
@@ -243,7 +246,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     decreases obj, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.Member(m)
   {
-    var writer := writer.Append(m.t.k);
+    var writer := String(m.t.k, writer);
     var writer := StructuralView(m.t.colon, writer);
     var writer := Value(m.t.v, writer);
     if m.suffix.Empty? then writer else StructuralView(m.suffix.t, writer)
