@@ -1,12 +1,12 @@
-include "../JSON.ZeroCopy.API.dfy"
+include "../ZeroCopy/API.dfy"
 
-module {:extern "Benchmarks"} Benchmarks {
+module {:extern "Benchmarks"} JSON.Benchmarks.Benchmark {
   import opened BoundedInts
 
-  import opened JSON.Grammar
-  import JSON.ZeroCopy.Serializer
-  import JSON.ZeroCopy.Deserializer
-  import JSON.ZeroCopy.API
+  import opened Grammar
+  import ZeroCopy.Serializer
+  import ZeroCopy.Deserializer
+  import ZeroCopy.API
 
   const WARMUP:  uint32 := 20
   const REPEATS: uint32 := 80

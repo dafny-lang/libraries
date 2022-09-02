@@ -1,8 +1,8 @@
-include "../BoundedInts.dfy"
-include "../Wrappers.dfy"
+include "../../BoundedInts.dfy"
+include "../../Wrappers.dfy"
 include "Cursors.dfy"
 
-module {:options "/functionSyntax:4"} Parsers {
+module {:options "/functionSyntax:4"} JSON.Utils.Parsers {
   import opened BoundedInts
   import opened Wrappers
 

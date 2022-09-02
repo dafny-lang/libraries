@@ -1,12 +1,12 @@
-include "Unicode.dfy"
-include "JSON.Errors.dfy"
-include "JSON.API.dfy"
-include "JSON.ZeroCopy.API.dfy"
+include "Utils/Unicode.dfy"
+include "Errors.dfy"
+include "API.dfy"
+include "ZeroCopy/API.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
 abstract module JSON.Tests.Wrapper {
-  import Str
-  import Unicode
+  import Utils.Str
+  import Utils.Unicode
   import opened BoundedInts
 
   import opened Errors

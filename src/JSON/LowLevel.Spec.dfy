@@ -1,9 +1,9 @@
-include "JSON.Grammar.dfy"
+include "Grammar.dfy"
 
 module {:options "/functionSyntax:4"} JSON.LowLevel.Spec {
   import opened BoundedInts
 
-  import Vs = Views.Core
+  import Vs = Utils.Views.Core
   import opened Grammar
 
   function View(v: Vs.View) : bytes {

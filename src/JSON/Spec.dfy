@@ -7,16 +7,16 @@
 
 include "../BoundedInts.dfy"
 
-include "JSON.AST.dfy"
-include "Unicode.dfy"
-include "Str.dfy"
+include "AST.dfy"
+include "Utils/Unicode.dfy"
+include "Utils/Str.dfy"
 
 module {:options "/functionSyntax:4"} JSON.Spec {
   import opened BoundedInts
 
-  import opened Str
+  import opened Utils.Str
   import opened AST
-  import opened Unicode
+  import opened Utils.Unicode
 
   type bytes = seq<uint8>
 
@@ -51,18 +51,25 @@ module {:options "/functionSyntax:4"} JSON.Spec {
       + Escape(str, start + 1)
   }
 
+  function ToBytes(s: string) : seq<uint8>
+    requires forall c: char | c in s :: c as int < 256
+  {
+    seq(|s|, i requires 0 <= i < |s| =>
+      assert s[i] in s; s[i] as byte)
+  }
+
   function String(str: string): bytes {
-    Str.ToBytes("\"") + Transcode16To8(Escape(str)) + Str.ToBytes("\"")
+    ToBytes("\"") + Transcode16To8(Escape(str)) + ToBytes("\"")
   }
 
   function Number(dec: Decimal): bytes {
     Transcode16To8(Str.OfInt(dec.n)) +
       (if dec.e10 == 0 then []
-       else Str.ToBytes("e") + Transcode16To8(Str.OfInt(dec.e10)))
+       else ToBytes("e") + Transcode16To8(Str.OfInt(dec.e10)))
   }
 
   function KV(kv: (string, JSON)): bytes {
-    String(kv.0) + Str.ToBytes(":") + JSON(kv.1)
+    String(kv.0) + ToBytes(":") + JSON(kv.1)
   }
 
   function Join(sep: bytes, items: seq<bytes>): bytes {
@@ -72,21 +79,21 @@ module {:options "/functionSyntax:4"} JSON.Spec {
   }
 
   function Object(obj: seq<(string, JSON)>): bytes {
-    Str.ToBytes("{") +
-    Join(Str.ToBytes(","), seq(|obj|, i requires 0 <= i < |obj| => KV(obj[i]))) +
-    Str.ToBytes("}")
+    ToBytes("{") +
+    Join(ToBytes(","), seq(|obj|, i requires 0 <= i < |obj| => KV(obj[i]))) +
+    ToBytes("}")
   }
 
   function Array(arr: seq<JSON>): bytes {
-    Str.ToBytes("[") +
-    Join(Str.ToBytes(","), seq(|arr|, i requires 0 <= i < |arr| => JSON(arr[i]))) +
-    Str.ToBytes("]")
+    ToBytes("[") +
+    Join(ToBytes(","), seq(|arr|, i requires 0 <= i < |arr| => JSON(arr[i]))) +
+    ToBytes("]")
   }
 
   function JSON(js: JSON): bytes {
     match js
-      case Null => Str.ToBytes("null")
-      case Bool(b) => if b then Str.ToBytes("true") else Str.ToBytes("false")
+      case Null => ToBytes("null")
+      case Bool(b) => if b then ToBytes("true") else ToBytes("false")
       case String(str) => String(str)
       case Number(dec) => Number(dec)
       case Object(obj) => Object(obj)

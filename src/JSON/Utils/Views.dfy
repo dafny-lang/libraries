@@ -1,6 +1,6 @@
-include "../BoundedInts.dfy"
+include "../../BoundedInts.dfy"
 
-module {:options "/functionSyntax:4"} Views.Core {
+module {:options "/functionSyntax:4"} JSON.Utils.Views.Core {
   import opened BoundedInts
 
   type View = v: View_ | v.Valid? witness View([], 0, 0)

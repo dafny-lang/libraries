@@ -5,11 +5,11 @@
 /// See ``JSON.AST`` for the high-level interface.
 
 include "../BoundedInts.dfy"
-include "Views.dfy"
+include "Utils/Views.dfy"
 
 module {:options "/functionSyntax:4"} JSON.Grammar {
   import opened BoundedInts
-  import opened Views.Core
+  import opened Utils.Views.Core
 
   const EMPTY := View.OfBytes([])
   const DOUBLEQUOTE := View.OfBytes(['\"' as byte])

@@ -8,28 +8,28 @@ include "../Collections/Sequences/Seq.dfy"
 include "../BoundedInts.dfy"
 include "../Math.dfy"
 
-include "Views.dfy"
-include "Vectors.dfy"
-include "Unicode.dfy"
-include "JSON.Errors.dfy"
-include "JSON.AST.dfy"
-include "JSON.Grammar.dfy"
-include "JSON.Spec.dfy"
+include "Utils/Views.dfy"
+include "Utils/Vectors.dfy"
+include "Utils/Unicode.dfy"
+include "Errors.dfy"
+include "AST.dfy"
+include "Grammar.dfy"
+include "Spec.dfy"
 
 module {:options "/functionSyntax:4"} JSON.Serializer {
   import Seq
   import Math
   import opened Wrappers
   import opened BoundedInts
-  import opened Str
-  import Unicode
+  import opened Utils.Str
+  import Utils.Unicode
 
   import AST
   import Spec
   import opened Errors
-  import opened Vectors
+  import opened Utils.Vectors
   import opened Grammar
-  import opened Views.Core
+  import opened Utils.Views.Core
 
   type Result<+T> = SerializationResult<T>
 

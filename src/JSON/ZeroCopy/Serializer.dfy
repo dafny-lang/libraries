@@ -1,7 +1,7 @@
-include "JSON.Errors.dfy"
-include "JSON.LowLevel.Spec.dfy"
-include "JSON.LowLevel.SpecProperties.dfy"
-include "Views.Writers.dfy"
+include "../Errors.dfy"
+include "../LowLevel.Spec.dfy"
+include "../LowLevel.SpecProperties.dfy"
+include "../Utils/Views.Writers.dfy"
 
 module {:options "/functionSyntax:4"} JSON.ZeroCopy.Serializer {
   import opened BoundedInts
@@ -11,8 +11,8 @@ module {:options "/functionSyntax:4"} JSON.ZeroCopy.Serializer {
   import LowLevel.Spec
   import LowLevel.SpecProperties
   import opened Grammar
-  import opened Views.Writers
-  import opened Vs = Views.Core // DISCUSS: Module naming convention?
+  import opened Utils.Views.Writers
+  import opened Vs = Utils.Views.Core // DISCUSS: Module naming convention?
 
   method Serialize(js: JSON) returns (rbs: SerializationResult<array<byte>>)
     ensures rbs.Success? ==> fresh(rbs.value)

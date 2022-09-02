@@ -1,8 +1,8 @@
-include "../BoundedInts.dfy"
-include "../Wrappers.dfy"
-include "../Math.dfy"
+include "../../BoundedInts.dfy"
+include "../../Wrappers.dfy"
+include "../../Math.dfy"
 
-module {:options "/functionSyntax:4"} Str {
+module {:options "/functionSyntax:4"} JSON.Utils.Str {
   import opened Wrappers
   import Math
 
@@ -240,14 +240,5 @@ module {:options "/functionSyntax:4"} Str {
 
   function Concat(strs: seq<string>) : string {
     Join("", strs)
-  }
-
-  import opened BoundedInts
-
-  function ToBytes(s: string) : seq<uint8>
-    requires forall c: char | c in s :: c as int < 256
-  {
-    seq(|s|, i requires 0 <= i < |s| =>
-      assert s[i] in s; s[i] as byte)
   }
 }

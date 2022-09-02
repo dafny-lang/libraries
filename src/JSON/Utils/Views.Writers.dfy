@@ -1,8 +1,8 @@
-include "../BoundedInts.dfy"
-include "../Wrappers.dfy"
+include "../../BoundedInts.dfy"
+include "../../Wrappers.dfy"
 include "Views.dfy"
 
-module {:options "/functionSyntax:4"} Views.Writers {
+module {:options "/functionSyntax:4"} JSON.Utils.Views.Writers {
   import opened BoundedInts
   import opened Wrappers
 
