@@ -1,6 +1,6 @@
 include "../../BoundedInts.dfy"
 include "../../Wrappers.dfy"
-include "../../Math.dfy"
+include "Math.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Utils.Str {
   import opened Wrappers

@@ -12,7 +12,6 @@
 former takes arguments and may be more stable and less reliant on Z3
 heuristics. The latter includes automation and its use requires less effort */
 
-include "../Math.dfy"
 include "DivMod.dfy"
 include "Internals/GeneralInternals.dfy"
 include "Mul.dfy"
@@ -27,9 +26,7 @@ module Power {
 
   function method {:opaque} Pow(b: int, e: nat): int
     decreases e
-    ensures Pow(b, e) == Math.IntPow(b, e)
   {
-    reveal Math.IntPow();
     if e == 0 then
       1
     else

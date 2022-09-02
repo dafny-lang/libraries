@@ -6,7 +6,7 @@
 
 include "../Collections/Sequences/Seq.dfy"
 include "../BoundedInts.dfy"
-include "../Math.dfy"
+include "Utils/Math.dfy"
 
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
@@ -18,7 +18,7 @@ include "Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Deserializer {
   import Seq
-  import Math
+  import Utils.Math
 
   import opened Wrappers
   import opened BoundedInts
