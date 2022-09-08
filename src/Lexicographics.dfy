@@ -5,7 +5,7 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "Relations.dfy"
+include "Relations/Relations.dfy"
 include "UInt.dfy"
 
 module Lexicographics {
@@ -14,7 +14,7 @@ module Lexicographics {
         provides Relations, UInt
 
     import opened Relations
-    import opened UInt = Helpers.UInt
+    import opened UInt
 
 
   // reflexivelexicographical comparison of byte sequences
@@ -93,22 +93,4 @@ module Lexicographics {
     decreases |x| - n
   {
   }
-
-  /*
-   * Lexicographic comparison of sequences.
-   *
-   * Given two sequences `a` and `b` and a strict (that is, irreflexive)
-   * ordering `less` on the elements of these sequences, determine whether or not
-   * `a` is lexicographically "less than or equal to" `b`.
-   *
-   * `a` is lexicographically "less than or equal to" `b` holds iff
-   *   there exists a `k` such that
-   *   - the first `k` elements of `a` and `b` are the same
-   *   - either:
-   *      -- `a` has length `k` (that is, `a` is a prefix of `b`)
-   *      -- `a[k]` is strictly less (using `less`) than `b[k]`
-   */
-
-  
-
 }
