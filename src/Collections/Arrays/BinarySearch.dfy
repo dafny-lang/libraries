@@ -7,6 +7,7 @@
 
 include "../../Wrappers.dfy"
 include "../../Relations/Relations.dfy"
+include "../../Relations/Comparison.dfy"
 
 module Search {
   export
@@ -19,7 +20,7 @@ module Search {
 
   method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> Comparison.CompResult) returns (r:Option<nat>)
     requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]).LessThan? || a[i] == a[j]
-    requires Trichotomous(compare)
+    requires Total?(compare)
     ensures r.Some? ==> r.value < a.Length && a[r.value] == key
     ensures r.None? ==> key !in a[..]
   {
