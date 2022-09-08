@@ -5,19 +5,17 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../Helpers.dfy"
 include "../../Wrappers.dfy"
-include "../../Relations.dfy"
+include "../../Relations/Relations.dfy"
 
 module Search {
   export
-    provides BinarySearch, Wrappers, Helpers
-    provides Helpers, Wrappers 
+    provides BinarySearch, Wrappers
+    provides Wrappers 
 
-    import Helpers
     import opened Relations
     import opened Wrappers
-    import opened Comparison = Helpers.Comparison
+    import opened Comparison = Relations.Comparison
 
   method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> Comparison.CompResult) returns (r:Option<nat>)
     requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]).LessThan? || a[i] == a[j]
@@ -34,9 +32,12 @@ module Search {
 
     var comp := compare(key , a[mid]);
     match comp
-      case LessThan => hi := mid;
-      case GreaterThan => lo:= mid + 1;
-      case _ => return Some(mid);
+      case LessThan => 
+        hi := mid;
+      case GreaterThan => 
+        lo:= mid + 1;
+      case _ => 
+        return Some(mid);
 
     return None;
     }
