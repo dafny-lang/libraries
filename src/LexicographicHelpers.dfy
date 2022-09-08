@@ -5,22 +5,36 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "Relations.dfy"
-include "Lexicographics.dfy"
-include "UInt.dfy"
+include "Relations/Relations.dfy"
+include "Relations/Comparison.dfy"
+include "BoundedInts.dfy"
 
-module LexicographicHelpers{
+module Lexicographics.LexicographicHelpers{
     export 
-        provides LexIsReflexive, LexIsAntisymmetric, LexIsTransitive, LexIsTotal, UInt8LessIsTrichotomousTransitive
+        provides LexIsReflexive, LexIsAntisymmetric, LexIsTransitive, LexIsTotal
         provides ThereIsAMinimum, MinimumIsUnique, FindMinimum
         provides SetToOrderedSequence, IsMinimum
-        provides UInt, Relations, Lexicographics
+        provides BoundedInts, Relations
         provides  LessOrEqual, LessOrEqualAux
 
     import opened Relations
-    import opened Lexicographics
-    import U = UInt
-    import opened Lexicographics.UInt
+    import opened Comparison = Relations.Comparison
+    import opened BoundedInts
+
+    /*
+   * Lexicographic comparison of sequences.
+   *
+   * Given two sequences `a` and `b` and a strict (that is, irreflexive)
+   * ordering `less` on the elements of these sequences, determine whether or not
+   * `a` is lexicographically "less than or equal to" `b`.
+   *
+   * `a` is lexicographically "less than or equal to" `b` holds iff
+   *   there exists a `k` such that
+   *   - the first `k` elements of `a` and `b` are the same
+   *   - either:
+   *      -- `a` has length `k` (that is, `a` is a prefix of `b`)
+   *      -- `a[k]` is strictly less (using `less`) than `b[k]`
+   */
 
     predicate method LessOrEqual<T(==)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool) {
         exists k :: 0 <= k <= |a| && LessOrEqualAux(a, b, less, k)
@@ -228,16 +242,5 @@ module LexicographicHelpers{
         }
       }
     }
-  }
-  
-    /*
-   * Here is an example relation and a lemma that says the relation is appropriate for use in
-   * lexicographic orderings.
-   */
-
-    lemma UInt8LessIsTrichotomousTransitive()
-    ensures Relations.Trichotomous(UInt8Less)
-    ensures Relations.Transitive(UInt8Less)
-  {
   }
 }

@@ -8,6 +8,7 @@ module Relations.Comparison {
         provides Wrappers
 
     import opened Wrappers
+    import opened Seq
 
   datatype CompResult = Lt | Eq | Gt {
     function method Flip(): CompResult {
