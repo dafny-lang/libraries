@@ -40,4 +40,15 @@ module Utf8EncodingFormExamples {
       :: DecodeCodeUnitSequenceChecked(s).None?
   {}
 
+  /*
+  * Here is an example relation and a lemma that says the relation is appropriate for use in
+  * lexicographic orderings.
+  */
+
+  lemma UInt8LessIsTrichotomousTransitive()
+    ensures Total?(UInt8Less)
+    ensures Transitive(UInt8Less)
+  {
+  }
+
 }
