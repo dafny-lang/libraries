@@ -15,7 +15,6 @@
 
 include "../../Math.dfy"
 include "../../Wrappers.dfy"
-include "../../UInt.dfy"
 include "../../Relations/Relations.dfy"
 
 module Seq {

@@ -1,26 +1,10 @@
- include "../../Relations/Relations.dfy"
- 
- /**********************************************************
-  *
-  *  Sorting of Sequences
-  *
-  ***********************************************************/
+include "../../Relations/Comparison.dfy"
 
-module Seq.MergeSorting {
+module Seq.MergeSort{
 
-    import opened Comparison = Relations.Comparison
- 
-  predicate method SortedBy<T>(a: seq<T>,compare: (T, T) -> CompResult)
-  {
-    forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j]).LessThan?
-  }
+  import opened Relations.Comparison
 
-  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>,  compare: (T, T) -> CompResult) 
-    requires SortedBy(s, compare)
-    requires |s| == 0 || compare(x,s[0]).LessThan?
-  {}
-
-  //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedBy`
+  //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedWith`
   function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> CompResult): (result :seq<T>)
     requires Total?(compare)
     requires Connected(compare)
