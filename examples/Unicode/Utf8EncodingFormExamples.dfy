@@ -6,6 +6,7 @@
 *******************************************************************************/
 
 include "../../src/Unicode/Utf8EncodingForm.dfy"
+include "../../src/Relations/Comparison.dfy"
 
 module Utf8EncodingFormExamples {
   import Unicode

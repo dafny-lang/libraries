@@ -1,6 +1,4 @@
 module Relations { 
-    export 
-    reveals Reflexive, AntiSymmetric, Connected, TotalOrdering, Transitive, Trichotomous
 
     predicate Reflexive<T(!new)>(R: (T, T) -> bool) 
     {

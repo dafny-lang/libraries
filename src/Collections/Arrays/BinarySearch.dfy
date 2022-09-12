@@ -10,10 +10,6 @@ include "../../Relations/Relations.dfy"
 include "../../Relations/Comparison.dfy"
 
 module Search {
-  export
-    provides BinarySearch, Wrappers
-    provides Wrappers 
-
     import opened Relations
     import opened Wrappers
     import opened Comparison = Relations.Comparison
