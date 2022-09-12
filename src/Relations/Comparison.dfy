@@ -1,14 +1,7 @@
 include "../Wrappers.dfy"
-include "../Collections/Sequences/Seq.dfy"
 
 module Relations.Comparison {
-    export 
-        reveals ComputeTransitivity, Comparison, CompResult, Total?, Valid?, TotalValid, UInt8LessIsTrichotomousTransitive
-
-        provides Wrappers
-
     import opened Wrappers
-    import opened Seq
 
   datatype CompResult = Lt | Eq | Gt {
     function method Flip(): CompResult {
@@ -87,41 +80,41 @@ module Relations.Comparison {
         case (Lt, Gt) | (Gt, Lt) =>
     }
 
-    predicate Complete?(ts: Seq<T>) {
+    predicate Complete?(ts: seq<T>) {
       forall t0, t1 | t0 in ts && t1 in ts :: Complete??(t0, t1)
     }
 
-    predicate Antisymmetric?(ts: Seq<T>) {
+    predicate Antisymmetric?(ts: seq<T>) {
       forall t0, t1 | t0 in ts && t1 in ts :: Antisymmetric??(t0, t1)
     }
 
-    predicate Transitive?(ts: Seq<T>) {
+    predicate Transitive?(ts: seq<T>) {
       forall t0, t1, t2 | t0 in ts && t1 in ts && t2 in ts :: Transitive??(t0, t1, t2)
     }
 
-    predicate {:opaque} Valid?(ts: Seq<T>) {
+    predicate {:opaque} Valid?(ts: seq<T>) {
       Complete?(ts) && /* Antisymmetric?(ts) && */ Transitive?(ts)
     }
 
-    predicate {:opaque} Total?(ts: Seq<T>) {
+    predicate {:opaque} Total?(ts: seq<T>) {
       Complete?(ts) && Antisymmetric?(ts) && Transitive?(ts)
     }
 
-    lemma TotalValid(ts: Seq<T>)
+    lemma TotalValid(ts: seq<T>)
       ensures Total?(ts) ==> Valid?(ts)
     {
       reveal Total?();
       reveal Valid?();
     }
-  }
-        /*
-   * Here is an example relation and a lemma that says the relation is appropriate for use in
-   * lexicographic orderings.
-   */
 
-    lemma UInt8LessIsTrichotomousTransitive()
-    ensures Total?(UInt8Less)
-    ensures Transitive(UInt8Less)
-  {
+    predicate method SortedBy<T>(a: seq<T>,compare: (T, T) -> CompResult)
+    {
+        forall i, j | 0 <= i < j < |a| :: compare(a[i],a[j]).Lt?
+    }
+
+    lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>,  compare: (T, T) -> CompResult) 
+        requires SortedBy(s, compare)
+        requires |s| == 0 || compare(x,s[0]).Lt?
+    {}  
   }
 }
