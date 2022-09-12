@@ -15,18 +15,11 @@
 
 include "../../Math.dfy"
 include "../../Wrappers.dfy"
-include "../../Relations/Relations.dfy"
 
 module Seq {
-  export 
-   // provides SortedBy, MergeSortBy, MergeSortedWith
-    provides Relations//, Comparison
-
   
   import opened Wrappers
   import Math
-  import opened Relations
-  // import opened comparison
   
 
   /**********************************************************
