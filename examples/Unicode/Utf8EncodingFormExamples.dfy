@@ -39,4 +39,5 @@ module Utf8EncodingFormExamples {
     ensures forall s | s in TEST_ILL_FORMED_SEQUENCES
       :: DecodeCodeUnitSequenceChecked(s).None?
   {}
+
 }
