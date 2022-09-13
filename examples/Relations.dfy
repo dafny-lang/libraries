@@ -5,7 +5,7 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-include "../src/Relations/Relations.dfy"
+include "../src/Relations.dfy"
 
 module RelationsExamples {
 

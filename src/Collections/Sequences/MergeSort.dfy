@@ -5,7 +5,7 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "../../Relations/Relations.dfy"
+include "../../Relations.dfy"
 
 module Seq.MergeSort {
 

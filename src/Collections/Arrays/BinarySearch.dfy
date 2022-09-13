@@ -6,7 +6,7 @@
 *******************************************************************************/
 
 include "../../Wrappers.dfy"
-include "../../Relations/Relations.dfy"
+include "../../Relations.dfy"
 
 module Search {
   import opened Wrappers
