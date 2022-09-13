@@ -6,7 +6,6 @@
 *******************************************************************************/
 
 include "../../src/Unicode/Utf8EncodingForm.dfy"
-include "../../src/Relations/Comparison.dfy"
 
 module Utf8EncodingFormExamples {
   import Unicode
@@ -40,16 +39,4 @@ module Utf8EncodingFormExamples {
     ensures forall s | s in TEST_ILL_FORMED_SEQUENCES
       :: DecodeCodeUnitSequenceChecked(s).None?
   {}
-
-  /*
-  * Here is an example relation and a lemma that says the relation is appropriate for use in
-  * lexicographic orderings.
-  */
-
-  lemma UInt8LessIsTrichotomousTransitive()
-    ensures Total?(UInt8Less)
-    ensures Transitive(UInt8Less)
-  {
-  }
-
 }
