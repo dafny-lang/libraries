@@ -8,14 +8,13 @@
 include "../../Wrappers.dfy"
 include "../../Relations.dfy"
 
-module Search {
+module BinarySearch {
   import opened Wrappers
   import opened Relations
 
   method BinarySearch<T>(a: array<T>, key: T, less: (T, T) -> bool) returns (r: Option<nat>)
-    requires SortedBy(a[..], less)
+    requires SortedBy(a[..], (x, y) => less(x, y) || x == y)
     requires StrictTotalOrdering(less)
-    requires Trichotomous(less)
     ensures r.Some? ==> r.value < a.Length && a[r.value] == key
     ensures r.None? ==> key !in a[..]
   {
