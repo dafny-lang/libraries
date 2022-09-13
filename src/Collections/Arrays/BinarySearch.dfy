@@ -7,16 +7,15 @@
 
 include "../../Wrappers.dfy"
 include "../../Relations/Relations.dfy"
-include "../../Relations/Comparison.dfy"
 
 module Search {
-    import opened Relations
-    import opened Wrappers
-    import opened Comparison = Relations.Comparison
+  import opened Wrappers
+  import opened Relations
 
-  method BinarySearch<T>(a: array<T>, key: T, compare: (T, T) -> Comparison.CompResult) returns (r:Option<nat>)
-    requires forall i,j :: 0 <= i < j < a.Length ==> compare(a[i], a[j]).LessThan? || a[i] == a[j]
-    requires Total?(compare)
+  method BinarySearch<T>(a: array<T>, key: T, less: (T, T) -> bool) returns (r: Option<nat>)
+    requires SortedBy(a[..], less)
+    requires StrictTotalOrdering(less)
+    requires Trichotomous(less)
     ensures r.Some? ==> r.value < a.Length && a[r.value] == key
     ensures r.None? ==> key !in a[..]
   {
@@ -24,19 +23,19 @@ module Search {
     while lo < hi
       invariant 0 <= lo <= hi <= a.Length
       invariant key !in a[..lo] && key !in a[hi..]
+      invariant a[..] == old(a[..])
     {
-    var mid := (lo + hi) / 2;
+      var mid := (lo + hi) / 2;
 
-    var comp := compare(key , a[mid]);
-    match comp
-      case LessThan => 
+      if less(key, a[mid]) {
         hi := mid;
-      case GreaterThan => 
+      } else if less(a[mid], key) {
         lo:= mid + 1;
-      case _ => 
+      } else {
         return Some(mid);
+      }
+    }
 
     return None;
-    }
   } 
 } 
