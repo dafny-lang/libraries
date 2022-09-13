@@ -1,5 +1,10 @@
 // RUN: %dafny /compile:3 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %OutputCheck --file-to-check "%t" "%s"
+// CHECK-L: Hello
+// CHECK-NEXT-L: Error: 'name' was not found
+// CHECK-NEXT-L: Hello
+// CHECK-NEXT-L: Dafny
+// CHECK-NEXT-L: Test dummy file
 
 include "../src/Wrappers.dfy"
 

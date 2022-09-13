@@ -1,5 +1,7 @@
 // RUN: %dafny /compile:3 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %OutputCheck --file-to-check "%t" "%s"
+// CHECK-L: [-6, 0, 1, 3, 7, 7, 9]
+// CHECK-NEXT-L: 3
 
 /*******************************************************************************
 *  Copyright by the contributors to the Dafny Project
@@ -37,7 +39,6 @@ module BinarySearchExamples {
     } else {
       print "Not found\n";
     }
-    
   }
 
   method Main() {
