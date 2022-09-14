@@ -12,10 +12,10 @@ module Seq.MergeSort {
   import opened Relations
 
   //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedWith`
-  function method MergeSortBy<T>(a: seq<T>, compare: (T, T) -> bool): (result :seq<T>)
-    requires TotalOrdering(compare)
+  function method MergeSortBy<T>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
+    requires TotalOrdering(lessThanOrEq)
     ensures multiset(a) == multiset(result)
-    ensures SortedBy(result, compare)
+    ensures SortedBy(result, lessThanOrEq)
   {
     if |a| <= 1 then
       a
@@ -25,33 +25,33 @@ module Seq.MergeSort {
 
       assert a == left + right;
 
-      var leftSorted := MergeSortBy(left, compare);
-      var rightSorted := MergeSortBy(right, compare);
+      var leftSorted := MergeSortBy(left, lessThanOrEq);
+      var rightSorted := MergeSortBy(right, lessThanOrEq);
 
-      MergeSortedWith(leftSorted, rightSorted, compare)
+      MergeSortedWith(leftSorted, rightSorted, lessThanOrEq)
   }
 
-  function method {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, compare: (T, T) -> bool) : (result :seq<T>)
-    requires SortedBy(left, compare)
-    requires SortedBy(right, compare)
-    requires TotalOrdering(compare)
+  function method {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool) : (result :seq<T>)
+    requires SortedBy(left, lessThanOrEq)
+    requires SortedBy(right, lessThanOrEq)
+    requires TotalOrdering(lessThanOrEq)
     ensures multiset(left + right) == multiset(result)
-    ensures SortedBy(result, compare)
+    ensures SortedBy(result, lessThanOrEq)
   {
     if |left| == 0 then
       right
     else if |right| == 0 then
       left
-    else if compare(left[0], right[0]) then
-      LemmaNewFirstElementStillSortedBy(left[0], MergeSortedWith(left[1..], right, compare), compare);
+    else if lessThanOrEq(left[0], right[0]) then
+      LemmaNewFirstElementStillSortedBy(left[0], MergeSortedWith(left[1..], right, lessThanOrEq), lessThanOrEq);
       assert left == [left[0]] + left[1..];
 
-      [left[0]] + MergeSortedWith(left[1..], right, compare)
+      [left[0]] + MergeSortedWith(left[1..], right, lessThanOrEq)
 
     else
-      LemmaNewFirstElementStillSortedBy(right[0], MergeSortedWith(left, right[1..], compare), compare);
+      LemmaNewFirstElementStillSortedBy(right[0], MergeSortedWith(left, right[1..], lessThanOrEq), lessThanOrEq);
       assert right == [right[0]] + right[1..];
 
-      [right[0]] + MergeSortedWith(left, right[1..], compare)
+      [right[0]] + MergeSortedWith(left, right[1..], lessThanOrEq)
   }
 }

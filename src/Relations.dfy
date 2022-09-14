@@ -45,15 +45,15 @@ module Relations {
     && Connected(R)
   }  
 
-  predicate method SortedBy<T>(a: seq<T>, less: (T, T) -> bool) {
-    forall i, j | 0 <= i < j < |a| :: less(a[i], a[j])
+  predicate method SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
+    forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
 
-  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, less: (T, T) -> bool) 
-    requires SortedBy(s, less)
-    requires |s| == 0 || less(x, s[0])
-    requires TotalOrdering(less)
-    ensures SortedBy([x] + s, less)
+  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool) 
+    requires SortedBy(s, lessThan)
+    requires |s| == 0 || lessThan(x, s[0])
+    requires TotalOrdering(lessThan)
+    ensures SortedBy([x] + s, lessThan)
   {}  
 
   /*
