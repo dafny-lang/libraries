@@ -8,7 +8,7 @@ This library provides two APIs:
 
 - A high-level API built on top of the zero-copy API that is unverified and less efficient, but is more convenient to use (in particular, it handles encoding and escaping: its JSON AST uses Dafny's `string` type).
 
-Both APIs provides functions for serialization (utf-8 bytes to AST) and deserialization (AST to utf-8 bytes).  Unverified transcoding functions are provided in `Utils/Unicode.dfy` if you nead to read or produce JSON text in other encodings.
+Both APIs provides functions for serialization (utf-8 bytes to AST) and deserialization (AST to utf-8 bytes).  Unverified transcoding functions are provided in `Utils/Unicode.dfy` if you need to read or produce JSON text in other encodings.
 
 ## Library usage
 
