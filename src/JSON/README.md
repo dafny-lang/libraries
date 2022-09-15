@@ -37,7 +37,7 @@ expect API.Serialize(CITY_AST) == Success(Unicode.Transcode16To8(
 
 ## What is verified?
 
-The zero-copy serializer is proved sound and complete against a simple functional specification found in [`LowLevel.Spec.dfy`](./LowLevel.Spec.dfy).  The low-level deserializer is proven sound, but not complete, against that same specification: if a value is decoded
+The zero-copy serializer is proved sound and complete against a simple functional specification found in [`LowLevel.Spec.dfy`](./LowLevel.Spec.dfy).  The low-level deserializer is proven sound, but not complete, against that same specification: if a value is deserialized successfully, then re-serializing recovers the original bytestring.
 
 ### Useful submodules
 
