@@ -45,7 +45,7 @@ module Relations {
     && Connected(R)
   }  
 
-  predicate method SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
+  predicate SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
     forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
 
