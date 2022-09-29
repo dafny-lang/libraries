@@ -181,7 +181,7 @@ abstract module LittleEndianNat {
 
   /* The nat representation of a sequence can be calculated using the nat
   representation of its prefix. */
-  lemma LemmaSeqPrefix(xs: seq<uint>, i: nat)
+  lemma {:vcs_split_on_every_assert} LemmaSeqPrefix(xs: seq<uint>, i: nat)
     requires 0 <= i <= |xs|
     ensures ToNatRight(xs[..i]) + ToNatRight(xs[i..]) * Pow(BASE(), i) == ToNatRight(xs)
   {
