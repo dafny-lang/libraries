@@ -1,5 +1,5 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %baredafny run %args --no-verify --target:cs "%s" -- "%S/ReadBytesFromFile.data" >> "%t"
+// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%S/ReadBytesFromFile.data" >> "%t"
 // RUN: %diff "%S/ReadBytesFromFile.expect" "%t"
 
 include "./AbstractReadBytesFromFile.dfy"

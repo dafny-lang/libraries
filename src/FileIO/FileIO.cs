@@ -1,4 +1,7 @@
 namespace dafny.libraries {
+  using System;
+  using System.IO;
+
   using Dafny;
 
   public class FileIO {
@@ -34,10 +37,10 @@ namespace dafny.libraries {
       bytesRead = Sequence<byte>.Empty;
       errorMsg = Sequence<char>.Empty;
       try {
-        bytesRead = SeqFromArray(System.IO.File.ReadAllBytes(path?.ToString()));
+        bytesRead = Helpers.SeqFromArray(File.ReadAllBytes(path?.ToString()));
         isError = false;
       } catch (Exception e) {
-        errorMsg = SeqFromArray(e.ToString().ToCharArray());
+        errorMsg = Helpers.SeqFromArray(e.ToString().ToCharArray());
       }
     }
 
@@ -65,10 +68,10 @@ namespace dafny.libraries {
       isError = true;
       errorMsg = Sequence<char>.Empty;
       try {
-        System.IO.File.WriteAllBytes(path?.ToString(), bytes.CloneAsArray());
+        File.WriteAllBytes(path?.ToString(), bytes.CloneAsArray());
         isError = false;
       } catch (Exception e) {
-        errorMsg = SeqFromArray(e.ToString().ToCharArray());
+        errorMsg = Helpers.SeqFromArray(e.ToString().ToCharArray());
       }
     }
   }
