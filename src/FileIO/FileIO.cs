@@ -1,4 +1,4 @@
-namespace dafny.libraries {
+namespace DafnyLibraries {
   using System;
   using System.IO;
 

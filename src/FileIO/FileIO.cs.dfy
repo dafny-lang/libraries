@@ -7,12 +7,12 @@ module FileIO refines AbstractFileIO {
   export extends AbstractFileIO
 
   method
-    {:extern "dafny.libraries.FileIO", "INTERNAL_ReadBytesFromFile"} {:compile false}
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_ReadBytesFromFile"} {:compile false}
     INTERNAL_ReadBytesFromFile(path: string)
     returns (isError: bool, bytesRead: seq<bv8>, errorMsg: string)
 
   method
-    {:extern "dafny.libraries.FileIO", "INTERNAL_WriteBytesToFile"} {:compile false}
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"} {:compile false}
     INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
     returns (isError: bool, errorMsg: string)
 }
