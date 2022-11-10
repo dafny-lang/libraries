@@ -1,5 +1,5 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %baredafny run %args --no-verify --target:java "%s" -- "%t.data" >> "%t"
+// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t.data" >> "%t"
 // RUN: %diff "%S/WriteBytesToFile.expect" "%t"
 // RUN: %diff "%S/WriteBytesToFile.data.expect" "%t.data"
 
