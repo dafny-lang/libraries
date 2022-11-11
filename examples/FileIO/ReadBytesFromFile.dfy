@@ -16,8 +16,10 @@ module ReadBytesFromFile {
     var dataPath := args[1];
     var expectedErrorPrefix := args[2];
 
+    // Happy path: read from the data file, and check that we see the expected content.
     {
       var expectedStr := "Hello world\nGoodbye\n";
+      // This conversion is safe only for ASCII values. For Unicode conversions, see the Unicode modules.
       var expectedBytes := seq(|expectedStr|, i requires 0 <= i < |expectedStr| => expectedStr[i] as int);
 
       var res := FileIO.ReadBytesFromFile(dataPath);
@@ -27,6 +29,7 @@ module ReadBytesFromFile {
       expect readBytes == expectedBytes, "read unexpected byte sequence";
     }
 
+    // Failure path: attempting to read from a blank file path should never work.
     {
       var res := FileIO.ReadBytesFromFile("");
       expect res.Failure?, "unexpected success";

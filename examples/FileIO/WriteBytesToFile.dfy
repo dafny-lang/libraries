@@ -22,6 +22,7 @@ module WriteBytesToFile {
     var outputPath := args[1];
     var expectedErrorPrefix := args[2];
 
+    // Happy path: write to the output path. (The %diff LIT commands check that we wrote the correct content.)
     {
       // Ideally we would define `str` as a constant and compute `bytes` automatically.
       // To do so, we would need to convert each `char` in `str` to a `bv8` value, by using `as bv8`.
@@ -41,6 +42,7 @@ module WriteBytesToFile {
       expect res.Success?, "unexpected failure: " + res.error;
     }
 
+    // Failure path: attempting to write to a blank file path should never work.
     {
       var res := FileIO.WriteBytesToFile("", []);
       expect res.Failure?, "unexpected success";
