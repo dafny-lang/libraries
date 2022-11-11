@@ -1,3 +1,8 @@
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT
+*******************************************************************************/
+
 // RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t.cs.out" "System.ArgumentException:" >> "%t"
 // RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t.java.out" "java.nio.file.FileSystemException:" >> "%t"

@@ -1,3 +1,10 @@
+"""
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT
+*******************************************************************************/
+"""
+
 from _dafny import Seq, string_of
 
 assert "DafnyLibraries" == __name__

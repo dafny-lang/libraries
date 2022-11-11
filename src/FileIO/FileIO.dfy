@@ -1,3 +1,8 @@
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT
+*******************************************************************************/
+
 // RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%S/FileIO.expect" "%t"
 

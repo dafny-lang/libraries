@@ -1,3 +1,8 @@
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT
+*******************************************************************************/
+
 namespace DafnyLibraries {
   using System;
   using System.IO;

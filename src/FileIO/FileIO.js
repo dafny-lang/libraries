@@ -1,5 +1,11 @@
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT
+*******************************************************************************/
+
 const fs = require("fs");
 const buffer = require("buffer");
+
 var DafnyLibraries = DafnyLibraries || {};
 DafnyLibraries.FileIO = (function() {
   let $module = {};
