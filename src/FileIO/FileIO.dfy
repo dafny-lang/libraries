@@ -20,12 +20,12 @@ module FileIO {
   }
 
   method
-    {:extern "DafnyLibraries.FileIO", "INTERNAL_ReadBytesFromFile"} {:compile false}
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_ReadBytesFromFile"}
     INTERNAL_ReadBytesFromFile(path: string)
     returns (isError: bool, bytesRead: seq<bv8>, errorMsg: string)
 
   method
-    {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"} {:compile false}
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"}
     INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
     returns (isError: bool, errorMsg: string)
 }
