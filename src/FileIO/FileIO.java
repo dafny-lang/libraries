@@ -5,6 +5,8 @@
 
 package DafnyLibraries;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,8 +39,7 @@ public class FileIO {
             final DafnySequence<Byte> readBytes = DafnySequence.fromBytes(Files.readAllBytes(pathObj));
             return Tuple3.create(false, readBytes, DafnySequence.empty(TypeDescriptor.CHAR));
         } catch (Exception ex) {
-            final DafnySequence<Character> errorMsg = DafnySequence.of(ex.toString().toCharArray());
-            return Tuple3.create(true, DafnySequence.empty(TypeDescriptor.BYTE), errorMsg);
+            return Tuple3.create(true, DafnySequence.empty(TypeDescriptor.BYTE), stackTraceToDafnyString(ex));
         }
     }
 
@@ -67,8 +68,15 @@ public class FileIO {
             Files.write(pathObj, byteArr);
             return Tuple2.create(false, DafnySequence.empty(TypeDescriptor.CHAR));
         } catch (Exception ex) {
-            final DafnySequence<Character> errorMsg = DafnySequence.of(ex.toString().toCharArray());
-            return Tuple2.create(true, errorMsg);
+            return Tuple2.create(true, stackTraceToDafnyString(ex));
         }
+    }
+
+    private static final DafnySequence<Character> stackTraceToDafnyString(final Throwable t) {
+        final StringWriter stringWriter = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(stringWriter);
+        t.printStackTrace(printWriter);
+        final String str = stringWriter.toString();
+        return DafnySequence.of(str.toCharArray());
     }
 }

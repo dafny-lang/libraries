@@ -28,7 +28,7 @@ DafnyLibraries.FileIO = (function() {
       const readBytes = _dafny.Seq.from(buf.valueOf(), byte => new BigNumber(byte));
       return [false, readBytes, emptySeq];
     } catch (e) {
-      const errorMsg = _dafny.Seq.from(e.toString());
+      const errorMsg = _dafny.Seq.from(e.stack);
       return [true, emptySeq, errorMsg];
     }
   }
@@ -48,7 +48,7 @@ DafnyLibraries.FileIO = (function() {
       fs.writeFileSync(path, buf);  // no need to specify encoding because data is a Buffer
       return [false, _dafny.Seq.of()];
     } catch (e) {
-      const errorMsg = _dafny.Seq.from(e.toString());
+      const errorMsg = _dafny.Seq.from(e.stack);
       return [true, errorMsg];
     }
   }

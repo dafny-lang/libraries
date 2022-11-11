@@ -5,6 +5,8 @@
 *******************************************************************************/
 """
 
+import traceback
+
 from _dafny import Seq, string_of
 
 assert "DafnyLibraries" == __name__
@@ -25,8 +27,8 @@ class FileIO:
         try:
             with open(string_of(path), "rb") as file:
                 return False, Seq(file.read()), Seq()
-        except Exception as e:
-            return True, Seq(), Seq(str(e))
+        except Exception:
+            return True, Seq(), Seq(traceback.format_exc())
 
     @staticmethod
     def INTERNAL_WriteBytesToFile(path: Seq, bytes_: Seq) -> (bool, Seq):
@@ -42,5 +44,5 @@ class FileIO:
             with open(string_of(path), "wb") as file:
                 file.write(bytes(bytes_))
                 return False, Seq()
-        except Exception as e:
-            return True, Seq(str(e))
+        except Exception:
+            return True, Seq(traceback.format_exc())
