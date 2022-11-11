@@ -1,10 +1,10 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
 // RUN: %diff "%s.expect" "%t"
 
-include "../../src/FileIO/AbstractFileIO.dfy"
+include "../../src/FileIO/FileIO.dfy"
 
 abstract module AbstractTest {
-  import AbstractFileIO : AbstractFileIO
+  import FileIO
 
   function method ExpectedErrorMessagePrefix(): string
 
@@ -27,12 +27,12 @@ abstract module AbstractTest {
       expect |args| == 2;
       var dataFilePath := args[1];
 
-      var res := AbstractFileIO.WriteBytesToFile(dataFilePath, bytes);
+      var res := FileIO.WriteBytesToFile(dataFilePath, bytes);
       expect res.Success?, "unexpected failure: " + res.error;
     }
 
     {
-      var res := AbstractFileIO.WriteBytesToFile("", []);
+      var res := FileIO.WriteBytesToFile("", []);
       expect res.Failure?, "unexpected success";
       expect ExpectedErrorMessagePrefix() <= res.error, "unexpected error message: " + res.error;
     }

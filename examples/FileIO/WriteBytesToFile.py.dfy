@@ -4,11 +4,9 @@
 // RUN: %diff "%S/WriteBytesToFile.data.expect" "%t.data"
 
 include "./AbstractWriteBytesToFile.dfy"
-include "../../src/FileIO/FileIO.py.dfy"
+include "../../src/FileIO/FileIO.dfy"
 
 module Test refines AbstractTest {
-  import AbstractFileIO = FileIO
-
   function method ExpectedErrorMessagePrefix(): string {
     "[Errno 2]"
   }

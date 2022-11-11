@@ -1,9 +1,9 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %diff "%S/FileIO.expect" "%t"
 
 include "../Wrappers.dfy"
 
-abstract module AbstractFileIO {
+module FileIO {
   import opened Wrappers
 
   export provides ReadBytesFromFile, WriteBytesToFile, Wrappers
@@ -19,9 +19,13 @@ abstract module AbstractFileIO {
     return if isError then Failure(errorMsg) else Success(());
   }
 
-  method INTERNAL_ReadBytesFromFile(path: string)
+  method
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_ReadBytesFromFile"} {:compile false}
+    INTERNAL_ReadBytesFromFile(path: string)
     returns (isError: bool, bytesRead: seq<bv8>, errorMsg: string)
 
-  method INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
+  method
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"} {:compile false}
+    INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
     returns (isError: bool, errorMsg: string)
 }

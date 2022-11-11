@@ -3,11 +3,9 @@
 // RUN: %diff "%S/ReadBytesFromFile.expect" "%t"
 
 include "./AbstractReadBytesFromFile.dfy"
-include "../../src/FileIO/FileIO.py.dfy"
+include "../../src/FileIO/FileIO.dfy"
 
 module Test refines AbstractTest {
-  import AbstractFileIO = FileIO
-
   function method ExpectedErrorMessagePrefix(): string {
     "[Errno 2]"
   }
