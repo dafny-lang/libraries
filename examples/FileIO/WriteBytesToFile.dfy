@@ -1,14 +1,27 @@
 // RUN: %dafny /compile:0 "%s" > "%t"
+// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t.cs.out" "System.ArgumentException:" >> "%t"
+// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t.java.out" "java.nio.file.FileSystemException:" >> "%t"
+// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t.js.out" "Error: ENOENT" >> "%t"
+// TODO: %baredafny run --no-verify --target:py "%s" --input "%S/../../src/FileIO/FileIO.py" -- "%t.py.out" "[Errno 2]" >> "%t"
 // RUN: %diff "%s.expect" "%t"
+
+//// Check that written files match expectations
+// RUN: %diff "data.txt" "%t.cs.out"
+// RUN: %diff "data.txt" "%t.java.out"
+// RUN: %diff "data.txt" "%t.js.out"
+// TODO: %diff "data.txt" "%t.py.out"
 
 include "../../src/FileIO/FileIO.dfy"
 
-abstract module AbstractTest {
+module WriteBytesToFile {
   import FileIO
 
-  function method ExpectedErrorMessagePrefix(): string
-
   method Main(args: seq<string>) {
+    expect |args| > 0;
+    expect |args| == 3, "usage: " + args[0] + " OUTPUT_PATH EXPECTED_ERROR_PREFIX";
+    var outputPath := args[1];
+    var expectedErrorPrefix := args[2];
+
     {
       // Ideally we would define `str` as a constant and compute `bytes` automatically.
       // To do so, we would need to convert each `char` in `str` to a `bv8` value, by using `as bv8`.
@@ -24,17 +37,14 @@ abstract module AbstractTest {
       ];
       assert forall i | 0 <= i < |bytes| :: bytes[i] as int == str[i] as int;
 
-      expect |args| == 2;
-      var dataFilePath := args[1];
-
-      var res := FileIO.WriteBytesToFile(dataFilePath, bytes);
+      var res := FileIO.WriteBytesToFile(outputPath, bytes);
       expect res.Success?, "unexpected failure: " + res.error;
     }
 
     {
       var res := FileIO.WriteBytesToFile("", []);
       expect res.Failure?, "unexpected success";
-      expect ExpectedErrorMessagePrefix() <= res.error, "unexpected error message: " + res.error;
+      expect expectedErrorPrefix <= res.error, "unexpected error message: " + res.error;
     }
   }
 }
