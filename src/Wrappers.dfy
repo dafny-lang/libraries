@@ -35,6 +35,13 @@ module Wrappers {
     {
       value
     }
+
+    function method Map<NewT>(reWrap: T -> NewT): Option<NewT>
+    {
+      match this
+      case Some(v) => Some(reWrap(v))
+      case None => None
+    }
   }
 
   datatype Result<+T, +R> = | Success(value: T) | Failure(error: R) {
@@ -60,6 +67,13 @@ module Wrappers {
       requires Failure?
     {
       Failure(this.error)
+    }
+
+    function method MapSuccess<NewT>(reWrap: T -> NewT): Result<NewT, R>
+    {
+      match this
+      case Success(s) => Success(reWrap(s))
+      case Failure(e) => Failure(e)
     }
 
     function method MapFailure<NewR>(reWrap: R -> NewR): Result<T, NewR>
