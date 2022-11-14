@@ -194,7 +194,7 @@ module Sets {
   }
 
    function method OfSeq<T(==)>(sq: seq<T>): set<T> {
-    set x <- sq
+    set x | x in sq
   }
 
   function method OfSlice<T(==)>(arr: array<T>, lo: int, hi: int): set<T>
