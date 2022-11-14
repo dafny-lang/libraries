@@ -92,10 +92,10 @@ import opened Wrappers
     {
       calc {
         old(Sets.OfSlice(arr, lo, hi));
-        set x <- old(arr[lo..hi]);
-        set x <- old(multiset(arr[lo..hi]));
-        set x <- multiset(arr[lo..hi]);
-        set x <- arr[lo..hi];
+        set x | x in old(arr[lo..hi]);
+        set x | x in old(multiset(arr[lo..hi]));
+        set x | x in multiset(arr[lo..hi]);
+        set x | x in arr[lo..hi];
         Sets.OfSlice(arr, lo, hi);
       }
     }
