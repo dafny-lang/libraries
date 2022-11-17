@@ -193,7 +193,7 @@ module Sets {
     LemmaSubsetSize(x, range);
   }
 
-   function method OfSeq<T(==)>(sq: seq<T>): set<T> {
+  function method OfSeq<T(==)>(sq: seq<T>): set<T> {
     set x | x in sq
   }
 

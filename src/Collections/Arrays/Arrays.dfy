@@ -337,7 +337,7 @@ import opened Wrappers
       arr[lo] // TODO
     }
 
-      method DutchFlag(arr: array<T>, pivot: T, lo: int, hi: int) returns (left: int, right: int)
+    method DutchFlag(arr: array<T>, pivot: T, lo: int, hi: int) returns (left: int, right: int)
       requires 0 <= lo < hi <= arr.Length
       requires pivot in multiset(arr[lo..hi])
       modifies arr
@@ -370,5 +370,5 @@ import opened Wrappers
       }
 
     }
-}
+  }
 }
