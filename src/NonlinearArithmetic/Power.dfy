@@ -199,7 +199,7 @@ module Power {
     }
   }
 
-  lemma LemmaPowSubs(b: int, e1: nat, e2: nat)
+  lemma LemmaPowSubAddCancel(b: int, e1: nat, e2: nat)
     decreases e1
     requires e1 >= e2
     ensures Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
@@ -207,15 +207,14 @@ module Power {
     LemmaPowAdds(b, e1 - e2, e2);
   }
 
-  lemma LemmaPowSubsAuto()
+  lemma LemmaPowSubAddCancelAuto()
     ensures forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 - e2)} | e1 >= e2
       :: Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
   {
     reveal Pow();
-    forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 - e2)} | e1 >= e2
-      ensures Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
+    forall b: int, e1: nat, e2: nat | e1 >= e2
     {
-      LemmaPowSubs(b, e1, e2);
+      LemmaPowSubAddCancel(b, e1, e2);
     }
   }
 
@@ -229,7 +228,7 @@ module Power {
     LemmaPowPositiveAuto();
     calc {
       Pow(b, e2) / Pow(b, e1);
-        { LemmaPowSubs(b, e2, e1); }
+        { LemmaPowSubAddCancel(b, e2, e1); }
       Pow(b, e2 - e1) * Pow(b, e1) / Pow(b, e1);
         { LemmaDivByMultiple(Pow(b, e2 - e1), Pow(b, e1)); }
       Pow(b, e2 - e1);
@@ -359,7 +358,7 @@ module Power {
 
     LemmaPowDistributesAuto();
     LemmaPowAddsAuto();
-    LemmaPowSubsAuto();
+    LemmaPowSubAddCancelAuto();
 
     LemmaMulAuto();
     LemmaMulIncreasesAuto();
