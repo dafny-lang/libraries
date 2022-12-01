@@ -21,6 +21,9 @@ jobs:
       - name: Install lit
         run: pip install lit OutputCheck
 
+      - name: Set up JS dependencies
+        run: npm install bignumber.js
+
       - name: Verify Dafny Code
         run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
 
