@@ -18,9 +18,6 @@ jobs:
         with:
           dafny-version: "3.4.2"
 
-      - name: Install Dafny report generator
-        run: dotnet tool install --global dafny-reportgenerator
-
       - name: Install lit 
         run: pip install lit OutputCheck
 
