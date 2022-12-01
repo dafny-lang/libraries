@@ -3,12 +3,12 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-const buffer = require("buffer");
-const fs = require("fs");
-const nodePath = require("path");
-
 var DafnyLibraries = DafnyLibraries || {};
 DafnyLibraries.FileIO = (function() {
+  const buffer = require("buffer");
+  const fs = require("fs");
+  const nodePath = require("path");
+
   let $module = {};
 
   /**
