@@ -5,6 +5,7 @@
 
 package DafnyLibraries;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -34,8 +35,7 @@ public class FileIO {
     public static Tuple3<Boolean, DafnySequence<? extends Byte>, DafnySequence<? extends Character>>
         INTERNAL_ReadBytesFromFile(DafnySequence<? extends Character> path) {
         try {
-            final String pathStr = new String((char[]) path.toArray().unwrap());
-            final Path pathObj = Paths.get(pathStr);
+            final Path pathObj = dafnyStringToPath(path);
             final DafnySequence<Byte> readBytes = DafnySequence.fromBytes(Files.readAllBytes(pathObj));
             return Tuple3.create(false, readBytes, DafnySequence.empty(TypeDescriptor.CHAR));
         } catch (Exception ex) {
@@ -44,7 +44,8 @@ public class FileIO {
     }
 
     /**
-     * Attempts to write {@code bytes} to the file at {@code path}, and returns a tuple of the following values:
+     * Attempts to write {@code bytes} to the file at {@code path}, creating nonexistent parent directories as necessary,
+     * and returns a tuple of the following values:
      * <dl>
      *     <dt>{@code isError}</dt>
      *     <dd>true iff an exception was thrown during path string conversion or when writing to the file</dd>
@@ -58,8 +59,8 @@ public class FileIO {
     public static Tuple2<Boolean, DafnySequence<? extends Character>>
         INTERNAL_WriteBytesToFile(DafnySequence<? extends Character> path, DafnySequence<? extends Byte> bytes) {
         try {
-            final String pathStr = new String((char[]) path.toArray().unwrap());
-            final Path pathObj = Paths.get(pathStr);
+            final Path pathObj = dafnyStringToPath(path);
+            createParentDirs(pathObj);
 
             // It's safe to cast `bytes` to `DafnySequence<Byte>` since the cast value is immediately consumed
             @SuppressWarnings("unchecked")
@@ -70,6 +71,24 @@ public class FileIO {
         } catch (Exception ex) {
             return Tuple2.create(true, stackTraceToDafnyString(ex));
         }
+    }
+
+    /**
+     * Returns a Path constructed from the given Dafny string.
+     */
+    private static final Path dafnyStringToPath(final DafnySequence<? extends Character> path) {
+        return Paths.get(new String((char[]) path.toArray().unwrap()));
+    }
+
+    /**
+     * Creates the nonexistent parent directory(-ies) of the given path.
+     */
+    private static final void createParentDirs(final Path path) throws IOException {
+        final Path parentDir = path.toAbsolutePath().getParent();
+        if (parentDir == null) {
+            return;
+        }
+        Files.createDirectories(parentDir);
     }
 
     private static final DafnySequence<Character> stackTraceToDafnyString(final Throwable t) {

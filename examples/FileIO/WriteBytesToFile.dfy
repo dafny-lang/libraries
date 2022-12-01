@@ -4,17 +4,25 @@
 *******************************************************************************/
 
 // RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t.cs.out" "System.ArgumentException:" >> "%t"
-// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t.java.out" "java.nio.file.FileSystemException:" >> "%t"
-// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t.js.out" "Error: ENOENT" >> "%t"
-// TODO: %baredafny run --no-verify --target:py "%s" --input "%S/../../src/FileIO/FileIO.py" -- "%t.py.out" "[Errno 2]" >> "%t"
+// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:" >> "%t"
+// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:" >> "%t"
+// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT" >> "%t"
+// TODO: %baredafny run --no-verify --target:py "%s" --input "%S/../../src/FileIO/FileIO.py" -- "%t_py" "[Errno 2]" >> "%t"
 // RUN: %diff "%s.expect" "%t"
 
 //// Check that written files match expectations
-// RUN: %diff "data.txt" "%t.cs.out"
-// RUN: %diff "data.txt" "%t.java.out"
-// RUN: %diff "data.txt" "%t.js.out"
-// TODO: %diff "data.txt" "%t.py.out"
+// RUN: %diff "data.txt" "%t_cs/output_plain"
+// RUN: %diff "data.txt" "%t_cs/foo/bar/output_nested"
+// RUN: %diff "data.txt" "%t_cs/foo/output_up"
+// RUN: %diff "data.txt" "%t_java/output_plain"
+// RUN: %diff "data.txt" "%t_java/foo/bar/output_nested"
+// RUN: %diff "data.txt" "%t_java/foo/output_up"
+// RUN: %diff "data.txt" "%t_js/output_plain"
+// RUN: %diff "data.txt" "%t_js/foo/bar/output_nested"
+// RUN: %diff "data.txt" "%t_js/foo/output_up"
+// TODO: %diff "data.txt" "%t_py/output_plain"
+// TODO: %diff "data.txt" "%t_py/foo/bar/output_nested"
+// TODO: %diff "data.txt" "%t_py/foo/output_up"
 
 include "../../src/FileIO/FileIO.dfy"
 
@@ -23,11 +31,11 @@ module WriteBytesToFile {
 
   method Main(args: seq<string>) {
     expect |args| > 0;
-    expect |args| == 3, "usage: " + args[0] + " OUTPUT_PATH EXPECTED_ERROR_PREFIX";
-    var outputPath := args[1];
+    expect |args| == 3, "usage: " + args[0] + " OUTPUT_DIR EXPECTED_ERROR_PREFIX";
+    var outputDir := args[1];
     var expectedErrorPrefix := args[2];
 
-    // Happy path: write to the output path. (The %diff LIT commands check that we wrote the correct content.)
+    // Happy paths: write files to the output dir. (The %diff LIT commands check that we wrote the correct content.)
     {
       // Ideally we would define `str` as a constant and compute `bytes` automatically.
       // To do so, we would need to convert each `char` in `str` to a `bv8` value, by using `as bv8`.
@@ -43,8 +51,21 @@ module WriteBytesToFile {
       ];
       assert forall i | 0 <= i < |bytes| :: bytes[i] as int == str[i] as int;
 
-      var res := FileIO.WriteBytesToFile(outputPath, bytes);
-      expect res.Success?, "unexpected failure: " + res.error;
+      // Write directly into the output directory
+      {
+        var res := FileIO.WriteBytesToFile(outputDir + "/output_plain", bytes);
+        expect res.Success?, "unexpected failure writing to output_plain: " + res.error;
+      }
+      // Ensure that nonexistent parent directories are created as necessary
+      {
+        var res := FileIO.WriteBytesToFile(outputDir + "/foo/bar/output_nested", bytes);
+        expect res.Success?, "unexpected failure writing to output_nested: " + res.error;
+      }
+      // Ensure that file paths with .. are handled correctly
+      {
+        var res := FileIO.WriteBytesToFile(outputDir + "/foo/bar/../output_up", bytes);
+        expect res.Success?, "unexpected failure writing to output_up: " + res.error;
+      }
     }
 
     // Failure path: attempting to write to a blank file path should never work.

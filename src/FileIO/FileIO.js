@@ -3,8 +3,9 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-const fs = require("fs");
 const buffer = require("buffer");
+const fs = require("fs");
+const nodePath = require("path");
 
 var DafnyLibraries = DafnyLibraries || {};
 DafnyLibraries.FileIO = (function() {
@@ -34,7 +35,8 @@ DafnyLibraries.FileIO = (function() {
   }
 
   /**
-   * Attempts to write all given `bytes` to the file at the given `path`, and returns an array of the following values:
+   * Attempts to write all given `bytes` to the file at the given `path`, creating nonexistent parent directories as necessary,
+   * and returns an array of the following values:
    *
    *   - `isError`: true iff an error was thrown during path string conversion or when writing to the file
    *   - `errorMsg`: the error message of the thrown error if `isError` is true, or an empty sequence otherwise
@@ -45,6 +47,7 @@ DafnyLibraries.FileIO = (function() {
   $module.INTERNAL_WriteBytesToFile = function(path, bytes) {
     try {
       const buf = buffer.Buffer.from(bytes);
+      createParentDirs(path);
       fs.writeFileSync(path, buf);  // no need to specify encoding because data is a Buffer
       return [false, _dafny.Seq.of()];
     } catch (e) {
@@ -52,6 +55,14 @@ DafnyLibraries.FileIO = (function() {
       return [true, errorMsg];
     }
   }
+
+  /**
+   * Creates the nonexistent parent directory(-ies) of the given path.
+   */
+  const createParentDirs = function(path) {
+    const parentDir = nodePath.dirname(nodePath.normalize(path));
+    fs.mkdirSync(parentDir, { recursive: true });
+  };
 
   return $module;
 })();

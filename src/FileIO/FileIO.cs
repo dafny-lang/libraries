@@ -50,7 +50,8 @@ namespace DafnyLibraries {
     }
 
     /// <summary>
-    /// Attempts to write all given bytes to the file at the given path, and outputs the following values:
+    /// Attempts to write all given bytes to the file at the given path, creating nonexistent parent directories as necessary,
+    /// and outputs the following values:
     /// <list>
     ///   <item>
     ///     <term>isError</term>
@@ -73,11 +74,21 @@ namespace DafnyLibraries {
       isError = true;
       errorMsg = Sequence<char>.Empty;
       try {
-        File.WriteAllBytes(path?.ToString(), bytes.CloneAsArray());
+        string pathStr = path?.ToString();
+        CreateParentDirs(pathStr);
+        File.WriteAllBytes(pathStr, bytes.CloneAsArray());
         isError = false;
       } catch (Exception e) {
         errorMsg = Helpers.SeqFromArray(e.ToString().ToCharArray());
       }
+    }
+
+    /// <summary>
+    /// Creates the nonexistent parent directory(-ies) of the given path.
+    /// </summary>
+    private static void CreateParentDirs(string path) {
+      string parentDir = Path.GetDirectoryName(Path.GetFullPath(path));
+      Directory.CreateDirectory(parentDir);
     }
   }
 }
