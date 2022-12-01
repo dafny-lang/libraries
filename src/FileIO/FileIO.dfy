@@ -3,8 +3,7 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %diff "%S/FileIO.expect" "%t"
+// RUN: %dafny /compile:0 "%s"
 
 include "../Wrappers.dfy"
 
