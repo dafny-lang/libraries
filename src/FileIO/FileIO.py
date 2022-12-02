@@ -6,6 +6,7 @@
 """
 
 import pathlib
+import sys
 import traceback
 
 from _dafny import Seq, string_of
