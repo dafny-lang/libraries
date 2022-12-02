@@ -14,6 +14,8 @@ include "../Wrappers.dfy"
  * Where the API accepts file paths as strings, there are some limitations.
  * File paths containing only ASCII characters work identically across languages and platforms;
  * non-ASCII Unicode codepoints may cause different language- or platform-specific behavior.
+ *
+ * File path symbols including . and .. are allowed.
  */
 module FileIO {
   import opened Wrappers

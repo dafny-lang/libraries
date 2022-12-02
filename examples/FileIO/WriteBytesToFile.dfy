@@ -4,11 +4,14 @@
 *******************************************************************************/
 
 // RUN: %dafny /compile:0 "%s"
+
+/// Truncate temp file %t before appending each of the following RUNs' output
 // RUN: echo -n > "%t"
 // RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:" >> "%t"
 // RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:" >> "%t"
 // RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT" >> "%t"
 // TODO: %baredafny run --no-verify --target:py "%s" --input "%S/../../src/FileIO/FileIO.py" -- "%t_py" "Traceback" >> "%t"
+
 // RUN: %diff "%s.expect" "%t"
 
 //// Check that written files match expectations
