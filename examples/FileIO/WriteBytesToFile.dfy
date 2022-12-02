@@ -10,7 +10,6 @@
 // RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:" >> "%t"
 // RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:" >> "%t"
 // RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT" >> "%t"
-// TODO: %baredafny run --no-verify --target:py "%s" --input "%S/../../src/FileIO/FileIO.py" -- "%t_py" "Traceback" >> "%t"
 
 // RUN: %diff "%s.expect" "%t"
 
@@ -24,9 +23,6 @@
 // RUN: %diff "data.txt" "%t_js/output_plain"
 // RUN: %diff "data.txt" "%t_js/foo/bar/output_nested"
 // RUN: %diff "data.txt" "%t_js/foo/output_up"
-// TODO: %diff "data.txt" "%t_py/output_plain"
-// TODO: %diff "data.txt" "%t_py/foo/bar/output_nested"
-// TODO: %diff "data.txt" "%t_py/foo/output_up"
 
 include "../../src/FileIO/FileIO.dfy"
 
