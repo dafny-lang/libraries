@@ -9,8 +9,8 @@ include "Wrappers.dfy"
 include "Relations.dfy"
 module Comparison {
 
-import opened Wrappers
-import opened Relations
+  import opened Wrappers
+  import opened Relations
 
   datatype Cmp = Lt | Eq | Gt {
     function method Flip(): Cmp {
