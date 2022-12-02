@@ -41,37 +41,37 @@ import opened Relations
       cmp(t0, t1)
     }
 
-     predicate Complete??(t0: T, t1: T) {
+     predicate CompleteonPair(t0: T, t1: T) {
       cmp(t0, t1) == cmp(t1, t0).Flip()
     }
 
-    predicate Transitive??(t0: T, t1: T, t2: T) {
+    predicate Transitive'(t0: T, t1: T, t2: T) {
       cmp(t0, t1).Le? && cmp(t1, t2).Le? ==> cmp(t0, t2).Le?
     }
 
-    predicate Complete?(ts: set<T>) {
-      forall t0, t1 | t0 in ts && t1 in ts :: Complete??(t0, t1)
+    predicate Complete(ts: set<T>) {
+      forall t0, t1 | t0 in ts && t1 in ts :: CompleteonPair(t0, t1)
     }
 
-    predicate Transitive?(ts: set<T>) {
-      forall t0, t1, t2 | t0 in ts && t1 in ts && t2 in ts :: Transitive??(t0, t1, t2)
+    predicate Transitive(ts: set<T>) {
+      forall t0, t1, t2 | t0 in ts && t1 in ts && t2 in ts :: Transitive'(t0, t1, t2)
     }
 
-    predicate {:opaque} Valid?(ts: set<T>) {
-      Complete?(ts) && /* Antisymmetric?(ts) && */ Transitive?(ts)
+    predicate {:opaque} Valid(ts: set<T>) {
+      Complete(ts) && Transitive(ts)
     }
 
     predicate Sorted(sq: seq<T>) {
       forall i, j | 0 <= i < j < |sq| :: cmp(sq[i], sq[j]).Le?
     }
 
-    predicate Reflexive??(t0: T) {
+    predicate Reflexive'(t0: T) {
       cmp(t0, t0) == Eq
     }
 
     lemma AlwaysReflexive(t0: T)
-      requires Complete??(t0, t0)
-      ensures Reflexive??(t0)
+      requires CompleteonPair(t0, t0)
+      ensures Reflexive'(t0)
     {}
 
     predicate {:opaque} Striped(sq: seq<T>, pivot: T, lo: int, left: int, mid: int, right: int, hi: int)
@@ -90,4 +90,4 @@ import opened Relations
     {}
 
     }
-   }
+  }

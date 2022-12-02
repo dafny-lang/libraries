@@ -19,55 +19,55 @@ import opened Wrappers
 
     function method Cmp(t0: T, t1: T): Cmp
 
-    twostate predicate Identical(arr: array<T>, lo: int, hi: int)
+    twostate predicate UnchangedSlice(arr: array<T>, lo: int, hi: int)
       requires 0 <= lo <= hi <= arr.Length
       reads arr
     {
       arr[lo..hi] == old(arr[lo..hi])
     }
 
-    twostate lemma IdenticalSplit(arr: array<T>, lo: int, mid: int, hi: int)
+    twostate lemma UnchangedSliceSplit(arr: array<T>, lo: int, mid: int, hi: int)
       requires 0 <= lo <= mid <= hi <= arr.Length
-      requires Identical(arr, lo, hi)
-      ensures Identical(arr, lo, mid)
-      ensures Identical(arr, mid, hi)
+      requires UnchangedSlice(arr, lo, hi)
+      ensures UnchangedSlice(arr, lo, mid)
+      ensures UnchangedSlice(arr, mid, hi)
     {
       assert arr[lo..mid] == arr[lo..hi][..mid-lo];
     }
 
-    twostate lemma IdenticalShuffled(arr: array<T>, lo: int, hi: int)
+    twostate lemma UnchangedSliceShuffled(arr: array<T>, lo: int, hi: int)
       requires 0 <= lo <= hi <= arr.Length
-      requires Identical(arr, lo, hi)
+      requires UnchangedSlice(arr, lo, hi)
       ensures Shuffled(arr, lo, hi)
     {}
 
-    twostate predicate SameElements(arr: array<T>, lo: int, hi: int)
+    twostate predicate UnchangedExceptSliceShuffled(arr: array<T>, lo: int, hi: int)
       reads arr
       requires 0 <= lo <= hi <= arr.Length
     {
-      && Identical(arr, 0, lo)
+      && UnchangedSlice(arr, 0, lo)
       && Shuffled(arr, lo, hi)
-      && Identical(arr, hi, arr.Length)
+      && UnchangedSlice(arr, hi, arr.Length)
     }
 
-    twostate lemma SameElementsExtend(arr: array<T>, lo: int, lo': int, hi': int, hi: int)
+    twostate lemma UnchangedExceptSliceShuffledExtend(arr: array<T>, lo: int, lo': int, hi': int, hi: int)
       requires 0 <= lo <= lo' <= hi' <= hi <= arr.Length
-      requires SameElements(arr, lo', hi')
-      ensures SameElements(arr, lo, hi)
+      requires UnchangedExceptSliceShuffled(arr, lo', hi')
+      ensures UnchangedExceptSliceShuffled(arr, lo, hi)
     {
-      assert SameElements(arr, lo', hi');
-      assert Identical(arr, 0, lo') && Shuffled(arr, lo', hi') && Identical(arr, hi', arr.Length);
-      IdenticalSplit(arr, 0, lo, lo'); IdenticalSplit(arr, hi', hi, arr.Length);
-      assert && Identical(arr, 0, lo) && Identical(arr, lo, lo')
+      assert UnchangedExceptSliceShuffled(arr, lo', hi');
+      assert UnchangedSlice(arr, 0, lo') && Shuffled(arr, lo', hi') && UnchangedSlice(arr, hi', arr.Length);
+      UnchangedSliceSplit(arr, 0, lo, lo'); UnchangedSliceSplit(arr, hi', hi, arr.Length);
+      assert && UnchangedSlice(arr, 0, lo) && UnchangedSlice(arr, lo, lo')
              && Shuffled(arr, lo', hi')
-             && Identical(arr, hi', hi) && Identical(arr, hi, arr.Length);
-      IdenticalShuffled(arr, lo, lo'); IdenticalShuffled(arr, hi', hi);
-      assert && Identical(arr, 0, lo) && Shuffled(arr, lo, lo')
+             && UnchangedSlice(arr, hi', hi) && UnchangedSlice(arr, hi, arr.Length);
+      UnchangedSliceShuffled(arr, lo, lo'); UnchangedSliceShuffled(arr, hi', hi);
+      assert && UnchangedSlice(arr, 0, lo) && Shuffled(arr, lo, lo')
              && Shuffled(arr, lo', hi')
-             && Shuffled(arr, hi', hi) && Identical(arr, hi, arr.Length);
+             && Shuffled(arr, hi', hi) && UnchangedSlice(arr, hi, arr.Length);
       ShuffledConcat(arr, lo, lo', hi'); ShuffledConcat(arr, lo, hi', hi);
-      assert Identical(arr, 0, lo) && Shuffled(arr, lo, hi) && Identical(arr, hi, arr.Length);
-      assert SameElements(arr, lo, hi);
+      assert UnchangedSlice(arr, 0, lo) && Shuffled(arr, lo, hi) && UnchangedSlice(arr, hi, arr.Length);
+      assert UnchangedExceptSliceShuffled(arr, lo, hi);
     }
 
     twostate predicate Shuffled(arr: array<T>, lo: int, hi: int)
@@ -81,8 +81,8 @@ import opened Wrappers
       requires 0 <= lo <= hi <= arr.Length
       reads arr
     {
-      reveal C.Valid?(); // Leaks through
-      C.Valid?(Sets.OfSlice(arr, lo, hi))
+      reveal C.Valid(); // Leaks through
+      C.Valid(Sets.OfSlice(arr, lo, hi))
     }
 
     twostate lemma SetOfSliceShuffled(arr: array<T>, lo: int, hi: int)
@@ -100,10 +100,10 @@ import opened Wrappers
       }
     }
 
-    twostate lemma SortableSameElements(arr: array<T>, lo: int, hi: int)
+    twostate lemma SortableUnchangedExceptSliceShuffled(arr: array<T>, lo: int, hi: int)
       requires 0 <= lo <= hi <= arr.Length
       requires old(Sortable(arr, lo, hi))
-      requires SameElements(arr, lo, hi)
+      requires UnchangedExceptSliceShuffled(arr, lo, hi)
       ensures Sortable(arr, lo, hi)
     {
       SetOfSliceShuffled(arr, lo, hi);
@@ -126,7 +126,7 @@ import opened Wrappers
       }
     }
 
-    lemma Sortable_Slice(arr: array<T>, lo: int, hi: int, lo': int, hi': int)
+    lemma SortableSubslice(arr: array<T>, lo: int, hi: int, lo': int, hi': int)
       requires 0 <= lo <= lo' <= hi' <= hi <= arr.Length
       requires Sortable(arr, lo, hi)
       ensures Sortable(arr, lo', hi')
@@ -149,20 +149,20 @@ import opened Wrappers
     lemma StripedNonEmpty(sq: seq<T>, pivot: T, lo: int, left: int, mid: int, right: int, hi: int)
       requires 0 <= lo <= left <= mid <= right <= hi <= |sq|
       requires C.Striped(sq, pivot, lo, left, mid, right, hi)
-      requires C.Valid?(Sets.OfSeq(sq[lo..hi]))
+      requires C.Valid(Sets.OfSeq(sq[lo..hi]))
       requires pivot in sq[lo..hi]
       ensures left < right
     {
-      reveal C.Valid?();
+      reveal C.Valid();
       var idx :| lo <= idx < hi && sq[idx] == pivot;
       C.AlwaysReflexive(pivot);
       reveal C.Striped();
     }
 
-    twostate lemma StripedSameElements(arr: array<T>, pivot: T, lo: int, left: int, right: int, hi: int)
+    twostate lemma StripedUnchangedExceptSliceShuffled(arr: array<T>, pivot: T, lo: int, left: int, right: int, hi: int)
       requires 0 <= lo <= left <= right <= hi <= |arr[..]|
       requires Shuffled(arr, lo, left)
-      requires Identical(arr, left, right)
+      requires UnchangedSlice(arr, left, right)
       requires Shuffled(arr, right, hi)
       requires old(C.Striped(arr[..], pivot, lo, left, right, right, hi))
       ensures C.Striped(arr[..], pivot, lo, left, right, right, hi)
@@ -184,7 +184,7 @@ import opened Wrappers
     method Swap(arr: array<T>, ghost lo: int, i: int, j: int, ghost hi: int)
       requires 0 <= lo <= i <= j < hi <= arr.Length
       modifies arr
-      ensures SameElements(arr, lo, hi)
+      ensures UnchangedExceptSliceShuffled(arr, lo, hi)
       ensures arr[..] == old(arr[..][i := arr[j]][j := arr[i]])
     {
       arr[i], arr[j] := arr[j], arr[i];
@@ -198,7 +198,7 @@ import opened Wrappers
       requires C.Striped(arr[..], pivot, lo, left, mid, right, hi)
       requires Cmp(arr[mid], pivot).Lt?
       modifies arr
-      ensures SameElements(arr, lo, hi)
+      ensures UnchangedExceptSliceShuffled(arr, lo, hi)
       ensures arr[..] == old(arr[..][left := arr[mid]][mid := arr[left]])
       ensures C.Striped(arr[..], pivot, lo, left + 1, mid + 1, right, hi)
     {
@@ -214,7 +214,7 @@ import opened Wrappers
       requires C.Striped(arr[..], pivot, lo, left, mid, right, hi)
       requires Cmp(arr[mid], pivot).Gt?
       modifies arr
-      ensures SameElements(arr, lo, hi)
+      ensures UnchangedExceptSliceShuffled(arr, lo, hi)
       ensures arr[..] == old(arr[..][mid := arr[right - 1]][right - 1 := arr[mid]])
       ensures C.Striped(arr[..], pivot, lo, left, mid, right - 1, hi)
     {
@@ -233,8 +233,8 @@ import opened Wrappers
       forall i, j | left  <= i < j < right ensures Cmp(arr[i], arr[j]).Le? {
         var idx :| lo <= idx < hi && arr[idx] == pivot;
         assert Cmp(arr[i], pivot) == Eq;
-        assert C.Complete??(arr[j], pivot);
-        assert C.Transitive??(arr[i], pivot, arr[j]);
+        assert C.CompleteonPair(arr[j], pivot);
+        assert C.Transitive'(arr[i], pivot, arr[j]);
       }
     }
 
@@ -249,10 +249,10 @@ import opened Wrappers
       C.SortedConcat(arr[lo..mid], arr[mid..hi]);
     }
 
-    twostate lemma SortedIdentical(arr: array<T>, lo: int, hi: int)
+    twostate lemma SortedUnchangedSlice(arr: array<T>, lo: int, hi: int)
       requires 0 <= lo <= hi <= arr.Length
       requires old(Sorted(arr, lo, hi))
-      requires Identical(arr, lo, hi)
+      requires UnchangedSlice(arr, lo, hi)
       ensures Sorted(arr, lo, hi)
     {
       assert arr[lo..hi] == old(arr[lo..hi]);
@@ -276,21 +276,22 @@ import opened Wrappers
         var idx :| lo <= idx < hi && arr[idx] == pivot;
         assert Cmp(arr[i], pivot).Le?;
         assert Cmp(arr[j], pivot).Eq?;
-        assert C.Complete??(arr[j], pivot);
-        assert C.Transitive??(arr[i], pivot, arr[j]);
+        assert C.CompleteonPair(arr[j], pivot);
+        assert C.Transitive'(arr[i], pivot, arr[j]);
       }
       SortedStripedMiddle(arr, pivot, lo, left, right, hi);
       SortedConcat(arr, lo, left, right);
       forall i, j | lo <= i < right <= j < hi ensures Cmp(arr[i], arr[j]).Le? {
         assert Cmp(arr[i], pivot).Le?;
         assert Cmp(arr[j], pivot).Gt?;
-        assert C.Complete??(arr[i], pivot);
-        assert C.Complete??(arr[j], pivot);
-        assert C.Transitive??(arr[i], pivot, arr[j]);
+        assert C.CompleteonPair(arr[i], pivot);
+        assert C.CompleteonPair(arr[j], pivot);
+        assert C.Transitive'(arr[i], pivot, arr[j]);
       }
       SortedConcat(arr, lo, right, hi);
     }
 
+    // Doesn't have the O(n log n) worst case runtime yet, need MedianofMeians algorithm implemented for that.
     method QuickSort(arr: array<T>, lo: int := 0, hi: int := arr.Length)
       requires 0 <= lo <= hi <= arr.Length
       requires Sortable(arr, lo, hi)
@@ -298,33 +299,33 @@ import opened Wrappers
       modifies arr
       ensures Sortable(arr, lo, hi)
       ensures Sorted(arr, lo, hi)
-      ensures SameElements(arr, lo, hi)
+      ensures UnchangedExceptSliceShuffled(arr, lo, hi)
     {
       if hi - lo > 1 {
         var pivot := MedianOfMedians(arr, lo, hi);
         var left, right := DutchFlag(arr, pivot, lo, hi);
 
         label left:
-        SortableSameElements(arr, lo, hi);
-        Sortable_Slice(arr, lo, hi, lo, left);
+        SortableUnchangedExceptSliceShuffled(arr, lo, hi);
+        SortableSubslice(arr, lo, hi, lo, left);
         StripedNonEmpty(arr[..], pivot, lo, left, right, right, hi);
         QuickSort(arr, lo, left);
 
         label right:
-        SameElementsExtend@left(arr, lo, lo, left, hi);
-        SortableSameElements(arr, lo, hi);
-        Sortable_Slice(arr, lo, hi, right, hi);
-        IdenticalSplit@left(arr, left, hi, arr.Length);
-        IdenticalSplit@left(arr, left, right, hi);
-        IdenticalShuffled@left(arr, right, hi);
-        StripedSameElements@left(arr, pivot, lo, left, right, hi);
+        UnchangedExceptSliceShuffledExtend@left(arr, lo, lo, left, hi);
+        SortableUnchangedExceptSliceShuffled(arr, lo, hi);
+        SortableSubslice(arr, lo, hi, right, hi);
+        UnchangedSliceSplit@left(arr, left, hi, arr.Length);
+        UnchangedSliceSplit@left(arr, left, right, hi);
+        UnchangedSliceShuffled@left(arr, right, hi);
+        StripedUnchangedExceptSliceShuffled@left(arr, pivot, lo, left, right, hi);
         QuickSort(arr, right, hi);
 
-        SameElementsExtend@right(arr, lo, right, hi, hi);
-        SortableSameElements(arr, lo, hi);
-        IdenticalSplit@right(arr, lo, left, right);
-        SortedIdentical@right(arr, lo, left);
-        StripedSameElements@right(arr, pivot, lo, left, right, hi);
+        UnchangedExceptSliceShuffledExtend@right(arr, lo, right, hi, hi);
+        SortableUnchangedExceptSliceShuffled(arr, lo, hi);
+        UnchangedSliceSplit@right(arr, lo, left, right);
+        SortedUnchangedSlice@right(arr, lo, left);
+        StripedUnchangedExceptSliceShuffled@right(arr, pivot, lo, left, right, hi);
         SortedDutchFlag(arr, pivot, lo, left, right, hi);
       }
     }
@@ -341,7 +342,7 @@ import opened Wrappers
       requires 0 <= lo < hi <= arr.Length
       requires pivot in multiset(arr[lo..hi])
       modifies arr
-      ensures SameElements(arr, lo, hi)
+      ensures UnchangedExceptSliceShuffled(arr, lo, hi)
       ensures lo <= left <= right <= hi
       ensures C.Striped(arr[..], pivot, lo, left, right, right, hi)
     {
@@ -352,7 +353,7 @@ import opened Wrappers
       while mid < right
         invariant pivot in multiset(arr[lo..hi])
         invariant lo <= left <= mid <= right <= hi
-        invariant SameElements(arr, lo, hi)
+        invariant UnchangedExceptSliceShuffled(arr, lo, hi)
         invariant C.Striped(arr[..], pivot, lo, left, mid, right, hi)
       {
         reveal C.Striped();
