@@ -58,8 +58,11 @@ abstract module LittleEndianNatConversions {
     ensures E > 0
   {
     LemmaDivBasicsAuto();
+    assert forall x :: x != 0 ==> 0 / x == 0;
     LemmaPowMultipliesAuto();
     LemmaFundamentalDivMod(Large.BITS(), Small.BITS());
+    assert Large.BITS() == Small.BITS() * (Large.BITS() / Small.BITS()) + (Large.BITS() % Small.BITS());
+    assert (Large.BITS() / Small.BITS()) > 0;
     Large.BITS() / Small.BITS()
   }
 
