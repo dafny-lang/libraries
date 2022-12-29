@@ -16,13 +16,13 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.4.2"
+          dafny-version: "3.9.1"
 
-      - name: Install Dafny report generator
-        run: dotnet tool install --global dafny-reportgenerator
-
-      - name: Install lit 
+      - name: Install lit
         run: pip install lit OutputCheck
+
+      - name: Set up JS dependencies
+        run: npm install bignumber.js
 
       - name: Verify Dafny Code
         run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .

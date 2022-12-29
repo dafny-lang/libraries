@@ -232,6 +232,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     var z := (firstByte & 0xF) as bv24;
     var y := (secondByte & 0x3F) as bv24;
     var x := (thirdByte & 0x3F) as bv24;
+    assert {:split_here} true;
     (z << 12) | (y << 6) | x as Unicode.ScalarValue
   }
 
@@ -249,9 +250,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     var z := (secondByte & 0xF) as bv24;
     var y := (thirdByte & 0x3F) as bv24;
     var x := (fourthByte & 0x3F) as bv24;
-    var v := (u1 << 18) | (u2 << 16) | (z << 12) | (y << 6) | x as Unicode.ScalarValue;
     assert {:split_here} true;
-    assert EncodeScalarValueQuadrupleByte(v) == m;
-    v
+    (u1 << 18) | (u2 << 16) | (z << 12) | (y << 6) | x as Unicode.ScalarValue
   }
 }

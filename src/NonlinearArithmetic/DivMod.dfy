@@ -1270,7 +1270,7 @@ module DivMod {
     }
   }
 
-  lemma {:timeLimitMultiplier 2} LemmaModNegNeg(x: int, d: int)
+  lemma {:vcs_split_on_every_assert} LemmaModNegNeg(x: int, d: int)
     requires 0 < d
     ensures x % d == (x * (1 - d)) % d
   {

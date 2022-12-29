@@ -124,7 +124,7 @@ module ModInternals {
   }
 
   /* proves the quotient remainder theorem */
-  lemma LemmaQuotientAndRemainder(x: int, q: int, r: int, n: int)
+  lemma {:vcs_split_on_every_assert} LemmaQuotientAndRemainder(x: int, q: int, r: int, n: int)
     requires n > 0
     requires 0 <= r < n
     requires x == q * n + r

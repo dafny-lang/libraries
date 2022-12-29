@@ -199,6 +199,25 @@ module Power {
     }
   }
 
+  lemma LemmaPowSubAddCancel(b: int, e1: nat, e2: nat)
+    decreases e1
+    requires e1 >= e2
+    ensures Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
+  {
+    LemmaPowAdds(b, e1 - e2, e2);
+  }
+
+  lemma LemmaPowSubAddCancelAuto()
+    ensures forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 - e2)} | e1 >= e2
+      :: Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
+  {
+    reveal Pow();
+    forall b: int, e1: nat, e2: nat | e1 >= e2
+    {
+      LemmaPowSubAddCancel(b, e1, e2);
+    }
+  }
+
   /* Subtract exponents when dividing powers. */
   lemma LemmaPowSubtracts(b: nat, e1: nat, e2: nat)
     requires b > 0
@@ -209,7 +228,7 @@ module Power {
     LemmaPowPositiveAuto();
     calc {
       Pow(b, e2) / Pow(b, e1);
-        { LemmaPowAdds(b, e2 - e1, e1); }
+        { LemmaPowSubAddCancel(b, e2, e1); }
       Pow(b, e2 - e1) * Pow(b, e1) / Pow(b, e1);
         { LemmaDivByMultiple(Pow(b, e2 - e1), Pow(b, e1)); }
       Pow(b, e2 - e1);
@@ -339,12 +358,7 @@ module Power {
 
     LemmaPowDistributesAuto();
     LemmaPowAddsAuto();
-
-    forall x: int, y: nat, z: nat {:trigger Pow(x, y - z)} | y >= z
-      ensures Pow(x, y - z) * Pow(x, z) == Pow(x, y)
-    {
-      LemmaPowAdds(x, y - z, z);
-    }
+    LemmaPowSubAddCancelAuto();
 
     LemmaMulAuto();
     LemmaMulIncreasesAuto();
