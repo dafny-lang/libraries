@@ -35,7 +35,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
     | ExpectingByte(expected: byte, b: opt_byte)
     | ExpectingAnyByte(expected_sq: seq<byte>, b: opt_byte)
     | OtherError(err: R)
-  {
+  { // TODO: Include positions in errors
     function ToString(pr: R -> string) : string {
       match this
         case EOF => "Reached EOF"
