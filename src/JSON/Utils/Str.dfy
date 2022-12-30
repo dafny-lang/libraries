@@ -182,10 +182,8 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
     type Char = char
   }
 
-  const HEX_DIGITS := [
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'A', 'B', 'C', 'D', 'E', 'F'
-  ]
+  const HEX_DIGITS: seq<char> := "0123456789ABCDEF"
+
   const HEX_TABLE := map[
     '0' := 0, '1' := 1, '2' := 2, '3' := 3, '4' := 4, '5' := 5, '6' := 6, '7' := 7, '8' := 8, '9' := 9,
     'a' := 0xA, 'b' := 0xB, 'c' := 0xC, 'd' := 0xD, 'e' := 0xE, 'f' := 0xF,
@@ -255,6 +253,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
   }
 
   function Concat(strs: seq<string>) : string {
-    Join("", strs)
+    if |strs| == 0 then ""
+    else strs[0] + Concat(strs[1..])
   }
+
+  lemma Concat_Join(strs: seq<string>)
+    ensures Concat(strs) == Join("", strs)
+  {}
 }

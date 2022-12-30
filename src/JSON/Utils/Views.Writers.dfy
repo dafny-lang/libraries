@@ -8,11 +8,6 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Writers {
 
   import opened Core
 
-  // export
-  //   reveals Error, Writer
-  //   provides Core, Wrappers
-  //   provides Writer_, Writer_.Append, Writer_.Empty, Writer_.Valid?
-
   datatype Chain =
     | Empty
     | Chain(previous: Chain, v: View)

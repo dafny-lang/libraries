@@ -4,9 +4,9 @@ JSON serialization and deserialization in Dafny, as described in [RFC 8259](http
 
 This library provides two APIs:
 
-- A low-level (zero-copy) API that is efficient, verified (see [What is verified?](#what-is-verified) below for details) and allows incremental changes (re-serialization is much faster for unchanged objects), but is more cumbersome to use (in particular, it works on a concrete syntax tree that represents strings as unescaped, undecoded utf-8 byte sequences of type `seq<uint8>`).
+- A low-level (zero-copy) API that is efficient, verified (see [What is verified?](#what-is-verified) below for details) and allows incremental changes (re-serialization is much faster for unchanged objects), but is more cumbersome to use.  This API operates on concrete syntax trees that capture details of punctuation and blanks and represent strings using unescaped, undecoded utf-8 byte sequences.
 
-- A high-level API built on top of the zero-copy API that is unverified and less efficient, but is more convenient to use (in particular, it produces abstract syntax trees and it abstracts away details of encoding and escaping: its JSON AST uses Dafny's `string` type).
+- A high-level API built on top of the previous one.  This API is more convenient to use, but it is unverified and less efficient. It produces abstract syntax trees that represent strings using Dafny's built-in `string` type.
 
 Both APIs provides functions for serialization (utf-8 bytes to AST) and deserialization (AST to utf-8 bytes).  Unverified transcoding functions are provided in `Utils/Unicode.dfy` if you need to read or produce JSON text in other encodings.
 

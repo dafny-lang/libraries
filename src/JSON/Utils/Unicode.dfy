@@ -1,5 +1,9 @@
 include "../../BoundedInts.dfy"
 
+// TODO: This module was written before Dafny got a Unicode library.  It would
+// be better to combine the two, especially given that the Unicode library has
+// proofs!
+
 module {:options "-functionSyntax:4"} JSON.Utils.Unicode {
   import opened BoundedInts
 

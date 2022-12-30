@@ -77,7 +77,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       s[beg..end]
     }
 
-    ghost function StrictlyAdvancedFrom?(other: Cursor): (b: bool)
+    ghost predicate StrictlyAdvancedFrom?(other: Cursor): (b: bool)
       requires Valid?
       ensures b ==>
         SuffixLength() < other.SuffixLength()
@@ -156,6 +156,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       end - beg
     }
 
+    lemma PrefixSuffixLength()
+      requires Valid?
+      ensures Length() == PrefixLength() + SuffixLength()
+    {}
+
     ghost predicate ValidIndex?(idx: uint32) {
       beg as int + idx as int < end as int
     }
@@ -186,7 +191,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       else SuffixAt(0) as opt_byte
     }
 
-    function LookingAt(c: char): (b: bool)
+    predicate LookingAt(c: char): (b: bool)
       requires Valid?
       requires c as int < 256
       ensures b <==> !EOF? && SuffixAt(0) == c as byte

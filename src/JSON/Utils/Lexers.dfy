@@ -6,7 +6,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Lexers {
     import opened Wrappers
     import opened BoundedInts
 
-    datatype LexerResult<+T, +R> = Accept | Reject(err: R) | Partial(st: T)
+    datatype LexerResult<+T, +R> =
+      // A Lexer may return three results:
+      | Accept // The input is valid.
+      | Reject(err: R) // The input is not valid; `err` says why.
+      | Partial(st: T) // More input is needed to finish lexing.
 
     type Lexer<!T, +R> = (T, opt_byte) -> LexerResult<T, R>
   }

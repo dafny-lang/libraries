@@ -1,13 +1,15 @@
 include "ConcreteSyntax.Spec.dfy"
 
-module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties {
+module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
+  // Some useful properties about the functions used in `ConcreteSyntax.Spec`.
+{
   import opened BoundedInts
 
   import Vs = Utils.Views.Core
   import opened Grammar
   import Spec
 
-  lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>) // DISCUSS
+  lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>)
     ensures forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
       | && (forall d | d < bracketed :: pd0.requires(d))
         && (forall d | d < bracketed :: pd1.requires(d))
