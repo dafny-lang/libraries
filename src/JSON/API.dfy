@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 include "Serializer.dfy"
 include "Deserializer.dfy"
 include "ZeroCopy/API.dfy"

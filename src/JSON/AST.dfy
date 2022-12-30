@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 module {:options "-functionSyntax:4"} JSON.AST {
   datatype Decimal =
     Decimal(n: int, e10: int) // (n) * 10^(e10)

@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 include "ConcreteSyntax.Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties

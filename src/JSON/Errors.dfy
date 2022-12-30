@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 include "../Wrappers.dfy"
 include "../BoundedInts.dfy"
 include "Utils/Str.dfy"

@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 include "../../BoundedInts.dfy"
 
 // TODO: This module was written before Dafny got a Unicode library.  It would

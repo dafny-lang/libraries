@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:3 "%s"
+
 include "Utils/Unicode.dfy"
 include "Errors.dfy"
 include "API.dfy"

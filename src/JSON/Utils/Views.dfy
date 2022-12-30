@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 include "../../BoundedInts.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Utils.Views.Core {

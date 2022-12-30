@@ -1,3 +1,5 @@
+// RUN: %dafny -compile:0 "%s"
+
 include "../Grammar.dfy"
 include "../ConcreteSyntax.Spec.dfy"
 include "Serializer.dfy"
