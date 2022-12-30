@@ -127,10 +127,10 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
   const COLON: Structural<jcolon> :=
     MkStructural(Grammar.COLON)
 
-  function KV(kv: (string, AST.JSON)): Result<jkv> {
+  function KeyValue(kv: (string, AST.JSON)): Result<jKeyValue> {
     var k :- String(kv.0);
     var v :- Value(kv.1);
-    Success(Grammar.KV(k, COLON, v))
+    Success(Grammar.KeyValue(k, COLON, v))
   }
 
   function MkSuffixedSequence<D, S>(ds: seq<D>, suffix: Structural<S>, start: nat := 0)
@@ -146,7 +146,7 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
     MkStructural(Grammar.COMMA)
 
   function Object(obj: seq<(string, AST.JSON)>): Result<jobject> {
-    var items :- Seq.MapWithResult(v requires v in obj => KV(v), obj);
+    var items :- Seq.MapWithResult(v requires v in obj => KeyValue(v), obj);
     Success(Bracketed(MkStructural(LBRACE),
                       MkSuffixedSequence(items, COMMA),
                       MkStructural(RBRACE)))

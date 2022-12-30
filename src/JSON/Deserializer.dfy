@@ -122,14 +122,14 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
         Success(AST.Decimal(n * Pow(10, pow10) + frac, e10 - pow10))
   }
 
-  function KV(js: Grammar.jkv): DeserializationResult<(string, AST.JSON)> {
+  function KeyValue(js: Grammar.jKeyValue): DeserializationResult<(string, AST.JSON)> {
     var k :- String(js.k);
     var v :- Value(js.v);
     Success((k, v))
   }
 
   function Object(js: Grammar.jobject): DeserializationResult<seq<(string, AST.JSON)>> {
-    Seq.MapWithResult(d requires d in js.data => KV(d.t), js.data)
+    Seq.MapWithResult(d requires d in js.data => KeyValue(d.t), js.data)
   }
 
   function Array(js: Grammar.jarray): DeserializationResult<seq<AST.JSON>> {

@@ -4,9 +4,11 @@
 include "API.dfy"
 include "ZeroCopy/API.dfy"
 
-/// This library offers two APIs: a high-level one and a low-level one.
+/// This library offers two APIs: a high-level one (giving abstract syntax trees
+/// with no concrete syntactic details) and a low-level one (including all
+/// information about blanks, separator positions, character escapes, etc.).
 ///
-/// ## High-level API
+/// ## High-level API (Abstract syntax)
 
 module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
   import API
@@ -113,7 +115,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
   }
 }
 
-/// ## Low-level API
+/// ## Low-level API (concrete syntax)
 ///
 /// If you care about low-level performance, or about preserving existing
 /// formatting as much as possible, you may prefer to use the lower-level API:
@@ -225,7 +227,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
 /// modifications):
 
       case Object(obj) =>
-        Object(obj.(data := MapSuffixedSequence(obj.data, (s: Suffixed<jkv, jcomma>) requires s in obj.data =>
+        Object(obj.(data := MapSuffixedSequence(obj.data, (s: Suffixed<jKeyValue, jcomma>) requires s in obj.data =>
           s.t.(v := ReplaceNull(s.t.v, replacement)))))
       case Array(arr) =>
         Array(arr.(data := MapSuffixedSequence(arr.data, (s: Suffixed<Value, jcomma>) requires s in arr.data =>

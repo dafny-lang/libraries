@@ -70,7 +70,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
        else ToBytes("e") + Transcode16To8(Str.OfInt(dec.e10)))
   }
 
-  function KV(kv: (string, JSON)): bytes {
+  function KeyValue(kv: (string, JSON)): bytes {
     String(kv.0) + ToBytes(":") + JSON(kv.1)
   }
 
@@ -82,7 +82,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
 
   function Object(obj: seq<(string, JSON)>): bytes {
     ToBytes("{") +
-    Join(ToBytes(","), seq(|obj|, i requires 0 <= i < |obj| => KV(obj[i]))) +
+    Join(ToBytes(","), seq(|obj|, i requires 0 <= i < |obj| => KeyValue(obj[i]))) +
     ToBytes("}")
   }
 

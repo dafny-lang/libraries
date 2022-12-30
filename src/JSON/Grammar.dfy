@@ -1,6 +1,6 @@
-/// ========================
-///  Low-level JSON grammar
-/// ========================
+/// ==========================================
+///  Low-level JSON grammar (Concrete syntax)
+/// ==========================================
 ///
 /// See ``JSON.AST`` for the high-level interface.
 
@@ -74,13 +74,13 @@ module {:options "-functionSyntax:4"} JSON.Grammar {
   type jint = v: View | Int?(v) witness View.OfBytes(['0' as byte])
   type jstr = v: View | true witness View.OfBytes([]) // TODO: Enforce quoting and escaping
   datatype jstring = JString(lq: jquote, contents: jstr, rq: jquote)
-  datatype jkv = KV(k: jstring, colon: Structural<jcolon>, v: Value)
+  datatype jKeyValue = KeyValue(k: jstring, colon: Structural<jcolon>, v: Value)
 
   // TODO enforce no leading space before closing bracket to disambiguate WS { WS WS } WS
-  type jobject = Bracketed<jlbrace, jkv, jcomma, jrbrace>
+  type jobject = Bracketed<jlbrace, jKeyValue, jcomma, jrbrace>
   type jarray = Bracketed<jlbracket, Value, jcomma, jrbracket>
-  type jmembers = SuffixedSequence<jkv, jcomma>
-  type jmember = Suffixed<jkv, jcomma>
+  type jmembers = SuffixedSequence<jKeyValue, jcomma>
+  type jmember = Suffixed<jKeyValue, jcomma>
   type jitems = SuffixedSequence<Value, jcomma>
   type jitem = Suffixed<Value, jcomma>
 

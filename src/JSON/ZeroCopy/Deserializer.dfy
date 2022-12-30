@@ -588,7 +588,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Wrappers
     import Strings
 
-    type TElement = jkv
+    type TElement = jKeyValue
 
     const OPEN := '{' as byte
     const CLOSE := '}' as byte
@@ -600,27 +600,27 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       Success(cs.Split())
     }
 
-    function {:opaque} KVFromParts(ghost cs: Cursor, k: Split<jstring>,
+    function {:opaque} KeyValueFromParts(ghost cs: Cursor, k: Split<jstring>,
                                    colon: Split<Structural<jcolon>>, v: Split<Value>)
-      : (sp: Split<jkv>)
+      : (sp: Split<jKeyValue>)
       requires k.StrictlySplitFrom?(cs, Spec.String)
       requires colon.StrictlySplitFrom?(k.cs, c => Spec.Structural(c, SpecView))
       requires v.StrictlySplitFrom?(colon.cs, Spec.Value)
-      ensures sp.StrictlySplitFrom?(cs, Spec.KV)
+      ensures sp.StrictlySplitFrom?(cs, Spec.KeyValue)
     {
-      var sp := SP(Grammar.KV(k.t, colon.t, v.t), v.cs);
+      var sp := SP(Grammar.KeyValue(k.t, colon.t, v.t), v.cs);
       calc { // Dafny/Z3 has a lot of trouble with associativity, so do the steps one by one:
         cs.Bytes();
         Spec.String(k.t) + k.cs.Bytes();
         Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + colon.cs.Bytes();
         Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + Spec.Value(v.t) + v.cs.Bytes();
-        Spec.KV(sp.t) + v.cs.Bytes();
+        Spec.KeyValue(sp.t) + v.cs.Bytes();
       }
       sp
     }
 
     function ElementSpec(t: TElement) : bytes {
-      Spec.KV(t)
+      Spec.KeyValue(t)
     }
     function {:opaque} Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
@@ -628,7 +628,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var k :- Strings.String(cs);
       var colon :- Core.Structural(k.cs, Parsers.Parser(Colon, SpecView));
       var v :- json.fn(colon.cs);
-      Success(KVFromParts(cs, k, colon, v))
+      Success(KeyValueFromParts(cs, k, colon, v))
     }
   }
 

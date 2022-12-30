@@ -10,37 +10,37 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.Spec {
     v.Bytes()
   }
 
-  function Structural<T>(self: Structural<T>, pt: T -> bytes): bytes {
-    View(self.before) + pt(self.t) + View(self.after)
+  function Structural<T>(self: Structural<T>, fT: T -> bytes): bytes {
+    View(self.before) + fT(self.t) + View(self.after)
   }
 
   function StructuralView(self: Structural<Vs.View>): bytes {
     Structural<Vs.View>(self, View)
   }
 
-  function Maybe<T>(self: Maybe<T>, pt: T -> bytes): (bs: bytes)
+  function Maybe<T>(self: Maybe<T>, fT: T -> bytes): (bs: bytes)
     ensures self.Empty? ==> bs == []
-    ensures self.NonEmpty? ==> bs == pt(self.t)
+    ensures self.NonEmpty? ==> bs == fT(self.t)
   {
-    if self.Empty? then [] else pt(self.t)
+    if self.Empty? then [] else fT(self.t)
   }
 
-  function ConcatBytes<T>(ts: seq<T>, pt: T --> bytes) : bytes
-    requires forall d | d in ts :: pt.requires(d)
+  function ConcatBytes<T>(ts: seq<T>, fT: T --> bytes) : bytes
+    requires forall d | d in ts :: fT.requires(d)
   {
     if |ts| == 0 then []
-    else pt(ts[0]) + ConcatBytes(ts[1..], pt)
+    else fT(ts[0]) + ConcatBytes(ts[1..], fT)
   }
 
-  function Bracketed<D, S>(self: Bracketed<Vs.View, D, S, Vs.View>, pdatum: Suffixed<D, S> --> bytes): bytes
-    requires forall d | d < self :: pdatum.requires(d)
+  function Bracketed<D, S>(self: Bracketed<Vs.View, D, S, Vs.View>, fDatum: Suffixed<D, S> --> bytes): bytes
+    requires forall d | d < self :: fDatum.requires(d)
   {
     StructuralView(self.l) +
-    ConcatBytes(self.data, pdatum) +
+    ConcatBytes(self.data, fDatum) +
     StructuralView(self.r)
   }
 
-  function KV(self: jkv): bytes {
+  function KeyValue(self: jKeyValue): bytes {
     String(self.k) + StructuralView(self.colon) + Value(self.v)
   }
 
@@ -66,7 +66,7 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.Spec {
   }
 
   function Member(self: jmember) : bytes {
-    KV(self.t) + CommaSuffix(self.suffix)
+    KeyValue(self.t) + CommaSuffix(self.suffix)
   }
 
   function Item(self: jitem) : bytes {
