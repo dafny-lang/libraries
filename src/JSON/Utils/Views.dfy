@@ -82,19 +82,19 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Core {
       else At(0) as opt_byte
     }
 
-    method Blit(bs: array<byte>, start: uint32 := 0)
+    method CopyTo(dest: array<byte>, start: uint32 := 0)
       requires Valid?
-      requires start as int + Length() as int <= bs.Length
+      requires start as int + Length() as int <= dest.Length
       requires start as int + Length() as int < TWO_TO_THE_32
-      modifies bs
-      ensures bs[start..start + Length()] == Bytes()
-      ensures bs[start + Length()..] == old(bs[start + Length()..])
+      modifies dest
+      ensures dest[start..start + Length()] == Bytes()
+      ensures dest[start + Length()..] == old(dest[start + Length()..])
     {
       for idx := 0 to Length()
-        invariant bs[start..start + idx] == Bytes()[..idx]
-        invariant bs[start + Length()..] == old(bs[start + Length()..])
+        invariant dest[start..start + idx] == Bytes()[..idx]
+        invariant dest[start + Length()..] == old(dest[start + Length()..])
       {
-        bs[start + idx] := s[beg + idx];
+        dest[start + idx] := s[beg + idx];
       }
     }
   }

@@ -22,11 +22,11 @@ module {:options "-functionSyntax:4"} JSON.API {
     bs := ZeroCopy.SerializeAlloc(js);
   }
 
-  method SerializeBlit(js: AST.JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
+  method SerializeInto(js: AST.JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
     modifies bs
   {
     var js :- Serializer.JSON(js);
-    len := ZeroCopy.SerializeBlit(js, bs);
+    len := ZeroCopy.SerializeInto(js, bs);
   }
 
   function {:opaque} Deserialize(bs: seq<byte>) : (js: DeserializationResult<AST.JSON>)

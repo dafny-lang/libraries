@@ -24,17 +24,17 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     return Success(bs);
   }
 
-  method SerializeTo(js: JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
-    modifies bs
-    ensures len.Success? ==> len.value as int <= bs.Length
-    ensures len.Success? ==> bs[..len.value] == Spec.JSON(js)
-    ensures len.Success? ==> bs[len.value..] == old(bs[len.value..])
-    ensures len.Failure? ==> unchanged(bs)
+  method SerializeTo(js: JSON, dest: array<byte>) returns (len: SerializationResult<uint32>)
+    modifies dest
+    ensures len.Success? ==> len.value as int <= dest.Length
+    ensures len.Success? ==> dest[..len.value] == Spec.JSON(js)
+    ensures len.Success? ==> dest[len.value..] == old(dest[len.value..])
+    ensures len.Failure? ==> unchanged(dest)
   {
     var writer := Text(js);
     :- Need(writer.Unsaturated?, OutOfMemory);
-    :- Need(writer.length as int <= bs.Length, OutOfMemory);
-    writer.Blit(bs);
+    :- Need(writer.length as int <= dest.Length, OutOfMemory);
+    writer.CopyTo(dest);
     return Success(writer.length);
   }
 

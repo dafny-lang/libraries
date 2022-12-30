@@ -26,7 +26,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.API {
     bs := Serializer.Serialize(js);
   }
 
-  method SerializeBlit(js: Grammar.JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
+  method SerializeInto(js: Grammar.JSON, bs: array<byte>) returns (len: SerializationResult<uint32>)
     modifies bs
     ensures len.Success? ==> len.value as int <= bs.Length
     ensures len.Success? ==> bs[..len.value] == Spec.JSON(js)

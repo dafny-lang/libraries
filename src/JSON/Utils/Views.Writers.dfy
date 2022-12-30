@@ -43,16 +43,16 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Writers {
         Chain(this, v')
     }
 
-    method {:tailrecursion} Blit(bs: array<byte>, end: uint32)
-      requires end as int == Length() <= bs.Length
-      modifies bs
-      ensures bs[..end] == Bytes()
-      ensures bs[end..] == old(bs[end..])
+    method {:tailrecursion} CopyTo(dest: array<byte>, end: uint32)
+      requires end as int == Length() <= dest.Length
+      modifies dest
+      ensures dest[..end] == Bytes()
+      ensures dest[end..] == old(dest[end..])
     {
       if Chain? {
         var end := end - v.Length();
-        v.Blit(bs, end);
-        previous.Blit(bs, end);
+        v.CopyTo(dest, end);
+        previous.CopyTo(dest, end);
       }
     }
   }
@@ -100,15 +100,15 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Writers {
       fn(this)
     }
 
-    method {:tailrecursion} Blit(bs: array<byte>)
+    method {:tailrecursion} CopyTo(dest: array<byte>)
       requires Valid?
       requires Unsaturated?
-      requires Length() <= bs.Length
-      modifies bs
-      ensures bs[..length] == Bytes()
-      ensures bs[length..] == old(bs[length..])
+      requires Length() <= dest.Length
+      modifies dest
+      ensures dest[..length] == Bytes()
+      ensures dest[length..] == old(dest[length..])
     {
-      chain.Blit(bs, length);
+      chain.CopyTo(dest, length);
     }
 
     method ToArray() returns (bs: array<byte>)
@@ -118,7 +118,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Writers {
       ensures bs[..] == Bytes()
     {
       bs := new byte[length];
-      Blit(bs);
+      CopyTo(bs);
     }
   }
 }

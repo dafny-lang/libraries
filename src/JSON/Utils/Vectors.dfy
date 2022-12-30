@@ -76,7 +76,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       items := items[idx := a];
     }
 
-    method Blit(new_data: array<A>, count: uint32)
+    method CopyFrom(new_data: array<A>, count: uint32)
       requires count as int <= new_data.Length
       requires count <= capacity
       requires data.Length == capacity as int
@@ -104,7 +104,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
     {
       var old_data, old_capacity := data, capacity;
       data, capacity := new A[new_capacity](_ => a), new_capacity;
-      Blit(old_data, old_capacity);
+      CopyFrom(old_data, old_capacity);
       Repr := {this, data};
     }
 
