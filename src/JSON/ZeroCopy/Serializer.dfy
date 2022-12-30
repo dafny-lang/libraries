@@ -1,6 +1,6 @@
 include "../Errors.dfy"
-include "../LowLevel.Spec.dfy"
-include "../LowLevel.SpecProperties.dfy"
+include "../ConcreteSyntax.Spec.dfy"
+include "../ConcreteSyntax.SpecProperties.dfy"
 include "../Utils/Views.Writers.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
@@ -8,8 +8,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   import opened Wrappers
 
   import opened Errors
-  import LowLevel.Spec
-  import LowLevel.SpecProperties
+  import ConcreteSyntax.Spec
+  import ConcreteSyntax.SpecProperties
   import opened Grammar
   import opened Utils.Views.Writers
   import opened Vs = Utils.Views.Core // DISCUSS: Module naming convention?

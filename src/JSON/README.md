@@ -4,9 +4,9 @@ JSON serialization and deserialization in Dafny, as described in [RFC 8259](http
 
 This library provides two APIs:
 
-- A low-level (zero-copy) API that is efficient, verified (see [What is verified?](#what-is-verified) below for details) and allows incremental changes (re-serialization is much faster for unchanged objects), but is more cumbersome to use (in particular, its JSON AST exposes strings as unescaped, undecoded utf-8 byte sequences of type `seq<uint8>`).
+- A low-level (zero-copy) API that is efficient, verified (see [What is verified?](#what-is-verified) below for details) and allows incremental changes (re-serialization is much faster for unchanged objects), but is more cumbersome to use (in particular, it works on a concrete syntax tree that represents strings as unescaped, undecoded utf-8 byte sequences of type `seq<uint8>`).
 
-- A high-level API built on top of the zero-copy API that is unverified and less efficient, but is more convenient to use (in particular, it handles encoding and escaping: its JSON AST uses Dafny's `string` type).
+- A high-level API built on top of the zero-copy API that is unverified and less efficient, but is more convenient to use (in particular, it produces abstract syntax trees and it abstracts away details of encoding and escaping: its JSON AST uses Dafny's `string` type).
 
 Both APIs provides functions for serialization (utf-8 bytes to AST) and deserialization (AST to utf-8 bytes).  Unverified transcoding functions are provided in `Utils/Unicode.dfy` if you need to read or produce JSON text in other encodings.
 
@@ -37,7 +37,7 @@ expect API.Serialize(CITY_AST) == Success(Unicode.Transcode16To8(
 
 ## What is verified?
 
-The zero-copy serializer is proved sound and complete against a simple functional specification found in [`LowLevel.Spec.dfy`](./LowLevel.Spec.dfy).  The low-level deserializer is proven sound, but not complete, against that same specification: if a value is deserialized successfully, then re-serializing recovers the original bytestring.
+The zero-copy serializer is proved sound and complete against a simple functional specification found in [`ConcreteSyntax.Spec.dfy`](./ConcreteSyntax.Spec.dfy).  The low-level deserializer is proven sound, but not complete, against that same specification: if a value is deserialized successfully, then re-serializing recovers the original bytestring.
 
 ### Useful submodules
 

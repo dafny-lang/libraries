@@ -1,5 +1,5 @@
 include "../Grammar.dfy"
-include "../LowLevel.Spec.dfy"
+include "../ConcreteSyntax.Spec.dfy"
 include "Serializer.dfy"
 include "Deserializer.dfy"
 
@@ -9,7 +9,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.API {
 
   import opened Errors
   import Grammar
-  import LowLevel.Spec
+  import ConcreteSyntax.Spec
   import Serializer
   import Deserializer
 

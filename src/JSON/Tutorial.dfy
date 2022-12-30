@@ -8,7 +8,7 @@ include "ZeroCopy/API.dfy"
 ///
 /// ## High-level API
 
-module {:options "-functionSyntax:4"} JSON.Examples.HighLevel {
+module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
   import API
   import Utils.Unicode
   import opened AST
@@ -118,7 +118,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.HighLevel {
 /// If you care about low-level performance, or about preserving existing
 /// formatting as much as possible, you may prefer to use the lower-level API:
 
-module {:options "-functionSyntax:4"} JSON.Examples.LowLevel {
+module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
   import ZeroCopy.API
   import Utils.Unicode
   import opened Grammar

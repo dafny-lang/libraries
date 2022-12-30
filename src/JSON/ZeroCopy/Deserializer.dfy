@@ -1,7 +1,7 @@
 include "../Errors.dfy"
 include "../Grammar.dfy"
-include "../LowLevel.Spec.dfy"
-include "../LowLevel.SpecProperties.dfy"
+include "../ConcreteSyntax.Spec.dfy"
+include "../ConcreteSyntax.SpecProperties.dfy"
 include "../Utils/Parsers.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
@@ -9,7 +9,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
     import opened Wrappers
 
-    import LowLevel.Spec
+    import ConcreteSyntax.Spec
     import Vs = Utils.Views.Core
     import opened Utils.Cursors
     import opened Utils.Parsers
@@ -104,7 +104,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened BoundedInts
     import opened Params: SequenceParams
 
-    import LowLevel.SpecProperties
+    import ConcreteSyntax.SpecProperties
     import opened Vs = Utils.Views.Core
     import opened Grammar
     import opened Utils.Cursors
@@ -331,7 +331,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import Arrays
     import Constants
 
-    import LowLevel.SpecProperties
+    import ConcreteSyntax.SpecProperties
 
     function {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1

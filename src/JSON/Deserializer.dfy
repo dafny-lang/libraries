@@ -37,6 +37,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     js.At(0) == 't' as byte
   }
 
+  // TODO: Verify this function
   function Unescape(str: string, start: nat := 0): DeserializationResult<string>
     decreases |str| - start
   { // Assumes UTF-16 strings

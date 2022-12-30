@@ -1,6 +1,6 @@
 include "Grammar.dfy"
 
-module {:options "-functionSyntax:4"} JSON.LowLevel.Spec {
+module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.Spec {
   import opened BoundedInts
 
   import Vs = Utils.Views.Core

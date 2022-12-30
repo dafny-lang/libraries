@@ -49,7 +49,7 @@ module JSON.Tests.ZeroCopyWrapper refines Wrapper {
   import opened Wrappers
   import Grammar
   import ZeroCopy.API
-  import LowLevel.Spec
+  import ConcreteSyntax.Spec
 
   type JSON = Grammar.JSON
 
@@ -72,7 +72,7 @@ module JSON.Tests.ZeroCopyWrapper refines Wrapper {
   }
 }
 
-module JSON.Tests.HighLevelWrapper refines Wrapper {
+module JSON.Tests.AbstractSyntaxWrapper refines Wrapper {
   import opened Wrappers
   import Grammar
   import API
@@ -128,6 +128,6 @@ module JSON.Tests {
 
   method Main() {
     ZeroCopyWrapper.TestStrings(VECTORS);
-    HighLevelWrapper.TestStrings(VECTORS);
+    AbstractSyntaxWrapper.TestStrings(VECTORS);
   }
 }
