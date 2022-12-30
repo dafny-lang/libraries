@@ -173,7 +173,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   // maintaining the termination argument?  Maybe the lambda for elements will be enough?
 
   ghost function SequenceSpec<T>(v: Value, items: seq<T>,
-                                 spec: T -> bytes, impl: (ghost Value, T, Writer) --> Writer,
+                                 spec: T -> bytes, impl: (Value, T, Writer) --> Writer,
                                  writer: Writer)
     : (wr: Writer)
     requires forall item, wr | item in items :: impl.requires(v, item, wr)
