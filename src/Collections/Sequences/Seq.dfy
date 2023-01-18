@@ -171,7 +171,7 @@ module Seq {
   /* if sequence a and b don't have duplicates and there are no elements in
   common between them, then the concatenated sequence of a + b will not contain
   duplicates either */
-  lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(a: seq<T>, b: seq<T>)
+  lemma LemmaNoDuplicatesInConcat<T>(a: seq<T>, b: seq<T>)
     requires HasNoDuplicates(a);
     requires HasNoDuplicates(b);
     requires multiset(a) !! multiset(b);
@@ -180,8 +180,12 @@ module Seq {
     reveal HasNoDuplicates();
     var c := a + b;
     if |c| > 1 {
-      assert forall i, j {:trigger c[i], c[j]}:: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
-        c[i] in multiset(a) && c[j] in multiset(b) && c[i] != c[j]; 
+      assert forall i {:trigger c[i]} :: 0 <= i < |a| ==>
+        c[i] in multiset(a);
+      assert forall j {:trigger c[j]} :: |a| <= j < |c| ==>
+        c[j] in multiset(b);
+      assert forall i, j {:trigger c[i], c[j]} :: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
+        c[i] != c[j];
     }
   }
 
