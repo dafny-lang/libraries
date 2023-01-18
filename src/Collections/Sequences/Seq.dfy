@@ -563,7 +563,7 @@ module Seq {
     if |s| == 0 {
     } else {
       LemmaFlattenLengthLeMul(s[..|s|-1], j);
-      assert |FlattenReverse(s[..|s|-1])| <= (|s|-1) * j;
+      assert {:split_here} |FlattenReverse(s[..|s|-1])| <= (|s|-1) * j;
     }
   }
 
