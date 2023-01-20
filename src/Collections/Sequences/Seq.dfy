@@ -15,10 +15,14 @@
 
 include "../../Wrappers.dfy"
 include "../../Math.dfy"
+include "MergeSort.dfy"
+include "../../Relations.dfy"
 
 module Seq {
 
   import opened Wrappers
+  import opened MergeSort
+  import opened Relations
   import Math
 
   /**********************************************************
@@ -766,4 +770,66 @@ module Seq {
     }
   }
 
+  /**********************************************************
+  *
+  *  Converting a set to a sorted sequence
+  *
+  ***********************************************************/  
+
+
+  /* Converting a set to a sequence (ghost) */
+  function GhostSetToSeq<T>(s: set<T>): (xs: seq<T>)
+    ensures multiset(s) == multiset(xs)
+  {
+    if s == {} then [] else var x :| x in s; [x] + GhostSetToSeq(s - {x})
+  }
+
+  /* Converting a set to a sequence (compiled) */
+  method SetToSeq<T>(s: set<T>) returns (xs: seq<T>)
+    ensures multiset(s) == multiset(xs)
+  {
+    xs := [];
+    var left: set<T> := s;
+    while left != {}
+      invariant multiset(left) + multiset(xs) == multiset(s)
+    {
+      var x :| x in left;
+      left := left - {x};
+      xs := xs + [x];
+    }
+  }
+
+  /* Proves that any two sequences that are sorted by a total order and admit the
+     same multiset are equal */
+  lemma SortedUnique<T>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
+    requires SortedBy(xs, R)
+    requires SortedBy(ys, R)
+    requires TotalOrdering(R)
+    requires multiset(xs) == multiset(ys)
+    ensures xs == ys
+  {
+    assert |xs| == |multiset(xs)| == |multiset(ys)| == |ys|;
+    if xs == [] || ys == [] {
+    } else {
+      assert xs == [xs[0]] + xs[1..];
+      assert ys == [ys[0]] + ys[1..];
+      assert multiset(xs[1..]) == multiset(xs) - multiset{xs[0]};
+      assert multiset(ys[1..]) == multiset(ys) - multiset{ys[0]};
+      assert multiset(xs[1..]) == multiset(ys[1..]);
+      SortedUnique(xs[1..], ys[1..], R);
+    }
+  }
+
+  /* Converting a set to a sorted sequence */
+  function SetToSortedSeq<T>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
+    requires TotalOrdering(R)
+    ensures multiset(s) == multiset(xs)
+    ensures SortedBy(xs, R)
+  {
+    MergeSortBy(GhostSetToSeq(s), R)
+  } by method {
+    xs := SetToSeq(s);
+    xs := MergeSortBy(xs, R);
+    SortedUnique(xs, SetToSortedSeq(s, R), R);
+  }
 }
