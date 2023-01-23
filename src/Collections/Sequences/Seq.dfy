@@ -27,48 +27,51 @@ module Seq {
   *
   ***********************************************************/
 
-  /* finds the first element in the sequence */
+  /* Returns the first element in a sequence */
   function method First<T>(xs: seq<T>): T
     requires |xs| > 0
   {
     xs[0]
   }
 
+  /* Returns a sequence without its first element */
   function method DropFirst<T>(xs: seq<T>): seq<T>
     requires |xs| > 0
   {
     xs[1..]
   }
 
-  /* finds the last element in the sequence */
+  /* Returns the last element of a sequence */
   function method Last<T>(xs: seq<T>): T
     requires |xs| > 0;
   {
     xs[|xs|-1]
   }
 
-  /* returns the sequence slice up to but not including the last element */
+  /* Returns a sequence without its last element */
   function method DropLast<T>(xs: seq<T>): seq<T> 
     requires |xs| > 0;
   {
     xs[..|xs|-1]
   }
 
-  /* concatenating everything but the last element + the last element results in the original seq */
+  /* Proves that concatenating a sequence without its last element and its 
+     last element results in the original sequence */
   lemma LemmaLast<T>(xs: seq<T>)
     requires |xs| > 0;
-    ensures  DropLast(xs) + [Last(xs)] == xs;
+    ensures DropLast(xs) + [Last(xs)] == xs;
   {
   }
 
-  /* the last element in an appended sequence will be the last element of the latter sequence */
+  /* Proves that the last element of two concatenated sequences will be the 
+     last element of the latter sequence */
   lemma LemmaAppendLast<T>(xs: seq<T>, ys: seq<T>)
     requires 0 < |xs + ys| && 0 < |ys|
     ensures Last(xs + ys) == Last(ys)
   {
   }
 
-  /* explains associative property of sequences in addition */
+  /* Proves that the concatenation of sequences is associative */
   lemma LemmaConcatIsAssociative<T>(xs: seq<T>, ys: seq<T>, zs: seq<T>)
     ensures xs + (ys + zs) == (xs + ys) + zs;
   {
@@ -80,27 +83,30 @@ module Seq {
   *
   ***********************************************************/
   
+  /* Is true if the sequence xs is a prefix of the sequence ys */
   predicate IsPrefix<T>(xs: seq<T>, ys: seq<T>)
     ensures IsPrefix(xs, ys) ==> (|xs| <= |ys| && xs == ys[..|xs|])
   {
     xs <= ys    
   }
   
+  /* Is true if the sequence xs is a suffix of the sequence ys */
   predicate IsSuffix<T>(xs: seq<T>, ys: seq<T>)
   {
     && |xs| <= |ys|
     && xs == ys[|ys|-|xs|..]
   }
 
-  /* a sequence that is sliced at the jth element concatenated with that same
-  sequence sliced from the jth element is equal to the original, unsliced sequence */
+  /* Proves that a sequence that is sliced at the j-th element, concatenated 
+     with that same sequence sliced from the j-th element, is equal to the 
+     original unsliced sequence */
   lemma LemmaSplitAt<T>(xs: seq<T>, pos: nat)
     requires pos < |xs|;
     ensures xs[..pos] + xs[pos..] == xs;
   {
   }
 
-  /* ensures that the element from a slice is included in the original sequence */
+  /* Proves that any element in a slice is included in the original sequence */
   lemma LemmaElementFromSlice<T>(xs: seq<T>, ys:seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |xs|;
     requires ys == xs[a..b];
@@ -124,7 +130,7 @@ module Seq {
     }
   }
 
-  /* converts a sequence to an array */
+  /* Converts a sequence to an array */
   method ToArray<T>(xs: seq<T>) returns (a: array<T>)
     ensures fresh(a)
     ensures a.Length == |xs|
@@ -133,14 +139,14 @@ module Seq {
     a := new T[|xs|](i requires 0 <= i < |xs| => xs[i]);
   }
 
-  /* converts a sequence to a set */
+  /* Converts a sequence to a set */
   function method {:opaque} ToSet<T>(xs: seq<T>): set<T> 
   {
     set x: T | x in xs
   }
 
-  /* proves that the cardinality of a subsequence is always less than or equal to that
-  of the full sequence */
+  /* Proves that the cardinality of a subsequence is always less than or 
+     equal to that of the full sequence */
   lemma LemmaCardinalityOfSet<T>(xs: seq<T>)
     ensures |ToSet(xs)| <= |xs| 
   {
@@ -152,7 +158,8 @@ module Seq {
     }
   }
   
-  /* the cardinality of a subsequence of an empty sequence is also 0 */
+  /* Proves that a sequence is of length 0 if and only if its conversion to
+     a set results in the empty set */
   lemma LemmaCardinalityOfEmptySetIs0<T>(xs: seq<T>)
     ensures |ToSet(xs)| == 0 <==> |xs| == 0
   {
@@ -162,15 +169,15 @@ module Seq {
     }
   }
 
-  /* is true if there are no duplicate values in the sequence */
+  /* Is true if there are no duplicate values in the sequence */
   predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>) 
   {
     (forall i, j {:trigger xs[i], xs[j]}:: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j])
   }
 
-  /* if sequences xs and ys don't have duplicates and there are no elements in
-  common between them, then the concatenated sequence of xs + ys will not contain
-  duplicates either */
+  /* Proves that if sequences xs and ys don't have duplicates and there are no 
+     elements in common between them, then the concatenated sequence xs + ys 
+     will not contain duplicates either */
   lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(xs: seq<T>, ys: seq<T>)
     requires HasNoDuplicates(xs);
     requires HasNoDuplicates(ys);
@@ -185,7 +192,8 @@ module Seq {
     }
   }
 
-  /* A sequence with no duplicates converts to a set of the same cardinality */
+  /* Proves that a sequence with no duplicates converts to a set of the same 
+     cardinality */
   lemma LemmaCardinalityOfSetNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
     ensures |ToSet(xs)| == |xs|
@@ -199,7 +207,7 @@ module Seq {
     }
   }
 
-  /* A sequence with cardinality equal to its set has no duplicates */
+  /* Proves that a sequence with cardinality equal to its set has no duplicates */
   lemma LemmaNoDuplicatesCardinalityOfSet<T>(xs: seq<T>)
     requires |ToSet(xs)| == |xs|
     ensures HasNoDuplicates(xs)
@@ -222,7 +230,8 @@ module Seq {
     }
   }
 
-  /* proves that there are no duplicate values in the multiset version of the sequence */
+  /* Proves that if a sequence has no duplicates, then each element occurs only 
+     once in its conversion to a multiset */
   lemma LemmaMultisetHasNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
     ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs):: multiset(xs)[x] == 1
@@ -240,7 +249,8 @@ module Seq {
     }
   }
 
-  /* finds the index of the first occurrence of an element in the sequence */
+  /* If an element occurs at least once in a sequence, the index of its
+     first occurance is returned */
   function method {:opaque} IndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
@@ -249,8 +259,8 @@ module Seq {
     if xs[0] == v then 0 else 1 + IndexOf(xs[1..], v)
   }
 
-  /* finds the index of the first occurrence of an element in the sequence if
-  found */
+  /* Returns Some i, if an element occurs at least once in a sequence, and i is 
+     the index of its first occurance. Otherwise the return is None. */
   function method {:opaque} IndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
                             forall j {:trigger xs[j]} :: 0 <= j < o.value ==> xs[j] != v
@@ -264,7 +274,8 @@ module Seq {
         if o'.Some? then Some(o'.value + 1) else None()
   }
 
-  /* finds the index of the last occurrence of an element in the sequence */
+  /* If an element occurs at least once in a sequence, the index of its
+     last occurance is returned */
   function method {:opaque} LastIndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
@@ -273,8 +284,8 @@ module Seq {
     if xs[|xs|-1] == v then |xs| - 1 else LastIndexOf(xs[..|xs|-1], v)
   }
 
-  /* finds the index of the last occurrence of an element in the sequence if
-  found */
+  /* Returns Some i, if an element occurs at least once in a sequence, and i is 
+     the index of its last occurance. Otherwise the return is None. */
   function method {:opaque} LastIndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
                             forall j {:trigger xs[j]} :: o.value < j < |xs| ==> xs[j] != v
@@ -284,7 +295,7 @@ module Seq {
     else if xs[|xs|-1] == v then Some(|xs| - 1) else LastIndexOfOption(xs[..|xs|-1], v)
   }
 
-  /* slices out a specific position's value from the sequence */
+  /* Returns a sequence without the element at a given position */
   function method {:opaque} Remove<T>(xs: seq<T>, pos: nat): (ys: seq<T>)
     requires pos < |xs|
     ensures |ys| == |xs| - 1
@@ -294,7 +305,8 @@ module Seq {
     xs[..pos] + xs[pos+1..]
   }
 
-  /* slices out a specific value from the sequence */
+  /* If a given element occurs at least once in a sequence, the sequence without
+     its first occurance is returned. Otherwise the same sequence is returned. */
   function method {:opaque} RemoveValue<T(==)>(xs: seq<T>, v: T): (ys: seq<T>)
     ensures v !in xs ==> xs == ys
     ensures v in xs ==> |multiset(ys)| == |multiset(xs)| - 1
