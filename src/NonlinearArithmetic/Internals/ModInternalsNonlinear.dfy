@@ -8,7 +8,7 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module ModInternalsNonlinear {
+module {:options "-functionSyntax:4"} ModInternalsNonlinear {
   
   /* WARNING: Think three times before adding to this file, as nonlinear
   verification is highly unstable! */

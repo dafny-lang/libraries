@@ -5,47 +5,47 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module Relations { 
+module {:options "-functionSyntax:4"} Relations { 
 
-  predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
     forall x :: R(x, x)
   }
 
-  predicate Irreflexive<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate Irreflexive<T(!new)>(R: (T, T) -> bool) {
     forall x :: !R(x, x)
   }
 
-  predicate AntiSymmetric<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate AntiSymmetric<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: R(x, y) && R(y, x) ==> x == y
   }
 
-  predicate Connected<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate Connected<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: x != y ==> R(x, y) || R(y, x)
   }
 
-  predicate StronglyConnected<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate StronglyConnected<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: R(x, y) || R(y, x)
   }
 
-  predicate Transitive<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate Transitive<T(!new)>(R: (T, T) -> bool) {
     forall x, y, z :: R(x, y) && R(y, z) ==> R(x, z)
   }
 
-  predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate TotalOrdering<T(!new)>(R: (T, T) -> bool) {
     && Reflexive(R)
     && AntiSymmetric(R)
     && Transitive(R)
     && StronglyConnected(R)
   }  
 
-  predicate StrictTotalOrdering<T(!new)>(R: (T, T) -> bool) {
+  ghost predicate StrictTotalOrdering<T(!new)>(R: (T, T) -> bool) {
     && Irreflexive(R)
     && AntiSymmetric(R)
     && Transitive(R)
     && Connected(R)
   }  
 
-  predicate SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
+  ghost predicate SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
     forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
 

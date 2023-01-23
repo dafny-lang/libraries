@@ -15,7 +15,7 @@ heuristics. The latter includes automation and its use requires less effort */
 include "Internals/MulInternalsNonlinear.dfy"
 include "Internals/MulInternals.dfy"
 
-module Mul {
+module {:options "-functionSyntax:4"} Mul {
 
   import MulINL = MulInternalsNonlinear
   import opened MulInternals

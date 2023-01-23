@@ -17,14 +17,14 @@ include "../../NonlinearArithmetic/Mul.dfy"
 include "../../NonlinearArithmetic/Power.dfy"
 include "Seq.dfy"
 
-abstract module LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} LittleEndianNat {
 
   import opened DivMod
   import opened Mul
   import opened Power
   import opened Seq
 
-  function method BASE(): nat
+  function BASE(): nat
     ensures BASE() > 1
 
   type uint = i: int | 0 <= i < BASE()
@@ -36,7 +36,7 @@ abstract module LittleEndianNat {
   //////////////////////////////////////////////////////////////////////////////
 
   /* Converts a sequence to a nat beginning with the least significant position. */
-  function method {:opaque} ToNatRight(xs: seq<uint>): nat
+  function {:opaque} ToNatRight(xs: seq<uint>): nat
   {
     if |xs| == 0 then 0
     else
@@ -45,7 +45,7 @@ abstract module LittleEndianNat {
   }
 
   /* Converts a sequence to a nat beginning with the most significant position. */
-  function method {:opaque} ToNatLeft(xs: seq<uint>): nat
+  function {:opaque} ToNatLeft(xs: seq<uint>): nat
   {
     if |xs| == 0 then 0
     else
@@ -334,7 +334,7 @@ abstract module LittleEndianNat {
   //////////////////////////////////////////////////////////////////////////////
 
   /* Converts a nat to a sequence. */
-  function method {:opaque} FromNat(n: nat): (xs: seq<uint>)
+  function {:opaque} FromNat(n: nat): (xs: seq<uint>)
   {
     if n == 0 then []
     else
@@ -394,7 +394,7 @@ abstract module LittleEndianNat {
   }
 
   /* Extends a sequence to a specified length. */
-  function method {:opaque} SeqExtend(xs: seq<uint>, n: nat): (ys: seq<uint>)
+  function {:opaque} SeqExtend(xs: seq<uint>, n: nat): (ys: seq<uint>)
     requires |xs| <= n
     ensures |ys| == n
     ensures ToNatRight(ys) == ToNatRight(xs)
@@ -404,7 +404,7 @@ abstract module LittleEndianNat {
   }
 
   /* Extends a sequence to a length that is a multiple of n. */
-  function method {:opaque} SeqExtendMultiple(xs: seq<uint>, n: nat): (ys: seq<uint>)
+  function {:opaque} SeqExtendMultiple(xs: seq<uint>, n: nat): (ys: seq<uint>)
     requires n > 0
     ensures |ys| % n == 0
     ensures ToNatRight(ys) == ToNatRight(xs)
@@ -420,7 +420,7 @@ abstract module LittleEndianNat {
   }
 
   /* Converts a nat to a sequence of a specified length. */
-  function method {:opaque} FromNatWithLen(n: nat, len: nat): (xs: seq<uint>)
+  function {:opaque} FromNatWithLen(n: nat, len: nat): (xs: seq<uint>)
     requires Pow(BASE(), len) > n
     ensures |xs| == len
     ensures ToNatRight(xs) == n
@@ -448,7 +448,7 @@ abstract module LittleEndianNat {
   }
 
   /* Generates a sequence of zeros of a specified length. */
-  function method {:opaque} SeqZero(len: nat): (xs: seq<uint>)
+  function {:opaque} SeqZero(len: nat): (xs: seq<uint>)
     ensures |xs| == len
     ensures forall i :: 0 <= i < |xs| ==> xs[i] == 0
     ensures ToNatRight(xs) == 0
@@ -487,7 +487,7 @@ abstract module LittleEndianNat {
   //////////////////////////////////////////////////////////////////////////////
 
   /* Adds two sequences. */
-  function method {:opaque} SeqAdd(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
+  function {:opaque} SeqAdd(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
     requires |xs| == |ys|
     ensures var (zs, cout) := SeqAdd(xs, ys);
       |zs| == |xs| && 0 <= cout <= 1
@@ -544,7 +544,7 @@ abstract module LittleEndianNat {
   }
 
   /* Subtracts two sequences. */
-  function method {:opaque} SeqSub(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
+  function {:opaque} SeqSub(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
     requires |xs| == |ys|
     ensures var (zs, cout) := SeqSub(xs, ys);
       |zs| == |xs| && 0 <= cout <= 1

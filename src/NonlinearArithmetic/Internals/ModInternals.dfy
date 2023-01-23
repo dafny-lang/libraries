@@ -24,7 +24,7 @@ include "../Mul.dfy"
 include "ModInternalsNonlinear.dfy"
 include "DivInternalsNonlinear.dfy"
 
-module ModInternals {
+module {:options "-functionSyntax:4"} ModInternals {
 
   import opened GeneralInternals
   import opened Mul
@@ -34,7 +34,7 @@ module ModInternals {
   import opened DivInternalsNonlinear
 
   /* Performs modulus recursively. */
-  function method {:opaque} ModRecursive(x: int, d: int): int
+  function {:opaque} ModRecursive(x: int, d: int): int
     requires d > 0
     decreases if x < 0 then (d - x) else x
   {
@@ -152,7 +152,7 @@ module ModInternals {
   }
 
   /* automates the modulus operator process */
-  predicate ModAuto(n: int)
+  ghost predicate ModAuto(n: int)
       requires n > 0;
   {
   && (n % n == (-n) % n == 0)
