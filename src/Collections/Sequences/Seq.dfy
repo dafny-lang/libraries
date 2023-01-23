@@ -322,7 +322,7 @@ module Seq {
       xs[..i] + xs[i+1..]
   }
 
-  /* inserts a certain value into a specified index of the sequence */
+  /* Inserts an element at a given position and returns the resulting sequence */
   function method {:opaque} Insert<T>(xs: seq<T>, a: T, pos: nat): seq<T>
     requires pos <= |xs|
     ensures |Insert(xs, a, pos)| == |xs| + 1
@@ -335,6 +335,7 @@ module Seq {
     xs[..pos] + [a] + xs[pos..]
   }
 
+  /* Returns the reverse of a sequence */
   function method {:opaque} Reverse<T>(xs: seq<T>): (ys: seq<T>)
     ensures |ys| == |xs|
     ensures forall i {:trigger ys[i]}{:trigger xs[|xs| - i - 1]} :: 0 <= i < |xs| ==> ys[i] == xs[|xs| - i - 1]
@@ -342,6 +343,7 @@ module Seq {
     if xs == [] then [] else [xs[|xs|-1]] + Reverse(xs[0 .. |xs|-1])
   }
     
+  /* Returns a constant sequence of a given length */
   function method {:opaque} Repeat<T>(v: T, length: nat): (xs: seq<T>)
     ensures |xs| == length
     ensures forall i: nat {:trigger xs[i]} | i < |xs| :: xs[i] == v
@@ -352,7 +354,7 @@ module Seq {
       [v] + Repeat(v, length - 1)
   }
   
-  /* unzips a sequence that contains ordered pairs into 2 seperate sequences */
+  /* Unzips a sequence that contains pairs into two seperate sequences */
   function method {:opaque} Unzip<A,B>(xs: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(xs).0| == |Unzip(xs).1| == |xs|
     ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]} 
@@ -364,8 +366,7 @@ module Seq {
       (a + [Last(xs).0], b + [Last(xs).1])
   }
 
-  /* takes two sequences, xs and ys, and combines then to form one sequence in which
-  each position contains an ordered pair from xs and ys */
+  /* Zips two sequences into one sequence that consists of pairs */
   function method {:opaque} Zip<A,B>(xs: seq<A>, ys: seq<B>): seq<(A, B)>
     requires |xs| == |ys|
     ensures |Zip(xs, ys)| == |xs|
@@ -377,7 +378,8 @@ module Seq {
     else Zip(DropLast(xs), DropLast(ys)) + [(Last(xs), Last(ys))]
   }
 
-  /* if a sequence is unzipped and then zipped, it forms the original sequence */
+  /* Proves that if a sequence is unzipped and then zipped, the original sequence 
+     is recovered */
   lemma LemmaZipOfUnzip<A,B>(xs: seq<(A,B)>)
     ensures Zip(Unzip(xs).0, Unzip(xs).1) == xs
   {
@@ -389,7 +391,7 @@ module Seq {
   *
   ***********************************************************/
 
-  /* finds the maximum integer value in the sequence */
+  /* Returns the maximum integer value in a non-empty sequence of integers */
   function method {:opaque} Max(xs: seq<int>): int
     requires 0 < |xs|
     ensures forall k {:trigger k in xs} :: k in xs ==> Max(xs) >= k
@@ -399,8 +401,8 @@ module Seq {
     if |xs| == 1 then xs[0] else Math.Max(xs[0], Max(xs[1..]))
   }
 
-  /* the greater maximum value of two sequences, xs and ys, becomes the maximum of the total sequence when 
-  xs and ys are concatenated */
+  /* Proves that the maximum of the concatenation of two non-empty sequences is 
+     greater or equal than the maxima of its two non-empty subsequences */
   lemma LemmaMaxOfConcat(xs: seq<int>, ys: seq<int>)
     requires 0 < |xs| && 0 < |ys|
     ensures Max(xs+ys) >= Max(xs)
@@ -415,7 +417,7 @@ module Seq {
     }
   }
 
-  /* finds the minimum integer value in the sequence */
+  /* Returns the minimum integer value in a non-empty sequence of integers */
   function method {:opaque} Min(xs: seq<int>): int
     requires 0 < |xs|
     ensures forall k {:trigger k in xs} :: k in xs ==> Min(xs) <= k
@@ -425,8 +427,8 @@ module Seq {
     if |xs| == 1 then xs[0] else Math.Min(xs[0], Min(xs[1..]))
   }
 
-  /* the smaller minimum value of two sequences, xs and ys, becomes the minimum of the total sequence when 
-  xs and ys are concatenated */
+  /* Proves that minimum of the concatenation of two non-empty sequences is 
+     less or equal than the minima of its two non-empty subsequences */
   lemma LemmaMinOfConcat(xs: seq<int>, ys: seq<int>)
     requires 0 < |xs| && 0 < |ys|
     ensures Min(xs+ys) <= Min(xs)
@@ -441,8 +443,8 @@ module Seq {
     }
   }
 
-  /* the maximum element in any subsequence will not be greater than the maximum element in 
-  the full sequence */
+  /* Proves that the maximum element in a non-empty sequence is greater or equal 
+     than the maxima of its non-empty subsequences */
   lemma LemmaSubseqMax(xs: seq<int>, from: nat, to: nat)
     requires from < to <= |xs|
     ensures Max(xs[from..to]) <= Max(xs)
@@ -455,8 +457,8 @@ module Seq {
     }
   }
 
-  /* the minimum element in any subsequence will not be less than the minimum element in 
-  the full sequence */
+  /* Proves that the minimum element in a non-empty sequence is less or equal 
+     than the minima of its non-empty subsequences */
   lemma LemmaSubseqMin(xs: seq<int>, from: nat, to: nat)
     requires from < to <= |xs|
     ensures Min(xs[from..to]) >= Min(xs)
@@ -474,8 +476,8 @@ module Seq {
   *
   ***********************************************************/
 
-  /*concatenates a sequence of sequences into a single sequence. Works by adding 
-  elements in order from first to last */
+  /* Flattens a sequence of sequences into a single sequence by concatenating 
+    subsequences, starting from the first element. */
   function method Flatten<T>(xs: seq<seq<T>>): seq<T>
     decreases |xs|
   {
@@ -483,9 +485,9 @@ module Seq {
     else xs[0] + Flatten(xs[1..])
   }
 
-  /* concatenating two sequences of sequences is equivalent to concatenating 
-  each sequence of sequences seperately, and then concatenating the two resulting 
-  sequences together */
+  /* Proves that flattening sequences of sequences is additive. That is, concatenating
+     the flattening of two sequences of sequences is the same as flattening the 
+     concatenation of two sequences of sequences */
   lemma LemmaFlattenConcat<T>(xs: seq<seq<T>>, ys: seq<seq<T>>)
     ensures Flatten(xs + ys) == Flatten(xs) + Flatten(ys)
   {
@@ -502,19 +504,21 @@ module Seq {
     }
   }
 
-  /* concatenates the sequence of sequences into a single sequence. Works by concatenating 
-  elements from last to first */
+  /* Flattens a sequence of sequences into a single sequence by concatenating 
+     subsequences in reverse order, i.e. starting from the last element. */
   function method FlattenReverse<T>(xs: seq<seq<T>>): seq<T>
-  decreases |xs|
+    decreases |xs|
   {
     if |xs| == 0 then []
     else FlattenReverse(DropLast(xs)) + Last(xs)
   }
 
-  /* concatenating two reversed sequences of sequences is the same as reversing two 
-  sequences of sequences and then concattenating the two resulting sequences together */
+  /* Proves that flattening sequences of sequences in reverse order is additive. 
+     That is, concatenating the flattening of two sequences of sequences in reverse 
+     order is the same as flattening the concatenation of two sequences of sequences
+     in reverse order */
   lemma LemmaFlattenReverseConcat<T>(xs: seq<seq<T>>, ys: seq<seq<T>>)
-  ensures FlattenReverse(xs + ys) == FlattenReverse(xs) + FlattenReverse(ys)
+    ensures FlattenReverse(xs + ys) == FlattenReverse(xs) + FlattenReverse(ys)
   {
     if |ys| == 0 {
       assert FlattenReverse(ys) == [];
@@ -530,8 +534,8 @@ module Seq {
     }
   }
 
-  /* both methods of concatenating sequence (starting from front v. starting from back)
-  result in the same sequence */
+  /* Proves that flattening sequences of sequences in order (starting from the front)
+     and in reverse order (starting from the back) results in the samer sequence */
   lemma LemmaFlattenAndFlattenReverseAreEquivalent<T>(xs: seq<seq<T>>)
     ensures Flatten(xs) == FlattenReverse(xs)
   {
