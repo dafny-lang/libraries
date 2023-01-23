@@ -772,19 +772,19 @@ module Seq {
 
   /**********************************************************
   *
-  *  Converting a set to a sorted sequence
+  *  Sets to Ordered Sequences
   *
   ***********************************************************/  
 
 
-  /* Converting a set to a sequence (ghost) */
+  /* Converts a set to a sequence (ghost). */
   function GhostSetToSeq<T>(s: set<T>): (xs: seq<T>)
     ensures multiset(s) == multiset(xs)
   {
     if s == {} then [] else var x :| x in s; [x] + GhostSetToSeq(s - {x})
   }
 
-  /* Converting a set to a sequence (compiled) */
+  /* Converts a set to a sequence (compiled). */
   method SetToSeq<T>(s: set<T>) returns (xs: seq<T>)
     ensures multiset(s) == multiset(xs)
   {
@@ -800,7 +800,7 @@ module Seq {
   }
 
   /* Proves that any two sequences that are sorted by a total order and admit the
-     same multiset are equal */
+     same multiset are equal. */
   lemma SortedUnique<T>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
     requires SortedBy(xs, R)
     requires SortedBy(ys, R)
@@ -820,7 +820,7 @@ module Seq {
     }
   }
 
-  /* Converting a set to a sorted sequence */
+  /* Converts a set to sequence that is ordered w.r.t. a given total order. */
   function SetToSortedSeq<T>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
     requires TotalOrdering(R)
     ensures multiset(s) == multiset(xs)
