@@ -27,28 +27,28 @@ module Seq {
   *
   ***********************************************************/
 
-  /* Returns the first element in a sequence */
+  /* Returns the first element in a sequence. */
   function method First<T>(xs: seq<T>): T
     requires |xs| > 0
   {
     xs[0]
   }
 
-  /* Returns a sequence without its first element */
+  /* Returns a sequence without its first element. */
   function method DropFirst<T>(xs: seq<T>): seq<T>
     requires |xs| > 0
   {
     xs[1..]
   }
 
-  /* Returns the last element of a sequence */
+  /* Returns the last element of a sequence. */
   function method Last<T>(xs: seq<T>): T
     requires |xs| > 0;
   {
     xs[|xs|-1]
   }
 
-  /* Returns a sequence without its last element */
+  /* Returns a sequence without its last element. */
   function method DropLast<T>(xs: seq<T>): seq<T> 
     requires |xs| > 0;
   {
@@ -56,7 +56,7 @@ module Seq {
   }
 
   /* Proves that concatenating a sequence without its last element and its 
-     last element results in the original sequence */
+     last element results in the original sequence. */
   lemma LemmaLast<T>(xs: seq<T>)
     requires |xs| > 0;
     ensures DropLast(xs) + [Last(xs)] == xs;
@@ -64,14 +64,14 @@ module Seq {
   }
 
   /* Proves that the last element of two concatenated sequences will be the 
-     last element of the latter sequence */
+     last element of the latter sequence. */
   lemma LemmaAppendLast<T>(xs: seq<T>, ys: seq<T>)
     requires 0 < |xs + ys| && 0 < |ys|
     ensures Last(xs + ys) == Last(ys)
   {
   }
 
-  /* Proves that the concatenation of sequences is associative */
+  /* Proves that the concatenation of sequences is associative. */
   lemma LemmaConcatIsAssociative<T>(xs: seq<T>, ys: seq<T>, zs: seq<T>)
     ensures xs + (ys + zs) == (xs + ys) + zs;
   {
@@ -83,14 +83,14 @@ module Seq {
   *
   ***********************************************************/
   
-  /* Is true if the sequence xs is a prefix of the sequence ys */
+  /* Is true if the sequence xs is a prefix of the sequence ys. */
   predicate IsPrefix<T>(xs: seq<T>, ys: seq<T>)
     ensures IsPrefix(xs, ys) ==> (|xs| <= |ys| && xs == ys[..|xs|])
   {
     xs <= ys    
   }
   
-  /* Is true if the sequence xs is a suffix of the sequence ys */
+  /* Is true if the sequence xs is a suffix of the sequence ys. */
   predicate IsSuffix<T>(xs: seq<T>, ys: seq<T>)
   {
     && |xs| <= |ys|
@@ -99,14 +99,14 @@ module Seq {
 
   /* Proves that a sequence that is sliced at the j-th element, concatenated 
      with that same sequence sliced from the j-th element, is equal to the 
-     original unsliced sequence */
+     original unsliced sequence. */
   lemma LemmaSplitAt<T>(xs: seq<T>, pos: nat)
     requires pos < |xs|;
     ensures xs[..pos] + xs[pos..] == xs;
   {
   }
 
-  /* Proves that any element in a slice is included in the original sequence */
+  /* Proves that any element in a slice is included in the original sequence. */
   lemma LemmaElementFromSlice<T>(xs: seq<T>, ys:seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |xs|;
     requires ys == xs[a..b];
@@ -130,7 +130,7 @@ module Seq {
     }
   }
 
-  /* Converts a sequence to an array */
+  /* Converts a sequence to an array. */
   method ToArray<T>(xs: seq<T>) returns (a: array<T>)
     ensures fresh(a)
     ensures a.Length == |xs|
@@ -139,14 +139,14 @@ module Seq {
     a := new T[|xs|](i requires 0 <= i < |xs| => xs[i]);
   }
 
-  /* Converts a sequence to a set */
+  /* Converts a sequence to a set. */
   function method {:opaque} ToSet<T>(xs: seq<T>): set<T> 
   {
     set x: T | x in xs
   }
 
   /* Proves that the cardinality of a subsequence is always less than or 
-     equal to that of the full sequence */
+     equal to that of the full sequence. */
   lemma LemmaCardinalityOfSet<T>(xs: seq<T>)
     ensures |ToSet(xs)| <= |xs| 
   {
@@ -159,7 +159,7 @@ module Seq {
   }
   
   /* Proves that a sequence is of length 0 if and only if its conversion to
-     a set results in the empty set */
+     a set results in the empty set. */
   lemma LemmaCardinalityOfEmptySetIs0<T>(xs: seq<T>)
     ensures |ToSet(xs)| == 0 <==> |xs| == 0
   {
@@ -169,7 +169,7 @@ module Seq {
     }
   }
 
-  /* Is true if there are no duplicate values in the sequence */
+  /* Is true if there are no duplicate values in the sequence. */
   predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>) 
   {
     (forall i, j {:trigger xs[i], xs[j]}:: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j])
@@ -177,7 +177,7 @@ module Seq {
 
   /* Proves that if sequences xs and ys don't have duplicates and there are no 
      elements in common between them, then the concatenated sequence xs + ys 
-     will not contain duplicates either */
+     will not contain duplicates either. */
   lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(xs: seq<T>, ys: seq<T>)
     requires HasNoDuplicates(xs);
     requires HasNoDuplicates(ys);
@@ -193,7 +193,7 @@ module Seq {
   }
 
   /* Proves that a sequence with no duplicates converts to a set of the same 
-     cardinality */
+     cardinality. */
   lemma LemmaCardinalityOfSetNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
     ensures |ToSet(xs)| == |xs|
@@ -207,7 +207,7 @@ module Seq {
     }
   }
 
-  /* Proves that a sequence with cardinality equal to its set has no duplicates */
+  /* Proves that a sequence with cardinality equal to its set has no duplicates. */
   lemma LemmaNoDuplicatesCardinalityOfSet<T>(xs: seq<T>)
     requires |ToSet(xs)| == |xs|
     ensures HasNoDuplicates(xs)
@@ -231,7 +231,7 @@ module Seq {
   }
 
   /* Proves that if a sequence has no duplicates, then each element occurs only 
-     once in its conversion to a multiset */
+     once in its conversion to a multiset. */
   lemma LemmaMultisetHasNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
     ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs):: multiset(xs)[x] == 1
@@ -250,7 +250,7 @@ module Seq {
   }
 
   /* If an element occurs at least once in a sequence, the index of its
-     first occurance is returned */
+     first occurance is returned. */
   function method {:opaque} IndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
@@ -275,7 +275,7 @@ module Seq {
   }
 
   /* If an element occurs at least once in a sequence, the index of its
-     last occurance is returned */
+     last occurance is returned. */
   function method {:opaque} LastIndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
@@ -295,7 +295,7 @@ module Seq {
     else if xs[|xs|-1] == v then Some(|xs| - 1) else LastIndexOfOption(xs[..|xs|-1], v)
   }
 
-  /* Returns a sequence without the element at a given position */
+  /* Returns a sequence without the element at a given position. */
   function method {:opaque} Remove<T>(xs: seq<T>, pos: nat): (ys: seq<T>)
     requires pos < |xs|
     ensures |ys| == |xs| - 1
@@ -322,7 +322,7 @@ module Seq {
       xs[..i] + xs[i+1..]
   }
 
-  /* Inserts an element at a given position and returns the resulting sequence */
+  /* Inserts an element at a given position and returns the resulting sequence. */
   function method {:opaque} Insert<T>(xs: seq<T>, a: T, pos: nat): seq<T>
     requires pos <= |xs|
     ensures |Insert(xs, a, pos)| == |xs| + 1
@@ -335,7 +335,7 @@ module Seq {
     xs[..pos] + [a] + xs[pos..]
   }
 
-  /* Returns the reverse of a sequence */
+  /* Returns the sequence that is in reverse order to a given sequence. */
   function method {:opaque} Reverse<T>(xs: seq<T>): (ys: seq<T>)
     ensures |ys| == |xs|
     ensures forall i {:trigger ys[i]}{:trigger xs[|xs| - i - 1]} :: 0 <= i < |xs| ==> ys[i] == xs[|xs| - i - 1]
@@ -343,7 +343,7 @@ module Seq {
     if xs == [] then [] else [xs[|xs|-1]] + Reverse(xs[0 .. |xs|-1])
   }
     
-  /* Returns a constant sequence of a given length */
+  /* Returns a constant sequence of a given length. */
   function method {:opaque} Repeat<T>(v: T, length: nat): (xs: seq<T>)
     ensures |xs| == length
     ensures forall i: nat {:trigger xs[i]} | i < |xs| :: xs[i] == v
@@ -354,7 +354,7 @@ module Seq {
       [v] + Repeat(v, length - 1)
   }
   
-  /* Unzips a sequence that contains pairs into two seperate sequences */
+  /* Unzips a sequence that contains pairs into two seperate sequences. */
   function method {:opaque} Unzip<A,B>(xs: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(xs).0| == |Unzip(xs).1| == |xs|
     ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]} 
@@ -366,7 +366,7 @@ module Seq {
       (a + [Last(xs).0], b + [Last(xs).1])
   }
 
-  /* Zips two sequences into one sequence that consists of pairs */
+  /* Zips two sequences into one sequence that consists of pairs. */
   function method {:opaque} Zip<A,B>(xs: seq<A>, ys: seq<B>): seq<(A, B)>
     requires |xs| == |ys|
     ensures |Zip(xs, ys)| == |xs|
@@ -379,7 +379,7 @@ module Seq {
   }
 
   /* Proves that if a sequence is unzipped and then zipped, the original sequence 
-     is recovered */
+     is recovered. */
   lemma LemmaZipOfUnzip<A,B>(xs: seq<(A,B)>)
     ensures Zip(Unzip(xs).0, Unzip(xs).1) == xs
   {
@@ -391,7 +391,7 @@ module Seq {
   *
   ***********************************************************/
 
-  /* Returns the maximum integer value in a non-empty sequence of integers */
+  /* Returns the maximum integer value in a non-empty sequence of integers. */
   function method {:opaque} Max(xs: seq<int>): int
     requires 0 < |xs|
     ensures forall k {:trigger k in xs} :: k in xs ==> Max(xs) >= k
@@ -402,7 +402,7 @@ module Seq {
   }
 
   /* Proves that the maximum of the concatenation of two non-empty sequences is 
-     greater or equal than the maxima of its two non-empty subsequences */
+     greater or equal than the maxima of its two non-empty subsequences. */
   lemma LemmaMaxOfConcat(xs: seq<int>, ys: seq<int>)
     requires 0 < |xs| && 0 < |ys|
     ensures Max(xs+ys) >= Max(xs)
@@ -417,7 +417,7 @@ module Seq {
     }
   }
 
-  /* Returns the minimum integer value in a non-empty sequence of integers */
+  /* Returns the minimum integer value in a non-empty sequence of integers. */
   function method {:opaque} Min(xs: seq<int>): int
     requires 0 < |xs|
     ensures forall k {:trigger k in xs} :: k in xs ==> Min(xs) <= k
@@ -428,7 +428,7 @@ module Seq {
   }
 
   /* Proves that minimum of the concatenation of two non-empty sequences is 
-     less or equal than the minima of its two non-empty subsequences */
+     less or equal than the minima of its two non-empty subsequences. */
   lemma LemmaMinOfConcat(xs: seq<int>, ys: seq<int>)
     requires 0 < |xs| && 0 < |ys|
     ensures Min(xs+ys) <= Min(xs)
@@ -444,7 +444,7 @@ module Seq {
   }
 
   /* Proves that the maximum element in a non-empty sequence is greater or equal 
-     than the maxima of its non-empty subsequences */
+     than the maxima of its non-empty subsequences. */
   lemma LemmaSubseqMax(xs: seq<int>, from: nat, to: nat)
     requires from < to <= |xs|
     ensures Max(xs[from..to]) <= Max(xs)
@@ -458,7 +458,7 @@ module Seq {
   }
 
   /* Proves that the minimum element in a non-empty sequence is less or equal 
-     than the minima of its non-empty subsequences */
+     than the minima of its non-empty subsequences. */
   lemma LemmaSubseqMin(xs: seq<int>, from: nat, to: nat)
     requires from < to <= |xs|
     ensures Min(xs[from..to]) >= Min(xs)
@@ -477,7 +477,7 @@ module Seq {
   ***********************************************************/
 
   /* Flattens a sequence of sequences into a single sequence by concatenating 
-    subsequences, starting from the first element. */
+     subsequences, starting from the first element. */
   function method Flatten<T>(xs: seq<seq<T>>): seq<T>
     decreases |xs|
   {
@@ -487,7 +487,7 @@ module Seq {
 
   /* Proves that flattening sequences of sequences is additive. That is, concatenating
      the flattening of two sequences of sequences is the same as flattening the 
-     concatenation of two sequences of sequences */
+     concatenation of two sequences of sequences. */
   lemma LemmaFlattenConcat<T>(xs: seq<seq<T>>, ys: seq<seq<T>>)
     ensures Flatten(xs + ys) == Flatten(xs) + Flatten(ys)
   {
@@ -516,7 +516,7 @@ module Seq {
   /* Proves that flattening sequences of sequences in reverse order is additive. 
      That is, concatenating the flattening of two sequences of sequences in reverse 
      order is the same as flattening the concatenation of two sequences of sequences
-     in reverse order */
+     in reverse order. */
   lemma LemmaFlattenReverseConcat<T>(xs: seq<seq<T>>, ys: seq<seq<T>>)
     ensures FlattenReverse(xs + ys) == FlattenReverse(xs) + FlattenReverse(ys)
   {
@@ -535,7 +535,7 @@ module Seq {
   }
 
   /* Proves that flattening sequences of sequences in order (starting from the front)
-     and in reverse order (starting from the back) results in the samer sequence */
+     and in reverse order (starting from the back) results in the same sequence. */
   lemma LemmaFlattenAndFlattenReverseAreEquivalent<T>(xs: seq<seq<T>>)
     ensures Flatten(xs) == FlattenReverse(xs)
   {
@@ -554,8 +554,8 @@ module Seq {
     }
   }
 
-  /* the concatenated sequence's length is greater than or equal to each individual
-  inner sequence's length */
+  /* Proves that the length of a flattened sequence of sequences xs is greater or 
+     equal than any of the lengths of the elements of xs.  */
   lemma LemmaFlattenLengthGeSingleElementLength<T>(xs: seq<seq<T>>, i: int)
     requires 0 <= i < |xs|
     ensures |FlattenReverse(xs)| >= |xs[i]|
@@ -565,9 +565,9 @@ module Seq {
     }
   }
 
-  /* the length of concatenating sequence in a sequence together will be no longer 
-  than the length of the original sequence of sequences multiplied by the length of 
-  the longest sequence */
+  /* Proves that the length of a flattened sequence of sequences xs is less or equal 
+     than the length of xs multiplied by a number not smaller than the length of the 
+     longest sequence in xs. */
   lemma LemmaFlattenLengthLeMul<T>(xs: seq<seq<T>>, j: int)
     requires forall i {:trigger xs[i]} | 0 <= i < |xs| :: |xs[i]| <= j
     ensures |FlattenReverse(xs)| <= |xs| * j
@@ -586,7 +586,8 @@ module Seq {
   *
   ***********************************************************/
 
-  /* applies a transformation function on the sequence */
+  /* Returns the sequence one obtains from applying a function to every element 
+     of a sequence. */
   function method {:opaque} Map<T,R>(f: (T ~> R), xs: seq<T>): (result: seq<R>)
     requires forall i {:trigger xs[i]} :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| == |xs|
@@ -597,7 +598,9 @@ module Seq {
     else [f(xs[0])] + Map(f, xs[1..])
   }
 
-/* applies a transformation function that returns a result on the sequence */
+/* Applies to every element of a sequence a function that is either successful, or
+   returns an error. Returns either an error, or, if successful at every element, the
+   transformed sequence.  */
   function method {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures result.Success? ==>
@@ -614,9 +617,9 @@ module Seq {
       Success([head] + tail)
   }
 
-  /* concatenating two sequences and then applying Map is the same as applying
-  Map on each sequence  seperately and then concatenating the two resulting
-  sequences */
+  /* Proves that applying a function to a sequence is additive. That is, concatenating 
+     two sequences and then applying Map is the same as applying Map on each sequence 
+     seperately, and then concatenating the two resulting sequences. */
   lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
@@ -637,7 +640,8 @@ module Seq {
     }
   }
 
-  /* uses a selection function to select elements from the sequence */
+  /* Returns the subsequence of those elements of a sequence that satisfy a given 
+     predicate. */
   function method {:opaque} Filter<T>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| <= |xs|
@@ -648,8 +652,9 @@ module Seq {
     else (if f(xs[0]) then [xs[0]] else []) + Filter(f, xs[1..])
   }
 
-  /* concatenating two sequences and then using "filter" is the same as using "filter" on each sequences
-  seperately and then concatenating their resulting sequences */
+  /* Proves that filtering a sequence is additive. That is, concatenating two sequences 
+     and then using "Filter" is the same as using "Filter" on each sequence seperately, 
+     and then concatenating the two resulting sequences. */
   lemma {:opaque} LemmaFilterDistributesOverConcat<T>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
@@ -670,14 +675,17 @@ module Seq {
     }
   }
   
+  /* Folds a sequence xs to the left, by acting on the initial element init via the 
+     function f. */
   function method {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, xs: seq<T>): A
   {
     if |xs| == 0 then init
     else FoldLeft(f, f(init, xs[0]), xs[1..])
   }
 
-  /* Concatenating two sequences, then folding left is the same as folding the first sequence and using the result as the initial value to fold the second
-  sequence. */
+  /* Proves that folding to the left is additive. That is, concatenating two sequences 
+     and then folding them to the left, is the same as folding to the left the first 
+     sequence and using the result to fold to the left the second sequence. */
   lemma {:opaque} LemmaFoldLeftDistributesOverConcat<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldLeft(f, init, xs + ys) == FoldLeft(f, FoldLeft(f, init, xs), ys)
@@ -700,8 +708,8 @@ module Seq {
     }
   }
 
-  /* inv is an invariant under stp, which is a relational version of the
-  function f passed to fold. */
+  /* Is true, if inv is an invariant under stp, which is a relational 
+     version of the function f passed to fold. */
   predicate InvFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
                                          stp: (B, A, B) -> bool)
   {
@@ -728,14 +736,17 @@ module Seq {
     }
   }
 
+  /* Folds a sequence xs to the right, by acting on the initial element init via the 
+     function f. */
   function method {:opaque} FoldRight<A,T>(f: (T, A) -> A, xs: seq<T>, init: A): A
   {
     if |xs| == 0 then init
     else f(xs[0], FoldRight(f, xs[1..], init))
   }
 
-  /* Concatenating two sequences, then folding right is the same as folding the second sequence and using the result as the initial value to fold the first
-  sequence. */
+  /* Proves that folding to the right is (contravariant) additive. That is, concatenating
+     two sequences and then folding them to the right, is the same as folding to the right 
+     the second sequence and using the result to fold to the right the first sequence. */
   lemma {:opaque} LemmaFoldRightDistributesOverConcat<A,T>(f: (T, A) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldRight(f, xs + ys, init) == FoldRight(f, xs, FoldRight(f, ys, init))
@@ -755,8 +766,8 @@ module Seq {
     }
   }
 
-  /* inv is an invariant under stp, which is a relational version of the
-  function f passed to fold. */
+  /* Is true, if inv is an invariant under stp, which is a relational version
+     of the function f passed to fold. */
   predicate InvFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
                                           stp: (A, B, B) -> bool)
   {
