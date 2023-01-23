@@ -770,12 +770,12 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
+
   /**********************************************************
   *
   *  Sets to Ordered Sequences
   *
   ***********************************************************/  
-
 
   /* Converts a set to a sequence (ghost). */
   ghost function GhostSetToSeq<T>(s: set<T>): (xs: seq<T>)
