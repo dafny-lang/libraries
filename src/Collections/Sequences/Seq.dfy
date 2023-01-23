@@ -27,36 +27,39 @@ module Seq {
   *
   ***********************************************************/
 
-  /* Returns the first element in a sequence. */
+  /* Returns the first element of a non-empty sequence. */
   function method First<T>(xs: seq<T>): T
     requires |xs| > 0
   {
     xs[0]
   }
 
-  /* Returns a sequence without its first element. */
+  /* Returns the subsequence of a non-empty sequence, one obtains from 
+     dropping the first element. */
   function method DropFirst<T>(xs: seq<T>): seq<T>
     requires |xs| > 0
   {
     xs[1..]
   }
 
-  /* Returns the last element of a sequence. */
+  /* Returns the last element of a non-empty sequence. */
   function method Last<T>(xs: seq<T>): T
     requires |xs| > 0;
   {
     xs[|xs|-1]
   }
 
-  /* Returns a sequence without its last element. */
+  /* Returns the subsequence of a non-empty sequence, one obtains from 
+     dropping the last element. */
   function method DropLast<T>(xs: seq<T>): seq<T> 
     requires |xs| > 0;
   {
     xs[..|xs|-1]
   }
 
-  /* Proves that concatenating a sequence without its last element and its 
-     last element results in the original sequence. */
+  /* Proves that concatenating the subsequence of a non-empty sequence, one obtains 
+     from dropping the last element, with the subsequence consisting only of the last 
+     element, results in the original sequence. */
   lemma LemmaLast<T>(xs: seq<T>)
     requires |xs| > 0;
     ensures DropLast(xs) + [Last(xs)] == xs;
