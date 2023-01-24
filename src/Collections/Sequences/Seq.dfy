@@ -381,8 +381,7 @@ module Seq {
     else Zip(DropLast(xs), DropLast(ys)) + [(Last(xs), Last(ys))]
   }
 
-  /* Proves that if a sequence is unzipped and then zipped, the original sequence 
-     is recovered. */
+  /* Proves that unzipping and zipping a sequence results in the original sequence */
   lemma LemmaZipOfUnzip<A,B>(xs: seq<(A,B)>)
     ensures Zip(Unzip(xs).0, Unzip(xs).1) == xs
   {
