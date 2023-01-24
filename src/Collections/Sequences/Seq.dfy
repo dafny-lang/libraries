@@ -278,7 +278,7 @@ module Seq {
   }
 
   /* If an element occurs at least once in a sequence, the index of its
-     last occurance is returned. */
+     last occurrence is returned. */
   function method {:opaque} LastIndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
