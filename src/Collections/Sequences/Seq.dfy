@@ -253,7 +253,7 @@ module Seq {
   }
 
   /* If an element occurs at least once in a sequence, the index of its
-     first occurance is returned. */
+     first occurrence is returned. */
   function method {:opaque} IndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
@@ -287,8 +287,8 @@ module Seq {
     if xs[|xs|-1] == v then |xs| - 1 else LastIndexOf(xs[..|xs|-1], v)
   }
 
-  /* Returns Some i, if an element occurs at least once in a sequence, and i is 
-     the index of its last occurance. Otherwise the return is None. */
+  /* Returns Some(i), if an element occurs at least once in a sequence, and i is 
+     the index of its last occurrence. Otherwise the return is None. */
   function method {:opaque} LastIndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
                             forall j {:trigger xs[j]} :: o.value < j < |xs| ==> xs[j] != v
@@ -309,7 +309,7 @@ module Seq {
   }
 
   /* If a given element occurs at least once in a sequence, the sequence without
-     its first occurance is returned. Otherwise the same sequence is returned. */
+     its first occurrence is returned. Otherwise the same sequence is returned. */
   function method {:opaque} RemoveValue<T(==)>(xs: seq<T>, v: T): (ys: seq<T>)
     ensures v !in xs ==> xs == ys
     ensures v in xs ==> |multiset(ys)| == |multiset(xs)| - 1
