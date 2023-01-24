@@ -15,7 +15,7 @@ include "UnicodeEncodingForm.dfy"
  * The Unicode encoding form that assigns each Unicode scalar value to an unsigned byte sequence of one to four bytes
  * in length, as specified in Table 3-6 and Table 3-7.
  */
-module {:options "-functionSyntax:4"} Utf8EncodingForm  refines UnicodeEncodingForm {
+module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingForm {
   type CodeUnit = bv8
 
   //
