@@ -148,8 +148,8 @@ module Seq {
     set x: T | x in xs
   }
 
-  /* Proves that the cardinality of a subsequence is always less than or 
-     equal to that of the full sequence. */
+  /* Proves that the cardinality of a set of elements is always less than or 
+     equal to that of the full sequence of elements. */
   lemma LemmaCardinalityOfSet<T>(xs: seq<T>)
     ensures |ToSet(xs)| <= |xs| 
   {
