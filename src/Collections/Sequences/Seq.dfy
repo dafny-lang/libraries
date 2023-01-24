@@ -677,7 +677,7 @@ module Seq {
     }
   }
   
-  /* Folds a sequence xs to the left, by acting on the initial element init via the 
+  /* Folds a sequence xs from the left, by repeatedly acting on the accumulator init via the 
      function f. */
   function method {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, xs: seq<T>): A
   {
