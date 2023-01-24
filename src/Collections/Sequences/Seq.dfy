@@ -100,8 +100,8 @@ module Seq {
     && xs == ys[|ys|-|xs|..]
   }
 
-  /* Proves that a sequence that is sliced at the j-th element, concatenated 
-     with that same sequence sliced from the j-th element, is equal to the 
+  /* Proves that a sequence that is sliced at the pos-th element, concatenated 
+     with that same sequence sliced from the pos-th element, is equal to the 
      original unsliced sequence. */
   lemma LemmaSplitAt<T>(xs: seq<T>, pos: nat)
     requires pos < |xs|;
