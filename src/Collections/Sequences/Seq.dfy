@@ -738,7 +738,7 @@ module Seq {
     }
   }
 
-  /* Folds a sequence xs to the right, by acting on the initial element init via the 
+  /* Folds a sequence xs from the right, by acting on the accumulator init via the 
      function f. */
   function method {:opaque} FoldRight<A,T>(f: (T, A) -> A, xs: seq<T>, init: A): A
   {
