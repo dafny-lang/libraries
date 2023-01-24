@@ -262,7 +262,7 @@ module Seq {
     if xs[0] == v then 0 else 1 + IndexOf(xs[1..], v)
   }
 
-  /* Returns Some i, if an element occurs at least once in a sequence, and i is 
+  /* Returns Some(i), if an element occurs at least once in a sequence, and i is 
      the index of its first occurance. Otherwise the return is None. */
   function method {:opaque} IndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
