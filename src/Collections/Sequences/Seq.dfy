@@ -66,10 +66,10 @@ module Seq {
   {
   }
 
-  /* Proves that the last element of two concatenated sequences will be the 
+  /* Proves that the last element of two concatenated sequences, the second one being non-empty, will be the 
      last element of the latter sequence. */
   lemma LemmaAppendLast<T>(xs: seq<T>, ys: seq<T>)
-    requires 0 < |xs + ys| && 0 < |ys|
+    requires 0 < |ys|
     ensures Last(xs + ys) == Last(ys)
   {
   }
