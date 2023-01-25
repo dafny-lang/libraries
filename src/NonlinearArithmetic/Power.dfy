@@ -17,13 +17,13 @@ include "Internals/GeneralInternals.dfy"
 include "Mul.dfy"
 include "Internals/MulInternals.dfy"
 
-module Power {
+module {:options "-functionSyntax:4"} Power {
   import opened DivMod
   import opened GeneralInternals
   import opened Mul
   import opened MulInternals
 
-  function method {:opaque} Pow(b: int, e: nat): int
+  function {:opaque} Pow(b: int, e: nat): int
     decreases e
   {
     if e == 0 then

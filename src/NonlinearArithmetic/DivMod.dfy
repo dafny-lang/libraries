@@ -16,7 +16,7 @@ include "Internals/DivInternalsNonlinear.dfy"
 include "Internals/DivInternals.dfy"
 include "Internals/GeneralInternals.dfy"
 
-module DivMod {
+module {:options "-functionSyntax:4"} DivMod {
 
   import opened DivInternals
   import DivINL = DivInternalsNonlinear
@@ -1414,7 +1414,7 @@ module DivMod {
   }
 
   /* true if x%n and y%n are equal */
-  predicate IsModEquivalent(x: int, y: int, m: int)
+  ghost predicate IsModEquivalent(x: int, y: int, m: int)
     requires m > 0
     ensures x % m == y % m <==> (x - y) % m == 0
   {

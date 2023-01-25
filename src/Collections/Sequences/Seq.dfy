@@ -16,7 +16,7 @@
 include "../../Wrappers.dfy"
 include "../../Math.dfy"
 
-module Seq {
+module {:options "-functionSyntax:4"} Seq {
 
   import opened Wrappers
   import Math
@@ -28,27 +28,27 @@ module Seq {
   ***********************************************************/
 
   /* finds the first element in the sequence */
-  function method First<T>(s: seq<T>): T
+  function First<T>(s: seq<T>): T
     requires |s| > 0
   {
     s[0]
   }
 
-  function method DropFirst<T>(s: seq<T>): seq<T>
+  function DropFirst<T>(s: seq<T>): seq<T>
     requires |s| > 0
   {
     s[1..]
   }
 
   /* finds the last element in the sequence */
-  function method Last<T>(s: seq<T>): T
+  function Last<T>(s: seq<T>): T
     requires |s| > 0;
   {
     s[|s|-1]
   }
 
   /* returns the sequence slice up to but not including the last element */
-  function method DropLast<T>(s: seq<T>): seq<T> 
+  function DropLast<T>(s: seq<T>): seq<T> 
     requires |s| > 0;
   {
     s[..|s|-1]
@@ -80,13 +80,13 @@ module Seq {
   *
   ***********************************************************/
   
-  predicate IsPrefix<T>(a: seq<T>, b: seq<T>)
+  ghost predicate IsPrefix<T>(a: seq<T>, b: seq<T>)
     ensures IsPrefix(a, b) ==> (|a| <= |b| && a == b[..|a|])
   {
     a <= b    
   }
   
-  predicate IsSuffix<T>(a: seq<T>, b: seq<T>)
+  ghost predicate IsSuffix<T>(a: seq<T>, b: seq<T>)
   {
     && |a| <= |b|
     && a == b[|b|-|a|..]
@@ -134,7 +134,7 @@ module Seq {
   }
 
   /* converts a sequence to a set */
-  function method {:opaque} ToSet<T>(s: seq<T>): set<T> 
+  function {:opaque} ToSet<T>(s: seq<T>): set<T> 
   {
     set x: T | x in s
   }
@@ -163,7 +163,7 @@ module Seq {
   }
 
   /* is true if there are no duplicate values in the sequence */
-  predicate {:opaque} HasNoDuplicates<T>(s: seq<T>) 
+  ghost predicate {:opaque} HasNoDuplicates<T>(s: seq<T>) 
   {
     (forall i, j {:trigger s[i], s[j]}:: 0 <= i < |s| && 0 <= j < |s| && i != j ==> s[i] != s[j])
   }
@@ -245,7 +245,7 @@ module Seq {
   }
 
   /* finds the index of the first occurrence of an element in the sequence */
-  function method {:opaque} IndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
+  function {:opaque} IndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
     ensures forall j {:trigger s[j]} :: 0 <= j < i ==> s[j] != v
@@ -255,7 +255,7 @@ module Seq {
 
   /* finds the index of the first occurrence of an element in the sequence if
   found */
-  function method {:opaque} IndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
+  function {:opaque} IndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |s| && s[o.value] == v &&
                             forall j {:trigger s[j]} :: 0 <= j < o.value ==> s[j] != v
             else v !in s
@@ -269,7 +269,7 @@ module Seq {
   }
 
   /* finds the index of the last occurrence of an element in the sequence */
-  function method {:opaque} LastIndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
+  function {:opaque} LastIndexOf<T(==)>(s: seq<T>, v: T): (i: nat)
     requires v in s
     ensures i < |s| && s[i] == v
     ensures forall j {:trigger s[j]} :: i < j < |s| ==> s[j] != v
@@ -279,7 +279,7 @@ module Seq {
 
   /* finds the index of the last occurrence of an element in the sequence if
   found */
-  function method {:opaque} LastIndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
+  function {:opaque} LastIndexOfOption<T(==)>(s: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |s| && s[o.value] == v &&
                             forall j {:trigger s[j]} :: o.value < j < |s| ==> s[j] != v
             else v !in s
@@ -289,7 +289,7 @@ module Seq {
   }
 
   /* slices out a specific position's value from the sequence */
-  function method {:opaque} Remove<T>(s: seq<T>, pos: nat): (s': seq<T>)
+  function {:opaque} Remove<T>(s: seq<T>, pos: nat): (s': seq<T>)
     requires pos < |s|
     ensures |s'| == |s| - 1
     ensures forall i {:trigger s'[i], s[i]} | 0 <= i < pos :: s'[i] == s[i]
@@ -299,7 +299,7 @@ module Seq {
   }
 
   /* slices out a specific value from the sequence */
-  function method {:opaque} RemoveValue<T(==)>(s: seq<T>, v: T): (s': seq<T>)
+  function {:opaque} RemoveValue<T(==)>(s: seq<T>, v: T): (s': seq<T>)
     ensures v !in s ==> s == s'
     ensures v in s ==> |multiset(s')| == |multiset(s)| - 1
     ensures v in s ==> multiset(s')[v] == multiset(s)[v] - 1
@@ -315,7 +315,7 @@ module Seq {
   }
 
   /* inserts a certain value into a specified index of the sequence */
-  function method {:opaque} Insert<T>(s: seq<T>, a: T, pos: nat): seq<T>
+  function {:opaque} Insert<T>(s: seq<T>, a: T, pos: nat): seq<T>
     requires pos <= |s|
     ensures |Insert(s, a, pos)| == |s| + 1
     ensures forall i {:trigger Insert(s, a, pos)[i], s[i]} :: 0 <= i < pos ==> Insert(s, a, pos)[i] == s[i]
@@ -327,14 +327,14 @@ module Seq {
     s[..pos] + [a] + s[pos..]
   }
 
-  function method {:opaque} Reverse<T>(s: seq<T>): (s': seq<T>)
+  function {:opaque} Reverse<T>(s: seq<T>): (s': seq<T>)
     ensures |s'| == |s|
     ensures forall i {:trigger s'[i]}{:trigger s[|s| - i - 1]} :: 0 <= i < |s| ==> s'[i] == s[|s| - i - 1]
   {
     if s == [] then [] else [s[|s|-1]] + Reverse(s[0 .. |s|-1])
   }
     
-  function method {:opaque} Repeat<T>(v: T, length: nat): (s: seq<T>)
+  function {:opaque} Repeat<T>(v: T, length: nat): (s: seq<T>)
     ensures |s| == length
     ensures forall i: nat {:trigger s[i]} | i < |s| :: s[i] == v
   {
@@ -345,7 +345,7 @@ module Seq {
   }
   
   /* unzips a sequence that contains ordered pairs into 2 seperate sequences */
-  function method {:opaque} Unzip<A,B>(s: seq<(A, B)>): (seq<A>, seq<B>)
+  function {:opaque} Unzip<A,B>(s: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(s).0| == |Unzip(s).1| == |s|
     ensures forall i {:trigger Unzip(s).0[i]} {:trigger Unzip(s).1[i]} 
         :: 0 <= i < |s| ==> (Unzip(s).0[i], Unzip(s).1[i]) == s[i]
@@ -358,7 +358,7 @@ module Seq {
 
   /* takes two sequences, a and b, and combines then to form one sequence in which
   each position contains an ordered pair from a and b */
-  function method {:opaque} Zip<A,B>(a: seq<A>, b: seq<B>): seq<(A, B)>
+  function {:opaque} Zip<A,B>(a: seq<A>, b: seq<B>): seq<(A, B)>
     requires |a| == |b|
     ensures |Zip(a, b)| == |a|
     ensures forall i {:trigger Zip(a, b)[i]}:: 0 <= i < |Zip(a, b)| ==> Zip(a, b)[i] == (a[i], b[i])
@@ -382,7 +382,7 @@ module Seq {
   ***********************************************************/
 
   /* finds the maximum integer value in the sequence */
-  function method {:opaque} Max(s: seq<int>): int
+  function {:opaque} Max(s: seq<int>): int
     requires 0 < |s|
     ensures forall k {:trigger k in s} :: k in s ==> Max(s) >= k
     ensures Max(s) in s
@@ -408,7 +408,7 @@ module Seq {
   }
 
   /* finds the minimum integer value in the sequence */
-  function method {:opaque} Min(s: seq<int>): int
+  function {:opaque} Min(s: seq<int>): int
     requires 0 < |s|
     ensures forall k {:trigger k in s} :: k in s ==> Min(s) <= k
     ensures Min(s) in s
@@ -468,7 +468,7 @@ module Seq {
 
   /*concatenates a sequence of sequences into a single sequence. Works by adding 
   elements in order from first to last */
-  function method Flatten<T>(s: seq<seq<T>>): seq<T>
+  function Flatten<T>(s: seq<seq<T>>): seq<T>
     decreases |s|
   {
     if |s| == 0 then []
@@ -496,8 +496,8 @@ module Seq {
 
   /* concatenates the sequence of sequences into a single sequence. Works by concatenating 
   elements from last to first */
-  function method FlattenReverse<T>(s: seq<seq<T>>): seq<T>
-  decreases |s|
+  function FlattenReverse<T>(s: seq<seq<T>>): seq<T>
+    decreases |s|
   {
     if |s| == 0 then []
     else FlattenReverse(DropLast(s)) + Last(s)
@@ -506,7 +506,7 @@ module Seq {
   /* concatenating two reversed sequences of sequences is the same as reversing two 
   sequences of sequences and then concattenating the two resulting sequences together */
   lemma LemmaFlattenReverseConcat<T>(a: seq<seq<T>>, b: seq<seq<T>>)
-  ensures FlattenReverse(a + b) == FlattenReverse(a) + FlattenReverse(b)
+    ensures FlattenReverse(a + b) == FlattenReverse(a) + FlattenReverse(b)
   {
     if |b| == 0 {
       assert FlattenReverse(b) == [];
@@ -575,7 +575,7 @@ module Seq {
   ***********************************************************/
 
   /* applies a transformation function on the sequence */
-  function method {:opaque} Map<T,R>(f: (T ~> R), s: seq<T>): (result: seq<R>)
+  function {:opaque} Map<T,R>(f: (T ~> R), s: seq<T>): (result: seq<R>)
     requires forall i {:trigger s[i]} :: 0 <= i < |s| ==> f.requires(s[i])
     ensures |result| == |s|
     ensures forall i {:trigger result[i]}:: 0 <= i < |s| ==> result[i] == f(s[i]);
@@ -586,7 +586,7 @@ module Seq {
   }
 
 /* applies a transformation function that returns a result on the sequence */
-  function method {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
+  function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |s| ==> f.requires(s[i])
     ensures result.Success? ==>
       && |result.value| == |s|
@@ -626,7 +626,7 @@ module Seq {
   }
 
   /* uses a selection function to select elements from the sequence */
-  function method {:opaque} Filter<T>(f: (T ~> bool), s: seq<T>): (result: seq<T>)
+  function {:opaque} Filter<T>(f: (T ~> bool), s: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |s| ==> f.requires(s[i])
     ensures |result| <= |s|
     ensures forall i: nat {:trigger result[i]} :: i < |result| && f.requires(result[i]) ==> f(result[i])
@@ -658,7 +658,7 @@ module Seq {
     }
   }
   
-  function method {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, s: seq<T>): A
+  function {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, s: seq<T>): A
   {
     if |s| == 0 then init
     else FoldLeft(f, f(init, s[0]), s[1..])
@@ -690,7 +690,7 @@ module Seq {
 
   /* inv is an invariant under stp, which is a relational version of the
   function f passed to fold. */
-  predicate InvFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
+  ghost predicate InvFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
                                          stp: (B, A, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
@@ -716,7 +716,7 @@ module Seq {
     }
   }
 
-  function method {:opaque} FoldRight<A,T>(f: (T, A) -> A, s: seq<T>, init: A): A
+  function {:opaque} FoldRight<A,T>(f: (T, A) -> A, s: seq<T>, init: A): A
   {
     if |s| == 0 then init
     else f(s[0], FoldRight(f, s[1..], init))
@@ -745,7 +745,7 @@ module Seq {
 
   /* inv is an invariant under stp, which is a relational version of the
   function f passed to fold. */
-  predicate InvFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
+  ghost predicate InvFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
                                           stp: (A, B, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
