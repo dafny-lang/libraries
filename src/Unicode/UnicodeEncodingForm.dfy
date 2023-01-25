@@ -25,7 +25,7 @@ include "Unicode.dfy"
  *  - The function `DecodeMinimalWellFormedCodeUnitSubsequence`, which defines the mapping from minimal well-formed
  *    code unit subsequences to scalar values.
  */
-abstract module UnicodeEncodingForm {
+abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
   import opened Wrappers
 
   import Functions
@@ -54,7 +54,7 @@ abstract module UnicodeEncodingForm {
    * A well-formed Unicode code unit sequence that maps to a single Unicode scalar value.
    * (Section 3.9 D85a.)
    */
-  function method IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
+  function IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
     ensures b ==>
       && |s| > 0
       && forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i])
@@ -64,7 +64,7 @@ abstract module UnicodeEncodingForm {
    * Returns the shortest prefix of `s` that is a minimal well-formed code unit subsequence,
    * or None if there is no such prefix.
    */
-  function method SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (maybePrefix: Option<MinimalWellFormedCodeUnitSeq>)
+  function SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (maybePrefix: Option<MinimalWellFormedCodeUnitSeq>)
     ensures |s| == 0 ==> maybePrefix.None?
     ensures (exists i | 0 < i <= |s| :: IsMinimalWellFormedCodeUnitSubsequence(s[..i])) <==>
       && maybePrefix.Some?
@@ -80,12 +80,12 @@ abstract module UnicodeEncodingForm {
    *
    * TODO: enforce that implementations satisfy Functions.Injective
    */
-  function method EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
+  function EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
 
   /**
    * Returns the scalar value that this encoding form assigns to the given minimal well-formed code unit subsequence.
    */
-  function method DecodeMinimalWellFormedCodeUnitSubsequence(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequence(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     ensures EncodeScalarValue(v) == m
 
   //
@@ -113,7 +113,7 @@ abstract module UnicodeEncodingForm {
    * Returns the unique partition of the given code unit sequence into minimal well-formed code unit subsequences,
    * or None if no such partition exists.
    */
-  function method PartitionCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
+  function PartitionCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
     ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == s
     decreases |s|
   {
@@ -138,7 +138,7 @@ abstract module UnicodeEncodingForm {
    * Returns the unique partition of the given well-formed code unit sequence into minimal well-formed code unit
    * subsequences.
    */
-  function method PartitionCodeUnitSequence(s: WellFormedCodeUnitSeq): (parts: seq<MinimalWellFormedCodeUnitSeq>)
+  function PartitionCodeUnitSequence(s: WellFormedCodeUnitSeq): (parts: seq<MinimalWellFormedCodeUnitSeq>)
     ensures Seq.Flatten(parts) == s
   {
     PartitionCodeUnitSequenceChecked(s).Extract()
@@ -169,7 +169,7 @@ abstract module UnicodeEncodingForm {
   /**
    * A code unit sequence is well-formed iff it can be partitioned into a sequence of minimal well-formed code unit subsequences.
    */
-  function method IsWellFormedCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedCodeUnitSequence(s: CodeUnitSeq): (b: bool)
   {
     PartitionCodeUnitSequenceChecked(s).Some?
   }
@@ -235,7 +235,7 @@ abstract module UnicodeEncodingForm {
   /**
    * Returns the well-formed Unicode string that is the encoding of the given scalar value sequence.
    */
-  function method EncodeScalarSequence(vs: seq<Unicode.ScalarValue>): (s: WellFormedCodeUnitSeq)
+  function EncodeScalarSequence(vs: seq<Unicode.ScalarValue>): (s: WellFormedCodeUnitSeq)
   {
     var ms := Seq.Map(EncodeScalarValue, vs);
     LemmaFlattenMinimalWellFormedCodeUnitSubsequences(ms);
@@ -245,7 +245,7 @@ abstract module UnicodeEncodingForm {
   /**
    * Returns the scalar value sequence encoded by the given well-formed Unicode string.
    */
-  function method DecodeCodeUnitSequence(s: WellFormedCodeUnitSeq): (vs: seq<Unicode.ScalarValue>)
+  function DecodeCodeUnitSequence(s: WellFormedCodeUnitSeq): (vs: seq<Unicode.ScalarValue>)
     ensures EncodeScalarSequence(vs) == s
   {
     var parts := PartitionCodeUnitSequence(s);

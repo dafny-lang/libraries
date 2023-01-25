@@ -9,7 +9,7 @@ include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
 // This module implements basic functionality of Unicode 14.0.
-module Unicode {
+module {:options "-functionSyntax:4"} Unicode {
   import opened Wrappers
 
   import Seq
@@ -52,7 +52,7 @@ module Unicode {
     16  // Supplementary Private Use Area B
   }
 
-  predicate {:opaque} IsInAssignedPlane(i: CodePoint) {
+  ghost predicate {:opaque} IsInAssignedPlane(i: CodePoint) {
     var plane := (i >> 16) as bv8;
     plane in ASSIGNED_PLANES
   }
