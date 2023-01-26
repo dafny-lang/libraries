@@ -803,8 +803,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that any two sequences that are sorted by a total order and admit the
-     same multiset are equal. */
+  /* Proves that any two sequences that are sorted by a total order and that have the same elements are equal. */
   lemma SortedUnique<T>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
     requires SortedBy(xs, R)
     requires SortedBy(ys, R)
