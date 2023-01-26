@@ -19,146 +19,145 @@ module {:options "-functionSyntax:4"} Sets {
 
   import opened Functions
 
-  /* If all elements in set x are in set y, x is a subset of y. */
-  lemma LemmaSubset<T>(x: set<T>, y: set<T>)
-    requires forall e {:trigger e in y} :: e in x ==> e in y
-    ensures x <= y
+  /* Proves that if all elements in set s1 are in set s2, s1 is a subset of s2. */
+  lemma LemmaSubset<T>(s1: set<T>, s2: set<T>)
+    requires forall x {:trigger x in s2} :: x in s1 ==> x in s2
+    ensures s1 <= s2
   {
   }
 
-  /* If x is a subset of y, then the size of x is less than or equal to the
-  size of y. */
-  lemma LemmaSubsetSize<T>(x: set<T>, y: set<T>)
-    ensures x < y ==> |x| < |y|
-    ensures x <= y ==> |x| <= |y|
+  /* Proves that if s1 is a subset of s2, then the size of s1 is less than or 
+     equal to the size of s2. */
+  lemma LemmaSubsetSize<T>(s1: set<T>, s2: set<T>)
+    ensures s1 < s2 ==> |s1| < |s2|
+    ensures s1 <= s2 ==> |s1| <= |s2|
   {
-    if x != {} {
-      var e :| e in x;
-      LemmaSubsetSize(x - {e}, y - {e});
+    if s1 != {} {
+      var x :| x in s1;
+      LemmaSubsetSize(s1 - {x}, s2 - {x});
     }
   }
 
-  /* If x is a subset of y and the size of x is equal to the size of y, x is
-  equal to y. */
-  lemma LemmaSubsetEquality<T>(x: set<T>, y: set<T>)
-    requires x <= y
-    requires |x| == |y|
-    ensures x == y
-    decreases x, y
+  /* Proves that if s1 is a subset of s2 and the size of s1 is equal to the size 
+     of s2, then s1 is equal to s2. */
+  lemma LemmaSubsetEquality<T>(s1: set<T>, s2: set<T>)
+    requires s1 <= s2
+    requires |s1| == |s2|
+    ensures s1 == s2
+    decreases s1, s2
   {
-    if x == {} {
+    if s1 == {} {
     } else {
-      var e :| e in x;
-      LemmaSubsetEquality(x - {e}, y - {e});
+      var x :| x in s1;
+      LemmaSubsetEquality(s1 - {x}, s2 - {x});
     }
   }
 
-  /* A singleton set has a size of 1. */
-  lemma LemmaSingletonSize<T>(x: set<T>, e: T)
-    requires x == {e}
-    ensures |x| == 1
+  /* Proves that a singleton set has a size of 1. */
+  lemma LemmaSingletonSize<T>(s: set<T>, x: T)
+    requires s == {x}
+    ensures |s| == 1
   {
   }
 
-  /* Elements in a singleton set are equal to each other. */
-  lemma LemmaSingletonEquality<T>(x: set<T>, a: T, b: T)
-    requires |x| == 1
-    requires a in x
-    requires b in x
-    ensures a == b
+  /* Proves that any two elements in a singleton set are equal to each other. */
+  lemma LemmaSingletonEquality<T>(s: set<T>, x1: T, x2: T)
+    requires |s| == 1
+    requires x1 in s
+    requires x2 in s
+    ensures x1 == x2
   {
-    if a != b {
-      assert {a} < x;
-      LemmaSubsetSize({a}, x);
-      assert |{a}| < |x|;
-      assert |x| > 1;
-      assert false;
+    var s2 := {x1, x2};
+    assert s2 <= s;
+    assert |s2| <= |s| == 1 by { LemmaSubsetSize(s2, s); }
+    if x1 != x2 {
+      assert 2 <= 1 by { assert |{x1, x2}| == 2; }
     }
   }
 
-  /* If an injective function is applied to each element of a set to construct
-  another set, the two sets have the same size.  */
-  lemma LemmaMapSize<X(!new), Y>(xs: set<X>, ys: set<Y>, f: X-->Y)
+  /* Essentially proves that if there exists a bijection between two sets, then
+     the two sets have the same cardinality. That is, if an injective function f 
+     is applied to each element of a set s1 to construct the set s2, then s1 and s2
+     have the same size. */
+  lemma LemmaMapSize<X(!new), Y>(s1: set<X>, s2: set<Y>, f: X-->Y)
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
     requires Injective(f)
-    requires forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
-    requires forall y {:trigger y in ys} :: y in ys ==> exists x :: x in xs && y == f(x)
-    ensures |xs| == |ys|
+    requires forall x {:trigger f(x)} :: x in s1 <==> f(x) in s2
+    requires forall y {:trigger y in s2} :: y in s2 ==> exists x :: x in s1 && y == f(x)
+    ensures |s1| == |s2|
   {
-    if xs != {} {
-      var x :| x in xs;
-      var xs' := xs - {x};
-      var ys' := ys - {f(x)};
-      LemmaMapSize(xs', ys', f);
+    if s1 != {} {
+      var x :| x in s1;
+      var s3 := s1 - {x};
+      var s4 := s2 - {f(x)};
+      LemmaMapSize(s3, s4, f);
     }
   }
 
-  /* Map an injective function to each element of a set. */
-  function {:opaque} Map<X(!new), Y>(xs: set<X>, f: X-->Y): (ys: set<Y>)
+  /* Returns the set s2 that is the image of an injective function f applied to the set s1. */
+  function {:opaque} Map<X(!new), Y>(s1: set<X>, f: X-->Y): (s2: set<Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
     requires Injective(f)
-    ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
-    ensures |xs| == |ys|
+    ensures forall x {:trigger f(x)} :: x in s1 <==> f(x) in s2
+    ensures |s1| == |s2|
   {
-    var ys := set x | x in xs :: f(x);
-    LemmaMapSize(xs, ys, f);
-    ys
+    var s2 := set x | x in s1 :: f(x);
+    LemmaMapSize(s1, s2, f);
+    s2
   }
 
-  /* If a set ys is constructed using elements of another set xs for which a
-  function returns true, the size of ys is less than or equal to the size of
-  xs. */
-  lemma LemmaFilterSize<X>(xs: set<X>, ys: set<X>, f: X~>bool)
-    requires forall x {:trigger f.requires(x)}{:trigger x in xs} :: x in xs ==> f.requires(x)
-    requires forall y {:trigger f(y)}{:trigger y in xs} :: y in ys ==> y in xs && f(y)
-    ensures |ys| <= |xs|
-    decreases xs, ys
+  /* Proves that if a set s2 consists those elements of a set s1 that satisfy a given
+     predicate, then size of s2 is less than or equal to the size of s1. */
+  lemma LemmaFilterSize<X>(s1: set<X>, s2: set<X>, p: X~>bool)
+    requires forall x {:trigger p.requires(x)}{:trigger x in s1} :: x in s1 ==> p.requires(x)
+    requires forall x {:trigger p(x)}{:trigger x in s1} :: x in s2 ==> x in s1 && p(x)
+    ensures |s2| <= |s1|
+    decreases s1, s2
   {
-    if ys != {} {
-      var y :| y in ys;
-      var xs' := xs - {y};
-      var ys' := ys - {y};
-      LemmaFilterSize(xs', ys', f);
+    if s2 != {} {
+      var x :| x in s2;
+      var s3 := s1 - {x};
+      var s4 := s2 - {x};
+      LemmaFilterSize(s3, s4, p);
     }
   }
 
-  /* Construct a set using elements of another set for which a function returns
-  true. */
-  function {:opaque} Filter<X(!new)>(xs: set<X>, f: X~>bool): (ys: set<X>)
-    reads f.reads
-    requires forall x {:trigger f.requires(x)} {:trigger x in xs} :: x in xs ==> f.requires(x)
-    ensures forall y {:trigger f(y)}{:trigger y in xs} :: y in ys <==> y in xs && f(y)
-    ensures |ys| <= |xs|
+  /* Returns the set s2 of those elements in s1 that satisfy the predicate p. */
+  function {:opaque} Filter<X(!new)>(s1: set<X>, p: X~>bool): (s2: set<X>)
+    reads p.reads
+    requires forall x {:trigger p.requires(x)} {:trigger x in s1} :: x in s1 ==> p.requires(x)
+    ensures forall x {:trigger p(x)}{:trigger x in s1} :: x in s2 <==> x in s1 && p(x)
+    ensures |s2| <= |s1|
   {
-    var ys := set x | x in xs && f(x);
-    LemmaFilterSize(xs, ys, f);
-    ys
+    var s2 := set x | x in s1 && p(x);
+    LemmaFilterSize(s1, s2, p);
+    s2
   }
 
-  /* The size of a union of two sets is greater than or equal to the size of
-  either individual set. */
-  lemma LemmaUnionSize<X>(xs: set<X>, ys: set<X>)
-    ensures |xs + ys| >= |xs|
-    ensures |xs + ys| >= |ys|
+  /* Proves that the size of a union of two sets is greater than or equal to the size of
+     either individual set. */
+  lemma LemmaUnionSize<X>(s1: set<X>, s2: set<X>)
+    ensures |s1 + s2| >= |s1|
+    ensures |s1 + s2| >= |s2|
   {
-    if ys == {} {
+    if s2 == {} {
     } else {
-      var y :| y in ys;
-      if y in xs {
-        var xr := xs - {y};
-        var yr := ys - {y};
-        assert xr + yr == xs + ys - {y};
-        LemmaUnionSize(xr, yr);
+      var x :| x in s2;
+      if x in s1 {
+        var s3 := s1 - {x};
+        var s4 := s2 - {x};
+        assert s3 + s4 == s1 + s2 - {x};
+        LemmaUnionSize(s3, s4);
       } else {
-        var yr := ys - {y};
-        assert xs + yr == xs + ys - {y};
-        LemmaUnionSize(xs, yr);
+        var s3 := s2 - {x};
+        assert s1 + s3 == s1 + s2 - {x};
+        LemmaUnionSize(s1, s3);
       }
     }
   }
 
-  /* Construct a set with all integers in the range [a, b). */
+  /* Returns the set of all the integers in the range [a, b). */
   function {:opaque} SetRange(a: int, b: int): (s: set<int>)
     requires a <= b
     ensures forall i {:trigger i in s} :: a <= i < b <==> i in s
@@ -168,7 +167,7 @@ module {:options "-functionSyntax:4"} Sets {
     if a == b then {} else {a} + SetRange(a + 1, b)
   }
 
-  /* Construct a set with all integers in the range [0, n). */
+  /* Returns the set of all the integers in the range [0, n). */
   function {:opaque} SetRangeZeroBound(n: int): (s: set<int>)
     requires n >= 0
     ensures forall i {:trigger i in s} :: 0 <= i < n <==> i in s
@@ -177,20 +176,20 @@ module {:options "-functionSyntax:4"} Sets {
     SetRange(0, n)
   }
 
-  /* If a set solely contains integers in the range [a, b), then its size is
-  bounded by b - a. */
-  lemma LemmaBoundedSetSize(x: set<int>, a: int, b: int)
-    requires forall i {:trigger i in x} :: i in x ==> a <= i < b
+  /* Proves that if a set solely contains integers in the range [a, b), then its size is
+     bounded by b - a. */
+  lemma LemmaBoundedSetSize(s: set<int>, a: int, b: int)
+    requires forall i {:trigger i in s} :: i in s ==> a <= i < b
     requires a <= b
-    ensures |x| <= b - a
+    ensures |s| <= b - a
   {
     var range := SetRange(a, b);
-    forall e {:trigger e in range}{:trigger e in x} | e in x
-      ensures e in range;
+    forall x {:trigger x in range}{:trigger x in s} | x in s
+      ensures x in range;
     {
     }
-    assert x <= range;
-    LemmaSubsetSize(x, range);
+    assert s <= range;
+    LemmaSubsetSize(s, range);
   }
 
 }
