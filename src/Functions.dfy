@@ -13,8 +13,8 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module Functions {
-  predicate Injective<X(!new), Y>(f: X-->Y)
+module {:options "-functionSyntax:4"} Functions {
+  ghost predicate Injective<X(!new), Y>(f: X-->Y)
     reads f.reads
     requires forall x :: f.requires(x)
   {

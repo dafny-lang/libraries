@@ -15,7 +15,7 @@
 
 include "../../Functions.dfy"
 
-module Sets {
+module {:options "-functionSyntax:4"} Sets {
 
   import opened Functions
 
@@ -94,7 +94,7 @@ module Sets {
   }
 
   /* Map an injective function to each element of a set. */
-  function method {:opaque} Map<X(!new), Y>(xs: set<X>, f: X-->Y): (ys: set<Y>)
+  function {:opaque} Map<X(!new), Y>(xs: set<X>, f: X-->Y): (ys: set<Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
     requires Injective(f)
@@ -125,7 +125,7 @@ module Sets {
 
   /* Construct a set using elements of another set for which a function returns
   true. */
-  function method {:opaque} Filter<X(!new)>(xs: set<X>, f: X~>bool): (ys: set<X>)
+  function {:opaque} Filter<X(!new)>(xs: set<X>, f: X~>bool): (ys: set<X>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} {:trigger x in xs} :: x in xs ==> f.requires(x)
     ensures forall y {:trigger f(y)}{:trigger y in xs} :: y in ys <==> y in xs && f(y)
@@ -159,7 +159,7 @@ module Sets {
   }
 
   /* Construct a set with all integers in the range [a, b). */
-  function method {:opaque} SetRange(a: int, b: int): (s: set<int>)
+  function {:opaque} SetRange(a: int, b: int): (s: set<int>)
     requires a <= b
     ensures forall i {:trigger i in s} :: a <= i < b <==> i in s
     ensures |s| == b - a
@@ -169,7 +169,7 @@ module Sets {
   }
 
   /* Construct a set with all integers in the range [0, n). */
-  function method {:opaque} SetRangeZeroBound(n: int): (s: set<int>)
+  function {:opaque} SetRangeZeroBound(n: int): (s: set<int>)
     requires n >= 0
     ensures forall i {:trigger i in s} :: 0 <= i < n <==> i in s
     ensures |s| == n

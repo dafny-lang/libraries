@@ -5,8 +5,8 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module Math {
-  function method Min(a: int, b: int): int
+module {:options "-functionSyntax:4"} Math {
+  function Min(a: int, b: int): int
   {
     if a < b
       then a
@@ -14,7 +14,7 @@ module Math {
       b
   }
 
-  function method Max(a: int, b: int): int
+  function Max(a: int, b: int): int
   {
     if a < b
       then b

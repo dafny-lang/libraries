@@ -175,7 +175,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* if sequence a and b don't have duplicates and there are no elements in
   common between them, then the concatenated sequence of a + b will not contain
   duplicates either */
-  lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(a: seq<T>, b: seq<T>)
+  lemma LemmaNoDuplicatesInConcat<T>(a: seq<T>, b: seq<T>)
     requires HasNoDuplicates(a);
     requires HasNoDuplicates(b);
     requires multiset(a) !! multiset(b);
@@ -184,8 +184,12 @@ module {:options "-functionSyntax:4"} Seq {
     reveal HasNoDuplicates();
     var c := a + b;
     if |c| > 1 {
-      assert forall i, j {:trigger c[i], c[j]}:: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
-        c[i] in multiset(a) && c[j] in multiset(b) && c[i] != c[j]; 
+      assert forall i {:trigger c[i]} :: 0 <= i < |a| ==>
+        c[i] in multiset(a);
+      assert forall j {:trigger c[j]} :: |a| <= j < |c| ==>
+        c[j] in multiset(b);
+      assert forall i, j {:trigger c[i], c[j]} :: i != j && 0 <= i < |a| && |a| <= j < |c| ==>
+        c[i] != c[j];
     }
   }
 
@@ -497,7 +501,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* concatenates the sequence of sequences into a single sequence. Works by concatenating 
   elements from last to first */
   function FlattenReverse<T>(s: seq<seq<T>>): seq<T>
-  decreases |s|
+    decreases |s|
   {
     if |s| == 0 then []
     else FlattenReverse(DropLast(s)) + Last(s)
@@ -506,7 +510,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* concatenating two reversed sequences of sequences is the same as reversing two 
   sequences of sequences and then concattenating the two resulting sequences together */
   lemma LemmaFlattenReverseConcat<T>(a: seq<seq<T>>, b: seq<seq<T>>)
-  ensures FlattenReverse(a + b) == FlattenReverse(a) + FlattenReverse(b)
+    ensures FlattenReverse(a + b) == FlattenReverse(a) + FlattenReverse(b)
   {
     if |b| == 0 {
       assert FlattenReverse(b) == [];
@@ -563,7 +567,7 @@ module {:options "-functionSyntax:4"} Seq {
     if |s| == 0 {
     } else {
       LemmaFlattenLengthLeMul(s[..|s|-1], j);
-      assert |FlattenReverse(s[..|s|-1])| <= (|s|-1) * j;
+      assert {:split_here} |FlattenReverse(s[..|s|-1])| <= (|s|-1) * j;
     }
   }
 
@@ -649,10 +653,10 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc {
         Filter(f, a + b);
-          { assert (a + b)[0] == a[0]; assert (a + b)[1..] == a[1..] + b; }
+          { assert {:split_here} (a + b)[0] == a[0]; assert (a + b)[1..] == a[1..] + b; }
         Filter(f, [a[0]]) + Filter(f, a[1..] + b);
         Filter(f, [a[0]]) + Filter(f, a[1..]) + Filter(f, b);
-          { assert [(a + b)[0]] + a[1..] + b == a + b; }
+          { assert {:split_here} [(a + b)[0]] + a[1..] + b == a + b; }
         Filter(f, a) + Filter(f, b);
       }
     }
@@ -778,10 +782,10 @@ module {:options "-functionSyntax:4"} Seq {
   ***********************************************************/  
 
   /* Converts a set to a sequence (ghost). */
-  ghost function GhostSetToSeq<T>(s: set<T>): (xs: seq<T>)
+  ghost function SetToSeqSpec<T>(s: set<T>): (xs: seq<T>)
     ensures multiset(s) == multiset(xs)
   {
-    if s == {} then [] else var x :| x in s; [x] + GhostSetToSeq(s - {x})
+    if s == {} then [] else var x :| x in s; [x] + SetToSeqSpec(s - {x})
   }
 
   /* Converts a set to a sequence (compiled). */
@@ -826,7 +830,7 @@ module {:options "-functionSyntax:4"} Seq {
     ensures multiset(s) == multiset(xs)
     ensures SortedBy(xs, R)
   {
-    MergeSortBy(GhostSetToSeq(s), R)
+    MergeSortBy(SetToSeqSpec(s), R)
   } by method {
     xs := SetToSeq(s);
     xs := MergeSortBy(xs, R);

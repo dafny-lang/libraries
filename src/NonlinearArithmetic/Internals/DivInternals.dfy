@@ -21,7 +21,7 @@ Note this is consistent: -3 * -1 + 2 == 5 */
 include "GeneralInternals.dfy"
 include "ModInternals.dfy"
 
-module DivInternals {
+module {:options "-functionSyntax:4"} DivInternals {
 
   import opened GeneralInternals
   import opened ModInternals
@@ -30,7 +30,7 @@ module DivInternals {
   import opened MulInternals
 
   /* Performs division recursively with positive denominator. */
-  function method {:opaque} DivPos(x: int, d: int): int
+  function {:opaque} DivPos(x: int, d: int): int
     requires d > 0
     decreases if x < 0 then (d - x) else x
   {
@@ -43,7 +43,7 @@ module DivInternals {
   }
 
   /* Performs division recursively. */
-  function method {:opaque} DivRecursive(x: int, d: int): int
+  function {:opaque} DivRecursive(x: int, d: int): int
     requires d != 0
   {
     reveal DivPos();
@@ -75,7 +75,7 @@ module DivInternals {
   /* Automates the division operator process. Contains the identity property, a
   fact about when quotients are zero, and facts about adding and subtracting
   integers over a common denominator. */
-  predicate DivAuto(n: int)
+  ghost predicate DivAuto(n: int)
     requires n > 0
   {
     && ModAuto(n)
