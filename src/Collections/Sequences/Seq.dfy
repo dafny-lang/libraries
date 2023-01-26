@@ -823,7 +823,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Converts a set to sequence that is ordered w.r.t. a given total order. */
+  /* Converts a set to a sequence that is ordered w.r.t. a given total order. */
   function SetToSortedSeq<T>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
     requires TotalOrdering(R)
     ensures multiset(s) == multiset(xs)
