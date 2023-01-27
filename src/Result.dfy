@@ -4,118 +4,135 @@ module {:options "-functionSyntax:4"} Result {
 
   import opened Wrappers 
 
-  datatype Result<+S,+E> = | Success(value: S) | Failure(error: E)
+  datatype Result<+T,+E> = | Success(value: T) | Failure(error: E)
 
-  function Success<S,E>(v: S): Result<S,E> {
+  function Success<T,E>(v: T): Result<T,E> {
     Result.Success(v)
   }
 
-  function Failure<S,E>(e: E): Result<S,E> {
+  function Failure<T,E>(e: E): Result<T,E> {
     Result.Failure(e)
-  }
+  } 
 
-  predicate IsSuccess<S,E>(r: Result<S,E>) {
+  predicate IsSuccess<T,E>(r: Result<T,E>) {
     r.Success?
   }  
 
-  predicate IsFailure<S,E>(r: Result<S,E>) {
+  predicate IsFailure<T,E>(r: Result<T,E>) {
     r.Failure?
   }  
 
-  function GetValue<S,E>(r: Result<S,E>): S 
+  function GetValue<T,E>(r: Result<T,E>): T
     requires r.Success?
   {
     r.value
   }
 
-  function GetValueDefault<S,E>(r: Result<S,E>, default: S): S {
+  function GetValueDefault<T,E>(r: Result<T,E>, default: T): T {
     match r 
     case Success(v) => v
     case Failure(_) => default
   }
 
-  function GetError<S,E>(r: Result<S,E>): E 
+  function GetError<T,E>(r: Result<T,E>): E 
     requires r.Failure?
   {
     r.error
   }
 
-  function Bind<S1,S2,E>(r: Result<S1,E>, f: S1 -> Result<S2,E>): Result<S2,E> {
+  function Bind<T1,T2,E>(r: Result<T1,E>, f: T1 -> Result<T2,E>): Result<T2,E> {
     match r
     case Success(v) => f(v)
-    case Failure(e) => Result<S2,E>.Failure(e)
+    case Failure(e) => Result<T2,E>.Failure(e)
   }
 
-  function Join<S,E>(rr: Result<Result<S,E>,E>): Result<S,E> {
+  function Join<T,E>(rr: Result<Result<T,E>,E>): Result<T,E> {
     match rr
     case Success(v) => v
-    case Failure(e) => Result<S,E>.Failure(e)
+    case Failure(e) => Result<T,E>.Failure(e)
   }
 
-  function Map<S1,S2,E>(f: S1 -> S2): Result<S1,E> -> Result<S2,E> {
-    (r: Result<S1,E>) =>
+  function Map<T1,T2,E>(f: T1 -> T2): Result<T1,E> -> Result<T2,E> {
+    (r: Result<T1,E>) =>
       match r 
-      case Success(v) => Result<S2,E>.Success(f(v))
-      case Failure(e) => Result<S2,E>.Failure(e)
+      case Success(v) => Result<T2,E>.Success(f(v))
+      case Failure(e) => Result<T2,E>.Failure(e)
   }
 
-  function MapError<S,E1,E2>(f: E1 -> E2): Result<S,E1> -> Result<S,E2> {
-    (r: Result<S,E1>) =>
+  function MapError<T,E1,E2>(f: E1 -> E2): Result<T,E1> -> Result<T,E2> {
+    (r: Result<T,E1>) =>
       match r 
-      case Success(v) => Result<S,E2>.Success(v)
-      case Failure(e) => Result<S,E2>.Failure(f(e))
+      case Success(v) => Result<T,E2>.Success(v)
+      case Failure(e) => Result<T,E2>.Failure(f(e))
   }  
 
-  function ToOption<S,E>(r: Result<S,E>): Option<S> {
-    match r
-    case Success(v) => Some(v)
-    case Failure(_) => None()
-  }
-
-  function Fold<S,E,T>(f: S -> T, g: E -> T): Result<S,E> -> T {
-    (r: Result<S,E>) =>
+  function Fold<T,E,U>(f: T -> U, g: E -> U): Result<T,E> -> U {
+    (r: Result<T,E>) =>
       match r 
       case Success(v) => f(v)
       case Failure(e) => g(e)
   }
 
-  function ToSeq<S,E>(r: Result<S,E>): seq<S> {
+  function Composition<T1,T2,T3,E>(f: T1 -> Result<T2,E>, g: T2 -> Result<T3,E>): T1 -> Result<T3,E> {
+    x => Bind(f(x), g)
+  }
+
+  function Equal<T,E>(eqs: (T, T) -> bool, eqf: (E, E) -> bool): (Result<T,E>, Result<T,E>) -> bool {
+    (r1: Result<T,E>, r2: Result<T,E>) =>
+      match (r1, r2)
+      case (Success(v1), Success(v2)) => eqs(v1, v2)
+      case (Failure(e1), Failure(e2)) => eqf(e1, e2)
+      case _ => false
+  }
+
+  function Compare<T,E>(cmps: (T, T) -> int, cmpf: (E, E) -> int): (Result<T,E>, Result<T,E>) -> int {
+    (r1: Result<T,E>, r2: Result<T,E>) =>
+      match (r1, r2)
+      case (Success(v1), Success(v2)) => cmps(v1, v2)
+      case (Failure(e1), Failure(e2)) => cmpf(e1, e2)
+      case (Success(_), Failure(_)) => -1
+      case (Failure(_), Success(_)) => 1
+  }
+
+  function ToSeq<T,E>(r: Result<T,E>): seq<T> {
     match r
     case Success(v) => [v]
     case Failure(_) => []
   }
 
-  function ToSet<S,E>(r: Result<S,E>): set<S> {
+  function ToSet<T,E>(r: Result<T,E>): set<T> {
     match r
     case Success(v) => {v}
     case Failure(_) => {}   
   }
 
-  function Composition<S1,S2,S3,E>(f: S1 -> Result<S2,E>, g: S2 -> Result<S3,E>): S1 -> Result<S3,E> {
-    x => Bind(f(x), g)
+  function ToOption<T,E>(r: Result<T,E>): Option<T> {
+    match r
+    case Success(v) => Some(v)
+    case Failure(_) => None()
   }
 
-  lemma LemmaUnitalityJoin<S,E>(r: Result<S,E>)
-    ensures Join(Map(Success<S,E>)(r)) == r == Join(Success<Result<S,E>,E>(r))
+  lemma LemmaUnitalityJoin<T,E>(r: Result<T,E>)
+    ensures Join(Map(Success<T,E>)(r)) == r == Join(Success<Result<T,E>,E>(r))
   {
   }
 
-  lemma LemmaAssociativityJoin<S,E>(rrr: Result<Result<Result<S,E>,E>,E>) 
-    ensures Join(Map(Join<S,E>)(rrr) ) == Join(Join<Result<S,E>,E>(rrr))
+  lemma LemmaAssociativityJoin<T,E>(rrr: Result<Result<Result<T,E>,E>,E>) 
+    ensures Join(Map(Join<T,E>)(rrr)) == Join(Join<Result<T,E>,E>(rrr))
   {
   }  
 
-  lemma LemmaLeftUnitalityBind<S1,S2,E>(v: S1, f: S1 -> Result<S2,E>)
+  lemma LemmaLeftUnitalityBind<T1,T2,E>(v: T1, f: T1 -> Result<T2,E>)
     ensures Bind(Success(v), f) == f(v)
   {
   }
 
-  lemma LemmaRightUnitalityBind<S,E>(r: Result<S,E>)
+  lemma LemmaRightUnitalityBind<T,E>(r: Result<T,E>)
     ensures Bind(r, Success) == r
   {
   }
 
-  lemma LemmaAssociativityBind<S1,S2,S3,E>(r: Result<S1,E>, f: S1 -> Result<S2,E>, g: S2 -> Result<S3,E>)
+  lemma LemmaAssociativityBind<T1,T2,T3,E>(r: Result<T1,E>, f: T1 -> Result<T2,E>, g: T2 -> Result<T3,E>)
     ensures Bind(Bind(r, f), g) == Bind(r, Composition(f, g))
   {
   }
