@@ -40,10 +40,10 @@ module {:options "-functionSyntax:4"} Result {
     r.error
   }
 
-  function Bind<T1,T2,E>(r: Result<T1,E>, f: T1 -> Result<T2,E>): Result<T2,E> {
+  function Bind<S,T,E>(r: Result<S,E>, f: S -> Result<T,E>): Result<T,E> {
     match r
     case Success(v) => f(v)
-    case Failure(e) => Result<T2,E>.Failure(e)
+    case Failure(e) => Result<T,E>.Failure(e)
   }
 
   function Join<T,E>(rr: Result<Result<T,E>,E>): Result<T,E> {
@@ -52,11 +52,11 @@ module {:options "-functionSyntax:4"} Result {
     case Failure(e) => Result<T,E>.Failure(e)
   }
 
-  function Map<T1,T2,E>(f: T1 -> T2): Result<T1,E> -> Result<T2,E> {
-    (r: Result<T1,E>) =>
+  function Map<S,T,E>(f: S -> T): Result<S,E> -> Result<T,E> {
+    (r: Result<S,E>) =>
       match r 
-      case Success(v) => Result<T2,E>.Success(f(v))
-      case Failure(e) => Result<T2,E>.Failure(e)
+      case Success(v) => Result<T,E>.Success(f(v))
+      case Failure(e) => Result<T,E>.Failure(e)
   }
 
   function MapError<T,E1,E2>(f: E1 -> E2): Result<T,E1> -> Result<T,E2> {
@@ -73,7 +73,7 @@ module {:options "-functionSyntax:4"} Result {
       case Failure(e) => g(e)
   }
 
-  function Composition<T1,T2,T3,E>(f: T1 -> Result<T2,E>, g: T2 -> Result<T3,E>): T1 -> Result<T3,E> {
+  function Composition<S,T,U,E>(f: S -> Result<T,E>, g: T -> Result<U,E>): S -> Result<U,E> {
     x => Bind(f(x), g)
   }
 
@@ -132,7 +132,7 @@ module {:options "-functionSyntax:4"} Result {
   {
   }
 
-  lemma LemmaAssociativityBind<T1,T2,T3,E>(r: Result<T1,E>, f: T1 -> Result<T2,E>, g: T2 -> Result<T3,E>)
+  lemma LemmaAssociativityBind<S,T,U,E>(r: Result<S,E>, f: S -> Result<T,E>, g: T -> Result<U,E>)
     ensures Bind(Bind(r, f), g) == Bind(r, Composition(f, g))
   {
   }
