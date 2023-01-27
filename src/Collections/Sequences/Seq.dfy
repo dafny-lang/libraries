@@ -655,8 +655,9 @@ module {:options "-functionSyntax:4"} Seq {
         Filter(f, a + b);
           { assert {:split_here} (a + b)[0] == a[0]; assert (a + b)[1..] == a[1..] + b; }
         Filter(f, [a[0]]) + Filter(f, a[1..] + b);
-        Filter(f, [a[0]]) + Filter(f, a[1..]) + Filter(f, b);
-          { assert {:split_here} [(a + b)[0]] + a[1..] + b == a + b; }
+          { assert Filter(f, a[1..] + b) == Filter(f, a[1..]) + Filter(f, b); }
+        Filter(f, [a[0]]) + (Filter(f, a[1..]) + Filter(f, b));
+          { assert {:split_here} [(a + b)[0]] + (a[1..] + b) == a + b; }
         Filter(f, a) + Filter(f, b);
       }
     }
