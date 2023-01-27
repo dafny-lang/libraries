@@ -4,8 +4,11 @@
 *  Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
+include "Wrappers.dfy"
 
 module {:options "-functionSyntax:4"} Option {
+
+  import opened Wrappers
 
   datatype Option<+T> = None | Some(value: T)
 
@@ -15,7 +18,7 @@ module {:options "-functionSyntax:4"} Option {
 
   function Bind<S,T>(o: Option<S>, f: S -> Option<T>): Option<T> {
     match o 
-    case None => None
+    case None => Option<T>.None
     case Some(v) => f(v)
   }
 
@@ -27,24 +30,37 @@ module {:options "-functionSyntax:4"} Option {
     o.Some?
   }
 
-  function Get<T>(o: Option<T>): (v: T) 
+  function GetValue<T>(o: Option<T>): T
     requires o.Some?
-    ensures o.value == v
   {
     o.value
   }
- 
+
+  function GetValueDefault<T>(o: Option<T>, default: T): T {
+    match o
+    case None => default
+    case Some(v) => v
+  }
+
   function Join<T>(oo: Option<Option<T>>): Option<T> {
     match oo
-    case None => None
+    case None => Option<T>.None
     case Some(o) => o
   }
 
-  function Map<S,T>(f: S -> T, o: Option<S>): (o2: Option<T>)
+  function Map<S,T>(f: S -> T): Option<S> -> Option<T>
   {
-    match o 
-    case None => None
-    case Some(v) => Some(f(v))
+    (o: Option<S>) =>
+      match o 
+      case None => Option<T>.None
+      case Some(v) => Some(f(v))
+  }
+
+  function Fold<T,U>(u: U, f: T -> U): Option<T> -> U {
+    (o: Option<T>) =>
+      match o 
+      case None => u
+      case Some(v) => f(v)
   }
 
   function Equal<T>(eq: (T, T) -> bool): (Option<T>, Option<T>) -> bool {
@@ -64,6 +80,17 @@ module {:options "-functionSyntax:4"} Option {
       case (Some(_), None) => 1
   }
 
+  function Composition<S,T,U>(f: S -> Option<T>, g: T-> Option<U>): S -> Option<U> {
+    x => Bind(f(x), g)
+  }
+
+  function ToResult<T,E>(e: E): Option<T> -> Result<T,E> {
+    (o: Option<T>) =>
+      match o 
+      case Some(v) => Success(v)
+      case None => Failure(e)
+  }
+
   function ToSeq<T>(o: Option<T>): seq<T> {
     match o 
     case None => []
@@ -75,5 +102,35 @@ module {:options "-functionSyntax:4"} Option {
     case None => {}
     case Some(v) => {v}
   }
+
+  lemma LemmaUnitalityJoin<T>(o: Option<T>)
+    ensures Join(Map(Some<T>)(o)) == o == Join(Some<Option<T>>(o))
+  {
+  }
+
+  lemma LemmaAssociativityJoin<T>(ooo: Option<Option<Option<T>>>) 
+    ensures Join(Map(Join<T>)(ooo)) == Join(Join<Option<T>>(ooo))
+  {
+  }  
+
+  lemma LemmaLeftUnitalityBind<S,T>(v: S, f: S -> Option<T>)
+    ensures Bind(Some(v), f) == f(v)
+  {
+  }
+
+  lemma LemmaRightUnitalityBind<T>(o: Option<T>)
+    ensures Bind(o, Some) == o
+  {
+  }
+
+  lemma LemmaAssociativityBind<S,T,U>(o: Option<S>, f: S -> Option<T>, g: T -> Option<U>)
+    ensures Bind(Bind(o, f), g) == Bind(o, Composition(f, g))
+  {
+  }
+
+
+
+
+
 
 }
