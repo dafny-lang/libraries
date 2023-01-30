@@ -560,8 +560,8 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that the length of a flattened sequence of sequences xs is greater or 
-     equal than any of the lengths of the elements of xs.  */
+  /* The length of a flattened sequence of sequences xs is greater than or 
+     equal to any of the lengths of the elements of xs.  */
   lemma LemmaFlattenLengthGeSingleElementLength<T>(xs: seq<seq<T>>, i: int)
     requires 0 <= i < |xs|
     ensures |FlattenReverse(xs)| >= |xs[i]|
