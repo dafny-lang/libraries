@@ -433,8 +433,8 @@ module {:options "-functionSyntax:4"} Seq {
     if |xs| == 1 then xs[0] else Math.Min(xs[0], Min(xs[1..]))
   }
 
-  /* Proves that minimum of the concatenation of two non-empty sequences is 
-     less or equal than the minima of its two non-empty subsequences. */
+  /* The minimum of the concatenation of two non-empty sequences is 
+     less than or equal to the minima of its two non-empty subsequences. */
   lemma LemmaMinOfConcat(xs: seq<int>, ys: seq<int>)
     requires 0 < |xs| && 0 < |ys|
     ensures Min(xs+ys) <= Min(xs)
