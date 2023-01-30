@@ -122,7 +122,7 @@ module {:options "-functionSyntax:4"} Result {
   {
   }  
 
-  lemma LemmaLeftUnitalityBind<T1,T2,E>(v: T1, f: T1 -> Result<T2,E>)
+  lemma LemmaLeftUnitalityBind<S,T,E>(v: S, f: S -> Result<T,E>)
     ensures Bind(Success(v), f) == f(v)
   {
   }
