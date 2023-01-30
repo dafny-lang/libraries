@@ -214,7 +214,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that a sequence with cardinality equal to its set has no duplicates. */
+  /* A sequence with cardinality equal to its set has no duplicates. */
   lemma LemmaNoDuplicatesCardinalityOfSet<T>(xs: seq<T>)
     requires |ToSet(xs)| == |xs|
     ensures HasNoDuplicates(xs)
