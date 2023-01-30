@@ -66,7 +66,7 @@ module {:options "-functionSyntax:4"} Seq {
   {
   }
 
-  /* Proves that the last element of two concatenated sequences, the second one being non-empty, will be the 
+  /* The last element of two concatenated sequences, the second one being non-empty, will be the 
      last element of the latter sequence. */
   lemma LemmaAppendLast<T>(xs: seq<T>, ys: seq<T>)
     requires 0 < |ys|
