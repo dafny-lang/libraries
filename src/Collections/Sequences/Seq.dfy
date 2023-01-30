@@ -57,9 +57,9 @@ module {:options "-functionSyntax:4"} Seq {
     xs[..|xs|-1]
   }
 
-  /* Proves that concatenating two subsequences of a non-empty sequence, the first obtained 
+  /* The concatenation of two subsequences of a non-empty sequence, the first obtained 
      from dropping the last element, the second consisting only of the last 
-     element, results in the original sequence. */
+     element, is the original sequence. */
   lemma LemmaLast<T>(xs: seq<T>)
     requires |xs| > 0;
     ensures DropLast(xs) + [Last(xs)] == xs;
