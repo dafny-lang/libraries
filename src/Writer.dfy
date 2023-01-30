@@ -27,7 +27,7 @@ module {:options "-functionSyntax:4"} Writer {
   }
 
   function Composition<S,T,U>(f: S -> Writer<T>, g: T -> Writer<U>): S -> Writer<U> {
-    x => Bind(f(x), g)
+    s => Bind(f(s), g)
   }
 
   lemma LemmaUnitalityJoin<T>(w: Writer<T>)
@@ -55,4 +55,13 @@ module {:options "-functionSyntax:4"} Writer {
   {
   }
 
+  lemma LemmaAssociativityComposition<S,T,U,V>(f: S -> Writer<T>, g: T -> Writer<U>, h: U -> Writer<V>)
+    ensures forall s: S :: Composition(Composition(f, g), h)(s) == Composition(f, Composition(g, h))(s)
+  {
+  }
+
+  lemma LemmaIdentityExtract<S,T>(f: S -> Writer<T>)
+    ensures forall s: S :: Composition(f, Return<T>)(s) == f(s) == Composition(Return<S>, f)(s)
+  {
+  }
 }
