@@ -178,7 +178,7 @@ module {:options "-functionSyntax:4"} Seq {
     (forall i, j {:trigger xs[i], xs[j]}:: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j])
   }
 
-  /* Proves that if sequences xs and ys don't have duplicates and there are no 
+  /* If sequences xs and ys don't have duplicates and there are no 
      elements in common between them, then the concatenated sequence xs + ys 
      will not contain duplicates either. */
   lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(xs: seq<T>, ys: seq<T>)
