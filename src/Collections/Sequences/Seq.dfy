@@ -540,8 +540,8 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that flattening sequences of sequences in order (starting from the front)
-     and in reverse order (starting from the back) results in the same sequence. */
+  /* Flattening sequences of sequences in order (starting from the beginning)
+     and in reverse order (starting from the end) results in the same sequence. */
   lemma LemmaFlattenAndFlattenReverseAreEquivalent<T>(xs: seq<seq<T>>)
     ensures Flatten(xs) == FlattenReverse(xs)
   {
