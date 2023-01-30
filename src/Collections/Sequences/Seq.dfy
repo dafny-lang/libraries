@@ -74,7 +74,7 @@ module {:options "-functionSyntax:4"} Seq {
   {
   }
 
-  /* Proves that the concatenation of sequences is associative. */
+  /* The concatenation of sequences is associative. */
   lemma LemmaConcatIsAssociative<T>(xs: seq<T>, ys: seq<T>, zs: seq<T>)
     ensures xs + (ys + zs) == (xs + ys) + zs;
   {
