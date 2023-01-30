@@ -12,7 +12,7 @@ module {:options "-functionSyntax:4"} Option {
 
   datatype Option<+T> = None | Some(value: T)
 
-  function Some<T>(v: T): Option<T> {
+  function Return<T>(v: T): Option<T> {
     Option.Some(v)
   }
 
@@ -53,7 +53,7 @@ module {:options "-functionSyntax:4"} Option {
     (o: Option<S>) =>
       match o 
       case None => Option<T>.None
-      case Some(v) => Some(f(v))
+      case Some(v) => Option<T>.Some(f(v))
   }
 
   function Fold<T,U>(u: U, f: T -> U): Option<T> -> U {
@@ -81,7 +81,7 @@ module {:options "-functionSyntax:4"} Option {
   }
 
   function Composition<S,T,U>(f: S -> Option<T>, g: T-> Option<U>): S -> Option<U> {
-    x => Bind(f(x), g)
+    s => Bind(f(s), g)
   }
 
   function ToResult<T,E>(e: E): Option<T> -> Result<T,E> {
@@ -104,7 +104,7 @@ module {:options "-functionSyntax:4"} Option {
   }
 
   lemma LemmaUnitalityJoin<T>(o: Option<T>)
-    ensures Join(Map(Some<T>)(o)) == o == Join(Some<Option<T>>(o))
+    ensures Join(Map(Return<T>)(o)) == o == Join(Return<Option<T>>(o))
   {
   }
 
@@ -114,17 +114,27 @@ module {:options "-functionSyntax:4"} Option {
   }  
 
   lemma LemmaLeftUnitalityBind<S,T>(v: S, f: S -> Option<T>)
-    ensures Bind(Some(v), f) == f(v)
+    ensures Bind(Return(v), f) == f(v)
   {
   }
 
   lemma LemmaRightUnitalityBind<T>(o: Option<T>)
-    ensures Bind(o, Some) == o
+    ensures Bind(o, Return) == o
   {
   }
 
   lemma LemmaAssociativityBind<S,T,U>(o: Option<S>, f: S -> Option<T>, g: T -> Option<U>)
     ensures Bind(Bind(o, f), g) == Bind(o, Composition(f, g))
+  {
+  }
+
+  lemma LemmaAssociativityComposition<S,T,U,V>(f: S -> Option<T>, g: T -> Option<U>, h: U -> Option<V>)
+    ensures forall s: S :: Composition(Composition(f, g),h)(s) == Composition(f, Composition(g,h))(s)
+  {
+  }
+
+  lemma LemmaIdentityReturn<X,S,T>(f: S -> Option<T>)
+    ensures forall s: S :: Composition(f, Return<T>)(s) == f(s) == Composition(Return<S>, f)(s)
   {
   }
 
