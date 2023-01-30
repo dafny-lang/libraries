@@ -100,7 +100,7 @@ module {:options "-functionSyntax:4"} Seq {
     && xs == ys[|ys|-|xs|..]
   }
 
-  /* Proves that a sequence that is sliced at the pos-th element, concatenated 
+  /* A sequence that is sliced at the pos-th element, concatenated 
      with that same sequence sliced from the pos-th element, is equal to the 
      original unsliced sequence. */
   lemma LemmaSplitAt<T>(xs: seq<T>, pos: nat)
