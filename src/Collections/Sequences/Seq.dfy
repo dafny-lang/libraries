@@ -373,7 +373,7 @@ module {:options "-functionSyntax:4"} Seq {
       (a + [Last(xs).0], b + [Last(xs).1])
   }
 
-  /* Zips two sequences into one sequence that consists of pairs. */
+  /* Zips two sequences of equal length into one sequence that consists of pairs. */
   function {:opaque} Zip<A,B>(xs: seq<A>, ys: seq<B>): seq<(A, B)>
     requires |xs| == |ys|
     ensures |Zip(xs, ys)| == |xs|
