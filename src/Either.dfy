@@ -13,6 +13,14 @@ module {:options "-functionSyntax:4"} Either {
 
   datatype Either<+S,+T> = Left(left: S) | Right(right: T) 
 
+  function Left<S,T>(v: S): Either<S,T> {
+    Either.Left(v)
+  }
+
+  function Right<S,T>(v: T): Either<S,T> {
+    Either.Right(v)
+  }
+
   predicate IsLeft<S,T>(e: Either<S,T>) {
     e.Left?
   }
@@ -33,18 +41,18 @@ module {:options "-functionSyntax:4"} Either {
     case Right(v) => Some(v)
   }
 
-  function MapLeft<S1,S2,T>(f: S1 -> S2): Either<S1,T> -> Either<S2,T> {
-    (e: Either<S1,T>) =>
+  function MapLeft<S,T,U>(f: S -> T): Either<S,U> -> Either<T,U> {
+    (e: Either<S,U>) =>
      match e 
-     case Left(v) => Either<S2,T>.Left(f(v))
-     case Right(v) => Either<S2,T>.Right(v)
+     case Left(v) => Either<T,U>.Left(f(v))
+     case Right(v) => Either<T,U>.Right(v)
   }
 
-  function MapRight<S,T1,T2>(f: T1 -> T2): Either<S,T1> -> Either<S,T2> {
-    (e: Either<S,T1>) =>
+  function MapRight<S,T,U>(f: T -> U): Either<S,T> -> Either<S,U> {
+    (e: Either<S,T>) =>
      match e 
-     case Left(v) => Either<S,T2>.Left(v)
-     case Right(v) => Either<S,T2>.Right(f(v))
+     case Left(v) => Either<S,U>.Left(v)
+     case Right(v) => Either<S,U>.Right(f(v))
   }
 
   function Map<S1,S2,T1,T2>(f: S1 -> S2, g: T1 -> T2): Either<S1,T1> -> Either<S2,T2> {
