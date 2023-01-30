@@ -199,7 +199,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that a sequence with no duplicates converts to a set of the same 
+  /* A sequence with no duplicates converts to a set of the same 
      cardinality. */
   lemma LemmaCardinalityOfSetNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
