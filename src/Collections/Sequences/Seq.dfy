@@ -571,8 +571,8 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that the length of a flattened sequence of sequences xs is less or equal 
-     than the length of xs multiplied by a number not smaller than the length of the 
+  /* The length of a flattened sequence of sequences xs is less than or equal 
+     to the length of xs multiplied by a number not smaller than the length of the 
      longest sequence in xs. */
   lemma LemmaFlattenLengthLeMul<T>(xs: seq<seq<T>>, j: int)
     requires forall i {:trigger xs[i]} | 0 <= i < |xs| :: |xs[i]| <= j
