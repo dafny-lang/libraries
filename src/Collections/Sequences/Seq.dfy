@@ -119,6 +119,8 @@ module {:options "-functionSyntax:4"} Seq {
   {
   }
 
+  /* A slice (from s2..e2) of a slice (from s1..e1) of a sequence is equal to just a 
+     slice (s1+s2..s1+e2) of the original sequence. */
   lemma LemmaSliceOfSlice<T>(xs: seq<T>, s1: int, e1: int, s2: int, e2: int)
     requires 0 <= s1 <= e1 <= |xs|;
     requires 0 <= s2 <= e2 <= e1 - s1;
@@ -407,8 +409,8 @@ module {:options "-functionSyntax:4"} Seq {
     if |xs| == 1 then xs[0] else Math.Max(xs[0], Max(xs[1..]))
   }
 
-  /* Proves that the maximum of the concatenation of two non-empty sequences is 
-     greater or equal than the maxima of its two non-empty subsequences. */
+  /* The maximum of the concatenation of two non-empty sequences is greater than or 
+     equal to the maxima of its two non-empty subsequences. */
   lemma LemmaMaxOfConcat(xs: seq<int>, ys: seq<int>)
     requires 0 < |xs| && 0 < |ys|
     ensures Max(xs+ys) >= Max(xs)
@@ -592,7 +594,7 @@ module {:options "-functionSyntax:4"} Seq {
   *
   ***********************************************************/
 
-  /* Returns the sequence one obtains from applying a function to every element 
+  /* Returns the sequence one obtains by applying a function to every element 
      of a sequence. */
   function {:opaque} Map<T,R>(f: (T ~> R), xs: seq<T>): (result: seq<R>)
     requires forall i {:trigger xs[i]} :: 0 <= i < |xs| ==> f.requires(xs[i])
@@ -604,9 +606,9 @@ module {:options "-functionSyntax:4"} Seq {
     else [f(xs[0])] + Map(f, xs[1..])
   }
 
-/* Applies to every element of a sequence a function that is either successful, or
-   returns an error. Returns either an error, or, if successful at every element, the
-   transformed sequence.  */
+/* Applies a function to every element of a sequence, returning Result value (which is a 
+   failure-compatible type). Returns either a failure, or, if successful at every element, 
+   the transformed sequence.  */
   function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures result.Success? ==>
@@ -623,9 +625,9 @@ module {:options "-functionSyntax:4"} Seq {
       Success([head] + tail)
   }
 
-  /* Proves that applying a function to a sequence is additive. That is, concatenating 
-     two sequences and then applying Map is the same as applying Map on each sequence 
-     seperately, and then concatenating the two resulting sequences. */
+  /* Applying a function to a sequence  is distributive over concatenation. That is, concatenating 
+     two sequences and then applying Map is the same as applying Map on each sequence seperately, 
+     and then concatenating the two resulting sequences. */
   lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
@@ -646,7 +648,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Returns the subsequence of those elements of a sequence that satisfy a given 
+  /* Returns the subsequence consisting of those elements of a sequence that satisfy a given 
      predicate. */
   function {:opaque} Filter<T>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
@@ -658,9 +660,9 @@ module {:options "-functionSyntax:4"} Seq {
     else (if f(xs[0]) then [xs[0]] else []) + Filter(f, xs[1..])
   }
 
-  /* Proves that filtering a sequence is additive. That is, concatenating two sequences 
-     and then using "Filter" is the same as using "Filter" on each sequence seperately, 
-     and then concatenating the two resulting sequences. */
+  /* Filtering a sequence is distributive over concatenation. That is, concatenating two sequences 
+     and then using "Filter" is the same as using "Filter" on each sequence seperately, and then 
+     concatenating the two resulting sequences. */
   lemma {:opaque} LemmaFilterDistributesOverConcat<T>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
@@ -681,17 +683,17 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
   
-  /* Folds a sequence xs from the left, by repeatedly acting on the accumulator init via the 
-     function f. */
+  /* Folds a sequence xs from the left (the beginning), by repeatedly acting on the accumulator
+     init via the function f. */
   function {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, xs: seq<T>): A
   {
     if |xs| == 0 then init
     else FoldLeft(f, f(init, xs[0]), xs[1..])
   }
 
-  /* Proves that folding to the left is additive. That is, concatenating two sequences 
-     and then folding them to the left, is the same as folding to the left the first 
-     sequence and using the result to fold to the left the second sequence. */
+  /* Folding to the left is distributive over concatenation. That is, concatenating two 
+     sequences and then folding them to the left, is the same as folding to the left the 
+     first sequence and using the result to fold to the left the second sequence. */
   lemma {:opaque} LemmaFoldLeftDistributesOverConcat<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldLeft(f, init, xs + ys) == FoldLeft(f, FoldLeft(f, init, xs), ys)
@@ -742,7 +744,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Folds a sequence xs from the right, by acting on the accumulator init via the 
+  /* Folds a sequence xs from the right (the end), by acting on the accumulator init via the 
      function f. */
   function {:opaque} FoldRight<A,T>(f: (T, A) -> A, xs: seq<T>, init: A): A
   {
