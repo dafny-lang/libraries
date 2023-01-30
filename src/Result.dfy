@@ -6,7 +6,7 @@ module {:options "-functionSyntax:4"} Result {
 
   datatype Result<+T,+E> = | Success(value: T) | Failure(error: E)
 
-  function Success<T,E>(v: T): Result<T,E> {
+  function Return<T,E>(v: T): Result<T,E> {
     Result.Success(v)
   }
 
@@ -74,7 +74,7 @@ module {:options "-functionSyntax:4"} Result {
   }
 
   function Composition<S,T,U,E>(f: S -> Result<T,E>, g: T -> Result<U,E>): S -> Result<U,E> {
-    x => Bind(f(x), g)
+    s => Bind(f(s), g)
   }
 
   function Equal<T,E>(eqs: (T, T) -> bool, eqf: (E, E) -> bool): (Result<T,E>, Result<T,E>) -> bool {
@@ -113,7 +113,7 @@ module {:options "-functionSyntax:4"} Result {
   }
 
   lemma LemmaUnitalityJoin<T,E>(r: Result<T,E>)
-    ensures Join(Map(Success<T,E>)(r)) == r == Join(Success<Result<T,E>,E>(r))
+    ensures Join(Map(Return<T,E>)(r)) == r == Join(Return<Result<T,E>,E>(r))
   {
   }
 
@@ -123,17 +123,27 @@ module {:options "-functionSyntax:4"} Result {
   }  
 
   lemma LemmaLeftUnitalityBind<S,T,E>(v: S, f: S -> Result<T,E>)
-    ensures Bind(Success(v), f) == f(v)
+    ensures Bind(Return(v), f) == f(v)
   {
   }
 
   lemma LemmaRightUnitalityBind<T,E>(r: Result<T,E>)
-    ensures Bind(r, Success) == r
+    ensures Bind(r, Return) == r
   {
   }
 
   lemma LemmaAssociativityBind<S,T,U,E>(r: Result<S,E>, f: S -> Result<T,E>, g: T -> Result<U,E>)
     ensures Bind(Bind(r, f), g) == Bind(r, Composition(f, g))
+  {
+  }
+
+  lemma LemmaAssociativityComposition<S,T,U,V,E>(f: S -> Result<T,E>, g: T -> Result<U,E>, h: U -> Result<V,E>)
+    ensures forall s: S :: Composition(Composition(f, g), h)(s) == Composition(f, Composition(g, h))(s)
+  {
+  }
+
+  lemma LemmaIdentityExtract<S,T,E>(f: S -> Result<T,E>)
+    ensures forall s: S :: Composition(f, Return<T,E>)(s) == f(s) == Composition(Return<S,E>, f)(s)
   {
   }
 
