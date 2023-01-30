@@ -491,7 +491,7 @@ module {:options "-functionSyntax:4"} Seq {
     else xs[0] + Flatten(xs[1..])
   }
 
-  /* Proves that flattening sequences of sequences is additive. That is, concatenating
+  /* Flattening sequences of sequences is distributive over concatenation. That is, concatenating
      the flattening of two sequences of sequences is the same as flattening the 
      concatenation of two sequences of sequences. */
   lemma LemmaFlattenConcat<T>(xs: seq<seq<T>>, ys: seq<seq<T>>)
