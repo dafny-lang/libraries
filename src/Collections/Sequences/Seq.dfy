@@ -361,7 +361,7 @@ module {:options "-functionSyntax:4"} Seq {
       [v] + Repeat(v, length - 1)
   }
   
-  /* Unzips a sequence that contains pairs into two seperate sequences. */
+  /* Unzips a sequence that contains pairs into two separate sequences. */
   function {:opaque} Unzip<A,B>(xs: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(xs).0| == |Unzip(xs).1| == |xs|
     ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]} 
