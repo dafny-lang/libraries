@@ -750,7 +750,7 @@ module {:options "-functionSyntax:4"} Seq {
     else f(xs[0], FoldRight(f, xs[1..], init))
   }
 
-  /* Proves that folding to the right is (contravariant) additive. That is, concatenating
+  /* Folding to the right is (contravariantly) distributive over concatenation. That is, concatenating
      two sequences and then folding them to the right, is the same as folding to the right 
      the second sequence and using the result to fold to the right the first sequence. */
   lemma {:opaque} LemmaFoldRightDistributesOverConcat<A,T>(f: (T, A) -> A, init: A, xs: seq<T>, ys: seq<T>)
