@@ -109,7 +109,7 @@ module {:options "-functionSyntax:4"} Seq {
   {
   }
 
-  /* Proves that any element in a slice is included in the original sequence. */
+  /* Any element in a slice is included in the original sequence. */
   lemma LemmaElementFromSlice<T>(xs: seq<T>, ys:seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |xs|;
     requires ys == xs[a..b];
