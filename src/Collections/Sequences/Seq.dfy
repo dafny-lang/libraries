@@ -449,8 +449,8 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that the maximum element in a non-empty sequence is greater or equal 
-     than the maxima of its non-empty subsequences. */
+  /* The maximum element in a non-empty sequence is greater than or equal to
+     the maxima of its non-empty subsequences. */
   lemma LemmaSubseqMax(xs: seq<int>, from: nat, to: nat)
     requires from < to <= |xs|
     ensures Max(xs[from..to]) <= Max(xs)
