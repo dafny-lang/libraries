@@ -385,7 +385,7 @@ module {:options "-functionSyntax:4"} Seq {
     else Zip(DropLast(xs), DropLast(ys)) + [(Last(xs), Last(ys))]
   }
 
-  /* Proves that unzipping and zipping a sequence results in the original sequence */
+  /* Unzipping and zipping a sequence results in the original sequence */
   lemma LemmaZipOfUnzip<A,B>(xs: seq<(A,B)>)
     ensures Zip(Unzip(xs).0, Unzip(xs).1) == xs
   {
