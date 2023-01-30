@@ -161,7 +161,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
   
-  /* Proves that a sequence is of length 0 if and only if its conversion to
+  /* A sequence is of length 0 if and only if its conversion to
      a set results in the empty set. */
   lemma LemmaCardinalityOfEmptySetIs0<T>(xs: seq<T>)
     ensures |ToSet(xs)| == 0 <==> |xs| == 0
