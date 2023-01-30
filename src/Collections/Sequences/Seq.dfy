@@ -519,7 +519,7 @@ module {:options "-functionSyntax:4"} Seq {
     else FlattenReverse(DropLast(xs)) + Last(xs)
   }
 
-  /* Proves that flattening sequences of sequences in reverse order is additive. 
+  /* Flattening sequences of sequences in reverse order is distributive over concatentation. 
      That is, concatenating the flattening of two sequences of sequences in reverse 
      order is the same as flattening the concatenation of two sequences of sequences
      in reverse order. */
