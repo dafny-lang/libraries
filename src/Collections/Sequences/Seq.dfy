@@ -256,7 +256,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* If an element occurs at least once in a sequence, the index of its
+  /* For an element that occurs at least once in a sequence, the index of its
      first occurrence is returned. */
   function {:opaque} IndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
