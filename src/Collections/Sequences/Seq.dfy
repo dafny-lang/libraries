@@ -237,7 +237,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* Proves that if a sequence has no duplicates, then each element occurs only 
+  /* Given a sequence with no duplicates, each element occurs only 
      once in its conversion to a multiset. */
   lemma LemmaMultisetHasNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
