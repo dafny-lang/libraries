@@ -318,7 +318,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNat {
         reveal ToNatRight();
         calc ==> {
           true;
-            { LemmaModEquivalenceAuto(); }
+            { LemmaModEquivalence(ToNatRight(xs), ToNatRight(DropFirst(xs)) * BASE() + First(xs), BASE()); }
           IsModEquivalent(ToNatRight(xs), ToNatRight(DropFirst(xs)) * BASE() + First(xs), BASE());
             { LemmaModMultiplesBasicAuto(); }
           IsModEquivalent(ToNatRight(xs), First(xs), BASE());
@@ -504,7 +504,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNat {
 
   /* SeqAdd returns the same value as converting the sequences to nats, then
   adding them. */
-  lemma LemmaSeqAdd(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
+  lemma {:vcs_split_on_every_assert} LemmaSeqAdd(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
     requires |xs| == |ys|
     requires SeqAdd(xs, ys) == (zs, cout)
     ensures ToNatRight(xs) + ToNatRight(ys) == ToNatRight(zs) + cout * Pow(BASE(), |xs|)
@@ -528,7 +528,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNat {
           { LemmaSeqAdd(DropLast(xs), DropLast(ys), zs', cin); }
         ToNatLeft(DropLast(xs)) + ToNatLeft(DropLast(ys)) - cin * pow + z * pow;
           {
-            LemmaMulEqualityAuto();
+            LemmaMulEquality(sum, z + cout * BASE(), pow);
             assert sum * pow == (z + cout * BASE()) * pow;
             LemmaMulIsDistributiveAuto();
           } 
@@ -561,7 +561,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNat {
 
   /* SeqSub returns the same value as converting the sequences to nats, then
   subtracting them. */
-  lemma LemmaSeqSub(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
+  lemma {:vcs_split_on_every_assert} LemmaSeqSub(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
     requires |xs| == |ys|
     requires SeqSub(xs, ys) == (zs, cout)
     ensures ToNatRight(xs) - ToNatRight(ys) + cout * Pow(BASE(), |xs|) == ToNatRight(zs)
@@ -586,7 +586,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNat {
           { LemmaSeqSub(DropLast(xs), DropLast(ys), zs', cin); }
         ToNatLeft(DropLast(xs)) - ToNatLeft(DropLast(ys)) + cin * pow + z * pow;
           {
-            LemmaMulEqualityAuto();
+            LemmaMulEquality(cout * BASE() + Last(xs) - cin - Last(ys), z, pow);
             assert pow * (cout * BASE() + Last(xs) - cin - Last(ys)) == pow * z;
             LemmaMulIsDistributiveAuto();
           }
