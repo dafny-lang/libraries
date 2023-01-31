@@ -661,7 +661,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Filtering a sequence is distributive over concatenation. That is, concatenating two sequences 
-     and then using "Filter" is the same as using "Filter" on each sequence seperately, and then 
+     and then using "Filter" is the same as using "Filter" on each sequence separately, and then 
      concatenating the two resulting sequences. */
   lemma {:opaque} LemmaFilterDistributesOverConcat<T>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
