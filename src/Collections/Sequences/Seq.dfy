@@ -34,7 +34,7 @@ module {:options "-functionSyntax:4"} Seq {
     xs[0]
   }
 
-  /* Returns the subsequence of a non-empty sequence, obtained by
+  /* Returns the subsequence of a non-empty sequence obtained by
      dropping the first element. */
   function DropFirst<T>(xs: seq<T>): seq<T>
     requires |xs| > 0
