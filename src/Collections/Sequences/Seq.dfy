@@ -331,7 +331,7 @@ module {:options "-functionSyntax:4"} Seq {
       xs[..i] + xs[i+1..]
   }
 
-  /* Inserts an element at a given position and returns the resulting sequence. */
+  /* Inserts an element at a given position and returns the resulting (longer) sequence. */
   function {:opaque} Insert<T>(xs: seq<T>, a: T, pos: nat): seq<T>
     requires pos <= |xs|
     ensures |Insert(xs, a, pos)| == |xs| + 1
