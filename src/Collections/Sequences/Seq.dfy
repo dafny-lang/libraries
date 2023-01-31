@@ -283,7 +283,7 @@ module {:options "-functionSyntax:4"} Seq {
         if o'.Some? then Some(o'.value + 1) else None()
   }
 
-  /* For an element occurs at least once in a sequence, the index of its
+  /* For an element that occurs at least once in a sequence, the index of its
      last occurrence is returned. */
   function {:opaque} LastIndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
