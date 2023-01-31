@@ -465,7 +465,7 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
-  /* The minimum element in a non-empty sequence is less than or equal 
+  /* The minimum element of a non-empty sequence is less than or equal 
      to the minima of its non-empty subsequences. */
   lemma LemmaSubseqMin(xs: seq<int>, from: nat, to: nat)
     requires from < to <= |xs|
