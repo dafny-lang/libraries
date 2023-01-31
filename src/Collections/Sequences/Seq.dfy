@@ -110,12 +110,12 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Any element in a slice is included in the original sequence. */
-  lemma LemmaElementFromSlice<T>(xs: seq<T>, ys:seq<T>, a: int, b: int, pos: nat)
+  lemma LemmaElementFromSlice<T>(xs: seq<T>, xs':seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |xs|;
-    requires ys == xs[a..b];
+    requires xs' == xs[a..b];
     requires a <= pos < b;
-    ensures  pos - a < |ys|;
-    ensures  ys[pos-a] == xs[pos];
+    ensures  pos - a < |xs'|;
+    ensures  xs'[pos-a] == xs[pos];
   {
   }
 
