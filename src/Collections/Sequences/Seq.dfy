@@ -626,7 +626,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Applying a function to a sequence  is distributive over concatenation. That is, concatenating 
-     two sequences and then applying Map is the same as applying Map on each sequence seperately, 
+     two sequences and then applying Map is the same as applying Map to each sequence separately, 
      and then concatenating the two resulting sequences. */
   lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
