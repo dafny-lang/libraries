@@ -49,7 +49,7 @@ module {:options "-functionSyntax:4"} Seq {
     xs[|xs|-1]
   }
 
-  /* Returns the subsequence of a non-empty sequence, obtained by
+  /* Returns the subsequence of a non-empty sequence obtained by
      dropping the last element. */
   function DropLast<T>(xs: seq<T>): seq<T> 
     requires |xs| > 0;
