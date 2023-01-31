@@ -606,7 +606,7 @@ module {:options "-functionSyntax:4"} Seq {
     else [f(xs[0])] + Map(f, xs[1..])
   }
 
-/* Applies a function to every element of a sequence, returning Result value (which is a 
+/* Applies a function to every element of a sequence, returning a Result value (which is a 
    failure-compatible type). Returns either a failure, or, if successful at every element, 
    the transformed sequence.  */
   function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
