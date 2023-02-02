@@ -45,6 +45,12 @@ module {:options "-functionSyntax:4"} Relations {
     && Connected(R)
   }  
 
+  ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && AntiSymmetric(R)
+    && Transitive(R)
+  }
+
   ghost predicate SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
     forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
