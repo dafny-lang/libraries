@@ -31,6 +31,7 @@ module BinarySearchExamples {
     var sortedInput := MergeSortBy(input, (x, y) => x <= y);
     print sortedInput, "\n";
 
+    assert SortedBy(sortedInput, (x, y) => x <= y);
     var sortedArray := ToArray(sortedInput);
     SortedByLessThanOrEqualTo(sortedArray[..]);
     var indexOfThree := BinarySearch.BinarySearch(sortedArray, 3, (x, y) => x < y);
