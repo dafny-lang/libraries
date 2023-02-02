@@ -2,10 +2,24 @@ include "Wrappers.dfy"
 
 module {:options "-functionSyntax:4"} Reader {
 
+  /**********************************************************
+  *
+  *  Monadic structure in terms of Return, Bind, Join, Map, Composition 
+  *
+  ***********************************************************/
+
   datatype Reader<-X,+T> = Reader(f: X -> T)
 
   function Return<X,T>(t: T): Reader<X,T> {
     Reader(x => t)
+  }
+
+  function Bind<X,S,T>(r: Reader<X,S>, f: S -> Reader<X,T>): Reader<X,T> {
+    Reader(x => (f((r.f)(x)).f)(x))
+  }
+
+  function Join<X,T>(rr: Reader<X,Reader<X,T>>): Reader<X,T> {
+    Reader(x => (rr.f(x)).f(x))
   }
 
   function Map<X,S,T>(f: S -> T): Reader<X,S> -> Reader<X,T> {
@@ -13,22 +27,27 @@ module {:options "-functionSyntax:4"} Reader {
       Reader(x => f((r.f)(x)))
   }
 
-  function Join<X,T>(rr: Reader<X,Reader<X,T>>): Reader<X,T> {
-    Reader(x => (rr.f(x)).f(x))
-  }
-
-  function Bind<X,S,T>(r: Reader<X,S>, f: S -> Reader<X,T>): Reader<X,T> {
-    Reader(x => (f((r.f)(x)).f)(x))
-  }
-
   function Composition<X,S,T,U>(f: S -> Reader<X,T>, g: T -> Reader<X,U>): S -> Reader<X,U> {
     s => Bind(f(s), g)
   }
+
+
+  /**********************************************************
+  *
+  *  Comparison
+  *
+  ***********************************************************/  
 
   ghost function Equal<X(!new),T>(eq: (T, T) -> bool): (Reader<X,T>, Reader<X,T>) -> bool 
   {
     (r1: Reader<X,T>, r2: Reader<X,T>) => forall x: X :: eq(r1.f(x), r2.f(x))
   }
+
+  /**********************************************************
+  *
+  *  Monad laws in terms of Join and Map
+  *
+  ***********************************************************/
 
   lemma LemmaUnitalityJoin<X,T>(r: Reader<X,T>)
     ensures forall x: X :: Join(Map(Return<X,T>)(r)).f(x) == r.f(x) == Join(Return<X,Reader<X,T>>(r)).f(x)
@@ -39,6 +58,12 @@ module {:options "-functionSyntax:4"} Reader {
     ensures forall x: X :: Join(Map(Join<X,T>)(rrr)).f(x) == Join(Join<X,Reader<X,T>>(rrr)).f(x)
   {
   }  
+
+  /**********************************************************
+  *
+  *  Monad laws in terms of Bind and Return
+  *
+  ***********************************************************/
 
   lemma LemmaLeftUnitalityBind<X,S,T>(s: S, f: S -> Reader<X,T>)
     ensures forall x: X :: Bind(Return(s), f).f(x) == f(s).f(x)
@@ -54,6 +79,12 @@ module {:options "-functionSyntax:4"} Reader {
     ensures forall x: X :: Bind(Bind(r, f), g).f(x) == Bind(r, Composition(f, g)).f(x)
   {
   }
+
+  /**********************************************************
+  *
+  *  Monad laws in terms of (Kleisli) Composition and Return
+  *
+  ***********************************************************/
 
   lemma LemmaAssociativityComposition<X,S,T,U,V>(f: S -> Reader<X,T>, g: T -> Reader<X,U>, h: U -> Reader<X,V>)
     ensures forall s: S, x: X :: Composition(Composition(f, g),h)(s).f(x) == Composition(f, Composition(g,h))(s).f(x)

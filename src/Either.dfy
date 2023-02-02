@@ -13,6 +13,12 @@ module {:options "-functionSyntax:4"} Either {
 
   datatype Either<+S,+T> = Left(left: S) | Right(right: T) 
 
+  /**********************************************************
+  *
+  *  Get and set
+  *
+  ***********************************************************/
+
   function Left<S,T>(v: S): Either<S,T> {
     Either.Left(v)
   }
@@ -29,6 +35,12 @@ module {:options "-functionSyntax:4"} Either {
     e.Right?
   }
 
+  /**********************************************************
+  *
+  *  Conversion to other datatypes
+  *
+  ***********************************************************/
+
   function FindLeft<S,T>(e: Either<S,T>): Option<S> {
     match e 
     case Left(v) => Some(v)
@@ -40,6 +52,12 @@ module {:options "-functionSyntax:4"} Either {
     case Left(v) => None
     case Right(v) => Some(v)
   }
+
+  /**********************************************************
+  *
+  *  Map
+  *
+  ***********************************************************/
 
   function MapLeft<S,T,U>(f: S -> T): Either<S,U> -> Either<T,U> {
     (e: Either<S,U>) =>
@@ -62,12 +80,24 @@ module {:options "-functionSyntax:4"} Either {
       case Right(v) => Either<S2,T2>.Right(g(v))
   }
 
+  /**********************************************************
+  *
+  *  Fold
+  *
+  ***********************************************************/
+
   function Fold<S,T,U>(f: S -> U, g: T -> U): Either<S,T> -> U {
     (e: Either<S,T>) =>
       match e
       case Left(v) => f(v)
       case Right(v) => g(v)
   }
+
+  /**********************************************************
+  *
+  *  Comparison
+  *
+  ***********************************************************/
 
   function Equal<S,T>(eql: (S, S) -> bool, eqr: (T, T) -> bool): (Either<S,T>, Either<S,T>) -> bool {
     (e1: Either<S,T>, e2: Either<S,T>) =>
@@ -85,8 +115,6 @@ module {:options "-functionSyntax:4"} Either {
       case (Left(_), Right(_)) => -1
       case (Right(_), Left(_)) => 1
   }
-
-
 
 }
 

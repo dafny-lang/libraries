@@ -21,4 +21,8 @@ module {:options "-functionSyntax:4"} Functions {
     forall x1, x2 :: f(x1) == f(x2) ==> x1 == x2
   }
 
+  function Composition<X,Y,Z>(f: X -> Y, g: Y -> Z): X -> Z {
+    x => g(f(x))
+  }
+
 }

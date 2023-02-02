@@ -10,6 +10,12 @@ module {:options "-functionSyntax:4"} Option {
 
   import opened Wrappers
 
+  /**********************************************************
+  *
+  *  Monadic structure in terms of Return, Bind, Join, Map, Composition 
+  *
+  ***********************************************************/
+
   datatype Option<+T> = None | Some(value: T)
 
   function Return<T>(v: T): Option<T> {
@@ -20,26 +26,6 @@ module {:options "-functionSyntax:4"} Option {
     match o 
     case None => Option<T>.None
     case Some(v) => f(v)
-  }
-
-  predicate IsNone<T>(o: Option<T>) {
-    o.None?
-  }
-
-  predicate IsSome<T>(o: Option<T>) {
-    o.Some?
-  }
-
-  function GetValue<T>(o: Option<T>): T
-    requires o.Some?
-  {
-    o.value
-  }
-
-  function GetValueDefault<T>(o: Option<T>, default: T): T {
-    match o
-    case None => default
-    case Some(v) => v
   }
 
   function Join<T>(oo: Option<Option<T>>): Option<T> {
@@ -56,12 +42,40 @@ module {:options "-functionSyntax:4"} Option {
       case Some(v) => Option<T>.Some(f(v))
   }
 
+  function Composition<S,T,U>(f: S -> Option<T>, g: T-> Option<U>): S -> Option<U> {
+    s => Bind(f(s), g)
+  }
+ 
+  /**********************************************************
+  *
+  *  Get and Fold
+  *
+  ***********************************************************/
+
+  function GetValueDefault<T>(o: Option<T>, default: T): T {
+    match o
+    case None => default
+    case Some(v) => v
+  }
+
+  function GetValue<T>(o: Option<T>): T
+    requires o.Some?
+  {
+    o.value
+  }
+
   function Fold<T,U>(u: U, f: T -> U): Option<T> -> U {
     (o: Option<T>) =>
       match o 
       case None => u
       case Some(v) => f(v)
   }
+
+  /**********************************************************
+  *
+  *  Comparison
+  *
+  ***********************************************************/
 
   function Equal<T>(eq: (T, T) -> bool): (Option<T>, Option<T>) -> bool {
     (o1: Option<T>, o2: Option<T>) =>
@@ -80,9 +94,11 @@ module {:options "-functionSyntax:4"} Option {
       case (Some(_), None) => 1
   }
 
-  function Composition<S,T,U>(f: S -> Option<T>, g: T-> Option<U>): S -> Option<U> {
-    s => Bind(f(s), g)
-  }
+  /**********************************************************
+  *
+  *  Conversion to other datatypes
+  *
+  ***********************************************************/
 
   function ToResult<T,E>(e: E): Option<T> -> Result<T,E> {
     (o: Option<T>) =>
@@ -103,6 +119,12 @@ module {:options "-functionSyntax:4"} Option {
     case Some(v) => {v}
   }
 
+  /**********************************************************
+  *
+  *  Monad laws in terms of Join and Map
+  *
+  ***********************************************************/
+
   lemma LemmaUnitalityJoin<T>(o: Option<T>)
     ensures Join(Map(Return<T>)(o)) == o == Join(Return<Option<T>>(o))
   {
@@ -112,6 +134,12 @@ module {:options "-functionSyntax:4"} Option {
     ensures Join(Map(Join<T>)(ooo)) == Join(Join<Option<T>>(ooo))
   {
   }  
+
+  /**********************************************************
+  *
+  *  Monad laws in terms of Bind and Return
+  *
+  ***********************************************************/
 
   lemma LemmaLeftUnitalityBind<S,T>(v: S, f: S -> Option<T>)
     ensures Bind(Return(v), f) == f(v)
@@ -128,6 +156,12 @@ module {:options "-functionSyntax:4"} Option {
   {
   }
 
+  /**********************************************************
+  *
+  *  Monad laws in terms of (Kleisli) Composition and Return
+  *
+  ***********************************************************/
+
   lemma LemmaAssociativityComposition<S,T,U,V>(f: S -> Option<T>, g: T -> Option<U>, h: U -> Option<V>)
     ensures forall s: S :: Composition(Composition(f, g),h)(s) == Composition(f, Composition(g,h))(s)
   {
@@ -137,10 +171,5 @@ module {:options "-functionSyntax:4"} Option {
     ensures forall s: S :: Composition(f, Return<T>)(s) == f(s) == Composition(Return<S>, f)(s)
   {
   }
-
-
-
-
-
 
 }
