@@ -15,18 +15,21 @@ abstract module {:options "-functionSyntax:4"} Functor {
 
   /**********************************************************
   *
-  *  Assumed structure 
+  *  Functor structure
   *
   ***********************************************************/
 
   /* Functor structure */
-  type W(!new)<T>
+  type W<T(!new)>
 
-  function Map<S,T>(f: S -> T): W<S> -> W<T>
+  function Map<S(!new),T>(f: S -> T): W<S> -> W<T>
 
-  ghost function Equal<T>(eq: (T, T) -> bool): (eq': (W<T>, W<T>) -> bool)
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
     requires EquivalenceRelation(eq)
-    ensures EquivalenceRelation(eq')
+
+  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
+    requires EquivalenceRelation(eq)
+    ensures EquivalenceRelation(Equal(eq))
 
   /* Functoriality of Map */
   lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T)
@@ -34,11 +37,11 @@ abstract module {:options "-functionSyntax:4"} Functor {
     requires forall x: S :: eq(f(x), g(x))
     ensures forall w: W<S> :: Equal(eq)(Map(f)(w), Map(g)(w))
 
-  lemma LemmaMapFunctorial<S,T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>)
+  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>)
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(Map(Composition(f, g))(w), Composition(Map(f), Map(g))(w))
 
-  lemma LemmaMapIdentity<T>(eq: (T, T) -> bool, id: T -> T)
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T)
     requires EquivalenceRelation(eq) 
     requires forall x: T :: eq(id(x), x)
     ensures forall w: W<T> :: Equal(eq)(Map(id)(w), w)
@@ -49,32 +52,32 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
 
   /**********************************************************
   *
-  *  Assumed structure 
+  *  Additional monad structure
   *
   ***********************************************************/
 
-  /* Monad structure */
-  type W(!new)<T>
+  /* Monad basics */
+  type W(!new)<T(!new)>
 
   function Return<T>(x: T): W<T>
 
-  function Join<T>(ww: W<W<T>>): W<T>
+  function Join<T(!new)>(ww: W<W<T>>): W<T>
 
   /* Naturality of Return and Join */
   lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S)
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(Map(f)(Return(x)), Return(f(x)))
 
-  lemma LemmaJoinNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>)
+  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>)
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(Join(Map(Map(f))(ww)), Map(f)(Join(ww)))
 
   /* Monad laws */
-  lemma LemmaUnitalityJoin<T>(eq: (T, T) -> bool, w: W<T>)
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>)
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(Join(Map(Return)(w)), w) && Equal(eq)(w, Join(Return(w)))
 
-  lemma LemmaAssociativityJoin<T>(eq: (T, T) -> bool, www: W<W<W<T>>>) 
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) 
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(Join(Map(Join)(www)), Join(Join(www)))
 
@@ -85,16 +88,16 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
   ***********************************************************/
 
   /* Derived functions */
-  function Bind<S,T>(w: W<S>, f: S -> W<T>): W<T> {
+  function Bind<S(!new),T(!new)>(w: W<S>, f: S -> W<T>): W<T> {
     Join(Map(f)(w))
   }
 
-  function KleisliComp<S,T,U>(f: S -> W<T>, g: T -> W<U>): S -> W<U> {
+  function KleisliComp<S,T(!new),U(!new)>(f: S -> W<T>, g: T -> W<U>): S -> W<U> {
     x => Join(Map(g)(f(x)))
   }
 
   /* Derived lemmas */
-  lemma LemmaLeftUnitalityBind<S,T>(eq: (T, T) -> bool, x: S, f: S -> W<T>)
+  lemma LemmaLeftUnitalityBind<S,T(!new)>(eq: (T, T) -> bool, x: S, f: S -> W<T>)
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(Bind(Return(x), f), f(x))
 /*   {
@@ -102,14 +105,14 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
     LemmaUnitalityJoin(eq, f(x));
   } */
 
-  lemma LemmaRightUnitalityBind<T>(eq: (T, T) -> bool, w: W<T>)
+  lemma LemmaRightUnitalityBind<T(!new)>(eq: (T, T) -> bool, w: W<T>)
     requires EquivalenceRelation(eq)
     ensures Bind(w, Return) == w
 /*   {
     LemmaUnitalityJoin(eq, w);
   } */
 
-  lemma LemmaAssociativityBind<S,T,U>(w: W<S>, f: S -> W<T>, g: T -> W<U>)
+  lemma LemmaAssociativityBind<S(!new),T(!new),U(!new)>(w: W<S>, f: S -> W<T>, g: T -> W<U>)
     ensures Bind(Bind(w, f), g) == Bind(w, KleisliComp(f, g))
 /*   {
     calc {
@@ -133,7 +136,7 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
     }
   } */
 
-  lemma LemmaAssociativityComposition<S,T,U,V>(f: S -> W<T>, g: T -> W<U>, h: U -> W<V>, x: S)
+  lemma LemmaAssociativityComposition<S,T(!new),U(!new),V(!new)>(f: S -> W<T>, g: T -> W<U>, h: U -> W<V>, x: S)
     ensures KleisliComp(KleisliComp(f, g), h)(x) == KleisliComp(f, KleisliComp(g, h))(x)
 /*   {
     calc {
@@ -157,7 +160,7 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
     }
   } */
 
-  lemma LemmaIdentityReturn<S,T>(eq: (T, T) -> bool, f: S -> W<T>, x: S)
+  lemma LemmaIdentityReturn<S,T(!new)>(eq: (T, T) -> bool, f: S -> W<T>, x: S)
     requires EquivalenceRelation(eq)
     ensures Equal(eq)(KleisliComp(f, Return)(x), f(x)) &&  Equal(eq)(f(x), KleisliComp(Return, f)(x))
 /*   {
@@ -184,11 +187,11 @@ abstract module {:options "-functionSyntax:4"} Result refines Monad {
 
   /**********************************************************
   *
-  *  Monad
+  *  Proves monad refinement
   *
   ***********************************************************/
   
-  type E
+  type E(!new)
 
   function eqe(e1: E, e2: E): bool
 
@@ -197,41 +200,32 @@ abstract module {:options "-functionSyntax:4"} Result refines Monad {
 
   /* Monad structure */
 
-  datatype W<T> = Success(value: T) | Failure(error: E)
+  datatype W<T(!new)> = Success(value: T) | Failure(error: E)
 
-  function Map<S,T>(f: S -> T): W<S> -> W<T> {
+  function Map<S(!new),T>(f: S -> T): W<S> -> W<T> {
     (w: W<S>) =>
       match w 
       case Success(v) => W<T>.Success(f(v))
       case Failure(e) => W<T>.Failure(e)
   }
 
-
-
-  ghost function Equal<T>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
-  {
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
+  { 
     (w1: W<T>, w2: W<T>) =>
       match (w1, w2)
-      case (Success(v1), Success(v2)) => eq(v1, v2)
+      case (Success(v1), Success(v2)) => eq(v1, v2) 
       case (Failure(e1), Failure(e2)) => eqe(e1, e2)
       case _ => false
   }
 
   lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
-    requires EquivalenceRelation(eq)
     ensures EquivalenceRelation(Equal(eq))
-  {
-    assert Reflexive(Equal(eq)) by {
-      
-    }
-  }
-
 
   function Return<T>(x: T): W<T> {
     Success(x)
   }
  
-  function Join<T>(ww: W<W<T>>): W<T> {
+  function Join<T(!new)>(ww: W<W<T>>): W<T> {
     match ww
     case Success(v) => v
     case Failure(e) => W<T>.Failure(e)
@@ -240,19 +234,25 @@ abstract module {:options "-functionSyntax:4"} Result refines Monad {
   /* Functoriality of Map */
   lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
 
-  lemma LemmaMapFunctorial<S,T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
+  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
 
-  lemma LemmaMapIdentity<T>(eq: (T, T) -> bool, id: T -> T) {}
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {
+    forall w: W<T> ensures Equal(eq)(Map(id)(w), w) {
+      match w
+        case Success(v) => 
+        case Failure(e) => LemmaEquivRel();
+    }
+  }
 
   /* Naturality of Return and Join */
   lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
 
-  lemma LemmaJoinNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
+  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
 
   /* Monad laws */
-  lemma LemmaUnitalityJoin<T>(eq: (T, T) -> bool, w: W<T>) {}
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
 
-  lemma LemmaAssociativityJoin<T>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
 
   /**********************************************************
   *
@@ -265,34 +265,34 @@ abstract module {:options "-functionSyntax:4"} Result refines Monad {
     W.Failure(e)
   } 
 
-  predicate IsSuccess<T>(w: W<T>) {
+  predicate IsSuccess<T(!new)>(w: W<T>) {
     w.Success?
   }  
 
-  predicate IsFailure<T>(w: W<T>) {
+  predicate IsFailure<T(!new)>(w: W<T>) {
     w.Failure?
   }  
 
-  function GetValue<T>(w: W<T>): T
+  function GetValue<T(!new)>(w: W<T>): T
     requires w.Success?
   {
     w.value
   }
 
-  function GetValueDefault<T,E>(w: W<T>, default: T): T {
+  function GetValueDefault<T(!new),E>(w: W<T>, default: T): T {
     match w 
     case Success(v) => v
     case Failure(_) => default
   }
 
-  function GetError<T>(w: W<T>): E 
+  function GetError<T(!new)>(w: W<T>): E 
     requires w.Failure?
   {
     w.error
   }
 
   /* Fold */
-  function Fold<T,U>(f: T -> U, g: E -> U): W<T> -> U {
+  function Fold<T(!new),U>(f: T -> U, g: E -> U): W<T> -> U {
     (w: W<T>) =>
       match w 
       case Success(v) => f(v)
@@ -300,13 +300,13 @@ abstract module {:options "-functionSyntax:4"} Result refines Monad {
   }
 
   /* Conversion to other types */
-  function ToSeq<T>(w: W<T>): seq<T> {
+  function ToSeq<T(!new)>(w: W<T>): seq<T> {
     match w
     case Success(v) => [v]
     case Failure(_) => []
   }
 
-  function ToSet<T>(w: W<T>): set<T> {
+  function ToSet<T(!new)>(w: W<T>): set<T> {
     match w
     case Success(v) => {v}
     case Failure(_) => {}   
@@ -324,14 +324,14 @@ module {:options "-functionSyntax:4"} Option refines Monad {
 
   /**********************************************************
   *
-  *  Monad
+  *  Proves monad refinement
   *
   ***********************************************************/
  
   /* Monad structure */
-  datatype W<T> = None | Some(value: T)
+  datatype W<T(!new)> = None | Some(value: T)
 
-  function Map<S,T>(f: S -> T): W<S> -> W<T>
+  function Map<S(!new),T>(f: S -> T): W<S> -> W<T>
   {
     (w: W<S>) =>
       match w 
@@ -339,7 +339,7 @@ module {:options "-functionSyntax:4"} Option refines Monad {
       case Some(v) => W<T>.Some(f(v))
   }
 
-  ghost function Equal<T>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
     (w1: W<T>, w2: W<T>) =>
       match (w1, w2)
       case (Some(v1), Some(v2)) => eq(v1, v2)
@@ -347,11 +347,14 @@ module {:options "-functionSyntax:4"} Option refines Monad {
       case _ => false
   }
 
+  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
+    ensures EquivalenceRelation(Equal(eq))
+
   function Return<T>(x: T): W<T> {
     Some(x)
   }
 
-  function Join<T>(ww: W<W<T>>): W<T> {
+  function Join<T(!new)>(ww: W<W<T>>): W<T> {
     match ww
     case None => None
     case Some(w) => w
@@ -360,19 +363,19 @@ module {:options "-functionSyntax:4"} Option refines Monad {
   /* Functoriality of Map */
   lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
 
-  lemma LemmaMapFunctorial<S,T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
+  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
 
-  lemma LemmaMapIdentity<T>(eq: (T, T) -> bool, id: T -> T) {}
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {}
 
   /* Naturality of Return and Join */
   lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
 
-  lemma LemmaJoinNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
+  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
 
   /* Monad laws */
-  lemma LemmaUnitalityJoin<T>(eq: (T, T) -> bool, w: W<T>) {}
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
 
-  lemma LemmaAssociativityJoin<T>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
 
   /**********************************************************
   *
@@ -381,19 +384,19 @@ module {:options "-functionSyntax:4"} Option refines Monad {
   ***********************************************************/
 
   /* Get and Fold */
-  function GetValueDefault<T>(w: W<T>, default: T): T {
+  function GetValueDefault<T(!new)>(w: W<T>, default: T): T {
     match w
     case None => default
     case Some(v) => v
   }
 
-  function GetValue<T>(w: W<T>): T
+  function GetValue<T(!new)>(w: W<T>): T
     requires w.Some?
   {
     w.value
   }
 
-  function Fold<T,U>(u: U, f: T -> U): W<T> -> U {
+  function Fold<T(!new),U>(u: U, f: T -> U): W<T> -> U {
     (w: W<T>) =>
       match w 
       case None => u
@@ -408,20 +411,20 @@ module {:options "-functionSyntax:4"} Option refines Monad {
   //     case None => Failure(e)
   // }
 
-  function ToSeq<T>(w: W<T>): seq<T> {
+  function ToSeq<T(!new)>(w: W<T>): seq<T> {
     match w 
     case None => []
     case Some(v) => [v]
   }
 
-  function ToSet<T>(w: W<T>): set<T> {
+  function ToSet<T(!new)>(w: W<T>): set<T> {
     match w
     case None => {}
     case Some(v) => {v}
   }
 
   /* Comparison */
-  function Compare<T>(cmp: (T, T) -> int): (W<T>, W<T>) -> int {
+  function Compare<T(!new)>(cmp: (T, T) -> int): (W<T>, W<T>) -> int {
     (w1: W<T>, w2: W<T>) =>
       match (w1, w2)
       case (Some(v1), Some(v2)) => cmp(v1, v2)
@@ -436,45 +439,48 @@ module {:options "-functionSyntax:4"} Writer refines Monad {
 
   /**********************************************************
   *
-  *  Monad
+  *  Proves monad refinement
   *
   ***********************************************************/
  
   /* Monad structure */
-  datatype W<T> = Result(value: T, log: string)
+  datatype W<T(!new)> = Result(value: T, log: string)
 
-  function Map<S,T>(f: S -> T): W<S> -> W<T> {
+  function Map<S(!new),T>(f: S -> T): W<S> -> W<T> {
     (w: W<S>) => W<T>.Result(f(w.value), w.log)
   }
 
-  ghost function Equal<T>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
     (w1: W<T>, w2: W<T>) => eq(w1.value, w2.value) && w1.log == w2.log
   }
+
+  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
+    ensures EquivalenceRelation(Equal(eq))
 
   function Return<T>(x: T): W<T> {
     Result(x, "")
   }
 
-  function Join<T>(ww: W<W<T>>): W<T> {
+  function Join<T(!new)>(ww: W<W<T>>): W<T> {
     Result((ww.value).value, (ww.value).log + ww.log)
   }
 
   /* Functoriality of Map */
   lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
 
-  lemma LemmaMapFunctorial<S,T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
+  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
 
-  lemma LemmaMapIdentity<T>(eq: (T, T) -> bool, id: T -> T) {}
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {}
 
   /* Naturality of Return and Join */
   lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
 
-  lemma LemmaJoinNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
+  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
 
   /* Monad laws */
-  lemma LemmaUnitalityJoin<T>(eq: (T, T) -> bool, w: W<T>) {}
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
 
-  lemma LemmaAssociativityJoin<T>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
 
   /**********************************************************
   *
@@ -483,11 +489,11 @@ module {:options "-functionSyntax:4"} Writer refines Monad {
   ***********************************************************/
 
   /* Get and Set */
-  function GetValue<T>(w: W<T>): T {
+  function GetValue<T(!new)>(w: W<T>): T {
     w.value
   }
 
-  function GetLog<T>(w: W<T>): string {
+  function GetLog<T(!new)>(w: W<T>): string {
     w.log
   }
 
@@ -506,41 +512,45 @@ abstract module {:options "-functionSyntax:4"} Reader refines Monad {
 
   type A(!new)
 
-  datatype W<T> = Reader(f: A -> T)
+  datatype W<T(!new)> = Reader(f: A -> T)
 
-  function Map<S,T>(f: S -> T): W<S> -> W<T> {
+  function Map<S(!new),T>(f: S -> T): W<S> -> W<T> {
     (w: W<S>) => Reader(a => f((w.f)(a)))
   }
-
-  ghost function Equal<T>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
+  
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
+  {
     (w1: W<T>, w2: W<T>) =>
       forall a: A :: eq(w1.f(a), w2.f(a))
   }
 
+  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
+    ensures EquivalenceRelation(Equal(eq))
+  
   function Return<T>(x: T): W<T> {
     Reader(a => x)
   }
 
-  function Join<T>(ww: W<W<T>>): W<T>{
+  function Join<T(!new)>(ww: W<W<T>>): W<T>{
     Reader(a => (ww.f(a)).f(a))
   }
 
   /* Functoriality of Map */
   lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
 
-  lemma LemmaMapFunctorial<S,T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
+  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
 
-  lemma LemmaMapIdentity<T>(eq: (T, T) -> bool, id: T -> T) {}
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {}
 
   /* Naturality of Return and Join */
   lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
 
-  lemma LemmaJoinNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
+  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
 
   /* Monad laws */
-  lemma LemmaUnitalityJoin<T>(eq: (T, T) -> bool, w: W<T>) {}
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
 
-  lemma LemmaAssociativityJoin<T>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
 
 }
 
