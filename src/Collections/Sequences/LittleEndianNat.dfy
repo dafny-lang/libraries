@@ -254,7 +254,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNat {
       } else {
         LemmaSeqMswInequality(ys[..i+1], xs[..i+1]);
       }
-      assert ToNatRight(xs[..i+1]) != ToNatRight(ys[..i+1]);
+      reveal ToNatRight();
       LemmaSeqPrefixNeq(xs, ys, i + 1);
     }
   }
