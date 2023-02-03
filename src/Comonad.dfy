@@ -1,31 +1,38 @@
+// RUN: %dafny /compile:0 "%s"
+
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+*******************************************************************************/
+
 include "Functor.dfy"
 include "Cowrappers.dfy"
 
 abstract module {:options "-functionSyntax:4"} Comonad refines Functor {
   /* Structure  */
-  type W(!new)<T(!new)>
+  type F(!new)<T(!new)>
 
-  function Extract<T(!new)>(w: W<T>): T
+  function Extract<T(!new)>(w: F<T>): T
 
-  function Duplicate<T(!new)>(w: W<T>): W<W<T>>
+  function Duplicate<T(!new)>(w: F<T>): F<F<T>>
 
-  /* Naturality of Extract and Duplicate */
-  lemma LemmaExtractNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: W<S>)
+  /* Naturality */
+  lemma LemmaExtractNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: F<S>)
     requires EquivalenceRelation(eq)
     ensures eq(f(Extract(w)), Extract(Map(f)(w)))
 
-  lemma LemmaDuplicateNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: W<S>)
+  lemma LemmaDuplicateNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: F<S>)
     requires EquivalenceRelation(eq)
     ensures EquivalenceRelation(Equal(eq))
     ensures Equal(Equal(eq))(Duplicate(Map(f)(w)), Map(Map(f))(Duplicate(w)))
 
-  /* Comonad laws */
-  lemma LemmaCoUnitalityExtract<T(!new)>(eq: (T, T) -> bool, w: W<T>)
+  /* Counitality and Coassociativity */
+  lemma LemmaCoUnitalityExtract<T(!new)>(eq: (T, T) -> bool, w: F<T>)
     requires EquivalenceRelation(eq)
     ensures && Equal(eq)(Map(Extract)(Duplicate(w)), w)
             && Equal(eq)(w, Extract(Duplicate(w)))
  
-  lemma LemmaCoAssociativityDuplicate<T(!new)>(eq: (T, T) -> bool, w: W<T>) 
+  lemma LemmaCoAssociativityDuplicate<T(!new)>(eq: (T, T) -> bool, w: F<T>) 
     requires && EquivalenceRelation(eq)
              && EquivalenceRelation(Equal(eq))
              && EquivalenceRelation(Equal(Equal(eq))) 
@@ -43,13 +50,13 @@ abstract module {:options "-functionSyntax:4"} CoreaderRightComonad refines Como
     ensures EquivalenceRelation(eql)
 
   /* Functor structure */
-  type W(!new)<T(!new)> = Coreader.Coreader<X,T>
+  type F(!new)<T(!new)> = Coreader.Coreader<X,T>
 
-  function Map<S(!new),T(!new)>(f: S -> T): W<S> -> W<T> {
+  function Map<S(!new),T(!new)>(f: S -> T): F<S> -> F<T> {
     Coreader.MapRight(f)
   }
 
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (F<T>, F<T>) -> bool {
     Coreader.Equal(eql, eq)
   }  
 
@@ -63,7 +70,7 @@ abstract module {:options "-functionSyntax:4"} CoreaderRightComonad refines Como
     LemmaEquiv();
   }
 
-  lemma LemmaMapFunctorial<S(!new),T(!new),U(!new)>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {
+  lemma LemmaMapFunctorial<S(!new),T(!new),U(!new)>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: F<S>) {
     LemmaEquiv();
   }
 
@@ -72,28 +79,28 @@ abstract module {:options "-functionSyntax:4"} CoreaderRightComonad refines Como
   }
 
   /* Comonad structure */
-  function Extract<T(!new)>(w: W<T>): T {
+  function Extract<T(!new)>(w: F<T>): T {
     Coreader.ExtractRight(w)
   } 
 
-  function Duplicate<T(!new)>(w: W<T>): W<W<T>> {
+  function Duplicate<T(!new)>(w: F<T>): F<F<T>> {
     Coreader.DuplicateLeft(w)
   }
 
-  /* Naturality of Extract and Duplicate */
-  lemma LemmaExtractNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: W<S>) {
+  /* Naturality */
+  lemma LemmaExtractNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: F<S>) {
   }
 
-  lemma LemmaDuplicateNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: W<S>) {
+  lemma LemmaDuplicateNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: F<S>) {
     LemmaEquiv();
   }
 
-  /* Comonad laws */
-  lemma LemmaCoUnitalityExtract<T(!new)>(eq: (T, T) -> bool, w: W<T>) {
+  /* Counitality and Coassociativity */
+  lemma LemmaCoUnitalityExtract<T(!new)>(eq: (T, T) -> bool, w: F<T>) {
     LemmaEquiv();
   }
  
-  lemma LemmaCoAssociativityDuplicate<T(!new)>(eq: (T, T) -> bool, w: W<T>) {
+  lemma LemmaCoAssociativityDuplicate<T(!new)>(eq: (T, T) -> bool, w: F<T>) {
     LemmaEquiv();
   }
 }
@@ -109,13 +116,13 @@ abstract module {:options "-functionSyntax:4"} CoreaderLeftComonad refines Comon
     ensures EquivalenceRelation(eqr)
 
   /* Functor structure */
-  type W(!new)<T(!new)> = Coreader.Coreader<T,X>
+  type F(!new)<T(!new)> = Coreader.Coreader<T,X>
 
-  function Map<S(!new),T(!new)>(f: S -> T): W<S> -> W<T> {
+  function Map<S(!new),T(!new)>(f: S -> T): F<S> -> F<T> {
     Coreader.MapLeft(f)
   }
 
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (F<T>, F<T>) -> bool {
     Coreader.Equal(eq, eqr)
   }  
 
@@ -129,7 +136,7 @@ abstract module {:options "-functionSyntax:4"} CoreaderLeftComonad refines Comon
     LemmaEquiv();
   }
 
-  lemma LemmaMapFunctorial<S(!new),T(!new),U(!new)>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {
+  lemma LemmaMapFunctorial<S(!new),T(!new),U(!new)>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: F<S>) {
     LemmaEquiv();
   }
 
@@ -138,29 +145,28 @@ abstract module {:options "-functionSyntax:4"} CoreaderLeftComonad refines Comon
   }
 
   /* Comonad structure */
-  function Extract<T(!new)>(w: W<T>): T {
+  function Extract<T(!new)>(w: F<T>): T {
     Coreader.ExtractLeft(w)
   } 
 
-  function Duplicate<T(!new)>(w: W<T>): W<W<T>> {
+  function Duplicate<T(!new)>(w: F<T>): F<F<T>> {
     Coreader.DuplicateRight(w)
   }
 
-  /* Naturality of Extract and Duplicate */
-  lemma LemmaExtractNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: W<S>) {
+  /* Naturality */
+  lemma LemmaExtractNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: F<S>) {
   }
 
-  lemma LemmaDuplicateNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: W<S>) {
+  lemma LemmaDuplicateNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, w: F<S>) {
     LemmaEquiv();
   }
 
-  /* Comonad laws */
-  lemma LemmaCoUnitalityExtract<T(!new)>(eq: (T, T) -> bool, w: W<T>) {
+  /* Counitality and Coassociativity */
+  lemma LemmaCoUnitalityExtract<T(!new)>(eq: (T, T) -> bool, w: F<T>) {
     LemmaEquiv();
   }
  
-  lemma LemmaCoAssociativityDuplicate<T(!new)>(eq: (T, T) -> bool, w: W<T>) {
+  lemma LemmaCoAssociativityDuplicate<T(!new)>(eq: (T, T) -> bool, w: F<T>) {
     LemmaEquiv();
   }
-
 }

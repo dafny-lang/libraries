@@ -1,3 +1,10 @@
+// RUN: %dafny /compile:0 "%s"
+
+/*******************************************************************************
+*  Copyright by the contributors to the Dafny Project
+*  SPDX-License-Identifier: MIT 
+*******************************************************************************/
+
 module {:options "-functionSyntax:4"} Coreader {
 
   datatype Coreader<+S,+T> = Coreader(left: S, right: T)
