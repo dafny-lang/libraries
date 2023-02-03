@@ -39,7 +39,7 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
 abstract module {:options "-functionSyntax:4"} ResultMonad refines Monad {
   import Result
     
-  type E(!new)
+  type E(!new,==)
 
   function eqe(x: E, y: E): bool
 
@@ -279,7 +279,7 @@ abstract module {:options "-functionSyntax:4"} EitherRightMonad refines Monad {
 abstract module {:options "-functionSyntax:4"} EitherLeftMonad refines Monad {
   import Either 
 
-  type X(!new)
+  type X(!new,==)
 
   function eqr(x: X, y: X): bool
 
