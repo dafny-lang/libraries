@@ -5,552 +5,376 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-include "Functions.dfy"
-include "Relations.dfy"
+module {:options "-functionSyntax:4"} Result {
+  datatype Result<T(!new),E(!new)> = | Success(value: T) | Failure(error: E)
 
-abstract module {:options "-functionSyntax:4"} Functor {
-
-  import opened Functions
-  import opened Relations
-
-  /**********************************************************
-  *
-  *  Functor structure
-  *
-  ***********************************************************/
-
-  /* Functor structure */
-  type W<T(!new)>
-
-  function Map<S(!new),T>(f: S -> T): W<S> -> W<T>
-
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
-    requires EquivalenceRelation(eq)
-
-  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
-    requires EquivalenceRelation(eq)
-    ensures EquivalenceRelation(Equal(eq))
-
-  /* Functoriality of Map */
-  lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T)
-    requires EquivalenceRelation(eq) 
-    requires forall x: S :: eq(f(x), g(x))
-    ensures forall w: W<S> :: Equal(eq)(Map(f)(w), Map(g)(w))
-
-  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>)
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(Map(Composition(f, g))(w), Composition(Map(f), Map(g))(w))
-
-  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T)
-    requires EquivalenceRelation(eq) 
-    requires forall x: T :: eq(id(x), x)
-    ensures forall w: W<T> :: Equal(eq)(Map(id)(w), w)
-
-}
-
-abstract module {:options "-functionSyntax:4"} Monad refines Functor {
-
-  /**********************************************************
-  *
-  *  Additional monad structure
-  *
-  ***********************************************************/
-
-  /* Monad basics */
-  type W(!new)<T(!new)>
-
-  function Return<T>(x: T): W<T>
-
-  function Join<T(!new)>(ww: W<W<T>>): W<T>
-
-  /* Naturality of Return and Join */
-  lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S)
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(Map(f)(Return(x)), Return(f(x)))
-
-  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>)
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(Join(Map(Map(f))(ww)), Map(f)(Join(ww)))
-
-  /* Monad laws */
-  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>)
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(Join(Map(Return)(w)), w) && Equal(eq)(w, Join(Return(w)))
-
-  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) 
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(Join(Map(Join)(www)), Join(Join(www)))
-
-  /**********************************************************
-  *
-  *  Derived structure 
-  *
-  ***********************************************************/
-
-  /* Derived functions */
-  function Bind<S(!new),T(!new)>(w: W<S>, f: S -> W<T>): W<T> {
-    Join(Map(f)(w))
+  function Return<T,E>(v: T): Result<T,E> {
+    Result.Success(v)
   }
 
-  function KleisliComp<S,T(!new),U(!new)>(f: S -> W<T>, g: T -> W<U>): S -> W<U> {
-    x => Join(Map(g)(f(x)))
+  function Bind<S(!new),T(!new),E(!new)>(r: Result<S,E>, f: S -> Result<T,E>): Result<T,E> {
+    match r
+    case Success(v) => f(v)
+    case Failure(e) => Result<T,E>.Failure(e)
   }
 
-  /* Derived lemmas */
-  lemma LemmaLeftUnitalityBind<S,T(!new)>(eq: (T, T) -> bool, x: S, f: S -> W<T>)
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(Bind(Return(x), f), f(x))
-/*   {
-    LemmaReturnNaturality(Equal(eq), f, x);
-    LemmaUnitalityJoin(eq, f(x));
-  } */
-
-  lemma LemmaRightUnitalityBind<T(!new)>(eq: (T, T) -> bool, w: W<T>)
-    requires EquivalenceRelation(eq)
-    ensures Bind(w, Return) == w
-/*   {
-    LemmaUnitalityJoin(eq, w);
-  } */
-
-  lemma LemmaAssociativityBind<S(!new),T(!new),U(!new)>(w: W<S>, f: S -> W<T>, g: T -> W<U>)
-    ensures Bind(Bind(w, f), g) == Bind(w, KleisliComp(f, g))
-/*   {
-    calc {
-      Bind(Bind(w, f), g);
-    == // Definition of Bind
-      Join(Map(g)(Join(Map(f)(w))));
-    ==  { LemmaJoinNaturality(g, Map(f)(w)); }
-      Join(Join(Map(Map(g))(Map(f)(w))));
-    == { LemmaMapFunctorial(f, Map(g), w); }
-      Join(Join(Map(x => Map(g)(f(x)))(w)));
-    == { LemmaAssociativityJoin(Map(x => Map(g)(f(x)))(w)); }
-      Join(Map(Join)(Map(x => Map(g)(f(x)))(w)));
-    == // Definition of Composition
-      Join(Composition(Map(x => Map(g)(f(x))), Map(Join))(w));
-    == {LemmaMapFunctorial(x => Map(g)(f(x)), Join, w);}
-      Join(Map(Composition(x => Map(g)(f(x)), Join))(w));
-    == { LemmaMapFunction((x, y) => x == y, Composition(x => Map(g)(f(x)), Join), x => Join(Map(g)(f(x)))); }
-      Join(Map(x => Join(Map(g)(f(x))))(w));
-    == // Definition of Bind, KleisliComp
-      Bind(w, KleisliComp(f, g));
-    }
-  } */
-
-  lemma LemmaAssociativityComposition<S,T(!new),U(!new),V(!new)>(f: S -> W<T>, g: T -> W<U>, h: U -> W<V>, x: S)
-    ensures KleisliComp(KleisliComp(f, g), h)(x) == KleisliComp(f, KleisliComp(g, h))(x)
-/*   {
-    calc {
-      KleisliComp(KleisliComp(f, g), h)(x);
-    == // Definition of KleisliComp
-      Join(Map(h)(Join(Map(g)(f(x)))));
-    == { LemmaJoinNaturality(h, Map(g)(f(x))); }
-      Join(Join(Map(Map(h))(Map(g)(f(x)))));
-    == // Definition of Composition
-      Join(Join(Composition(Map(g), Map(Map(h)))(f(x))));
-    == { LemmaMapFunctorial(g, Map(h), f(x)); }
-      Join(Join(Map(Composition(g, Map(h)))(f(x))));
-    == { LemmaAssociativityJoin(Map(Composition(g, Map(h)))(f(x))); }
-      Join(Map(Join)(Map(Composition(g, Map(h)))(f(x))) ); 
-    == { LemmaMapFunctorial(Composition(g, Map(h)), Join, f(x)); }
-      Join(Map(Composition(Composition(g, Map(h)), Join))(f(x)));
-    == { LemmaMapFunction((x, y) => x == y, Composition(Composition(g, Map(h)), Join), y => Join(Map(h)(g(y)))); }
-      Join(Map(y => Join(Map(h)(g(y))))(f(x)));
-    == // Definition of KleisliComp
-      KleisliComp(f, KleisliComp(g, h))(x);
-    }
-  } */
-
-  lemma LemmaIdentityReturn<S,T(!new)>(eq: (T, T) -> bool, f: S -> W<T>, x: S)
-    requires EquivalenceRelation(eq)
-    ensures Equal(eq)(KleisliComp(f, Return)(x), f(x)) &&  Equal(eq)(f(x), KleisliComp(Return, f)(x))
-/*   {
-    calc {
-      KleisliComp(f, Return)(x);
-    == // Definition of Composition
-      Join(Map(Return)(f(x)));
-    == { LemmaUnitalityJoin(f(x)); }
-      f(x);
-    }
-    calc {
-      f(x);
-    == { LemmaUnitalityJoin(f(x)); }
-      Join(Return(f(x)));
-    == { LemmaReturnNaturality(f, x); }
-      Join(Map(f)(Return(x)));
-    == // Definition of Composition
-      KleisliComp(Return, f)(x);
-    }
-  } */
-}
-
-abstract module {:options "-functionSyntax:4"} Result refines Monad {
-
-  /**********************************************************
-  *
-  *  Proves monad refinement
-  *
-  ***********************************************************/
-  
-  type E(!new)
-
-  function eqe(e1: E, e2: E): bool
-
-  lemma {:axiom} LemmaEquivRel()
-    ensures EquivalenceRelation(eqe)
-
-  /* Monad structure */
-
-  datatype W<T(!new)> = Success(value: T) | Failure(error: E)
-
-  function Map<S(!new),T>(f: S -> T): W<S> -> W<T> {
-    (w: W<S>) =>
-      match w 
-      case Success(v) => W<T>.Success(f(v))
-      case Failure(e) => W<T>.Failure(e)
-  }
-
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
-  { 
-    (w1: W<T>, w2: W<T>) =>
-      match (w1, w2)
-      case (Success(v1), Success(v2)) => eq(v1, v2) 
-      case (Failure(e1), Failure(e2)) => eqe(e1, e2)
-      case _ => false
-  }
-
-  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
-    ensures EquivalenceRelation(Equal(eq))
-
-  function Return<T>(x: T): W<T> {
-    Success(x)
-  }
- 
-  function Join<T(!new)>(ww: W<W<T>>): W<T> {
-    match ww
+  function Join<T(!new),E(!new)>(rr: Result<Result<T,E>,E>): Result<T,E> {
+    match rr
     case Success(v) => v
-    case Failure(e) => W<T>.Failure(e)
+    case Failure(e) => Result<T,E>.Failure(e)
   }
 
-  /* Functoriality of Map */
-  lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
-
-  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
-
-  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {
-    forall w: W<T> ensures Equal(eq)(Map(id)(w), w) {
-      match w
-        case Success(v) => 
-        case Failure(e) => LemmaEquivRel();
-    }
+  function Map<S(!new),T(!new),E(!new)>(f: S -> T): Result<S,E> -> Result<T,E> {
+    (r: Result<S,E>) =>
+      match r 
+      case Success(v) => Result<T,E>.Success(f(v))
+      case Failure(e) => Result<T,E>.Failure(e)
   }
 
-  /* Naturality of Return and Join */
-  lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
-
-  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
-
-  /* Monad laws */
-  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
-
-  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
-
-  /**********************************************************
-  *
-  *  Wrapper
-  *
-  ***********************************************************/
-
-  /* Get and Set */
-  function Failure<T>(e: E): W<T> {
-    W.Failure(e)
+  function MapError<T(!new),E1(!new),E2(!new)>(f: E1 -> E2): Result<T,E1> -> Result<T,E2> {
+    (r: Result<T,E1>) =>
+      match r 
+      case Success(v) => Result<T,E2>.Success(v)
+      case Failure(e) => Result<T,E2>.Failure(f(e))
   } 
 
-  predicate IsSuccess<T(!new)>(w: W<T>) {
-    w.Success?
-  }  
-
-  predicate IsFailure<T(!new)>(w: W<T>) {
-    w.Failure?
-  }  
-
-  function GetValue<T(!new)>(w: W<T>): T
-    requires w.Success?
-  {
-    w.value
+  function KleisliComposition<S(!new),T(!new),U(!new),E(!new)>(f: S -> Result<T,E>, g: T -> Result<U,E>): S -> Result<U,E> {
+    s => Bind(f(s), g)
   }
 
-  function GetValueDefault<T(!new),E>(w: W<T>, default: T): T {
-    match w 
+  function Success<T,E>(v: T): Result<T,E> {
+    Result.Success(v)
+  }
+
+  function Failure<T,E>(e: E): Result<T,E> {
+    Result.Failure(e)
+  } 
+
+  predicate IsSuccess<T(!new),E(!new)>(r: Result<T,E>) {
+    r.Success?
+  }  
+
+  predicate IsFailure<T(!new),E(!new)>(r: Result<T,E>) {
+    r.Failure?
+  }  
+
+  function GetValue<T(!new),E(!new)>(r: Result<T,E>): T
+    requires r.Success?
+  {
+    r.value
+  }
+
+  function GetValueDefault<T(!new),E(!new)>(r: Result<T,E>, default: T): T {
+    match r 
     case Success(v) => v
     case Failure(_) => default
   }
 
-  function GetError<T(!new)>(w: W<T>): E 
-    requires w.Failure?
+  function GetError<T(!new),E(!new)>(r: Result<T,E>): E 
+    requires r.Failure?
   {
-    w.error
+    r.error
   }
 
-  /* Fold */
-  function Fold<T(!new),U>(f: T -> U, g: E -> U): W<T> -> U {
-    (w: W<T>) =>
-      match w 
+  function Fold<T(!new),E(!new),U>(f: T -> U, g: E -> U): Result<T,E> -> U {
+    (r: Result<T,E>) =>
+      match r 
       case Success(v) => f(v)
       case Failure(e) => g(e)
   }
 
-  /* Conversion to other types */
-  function ToSeq<T(!new)>(w: W<T>): seq<T> {
-    match w
+  function Equal<T(!new),E(!new)>(eqt: (T, T) -> bool, eqe: (E, E) -> bool): (Result<T,E>, Result<T,E>) -> bool {
+    (r1: Result<T,E>, r2: Result<T,E>) =>
+      match (r1, r2)
+      case (Success(v1), Success(v2)) => eqt(v1, v2)
+      case (Failure(e1), Failure(e2)) => eqe(e1, e2)
+      case _ => false
+  }
+
+  function Compare<T(!new),E(!new)>(cmps: (T, T) -> int, cmpf: (E, E) -> int): (Result<T,E>, Result<T,E>) -> int {
+    (r1: Result<T,E>, r2: Result<T,E>) =>
+      match (r1, r2)
+      case (Success(v1), Success(v2)) => cmps(v1, v2)
+      case (Failure(e1), Failure(e2)) => cmpf(e1, e2)
+      case (Success(_), Failure(_)) => -1
+      case (Failure(_), Success(_)) => 1
+  }
+
+  function ToSeq<T(!new),E(!new)>(r: Result<T,E>): seq<T> {
+    match r
     case Success(v) => [v]
     case Failure(_) => []
   }
 
-  function ToSet<T(!new)>(w: W<T>): set<T> {
-    match w
+  function ToSet<T(!new),E(!new)>(r: Result<T,E>): set<T> {
+    match r
     case Success(v) => {v}
     case Failure(_) => {}   
   }
-
-  // function ToOption<T>(w: W<T>): Option<T> {
-  //   match w
-  //   case Success(v) => Some(v)
-  //   case Failure(_) => None()
-  // }
-
 }
 
-module {:options "-functionSyntax:4"} Option refines Monad {
+module {:options "-functionSyntax:4"} Writer {
+  datatype Writer<T> = Result(value: T, log: string)
 
-  /**********************************************************
-  *
-  *  Proves monad refinement
-  *
-  ***********************************************************/
- 
-  /* Monad structure */
-  datatype W<T(!new)> = None | Some(value: T)
+  function Return<T>(v: T): Writer<T> {
+    Result(v, "")
+  }
 
-  function Map<S(!new),T>(f: S -> T): W<S> -> W<T>
+  function Bind<S,T>(w: Writer<S>, f: S -> Writer<T>): Writer<T> {
+    Writer<T>.Result(f(w.value).value, w.log + f(w.value).log)
+  }
+
+  function Join<T>(ww: Writer<Writer<T>>): Writer<T> {
+    Result((ww.value).value, (ww.value).log + ww.log)
+  }
+
+  function Map<S,T>(f: S -> T): Writer<S> -> Writer<T> {
+    (w: Writer<S>) => Writer<T>.Result(f(w.value), w.log)
+  }
+
+  function KleisliComposition<S,T,U>(f: S -> Writer<T>, g: T -> Writer<U>): S -> Writer<U> {
+    s => Bind(f(s), g)
+  }
+
+  function GetValue<T>(w: Writer<T>): T {
+    w.value
+  }
+
+  function GetLog<T>(w: Writer<T>): string {
+    w.log
+  }
+
+  function Result<T>(v: T, s: string): Writer<T> {
+    Writer<T>.Result(v, s)
+  }
+
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (Writer<T>, Writer<T>) -> bool {
+    (w1: Writer<T>, w2: Writer<T>) => 
+      && eq(w1.value, w2.value) 
+      && w1.log == w2.log
+  }
+}
+
+module {:options "-functionSyntax:4"} Option {
+  import Result
+
+  datatype Option<+T> = None | Some(value: T)
+
+  function Return<T>(v: T): Option<T> {
+    Option.Some(v)
+  }
+
+  function Bind<S,T>(o: Option<S>, f: S -> Option<T>): Option<T> {
+    match o 
+    case None => Option<T>.None
+    case Some(v) => f(v)
+  }
+
+  function Join<T>(oo: Option<Option<T>>): Option<T> {
+    match oo
+    case None => Option<T>.None
+    case Some(o) => o
+  }
+
+  function Map<S,T>(f: S -> T): Option<S> -> Option<T>
   {
-    (w: W<S>) =>
-      match w 
-      case None => W<T>.None
-      case Some(v) => W<T>.Some(f(v))
+    (o: Option<S>) =>
+      match o 
+      case None => Option<T>.None
+      case Some(v) => Option<T>.Some(f(v))
   }
 
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
-    (w1: W<T>, w2: W<T>) =>
-      match (w1, w2)
-      case (Some(v1), Some(v2)) => eq(v1, v2)
-      case (None, None) => true
-      case _ => false
+  function KleisliComposition<S,T,U>(f: S -> Option<T>, g: T-> Option<U>): S -> Option<U> {
+    s => Bind(f(s), g)
   }
-
-  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
-    ensures EquivalenceRelation(Equal(eq))
-
-  function Return<T>(x: T): W<T> {
-    Some(x)
-  }
-
-  function Join<T(!new)>(ww: W<W<T>>): W<T> {
-    match ww
-    case None => None
-    case Some(w) => w
-  }
-
-  /* Functoriality of Map */
-  lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
-
-  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
-
-  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {}
-
-  /* Naturality of Return and Join */
-  lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
-
-  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
-
-  /* Monad laws */
-  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
-
-  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
-
-  /**********************************************************
-  *
-  *  Wrapper
-  *
-  ***********************************************************/
-
-  /* Get and Fold */
-  function GetValueDefault<T(!new)>(w: W<T>, default: T): T {
-    match w
+ 
+  function GetValueDefault<T>(o: Option<T>, default: T): T {
+    match o
     case None => default
     case Some(v) => v
   }
 
-  function GetValue<T(!new)>(w: W<T>): T
-    requires w.Some?
+  function GetValue<T>(o: Option<T>): T
+    requires o.Some?
   {
-    w.value
+    o.value
   }
 
-  function Fold<T(!new),U>(u: U, f: T -> U): W<T> -> U {
-    (w: W<T>) =>
-      match w 
+  function Fold<T,U>(u: U, f: T -> U): Option<T> -> U {
+    (o: Option<T>) =>
+      match o 
       case None => u
       case Some(v) => f(v)
   }
 
-  /* Conversion to other types */
-  // function ToResult<T>(e: E): Option<T> -> Result<T,E> {
-  //   (o: Option<T>) =>
-  //     match o 
-  //     case Some(v) => Success(v)
-  //     case None => Failure(e)
-  // }
-
-  function ToSeq<T(!new)>(w: W<T>): seq<T> {
-    match w 
-    case None => []
-    case Some(v) => [v]
+  function Equal<T>(eq: (T, T) -> bool): (Option<T>, Option<T>) -> bool {
+    (o1: Option<T>, o2: Option<T>) =>
+      match (o1, o2)
+      case (Some(v1), Some(v2)) => eq(v1, v2)
+      case (None, None) => true
+      case _ => false
   }
-
-  function ToSet<T(!new)>(w: W<T>): set<T> {
-    match w
-    case None => {}
-    case Some(v) => {v}
-  }
-
-  /* Comparison */
-  function Compare<T(!new)>(cmp: (T, T) -> int): (W<T>, W<T>) -> int {
-    (w1: W<T>, w2: W<T>) =>
-      match (w1, w2)
+  
+  function Compare<T>(cmp: (T, T) -> int): (Option<T>, Option<T>) -> int {
+    (o1: Option<T>, o2: Option<T>) =>
+      match (o1, o2)
       case (Some(v1), Some(v2)) => cmp(v1, v2)
       case (None, None) => 0
       case (None, Some(_)) => -1
       case (Some(_), None) => 1
   }
 
-}
-
-module {:options "-functionSyntax:4"} Writer refines Monad {
-
-  /**********************************************************
-  *
-  *  Proves monad refinement
-  *
-  ***********************************************************/
- 
-  /* Monad structure */
-  datatype W<T(!new)> = Result(value: T, log: string)
-
-  function Map<S(!new),T>(f: S -> T): W<S> -> W<T> {
-    (w: W<S>) => W<T>.Result(f(w.value), w.log)
+  function ToResult<T,E>(e: E): Option<T> -> Result.Result<T,E> {
+    (o: Option<T>) =>
+      match o 
+      case Some(v) => Result.Success(v)
+      case None => Result.Failure(e)
   }
 
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool {
-    (w1: W<T>, w2: W<T>) => eq(w1.value, w2.value) && w1.log == w2.log
+  function ToOption<T(!new),E(!new)>(r: Result.Result<T,E>): Option<T> {
+    match r
+    case Success(v) => Some(v)
+    case Failure(_) => None()
   }
 
-  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
-    ensures EquivalenceRelation(Equal(eq))
-
-  function Return<T>(x: T): W<T> {
-    Result(x, "")
+  function ToSeq<T>(o: Option<T>): seq<T> {
+    match o 
+    case None => []
+    case Some(v) => [v]
   }
 
-  function Join<T(!new)>(ww: W<W<T>>): W<T> {
-    Result((ww.value).value, (ww.value).log + ww.log)
-  }
-
-  /* Functoriality of Map */
-  lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
-
-  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
-
-  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {}
-
-  /* Naturality of Return and Join */
-  lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
-
-  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
-
-  /* Monad laws */
-  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
-
-  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
-
-  /**********************************************************
-  *
-  *  Wrapper
-  *
-  ***********************************************************/
-
-  /* Get and Set */
-  function GetValue<T(!new)>(w: W<T>): T {
-    w.value
-  }
-
-  function GetLog<T(!new)>(w: W<T>): string {
-    w.log
-  }
-
-  function Result<T>(v: T, s: string): W<T> {
-    W<T>.Result(v, s)
+  function ToSet<T>(o: Option<T>): set<T> {
+    match o
+    case None => {}
+    case Some(v) => {v}
   }
 }
 
-abstract module {:options "-functionSyntax:4"} Reader refines Monad {
 
-  /**********************************************************
-  *
-  *  Monad
-  *
-  ***********************************************************/
+module {:options "-functionSyntax:4"} Either {
+  import Option
 
-  type A(!new)
+  datatype Either<+S,+T> = Left(left: S) | Right(right: T) 
 
-  datatype W<T(!new)> = Reader(f: A -> T)
-
-  function Map<S(!new),T>(f: S -> T): W<S> -> W<T> {
-    (w: W<S>) => Reader(a => f((w.f)(a)))
+  function ReturnLeft<S,T>(v: S): Either<S,T> {
+    Either.Left(v)
   }
-  
-  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (W<T>, W<T>) -> bool
+
+  function ReturnRight<S,T>(v: T): Either<S,T> {
+    Either.Right(v)
+  }
+
+  predicate IsLeft<S,T>(e: Either<S,T>) {
+    e.Left?
+  }
+
+  predicate IsRight<S,T>(e: Either<S,T>) {
+    e.Right?
+  }
+
+  function FindLeft<S,T>(e: Either<S,T>): Option.Option<S> {
+    match e 
+    case Left(v) => Option.Some(v)
+    case Right(v) => Option.None
+  }
+
+  function FindRight<S,T>(e: Either<S,T>): Option.Option<T> {
+    match e 
+    case Left(v) => Option.None
+    case Right(v) => Option.Some(v)
+  }
+
+  function JoinRight<S,T>(ee: Either<S,Either<S,T>>): Either<S,T> {
+    match ee
+    case Left(v) => Either<S,T>.Left(v)
+    case Right(v) => v
+  }
+
+  function JoinLeft<S,T>(ee: Either<Either<S,T>,T>): Either<S,T> {
+    match ee
+    case Left(v) => v
+    case Right(v) => Either<S,T>.Right(v)
+  }
+
+  function MapLeft<S,T,U>(f: S -> T): Either<S,U> -> Either<T,U> {
+    (e: Either<S,U>) =>
+     match e 
+     case Left(v) => Either<T,U>.Left(f(v))
+     case Right(v) => Either<T,U>.Right(v)
+  }
+
+  function MapRight<S,T,U>(f: T -> U): Either<S,T> -> Either<S,U> {
+    (e: Either<S,T>) =>
+     match e 
+     case Left(v) => Either<S,U>.Left(v)
+     case Right(v) => Either<S,U>.Right(f(v))
+  }
+
+  function Map<S1,S2,T1,T2>(f: S1 -> S2, g: T1 -> T2): Either<S1,T1> -> Either<S2,T2> {
+    (e: Either<S1,T1>) =>
+      match e
+      case Left(v) => Either<S2,T2>.Left(f(v))
+      case Right(v) => Either<S2,T2>.Right(g(v))
+  }
+
+  function Fold<S,T,U>(f: S -> U, g: T -> U): Either<S,T> -> U {
+    (e: Either<S,T>) =>
+      match e
+      case Left(v) => f(v)
+      case Right(v) => g(v)
+  }
+
+  function Equal<S,T>(eql: (S, S) -> bool, eqr: (T, T) -> bool): (Either<S,T>, Either<S,T>) -> bool {
+    (e1: Either<S,T>, e2: Either<S,T>) =>
+      match (e1, e2)
+      case (Left(v1), Left(v2)) => eql(v1, v2)
+      case (Right(v1), Right(v2)) => eqr(v1, v2)
+      case _ => false
+  }
+
+  function Compare<S,T>(cmpl: (S, S) -> int, cmpr: (T, T) -> int): (Either<S,T>, Either<S,T>) -> int {
+    (e1: Either<S,T>, e2: Either<S,T>) =>
+      match (e1, e2)
+      case (Left(v1), Left(v2)) => cmpl(v1, v2)
+      case (Right(v1), Right(v2)) => cmpr(v1, v2)
+      case (Left(_), Right(_)) => -1
+      case (Right(_), Left(_)) => 1
+  }
+}
+
+module {:options "-functionSyntax:4"} Reader {
+  datatype Reader<-X,+T> = Reader(f: X -> T)
+
+  function Return<X,T>(t: T): Reader<X,T> {
+    Reader(x => t)
+  }
+
+  function Bind<X,S,T>(r: Reader<X,S>, f: S -> Reader<X,T>): Reader<X,T> {
+    Reader(x => (f((r.f)(x)).f)(x))
+  }
+
+  function Join<X,T>(rr: Reader<X,Reader<X,T>>): Reader<X,T> {
+    Reader(x => (rr.f(x)).f(x))
+  }
+
+  function Map<X,S,T>(f: S -> T): Reader<X,S> -> Reader<X,T> {
+    (r: Reader<X,S>) => 
+      Reader(x => f((r.f)(x)))
+  }
+
+  function MapContra<X,Y,T>(f: X -> Y): Reader<Y,T> -> Reader<X,T> {
+    (r: Reader<Y,T>) =>
+      Reader(x => r.f(f(x)))
+  }
+
+  function KleisliComposition<X,S,T,U>(f: S -> Reader<X,T>, g: T -> Reader<X,U>): S -> Reader<X,U> {
+    s => Bind(f(s), g)
+  } 
+
+  ghost function Equal<X(!new),T>(eq: (T, T) -> bool): (Reader<X,T>, Reader<X,T>) -> bool 
   {
-    (w1: W<T>, w2: W<T>) =>
-      forall a: A :: eq(w1.f(a), w2.f(a))
+    (r1: Reader<X,T>, r2: Reader<X,T>) => 
+      forall x: X :: eq(r1.f(x), r2.f(x))
   }
-
-  lemma LemmaEquivRelLift<T>(eq: (T, T) -> bool)
-    ensures EquivalenceRelation(Equal(eq))
-  
-  function Return<T>(x: T): W<T> {
-    Reader(a => x)
-  }
-
-  function Join<T(!new)>(ww: W<W<T>>): W<T>{
-    Reader(a => (ww.f(a)).f(a))
-  }
-
-  /* Functoriality of Map */
-  lemma LemmaMapFunction<S,T>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {}
-
-  lemma LemmaMapFunctorial<S(!new),T,U>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: W<S>) {}
-
-  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {}
-
-  /* Naturality of Return and Join */
-  lemma LemmaReturnNaturality<S,T>(eq: (T, T) -> bool, f: S -> T, x: S) {}
-
-  lemma LemmaJoinNaturality<S(!new),T>(eq: (T, T) -> bool, f: S -> T, ww: W<W<S>>) {}
-
-  /* Monad laws */
-  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: W<T>) {}
-
-  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: W<W<W<T>>>) {}
-
 }
 
