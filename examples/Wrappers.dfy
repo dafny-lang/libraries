@@ -9,7 +9,9 @@
 include "../src/Wrappers.dfy"
 
 module Demo {
-  import opened Wrappers
+  import opened Option
+  import opened Result
+  import opened Outcome
 
   // ------ Demo for Option ----------------------------
   // We use Option when we don't need to pass around a reason for the failure,
@@ -60,7 +62,7 @@ module Demo {
   // Sometimes we want to go from Option to Result:
   method FindName(m: MyMap<string, string>) returns (res: Result<string, string>) {
     // Will return a default error message in case of None:
-    res := m.Get("name").ToResult();
+    res := OfOption(m.Get("name"));
     // We can also match on the option to write a custom error:
     match m.Get("name")
     case Some(n) => res := Success(n);

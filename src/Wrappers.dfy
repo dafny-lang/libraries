@@ -6,8 +6,73 @@
 *******************************************************************************/
 
 module {:options "-functionSyntax:4"} Result {
-  datatype Result<T(!new),E(!new)> = | Success(value: T) | Failure(error: E)
+  import Option
 
+  datatype Result<T(!new,==),E(!new)> = | Success(value: T) | Failure(error: E) {
+
+    predicate IsSuccess() {
+      Success?
+    }  
+
+    predicate IsFailure() {
+      Failure?
+    }  
+
+    function GetValue(): T
+      requires Success?
+    {
+      value
+    }
+
+    function GetValueDefault(default: T): T {
+      match this 
+      case Success(v) => v
+      case Failure(_) => default
+    }
+
+    function PropagateFailure<S>(): Result<S,E>
+      requires Failure?
+    {
+      Failure(error)
+    }
+
+    function GetError(): E 
+      requires Failure?
+    {
+      error
+    }
+
+    function Extract(): T
+      requires Success?
+    {
+      value
+    }
+
+    function ToOption(): Option.Option<T> {
+      match this
+      case Success(v) => Option.Some(v)
+      case Failure(_) => Option.None
+    }
+
+    function ToSeq(): seq<T> {
+      match this
+      case Success(v) => [v]
+      case Failure(_) => []
+    }
+
+    function ToSet(): set<T> {
+      match this
+      case Success(v) => {v}
+      case Failure(_) => {}   
+    }
+  }
+
+  function OfOption<T>(o: Option.Option<T>): Result<T,string> {
+    match o
+    case Some(v) => Success(v)
+    case None => Failure("Option is None")
+  }
+  
   function Return<T,E>(v: T): Result<T,E> {
     Result.Success(v)
   }
@@ -18,7 +83,7 @@ module {:options "-functionSyntax:4"} Result {
     case Failure(e) => Result<T,E>.Failure(e)
   }
 
-  function Join<T(!new),E(!new)>(rr: Result<Result<T,E>,E>): Result<T,E> {
+  function Join<T(!new,==),E(!new,==)>(rr: Result<Result<T,E>,E>): Result<T,E> {
     match rr
     case Success(v) => v
     case Failure(e) => Result<T,E>.Failure(e)
@@ -50,32 +115,6 @@ module {:options "-functionSyntax:4"} Result {
     Result.Failure(e)
   } 
 
-  predicate IsSuccess<T(!new),E(!new)>(r: Result<T,E>) {
-    r.Success?
-  }  
-
-  predicate IsFailure<T(!new),E(!new)>(r: Result<T,E>) {
-    r.Failure?
-  }  
-
-  function GetValue<T(!new),E(!new)>(r: Result<T,E>): T
-    requires r.Success?
-  {
-    r.value
-  }
-
-  function GetValueDefault<T(!new),E(!new)>(r: Result<T,E>, default: T): T {
-    match r 
-    case Success(v) => v
-    case Failure(_) => default
-  }
-
-  function GetError<T(!new),E(!new)>(r: Result<T,E>): E 
-    requires r.Failure?
-  {
-    r.error
-  }
-
   function Fold<T(!new),E(!new),U>(f: T -> U, g: E -> U): Result<T,E> -> U {
     (r: Result<T,E>) =>
       match r 
@@ -98,18 +137,6 @@ module {:options "-functionSyntax:4"} Result {
       case (Failure(e1), Failure(e2)) => cmpf(e1, e2)
       case (Success(_), Failure(_)) => -1
       case (Failure(_), Success(_)) => 1
-  }
-
-  function ToSeq<T(!new),E(!new)>(r: Result<T,E>): seq<T> {
-    match r
-    case Success(v) => [v]
-    case Failure(_) => []
-  }
-
-  function ToSet<T(!new),E(!new)>(r: Result<T,E>): set<T> {
-    match r
-    case Success(v) => {v}
-    case Failure(_) => {}   
   }
 }
 
@@ -156,9 +183,47 @@ module {:options "-functionSyntax:4"} Writer {
 }
 
 module {:options "-functionSyntax:4"} Option {
-  import Result
+  datatype Option<+T(==)> = None | Some(value: T) {
+    function GetValueDefault(default: T): T {
+      match this
+      case None => default
+      case Some(v) => v
+    }
 
-  datatype Option<+T> = None | Some(value: T)
+    function GetValue(): T
+      requires Some?
+    {
+      value
+    }
+
+    predicate IsFailure() {
+      None?
+    }
+
+    function Extract(): T
+      requires Some?
+    {
+      value
+    }
+
+    function PropagateFailure<S>(): Option<S>
+      requires None?
+    {
+      None
+    }
+
+    function ToSeq(): seq<T> {
+      match this 
+      case None => []
+      case Some(v) => [v]
+    }
+
+    function ToSet(): set<T> {
+      match this
+      case None => {}
+      case Some(v) => {v}
+    }
+  }
 
   function Return<T>(v: T): Option<T> {
     Option.Some(v)
@@ -187,18 +252,6 @@ module {:options "-functionSyntax:4"} Option {
   function KleisliComposition<S,T,U>(f: S -> Option<T>, g: T-> Option<U>): S -> Option<U> {
     s => Bind(f(s), g)
   }
- 
-  function GetValueDefault<T>(o: Option<T>, default: T): T {
-    match o
-    case None => default
-    case Some(v) => v
-  }
-
-  function GetValue<T>(o: Option<T>): T
-    requires o.Some?
-  {
-    o.value
-  }
 
   function Fold<T,U>(u: U, f: T -> U): Option<T> -> U {
     (o: Option<T>) =>
@@ -222,31 +275,6 @@ module {:options "-functionSyntax:4"} Option {
       case (None, None) => 0
       case (None, Some(_)) => -1
       case (Some(_), None) => 1
-  }
-
-  function ToResult<T,E>(e: E): Option<T> -> Result.Result<T,E> {
-    (o: Option<T>) =>
-      match o 
-      case Some(v) => Result.Success(v)
-      case None => Result.Failure(e)
-  }
-
-  function ToOption<T(!new),E(!new)>(r: Result.Result<T,E>): Option<T> {
-    match r
-    case Success(v) => Some(v)
-    case Failure(_) => None()
-  }
-
-  function ToSeq<T>(o: Option<T>): seq<T> {
-    match o 
-    case None => []
-    case Some(v) => [v]
-  }
-
-  function ToSet<T>(o: Option<T>): set<T> {
-    match o
-    case None => {}
-    case Some(v) => {v}
   }
 }
 
@@ -378,3 +406,26 @@ module {:options "-functionSyntax:4"} Reader {
   }
 }
 
+module {:options "-functionSyntax:4"} Outcome {
+  import Result 
+
+  datatype Outcome<E> = Pass | Fail(error: E) {
+      predicate IsFailure() {
+        Fail?
+      }
+      // Note: PropagateFailure returns a Result, not an Outcome.
+      function PropagateFailure<U>(): Result.Result<U, E>
+        requires Fail?
+      {
+        Result.Failure(this.error)
+      }
+      // Note: no Extract method
+    }
+
+    // A helper function to ensure a requirement is true at runtime
+    // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
+    function Need<E>(condition: bool, error: E): (result: Outcome<E>)
+    {
+      if condition then Pass else Fail(error)
+  }
+}
