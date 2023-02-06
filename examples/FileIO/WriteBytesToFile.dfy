@@ -10,15 +10,15 @@
 // RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT"
 
 //// Check that written files match expectations
-// RUN: %diff "data.txt" "%t_cs/output_plain"
-// RUN: %diff "data.txt" "%t_cs/foo/bar/output_nested"
-// RUN: %diff "data.txt" "%t_cs/foo/output_up"
-// RUN: %diff "data.txt" "%t_java/output_plain"
-// RUN: %diff "data.txt" "%t_java/foo/bar/output_nested"
-// RUN: %diff "data.txt" "%t_java/foo/output_up"
-// RUN: %diff "data.txt" "%t_js/output_plain"
-// RUN: %diff "data.txt" "%t_js/foo/bar/output_nested"
-// RUN: %diff "data.txt" "%t_js/foo/output_up"
+// RUN: %diff "%S/data.txt" "%t_cs/output_plain"
+// RUN: %diff "%S/data.txt" "%t_cs/foo/bar/output_nested"
+// RUN: %diff "%S/data.txt" "%t_cs/foo/output_up"
+// RUN: %diff "%S/data.txt" "%t_java/output_plain"
+// RUN: %diff "%S/data.txt" "%t_java/foo/bar/output_nested"
+// RUN: %diff "%S/data.txt" "%t_java/foo/output_up"
+// RUN: %diff "%S/data.txt" "%t_js/output_plain"
+// RUN: %diff "%S/data.txt" "%t_js/foo/bar/output_nested"
+// RUN: %diff "%S/data.txt" "%t_js/foo/output_up"
 
 include "../../src/FileIO/FileIO.dfy"
 
