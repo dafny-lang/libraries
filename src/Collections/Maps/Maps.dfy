@@ -12,7 +12,7 @@
 include "../../Wrappers.dfy"
 
 module {:options "-functionSyntax:4"} Maps {
-  import opened Wrappers
+  import opened Wrappers.Option
 
   function Get<X, Y>(m: map<X, Y>, x: X): Option<Y>
   {

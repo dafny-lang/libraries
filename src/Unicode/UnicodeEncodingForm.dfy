@@ -26,7 +26,7 @@ include "Unicode.dfy"
  *    code unit subsequences to scalar values.
  */
 abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
-  import opened Wrappers
+  import opened Wrappers.Option
 
   import Functions
   import Seq
@@ -48,7 +48,7 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
    * A code unit is the minimal bit combination that can represent a unit of encoded text for processing or
    * interchange. (Section 3.9 D77.)
    */
-  type CodeUnit
+  type CodeUnit(==)
 
   /**
    * A well-formed Unicode code unit sequence that maps to a single Unicode scalar value.

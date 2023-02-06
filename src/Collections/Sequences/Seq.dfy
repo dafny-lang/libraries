@@ -18,7 +18,8 @@ include "../../Math.dfy"
 
 module {:options "-functionSyntax:4"} Seq {
 
-  import opened Wrappers
+  import opened Wrappers.Option
+  import opened Wrappers.Result
   import Math
 
   /**********************************************************
@@ -586,7 +587,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
 /* applies a transformation function that returns a result on the sequence */
-  function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
+  function {:opaque} MapWithResult<T, R(!new), E(!new)>(f: (T ~> Result<R,E>), s: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |s| ==> f.requires(s[i])
     ensures result.Success? ==>
       && |result.value| == |s|

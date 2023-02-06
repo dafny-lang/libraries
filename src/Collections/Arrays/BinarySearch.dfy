@@ -9,7 +9,7 @@ include "../../Wrappers.dfy"
 include "../../Relations.dfy"
 
 module BinarySearch {
-  import opened Wrappers
+  import opened Wrappers.Option
   import opened Relations
 
   method BinarySearch<T>(a: array<T>, key: T, less: (T, T) -> bool) returns (r: Option<nat>)

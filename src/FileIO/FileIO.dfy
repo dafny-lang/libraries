@@ -18,9 +18,9 @@ include "../Wrappers.dfy"
  * File path symbols including . and .. are allowed.
  */
 module {:options "-functionSyntax:4"} FileIO {
-  import opened Wrappers
+  import opened Wrappers.Result
 
-  export provides ReadBytesFromFile, WriteBytesToFile, Wrappers
+  export provides ReadBytesFromFile, WriteBytesToFile, Result
 
   /*
    * Public API
