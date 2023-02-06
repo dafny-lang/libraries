@@ -59,18 +59,18 @@ module {:options "-functionSyntax:4"} Relations {
     forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
 
+  /* An element in an ordered set is called minimal, if it is less than every element of the set. */
   ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) 
   {
     m in s && forall y: T | y in s :: R(m, y)
   }
 
+  /* Any totally ordered set contains a unique minimal element. */
   lemma LemmaUniqueMinimum<T(!new)>(R: (T, T) -> bool, s: set<T>) 
-    requires 
-      && |s| > 0
-      && TotalOrdering(R)
-    ensures 
-      && (exists m: T :: IsMinimum(R, m, s))
-      && (forall m, n: T :: IsMinimum(R, m, s) && IsMinimum(R, n, s) ==> m == n)
+    requires &&|s| > 0 
+             && TotalOrdering(R)
+    ensures && (exists m: T :: IsMinimum(R, m, s))
+            && (forall m, n: T :: IsMinimum(R, m, s) && IsMinimum(R, n, s) ==> m == n)
   {
     var x :| x in s;
     if s == {x} {
