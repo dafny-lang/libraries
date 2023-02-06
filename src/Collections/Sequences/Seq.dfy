@@ -677,13 +677,13 @@ module {:options "-functionSyntax:4"} Seq {
       assert xs + ys == ys;
     } else {
       calc {
-        Filter(f, a + b);
-          { assert {:split_here} (a + b)[0] == a[0]; assert (a + b)[1..] == a[1..] + b; }
-        Filter(f, [a[0]]) + Filter(f, a[1..] + b);
-          { assert Filter(f, a[1..] + b) == Filter(f, a[1..]) + Filter(f, b); }
-        Filter(f, [a[0]]) + (Filter(f, a[1..]) + Filter(f, b));
-          { assert {:split_here} [(a + b)[0]] + (a[1..] + b) == a + b; }
-        Filter(f, a) + Filter(f, b);
+        Filter(f, xs + ys);
+          { assert {:split_here} (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
+        Filter(f, [xs[0]]) + Filter(f, xs[1..] + ys);
+          { assert Filter(f, xs[1..] + ys) == Filter(f, xs[1..]) + Filter(f, ys); }
+        Filter(f, [xs[0]]) + (Filter(f, xs[1..]) + Filter(f, ys));
+          { assert {:split_here} [(xs + ys)[0]] + (xs[1..] + ys) == xs + ys; }
+        Filter(f, xs) + Filter(f, ys);
       }
     }
   }
