@@ -272,7 +272,7 @@ module {:options "-functionSyntax:4"} Wrappers {
   }
 
   module {:options "-functionSyntax:4"} Either {
-    import Option
+    import opened Option
 
     datatype Either<+S,+T> = Left(left: S) | Right(right: T) {
       predicate IsLeft<S,T>() {
@@ -284,16 +284,16 @@ module {:options "-functionSyntax:4"} Wrappers {
       }
     }
 
-    function FindLeft<S,T>(e: Either<S,T>): Option.Option<S> {
+    function FindLeft<S,T>(e: Either<S,T>): Option<S> {
       match e 
-      case Left(v) => Option.Some(v)
-      case Right(v) => Option.None
+      case Left(v) => Some(v)
+      case Right(v) => None
     }
 
-    function FindRight<S,T>(e: Either<S,T>): Option.Option<T> {
+    function FindRight<S,T>(e: Either<S,T>): Option<T> {
       match e 
-      case Left(v) => Option.None
-      case Right(v) => Option.Some(v)
+      case Left(v) => None
+      case Right(v) => Some(v)
     }
 
     function ReturnLeft<S,T>(v: S): Either<S,T> {

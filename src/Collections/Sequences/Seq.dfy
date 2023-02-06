@@ -21,7 +21,8 @@ include "../../Relations.dfy"
 module {:options "-functionSyntax:4"} Seq {
 
   import opened Wrappers.Option
-  import opened Wrappers.Result  import opened MergeSort
+  import opened Wrappers.Result  
+  import opened MergeSort
   import opened Relations
   import Math
 
