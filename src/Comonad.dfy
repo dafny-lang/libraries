@@ -40,7 +40,7 @@ abstract module {:options "-functionSyntax:4"} Comonad refines Functor {
 }
 
 abstract module {:options "-functionSyntax:4"} CoreaderRightComonad refines Comonad {
-  import Coreader
+  import Cowrappers.Coreader
 
   type X(!new)
 
@@ -106,7 +106,7 @@ abstract module {:options "-functionSyntax:4"} CoreaderRightComonad refines Como
 }
 
 abstract module {:options "-functionSyntax:4"} CoreaderLeftComonad refines Comonad {
-  import Coreader
+  import Cowrappers.Coreader
 
   type X(!new)
 

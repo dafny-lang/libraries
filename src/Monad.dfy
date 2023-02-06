@@ -37,7 +37,7 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
 
 
 abstract module {:options "-functionSyntax:4"} ResultMonad refines Monad {
-  import Result
+  import Wrappers.Result
     
   type E(!new,==)
 
@@ -104,7 +104,7 @@ abstract module {:options "-functionSyntax:4"} ResultMonad refines Monad {
 
 
 module {:options "-functionSyntax:4"} WriterMonad refines Monad {
-  import Writer 
+  import Wrappers.Writer 
 
   /* Functor structure */
   type F(!new)<T(!new)> = Writer.Writer<T>
@@ -157,7 +157,7 @@ module {:options "-functionSyntax:4"} WriterMonad refines Monad {
 
 
 module {:options "-functionSyntax:4"} OptionMonad refines Monad {
-  import Option
+  import Wrappers.Option
 
   /* Functor structure */
   type F(!new)<T(!new)> = Option.Option<T>
@@ -210,7 +210,7 @@ module {:options "-functionSyntax:4"} OptionMonad refines Monad {
 
 
 abstract module {:options "-functionSyntax:4"} EitherRightMonad refines Monad {
-  import Either 
+  import Wrappers.Either 
 
   type X(!new)
 
@@ -277,7 +277,7 @@ abstract module {:options "-functionSyntax:4"} EitherRightMonad refines Monad {
 
 
 abstract module {:options "-functionSyntax:4"} EitherLeftMonad refines Monad {
-  import Either 
+  import Wrappers.Either 
 
   type X(!new,==)
 
@@ -344,7 +344,7 @@ abstract module {:options "-functionSyntax:4"} EitherLeftMonad refines Monad {
 
 
 abstract module {:options "-functionSyntax:4"} ReaderMonad refines Monad {
-  import Reader
+  import Wrappers.Reader
 
   type X(!new)
 
