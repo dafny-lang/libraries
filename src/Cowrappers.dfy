@@ -5,7 +5,8 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Coreader {
+module {:options "-functionSyntax:4"} Cowrappers {
+  module {:options "-functionSyntax:4"} Coreader {
 
   datatype Coreader<+S,+T> = Coreader(left: S, right: T)
 
@@ -56,4 +57,5 @@ module {:options "-functionSyntax:4"} Coreader {
       eql(r1.left, r2.left) && eqr(r1.right, r2.right)
   }
 
+  }
 }
