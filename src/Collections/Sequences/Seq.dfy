@@ -678,10 +678,11 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc {
         Filter(f, xs + ys);
-          { assert (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
+          { assert {:split_here} (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
         Filter(f, [xs[0]]) + Filter(f, xs[1..] + ys);
-        Filter(f, [xs[0]]) + Filter(f, xs[1..]) + Filter(f, ys);
-          { assert {:split_here} [(xs + ys)[0]] + xs[1..] + ys == xs + ys; }
+          { assert Filter(f, xs[1..] + ys) == Filter(f, xs[1..]) + Filter(f, ys); }
+        Filter(f, [xs[0]]) + (Filter(f, xs[1..]) + Filter(f, ys));
+          { assert {:split_here} [(xs + ys)[0]] + (xs[1..] + ys) == xs + ys; }
         Filter(f, xs) + Filter(f, ys);
       }
     }
