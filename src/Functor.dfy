@@ -15,7 +15,7 @@ abstract module {:options "-functionSyntax:4"} Functor {
   /* Structure */
   type F(!new)<T(!new)>
 
-  function Map<S(!new),T(!new)>(f: S -> T): F<S> -> F<T>
+  ghost function Map<S(!new),T(!new)>(f: S -> T): F<S> -> F<T>
 
   ghost function Equal<T(!new)>(eq: (T, T) -> bool): (F<T>, F<T>) -> bool
     requires EquivalenceRelation(eq)

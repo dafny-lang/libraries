@@ -12,9 +12,9 @@ abstract module {:options "-functionSyntax:4"} Monad refines Functor {
   /* Structure  */
   type F(!new)<T(!new)>
 
-  function Return<T(!new)>(x: T): F<T>
+  ghost function Return<T(!new)>(x: T): F<T>
 
-  function Join<T(!new)>(ww: F<F<T>>): F<T>
+  ghost function Join<T(!new)>(ww: F<F<T>>): F<T>
 
   /* Naturality */
   lemma LemmaReturnNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, x: S)
@@ -428,6 +428,117 @@ abstract module {:options "-functionSyntax:4"} ReaderMonad refines Monad {
   lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: F<F<F<T>>>) {
   }
 }
+
+
+module {:options "-functionSyntax:4"} ListMonad refines Monad {
+  import Wrappers.List
+
+  /* Functor structure */
+  type F(!new)<T(!new)> = List.List<T>
+
+  function Map<S(!new),T(!new)>(f: S -> T): F<S> -> F<T> {
+    List.Map(f)
+  }
+
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (F<T>, F<T>) -> bool {
+    List.Equal(eq)
+  }    
+
+  /* Properties of Equal */
+  lemma LemmaEquivRelLift<T(!new)>(eq: (T, T) -> bool) {
+  }
+
+  /* Properties of Map */
+  lemma LemmaMapFunction<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {
+  }
+
+  lemma LemmaMapFunctorial<S(!new),T(!new),U(!new)>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: F<S>) {
+  }
+
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {
+  }
+
+  /* Monad structure */
+  function Return<T(!new)>(x: T): F<T> {
+    List.Return(x)
+  }
+
+  function Join<T(!new)>(ww: F<F<T>>): F<T> {
+    List.Join(ww)
+  }
+
+  /* Naturality */
+  lemma LemmaReturnNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, x: S) {
+  }
+
+  lemma LemmaJoinNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, ww: F<F<S>>) {
+  }
+
+  /* Unitality and Associativity */
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: F<T>) {
+  }
+
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: F<F<F<T>>>) {
+  }
+}
+
+module {:options "-functionSyntax:4"} PowersetMonad refines Monad {
+  import Wrappers.Powerset
+
+  /* Functor structure */
+  type F(!new)<T(!new)> = Powerset.Set<T>
+
+  ghost function Map<S(!new),T(!new)>(f: S -> T): F<S> -> F<T> {
+    Powerset.Map(f)
+  }
+
+  ghost function Equal<T(!new)>(eq: (T, T) -> bool): (F<T>, F<T>) -> bool {
+    Powerset.Equal(eq)
+  }    
+
+  /* Properties of Equal */
+  lemma LemmaEquivRelLift<T(!new)>(eq: (T, T) -> bool) {
+  }
+
+  /* Properties of Map */
+  lemma LemmaMapFunction<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, g: S -> T) {
+  }
+
+  lemma LemmaMapFunctorial<S(!new),T(!new),U(!new)>(eq: (U, U) -> bool, f: S -> T, g: T -> U, w: F<S>) {
+  }
+
+  lemma LemmaMapIdentity<T(!new)>(eq: (T, T) -> bool, id: T -> T) {
+  }
+
+  /* Monad structure */
+  ghost function Return<T(!new)>(x: T): F<T> {
+    Powerset.Return(x)
+  }
+
+  ghost function Join<T(!new)>(ww: F<F<T>>): F<T> {
+    Powerset.Join(ww)
+  }
+
+  /* Naturality */
+  lemma LemmaReturnNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, x: S) {
+  }
+
+  lemma LemmaJoinNaturality<S(!new),T(!new)>(eq: (T, T) -> bool, f: S -> T, ww: F<F<S>>) {
+  }
+
+  /* Unitality and Associativity */
+  lemma LemmaUnitalityJoin<T(!new)>(eq: (T, T) -> bool, w: F<T>) {
+  }
+
+  lemma LemmaAssociativityJoin<T(!new)>(eq: (T, T) -> bool, www: F<F<F<T>>>) {
+  }
+}
+
+
+
+
+
+
 
 
 

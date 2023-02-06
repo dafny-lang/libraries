@@ -4,6 +4,8 @@
 *  Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
+include "Relations.dfy"
+
 module {:options "-functionSyntax:4"} Wrappers {
   module {:options "-functionSyntax:4"} Result {
     import opened Option
@@ -275,25 +277,25 @@ module {:options "-functionSyntax:4"} Wrappers {
     import opened Option
 
     datatype Either<+S,+T> = Left(left: S) | Right(right: T) {
-      predicate IsLeft<S,T>() {
+      predicate IsLeft() {
         Left?
       }
 
-      predicate IsRight<S,T>() {
+      predicate IsRight() {
         Right?
       }
-    }
 
-    function FindLeft<S,T>(e: Either<S,T>): Option<S> {
-      match e 
-      case Left(v) => Some(v)
-      case Right(v) => None
-    }
+      function FindLeft(): Option<S> {
+        match this 
+        case Left(v) => Some(v)
+        case Right(v) => None
+      }
 
-    function FindRight<S,T>(e: Either<S,T>): Option<T> {
-      match e 
-      case Left(v) => None
-      case Right(v) => Some(v)
+      function FindRight(): Option<T> {
+        match this
+        case Left(v) => None
+        case Right(v) => Some(v)
+      }
     }
 
     function ReturnLeft<S,T>(v: S): Either<S,T> {
@@ -303,8 +305,6 @@ module {:options "-functionSyntax:4"} Wrappers {
     function ReturnRight<S,T>(v: T): Either<S,T> {
       Either.Right(v)
     }
-
-
 
     function JoinRight<S,T>(ee: Either<S,Either<S,T>>): Either<S,T> {
       match ee
@@ -399,6 +399,93 @@ module {:options "-functionSyntax:4"} Wrappers {
         forall x: X :: eq(r1.f(x), r2.f(x))
     }
   }
+
+  module {:options "-functionSyntax:4"} List {
+    type List<+T> = seq<T>
+
+    function MapCurry<S,T>(f: S -> T, xs: List<S>): List<T> {
+      if xs == [] then 
+        []
+      else 
+        [f(xs[0])] + MapCurry(f, xs[1..])
+    }
+
+    function Map<S,T>(f: S -> T): (List<S> -> List<T>) {
+      xs => MapCurry(f, xs)
+    }
+
+    function Return<T>(t: T): List<T> {
+      [t]
+    }
+
+    function Join<T>(xxs: List<List<T>>): List<T> {
+      if xxs == [] then
+        []
+      else
+        xxs[0] + Join(xxs[1..])
+    }
+
+    function Bind<S,T>(xs: List<S>, f: S -> List<T>): List<T> {
+      Join(Map(f)(xs))
+    }
+
+    function KleisliComposition<S,T,U>(f: S -> List<T>, g: T -> List<U>): S -> List<U> {
+      s => Bind(f(s), g)
+    } 
+
+    ghost function Equal<T>(eq: (T, T) -> bool): (List<T>, List<T>) -> bool 
+    {
+      (xs: List<T>, ys: List<T>) => 
+        && |xs| == |ys| 
+        && forall i | 0 <= i < |xs| :: eq(xs[i], ys[i])
+    }
+  }
+
+  module {:options "-functionSyntax:4"} Powerset {
+    type Set<T> = set<T>
+
+    ghost function Return<T>(x: T): Set<T> {
+      {x}
+    }
+
+    ghost function MapCurry<S,T>(f: S -> T, xs: Set<S>): Set<T> 
+      decreases |xs|
+    {
+      if xs == {} then
+        {}
+      else 
+        var x :| x in xs;
+        {f(x)} + MapCurry(f, xs - {x})
+    }
+
+    ghost function Map<S,T>(f: S -> T): Set<S> -> Set<T> {
+      (xs: Set<S>) => MapCurry(f, xs)
+    }
+
+    ghost function Join<T>(xxs: Set<Set<T>>): Set<T> {
+      if xxs == {} then
+        {}
+      else 
+        var xs :| xs in xxs;
+        xs + Join(xxs - {xs})
+    }
+
+    ghost function Bind<S,T>(xs: Set<S>, f: S -> Set<T>): Set<T> {
+      Join(Map(f)(xs))
+    }
+
+    ghost function KleisliComposition<S,T,U>(f: S -> Set<T>, g: T -> Set<U>): S -> Set<U> {
+      s => Bind(f(s), g)
+    }
+
+    ghost function Equal<T>(eq: (T, T) -> bool): (Set<T>, Set<T>) -> bool 
+    {
+      (s1: Set<T>, s2: Set<T>) =>
+        && (forall x | x in s1 :: (exists y | y in s2 :: eq(x, y)))
+        && (forall x | x in s2 :: (exists y | y in s1 :: eq(x, y)))
+    }
+  }
+    
 
   module {:options "-functionSyntax:4"} Outcome {
     import Result 
