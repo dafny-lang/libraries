@@ -57,7 +57,7 @@ module {:options "-functionSyntax:4"} Relations {
   /* Any totally ordered set contains a unique minimal element. */
   lemma LemmaUniqueMinimum<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (m: T)
     requires |s| > 0 && TotalOrdering(R)
-    ensures IsMinimum(R, m, s) && (forall n: T :: IsMinimum(R, n, s) ==> m == n)
+    ensures IsMinimum(R, m, s) && (forall n: T | IsMinimum(R, n, s) :: m == n)
   {
     var x :| x in s;
     if s == {x} {
