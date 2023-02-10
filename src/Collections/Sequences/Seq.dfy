@@ -658,7 +658,7 @@ module {:options "-functionSyntax:4"} Seq {
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| <= |xs|
     ensures forall i: nat {:trigger result[i]} :: i < |result| && f.requires(result[i]) ==> f(result[i])
-    reads f.reads
+    reads *
   {
     if |xs| == 0 then []
     else (if f(xs[0]) then [xs[0]] else []) + Filter(f, xs[1..])
