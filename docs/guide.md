@@ -57,7 +57,7 @@ _Not yet written_
 
 ## The `BoundedInts` module {#sec-boundedints}
 
-{% include_relative ./BoundedInts.md %}
+{% include_relative BoundedInts.md %}
 
 
 ## The `FileIO` module
