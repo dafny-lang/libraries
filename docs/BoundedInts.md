@@ -1,4 +1,6 @@
 
+## The `BoundedInts` module {#sec-boundedints}
+
 The `Dafny.BoundedInts` module contains definitions of types and constants for fixed-bit-width integers.
 
 Dafny itself generally uses and reasons about mathematical, unbounded integers and natural numbers.
@@ -29,7 +31,7 @@ They are useful in stating the ranges of fixed-bit-width integers. Examples are 
 Here are two example methods. In the first, the module `Dafny.BoundedInts` is renamed to `T`, which is then used as the prefix for type and constant names.
 In the second, the module is imported as opened, in which case the type and constant names can be used without qualification.
 <!-- %check-verify -->
-```
+```dafny
 module M {
   import T = Dafny.BoundedInts
   
