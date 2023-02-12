@@ -112,7 +112,9 @@ But what if we need to convert to some custom FC-type? Each datatype also has a 
 one FC-type to another. For example, we could rewrite the above as
 
 ```dafny
-  var index: int :- Find(s, 0, value).Map((o: Option<int>) => match o case Some(v) => Success(v) case None => Failure("not found") );
+  var index: int :- Find(s, 0, value).
+     Map((o: Option<int>) => match o case Some(v) => Success(v) 
+                                     case None => Failure("not found") );
 ```
 
 ### Combining different FC-types in methods
@@ -126,7 +128,8 @@ For this situation there is one more piece of syntax to make working with boxed 
 method m(s: seq<int>) returns (r: Result<int,string>) {
   var value: int := *;
   // do various calculations
-  var f = (o: Option<int>) => match o case Some(v) => Success(v) case None => Failure("not found")
+  var f = (o: Option<int>) => match o case Some(v) => Success(v) 
+                                      case None => Failure("not found")
   var index: int :- {:convert f} Find(s, 0, value);
   // more calculations
   return Success(value);
