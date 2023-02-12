@@ -50,29 +50,36 @@ In either case, the relevant directory to point the `--library` option to is nam
 In VSCode, TBD
 
 
-
+---
 {% include_relative Boxes.md %}
 
+---
 {% include_relative BoundedInts.md %}
 
+---
 {% include_relative FileIO.md %}
 
+---
 ## The `Math` module {#sec-math}
 
 _Not yet written_
 
+---
 ## The `Collections` module {#sec-collections}
 
 _Not yet written_
 
 
+---
 ## The `Relations` module {#sec-relations}
 
 _Not yet written_
 
+---
 ## The `Unicode` module {#sec-unicode}
 _Not yet written_
 
+---
 ## The `NonlinearArith` module {#sec-nonlinear-arith}
 _Not yet written_
 
