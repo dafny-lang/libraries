@@ -138,7 +138,7 @@ module {:options "-functionSyntax:4"} Maps {
     requires Functions.Injective(f)
     ensures |m'| == |m|
     ensures m'.Values == m.Values
-   {
+  {
     var m' := map k <- m :: f(k) := m[k];
     Sets.LemmaMapSize(m.Keys, m'.Keys, f);
     m'
