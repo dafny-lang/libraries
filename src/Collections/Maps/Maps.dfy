@@ -1,18 +1,22 @@
 // RUN: %dafny /compile:0 "%s"
 
 /*******************************************************************************
-*  Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+*  Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University,
 *  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
+*  SPDX-License-Identifier: BSD-2-Clause
+*
 *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
+*  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
 include "../../Wrappers.dfy"
+include "../../Functions.dfy"
+include "../Sets/Sets.dfy"
 
 module {:options "-functionSyntax:4"} Maps {
   import opened Wrappers
+  import Functions
+  import Sets
 
   function Get<X, Y>(m: map<X, Y>, x: X): Option<Y>
   {
@@ -127,4 +131,16 @@ module {:options "-functionSyntax:4"} Maps {
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
   }
 
+  /* Map an injective function over the keys of a map, retaining the values. */
+  function {:opaque} MapKeys<X(!new), Y, X'>(m: map<X, Y>, f: X --> X'): (m': map<X', Y>)
+    reads f.reads
+    requires forall x {:trigger f.requires(x)} :: f.requires(x)
+    requires Functions.Injective(f)
+    ensures |m'| == |m|
+    ensures m'.Values == m.Values
+   {
+    var m' := map k <- m :: f(k) := m[k];
+    Sets.LemmaMapSize(m.Keys, m'.Keys, f);
+    m'
+  }
 }
