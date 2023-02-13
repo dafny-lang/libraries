@@ -27,9 +27,9 @@ jobs:
 
       - name: Verify DafnyCore Code
         run: |
-            pwd
-	    ls -la
-            lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
+          pwd
+	  ls -la
+          lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
