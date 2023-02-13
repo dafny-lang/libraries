@@ -1,5 +1,5 @@
 # This workflow does static verification of the DafnyCore library
-name: tests
+name: Dafny Core verification
 
 on:
   push:
@@ -16,6 +16,9 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
 
+      - name: Check version
+        run:  dafny --version
+
       - name: Install lit
         run: pip install lit OutputCheck
 
@@ -25,7 +28,8 @@ jobs:
       - name: Verify DafnyCore Code
         run: |
             pwd
-            lit sec/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
+	    ls -la
+            lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
