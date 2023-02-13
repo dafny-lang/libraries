@@ -1,5 +1,5 @@
-# This workflow does static verification of the legacy modules
-name: Legacy verification
+# This workflow does static verification of the DafnyCore library
+name: Dafny Core verification
 
 on:
   push:
@@ -18,14 +18,20 @@ jobs:
         with:
           dafny-version: "3.11.0"
 
+      - name: Check version
+        run:  dafny --version
+
       - name: Install lit
         run: pip install lit OutputCheck
 
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
-      - name: Verify legacy code
-        run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
+      - name: Verify DafnyCore Code
+        run: |
+          pwd
+          ls -la
+          lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
@@ -36,3 +42,4 @@ jobs:
           name: verification-results
           path: '**/TestResults/*.trx'
           if-no-files-found: error
+
