@@ -2,7 +2,7 @@
 name: Legacy verification
 
 on:
-  push:
+#  push:
     branches: [ master , 'cok*' ]
   pull_request:
     branches: [ master ]
@@ -28,8 +28,6 @@ jobs:
         run: |
           dafny --version
           which dafny
-          z3 --version
-          which z3
 
       - name: Verify legacy code
         run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
