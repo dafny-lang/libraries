@@ -45,7 +45,7 @@ method m(s: seq<int>) returns (r: Option<int>) {
 You could just capture the result of find using `:=` in a `Option<int>` variable and inspect it. But if the `None` condition is 
 generally a rare error, it is easy to forget to always check that each operation was successful. Instead, the `:-` changes the 
 control flow so that if a `None` value is returned from `Find`, the method immediately aborts, with the output value (which has
-the `Option<int>` type) getting that returned value.So this operates something like exceptions.
+the `Option<int>` type) getting that returned value. So this operates something like exceptions.
 See the [reference manual](TODO)) for more on the similarities and differences with exceptions.
 
 ### Outcome
@@ -108,7 +108,7 @@ method m(s: seq<int>) returns (r: Result<int,string>) {
 
 Here we used the `ToResult` function of `Option` to convert the result value to a `Result`. There are similar `ToOutcome` and `ToOption` functions in each type.
 
-But what if we need to convert to some custom FC-type? Each datatype also has a `Map` function that takes a function as an argument, which function is a converter from
+But what if we need to convert to some custom FC-type? Each datatype comes with a `Map` function, that can be given as an argument a function that converts from
 one FC-type to another. For example, we could rewrite the above as
 
 ```dafny
