@@ -2,7 +2,7 @@
 name: Dafny Core verification
 
 on:
-  push:
+#  push:
 #    branches: [ master , 'cok*' ]
   pull_request:
     branches: [ master ]
