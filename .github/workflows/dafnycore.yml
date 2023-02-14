@@ -3,7 +3,7 @@ name: Dafny Core verification
 
 on:
   push:
-    branches: [ master , 'cok*' ]
+#    branches: [ master , 'cok*' ]
   pull_request:
     branches: [ master ]
 
@@ -22,6 +22,7 @@ jobs:
         run: |
           dafny --version
           which dafny
+          ls -laR
           which z3
 
       - name: Install lit
