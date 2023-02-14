@@ -5,7 +5,7 @@ The `FileIO` module provides basic file I/O operations.
 Right now, these are limited to reading bytes from a file and writing bytes to a file.
 The API is intentionally limited in scope and will be expanded later.
 
-Unlike other modules in the `libraries` repo,
+Unlike other modules in the `libraries` repository,
 the `FileIO` module will not compile or run correctly without a language-specific implementation file.
 Language-specific implementation files are provided for C#/.NET, Java, and Javascript.
 (Python and Golang support are planned.)
