@@ -68,7 +68,7 @@ var matches :- FindAllMatches(s, value);
 
 Notice that there is no left-hand-side for the first out-parameter. It does not carry a value: if the value is a Fail, the control
 flow will abruptly return; if is is a Pass, the first out-parameter is then discarded and the second is assigned to the remaining LHS.
-An Outcome serves as an automatically-checked erorr mechanism.
+An Outcome serves as an automatically-checked error mechanism.
 
 
 ### Result
