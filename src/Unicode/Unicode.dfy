@@ -10,8 +10,6 @@ include "../Collections/Sequences/Seq.dfy"
 
 // This module implements basic functionality of Unicode 14.0.
 module {:options "-functionSyntax:4"} Unicode {
-  import opened Wrappers
-
   import Seq
 
   /**

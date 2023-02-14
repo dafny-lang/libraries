@@ -20,7 +20,8 @@ include "../../Relations.dfy"
 
 module {:options "-functionSyntax:4"} Seq {
 
-  import opened Wrappers
+  import opened Wrappers.Option
+  import opened Wrappers.Result  
   import opened MergeSort
   import opened Relations
   import Math
@@ -613,7 +614,7 @@ module {:options "-functionSyntax:4"} Seq {
 /* Applies a function to every element of a sequence, returning a Result value (which is a 
    failure-compatible type). Returns either a failure, or, if successful at every element, 
    the transformed sequence.  */
-  function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
+  function {:opaque} MapWithResult<T, R(!new), E(!new)>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures result.Success? ==>
       && |result.value| == |xs|

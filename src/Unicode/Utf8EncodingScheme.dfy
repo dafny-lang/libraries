@@ -29,8 +29,6 @@ include "Utf8EncodingForm.dfy"
  * but that runs into <https://github.com/dafny-lang/dafny/issues/1639>.
  */
 module {:options "-functionSyntax:4"} Utf8EncodingScheme {
-  import opened Wrappers
-
   import BoundedInts
   import Seq
   import Unicode
