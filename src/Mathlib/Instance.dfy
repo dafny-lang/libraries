@@ -94,8 +94,8 @@ module MyIntAuto {
 
 module SolutionModulesInstance {
 
-	import opened Base
-	import opened SolutionModules
+	//import opened Base
+	//import opened SolutionModules
 
 	module IntMonoid refines SolutionModules.Monoid {
 
@@ -120,8 +120,13 @@ module SolutionModulesInstance {
 		}
 			
 	}
-	
+
+	module IntMonoidOut refines SolutionModulesTheory_Out {
+		import M = IntMonoid
+	}	
 }
+
+
 
 module SolutionTraitsInstance {
 

@@ -38,7 +38,7 @@ module SolutionLessBasic {
 
 module SolutionModules {
 
-	module Monoid {
+	abstract module Monoid {
 
 		import Base
 

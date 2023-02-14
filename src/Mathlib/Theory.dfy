@@ -25,24 +25,21 @@ module SolutionLessBasicTheory {
 	
 }
 
-module SolutionModulesTheory_Out {
+abstract module SolutionModulesTheory_Out {
 
-	import opened Base
-	import opened SolutionModules
-
-	import opened SolutionModules.Monoid
+	import M: SolutionModules.Monoid
 
 	lemma NeutralIdempotent()
-		ensures bop(e,e) == e
+		ensures M.bop(M.e,M.e) == M.e
 	{
-		Monoid.neutral(); 
+		M.neutral(); 
 	}
 	
 }
 
-module SolutionModulesTheory_In {
+/* module SolutionModulesTheory_In {
 
-	module MonoidTheory {
+	abstract module MonoidTheory {
 
 		import opened Base
 		import opened SolutionModules.Monoid
@@ -56,7 +53,7 @@ module SolutionModulesTheory_In {
 
 	}
 	
-}
+} */
 
 module SolutionTraitsTheory_Out {
 

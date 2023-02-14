@@ -34,21 +34,17 @@ module SolutionLessBasicUsing {
 	
 }
 
+
+
 module SolutionModulesUsing {
 
-	import opened Base
-	import opened SolutionModulesInstance
+	import opened SolutionModulesInstance.IntMonoidOut
+	import opened MyIntAuto
 
-	import opened SolutionModulesTheory_Out
-	import opened SolutionModulesInstance.IntMonoid
-
-	import opened MyInt
-	
 	lemma MyIntZeroIdempotent()
 		ensures add(zero(),zero()) == zero()
 	{	
 		NeutralIdempotent();
-		assume false; // Unfortunately, need to connect bop and add
 	}
 	
 }
