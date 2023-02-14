@@ -2,8 +2,7 @@
 name: Legacy verification
 
 on:
-#  push:
-#    branches: [ master , 'cok*' ]
+  workflow_dispatch:
   pull_request:
     branches: [ master ]
 
