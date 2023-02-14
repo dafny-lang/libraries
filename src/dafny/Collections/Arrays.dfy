@@ -1,4 +1,4 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
  *  Copyright by the contributors to the Dafny Project
@@ -7,11 +7,13 @@
 
 include "../Boxes.dfy"
 include "../Relations.dfy"
+include "Seqs.dfy"
 
 module Dafny.Collections.Arrays {
 
   import opened Boxes
   import opened Relations
+  import opened Seq
 
   method BinarySearch<T>(a: array<T>, key: T, less: (T, T) -> bool) returns (r: Option<nat>)
     requires SortedBy(a[..], (x, y) => less(x, y) || x == y)
