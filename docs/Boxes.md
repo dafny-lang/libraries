@@ -108,7 +108,7 @@ method m(s: seq<int>) returns (r: Result<int,string>) {
 
 Here we used the `ToResult` function of `Option` to convert the result value to a `Result`. There are similar `ToOutcome` and `ToOption` functions in each type.
 
-But what if we need to convert to some custom FC-type? Each datatype comes with a `Map` function, that can be given as an argument a function that converts from
+But what if we need to convert to some custom FC-type? Each datatype comes with a `Map` function, which can be given as an argument a function that converts from
 one FC-type to another. For example, we could rewrite the above as
 
 ```dafny
@@ -116,6 +116,9 @@ one FC-type to another. For example, we could rewrite the above as
      Map((o: Option<int>) => match o case Some(v) => Success(v) 
                                      case None => Failure("not found") );
 ```
+
+One can also just use usual function application syntax. `f(x)` to convert one FC-type
+to another.
 
 ### Combining different FC-types in methods
 
