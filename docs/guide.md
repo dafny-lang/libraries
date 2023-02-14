@@ -63,7 +63,7 @@ In VSCode, TBD
 ---
 {%include_relative Relations.md %}
 ---
-{% include_realtive Unicode.md %}
+{% include_relative Unicode.md %}
 ---
 {% include_relative NonlinearArithmetic.md %}
 
