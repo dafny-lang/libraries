@@ -23,7 +23,7 @@ Consider this routine that looks for a value in a sequence, beginning at positio
 import opened Dafny.Boxes
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
-  ensures  r.Some? ==> s[r.???] == value;
+  ensures  r.Some? ==> s[r.Extract()] == value;
   ensures  r.None? ==> forall i | k <= i < |s| :: s[i] != value
 {
   if k >= |s| then None else if s[k] == value then Some(k) else Find(s, k+1, value)
@@ -68,7 +68,7 @@ var matches :- FindAllMatches(s, value);
 
 Notice that there is no left-hand-side for the first out-parameter. It does not carry a value: if the value is a Fail, the control
 flow will abruptly return; if is is a Pass, the first out-parameter is then discarded and the second is assigned to the remaining LHS.
-An Outcome serves as an automatically-checked erorr mechanism.
+An Outcome serves as an automatically-checked error mechanism.
 
 
 ### Result

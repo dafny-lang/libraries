@@ -10,15 +10,15 @@ numbers. So Dafny defines them here, for use when needed.
 An important implementation point about these type definitions is Dafny can determine which native type 
 in the target compiled program best matches the Dafny type. For example, the Dafny type `int16` is
 a signed integer that fits in 16 bits. If a program using this type is compiled to, say Java, then
-variables of this Dafny type will be compiled to Java `short` variables. In not every case is there
-a natural match. For example Java does not have an unsigned 16-bit type while C# and C++ do.
+variables of this Dafny type will be compiled to Java `short` variables. In some cases there is no
+natural match. For example Java does not have an unsigned 16-bit type while C# and C++ do.
 
 This module defines:
 - unsigned types of 8, 16, 32, 64, 128 bit widths (e.g. `uint32`)
 - signed types of 8, 16, 32, 64, 128 bit widths (e.g. `int16`)
 - unsigned types that are subsets of the corresponding signed type (e.g. `nat8` has values from 0 through 127)
 
-The `natN` series of types take some care. A `nat8` for example has non-negative values up through 127,
+The `natN` series of types require some care. A `nat8` for example has non-negative values up through 127,
 that is, just 7-bits worth of values. But it can be directly converted to an `int8` and can be represented by a 
 native signed 8-bit integer type.
 - if you need a general unsigned 8-bit type, with values running up to 256, use `uint8`

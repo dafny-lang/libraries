@@ -3,13 +3,9 @@
 
 _THIS DOCUMENT IS A DRAFT UNDER ACTIVE DEBATE AND EDITING_
 
-A programming language library encapsulates a useful set of basic
-functionality that programmers can then incorporate in their custom
-program without having to rewrite, debug, or verify.
-
-Like other languages, the Dafny programming language and tool set includes
+The Dafny programming language and tool set includes
 libraries that provide functionality in various domains. This document describes 
-the _Dafny Core Library_. Dafny programs are copmponed of modules; to ensure
+the _Dafny Core Library_. Dafny programs are composed of modules; to ensure
 verification soundness, Dafny imposes a strict non-circular dependency relationship
 among modules. This Core library contains functionality that may be needed
 by other libraries, but it itself is standalone.
@@ -19,6 +15,7 @@ All the supported, delivered libraries will
 - be verified --- proved to meet specifications and tested with expected use cases,
 with each release of the library and of the Dafny toolset
 - be efficient --- efficient in both proofs and executables that use the libraries
+- be compilable for every supported target language by default, with exceptions being documented and for exceptional reasons
 
 The Dafny code for the library is written to be understandable with a minimum of inline documentation
 and is open source and available [on github](https://github.com/dafny-lang/libraries). This document is
@@ -45,9 +42,12 @@ At present, you must have a copy of the library in your file system to use the l
 - obtain a release zip file from [the library github release page](https://github.com/dafny-lang/libraries/releases) and unzip it in a folder of your choice, or
 - clone the library repository (`git clone https://github.com/dafny-lang/libraries.git`) to a location of your choice
 
-In either case, the relevant directory to point the `--library` option to is named `dafny`, either at the top of the zip file or at `libraries/src/dafny` in the clone.
+In either case, the relevant directory to point the `--library` option to is named `dafny`, either at the top of the zip file or at `libraries/src/dafny` in the clone. 
 
-In VSCode, TBD
+Some functionality is implemented using native target language capabilities (e.g. FileIO). In these cases, a compiled program must also includ the relevant target
+language files that are included in this Dafny Core distribution.
+
+The procedure for using library code directly with VSCode is not yet settled. For now make a copy of the library in your system and  'include' the `DafnyCore.md` file.
 
 
 ---
@@ -61,9 +61,9 @@ In VSCode, TBD
 ---
 {% include_relative Collections.md %}
 ---
-{%include_relative Relations.md %}
+{% include_relative Relations.md %}
 ---
-{% include_realtive Unicode.md %}
+{% include_relative Unicode.md %}
 ---
 {% include_relative NonlinearArithmetic.md %}
 
