@@ -3,7 +3,7 @@ name: Legacy verification
 
 on:
 #  push:
-    branches: [ master , 'cok*' ]
+#    branches: [ master , 'cok*' ]
   pull_request:
     branches: [ master ]
 
