@@ -131,7 +131,7 @@ module {:options "-functionSyntax:4"} Maps {
     forall x, x' {:trigger m[x], m[x']} :: x in m && x' in m && start <= x <= x' ==> m[x] <= m[x']
   }
 
-  /* Map an injective function over the keys of a map, retaining the values. */
+  /* Maps an injective function over the keys of a map, retaining the values. */
   function {:opaque} MapKeys<X(!new), Y, X'>(m: map<X, Y>, f: X --> X'): (m': map<X', Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
