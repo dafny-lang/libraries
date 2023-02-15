@@ -75,40 +75,4 @@ module {:options "-functionSyntax:4"} Relations {
     requires |s| == 0 || lessThan(x, s[0])
     requires TotalOrdering(lessThan)
     ensures SortedBy([x] + s, lessThan)
-  {}  
-
-  /* An element in an ordered set is called minimal, if it is less than every element of the set. */
-  ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) 
-  {
-    m in s && forall y: T | y in s :: R(m, y)
-  }
-
-  /* Any totally ordered set contains a unique minimal element. */
-  lemma LemmaUniqueMinimum<T(!new)>(R: (T, T) -> bool, s: set<T>) 
-    requires &&|s| > 0 
-             && TotalOrdering(R)
-    ensures && (exists m: T :: IsMinimum(R, m, s))
-            && (forall m, n: T :: IsMinimum(R, m, s) && IsMinimum(R, n, s) ==> m == n)
-  {
-    var x :| x in s;
-    if s == {x} {
-      assert IsMinimum(R, x, s);
-    } else {
-      var s' := s - {x};
-      LemmaUniqueMinimum(R, s');
-      var z :| IsMinimum(R, z, s');
-      if 
-      case R(z, x) => {
-        forall y: T | y in s ensures R(z, y) {
-        }
-        assert IsMinimum(R, z, s); 
-      }
-      case R(x, z) => {
-        forall y: T | y in s ensures R(x, y) {
-        }
-        assert IsMinimum(R, x, s); 
-      }
-    assert exists m: T :: IsMinimum(R, m, s);
-    }
-  }
-}
+  {}
