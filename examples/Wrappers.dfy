@@ -1,4 +1,4 @@
-// RUN: %dafny /compile:3 "%s" > "%t"
+// RUN: %run "%s" > "%t"
 // RUN: %OutputCheck --file-to-check "%t" "%s"
 // CHECK-L: Hello
 // CHECK-NEXT-L: Error: 'name' was not found
@@ -8,7 +8,7 @@
 
 include "../src/Wrappers.dfy"
 
-module {:options "--functions-syntax:4} Demo {
+module {:options "--function-syntax:4"} Demo {
   import opened Wrappers
 
   // ------ Demo for Option ----------------------------

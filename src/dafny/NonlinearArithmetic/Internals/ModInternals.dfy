@@ -90,10 +90,16 @@ module {:options "-functionSyntax:4"} Dafny.ModInternals {
   {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x + n, n);
+    assert x == n*(x/n) + (x%n);
+    assert (x+n) == n*((x+n)/n) + ((x+n)%n);
+    assert ((x+n)%n) == (x%n);
+    assert n*((x+n)/n) - n*(x/n) - n == 0;
     var zp := (x + n) / n - x / n - 1;
-    assert 0 == n * zp + ((x + n) % n) - (x % n) by { LemmaMulAuto(); }
-    if (zp > 0) { LemmaMulInequality(1, zp, n); }
-    if (zp < 0) { LemmaMulInequality(zp, -1, n); }
+    assert n * zp == 0;
+    assert zp == 0;
+    //assert 0 == n * zp + ((x + n) % n) - (x % n) by { LemmaMulAuto(); }
+    //if (zp > 0) { LemmaMulInequality(1, zp, n); }
+    //if (zp < 0) { LemmaMulInequality(zp, -1, n); }
   }
 
   lemma LemmaDivSubDenominator(n: int, x: int)
