@@ -122,6 +122,8 @@ to another.
 
 ### Combining different FC-types in methods
 
+_This is an experimental, tentatively planned, not yet implemented feature._
+
 The conversion functions used in the last section work syntactically because we had boxed values that were returned by expressions (function calls), to which the conversion functions could
 be applied. When a FC-value is returned by a method there is no place to call such a conversion function: the return value of the method must be captured by either `:=` or `:-`.
 

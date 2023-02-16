@@ -1,8 +1,6 @@
 
 # Guide to the Dafny Core Library
 
-_THIS DOCUMENT IS A DRAFT UNDER ACTIVE DEBATE AND EDITING_
-
 The Dafny programming language and tool set includes
 libraries that provide functionality in various domains. This document describes 
 the _Dafny Core Library_. Dafny programs are composed of modules; to ensure
@@ -42,10 +40,10 @@ At present, you must have a copy of the library in your file system to use the l
 - obtain a release zip file from [the library github release page](https://github.com/dafny-lang/libraries/releases) and unzip it in a folder of your choice, or
 - clone the library repository (`git clone https://github.com/dafny-lang/libraries.git`) to a location of your choice
 
-In either case, the relevant directory to point the `--library` option to is named `dafny`, either at the top of the zip file or at `libraries/src/dafny` in the clone. 
+In either case, the relevant directory to point the `--library` option to is named `dafny`, either at the top of the zip file or at `libraries/src/dafny` in the clone, or to the `DafnyCore.dfy` file in that directory. 
 
 Some functionality is implemented using native target language capabilities (e.g. FileIO). In these cases, a compiled program must also includ the relevant target
 language files that are included in this Dafny Core distribution.
 
-The procedure for using library code directly with VSCode is not yet settled. For now make a copy of the library in your system and  'include' the `DafnyCore.md` file.
+The procedure for using library code directly with VSCode is not yet settled. For now make a copy of the library in your system and  'include' the `DafnyCore.dfy` file.
 
