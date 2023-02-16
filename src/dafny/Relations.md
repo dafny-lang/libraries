@@ -4,17 +4,17 @@
 The `Relations` module defines a number of properties of functions.
 
 Properties of binary predicates:
-- Reflexive: R(x,x) is true
-- Irreflexive: R(x,x) is false
-- AntiSymmetric: R(x,y) ==> R(y.x)
-- Transitive : R(x,y) && R(y,z) ==> R(x,z)
-- Connected : x != y ==> R(x,y) || R(y,x)
-- StronglyConnected : R(x,y) || R(y,x)
+- Reflexive: `R(x,x)` is true
+- Irreflexive: `R(x,x)` is false
+- AntiSymmetric: `R(x,y) ==> R(y.x)`
+- Transitive : `R(x,y) && R(y,z) ==> R(x,z)`
+- Connected : `x != y ==> R(x,y) || R(y,x)`
+- StronglyConnected : `R(x,y) || R(y,x)`
 - TotalOrdering : Reflexive, AntiSymmetric, Transitive, StronglyConnected (e.g., <= on integers)
 - StrictTotalOrdering : Irreflexive, AntiSymmetric, Transitive, Connected (e.g., < on integers)
 
 A property of unary functions:
-- Injective
+- Injective : `f(x) == f(y) ==> x == y`
 
 These properties are sometimes required for other functions. For example, 
 if one wants to sort a sequence by some relation `R`, one must establish that `R` is a _Total Ordering_. 
