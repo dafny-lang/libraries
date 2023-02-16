@@ -24,14 +24,14 @@ meant to be tutorial and example-based.
 ## Content of the Core Library
 
 The sections below describe how to use each of the principal modules of the library:
-- [Dafny.Boxes](#sec-boxes) -- containers that enable encapsulaton of success and failure results in a single datatype
-- [Dafny.BoundedInts](#sec-boundedints) -- definitions of types and constants for bounded integer arithmetic
-- [Dafny.FileIO](#sec-fileio) -- basic input and output operations
-- [Dafny.Math](#sec-math) --- basic mathematical operations and lemmas
-- [Dafny.Unicode](#sec-unicode) --- tools to manipulate unicode characters and strings
-- [Dafny.Collections](#sec-collections) -- functions and lemmas about sequences, sets and maps
-- [Dafny.NonlinearArith](sec-nonlinear-arith) --  lemmas and functions for non-linear arithmetic
-- [Dafny.Relations](#sec-relations) -- predicates and lemmas about properties of functions
+- [Dafny.Boxes](Boxes) -- containers that enable encapsulaton of success and failure results in a single datatype
+- [Dafny.BoundedInts](BoundedInts) -- definitions of types and constants for bounded integer arithmetic
+- [Dafny.FileIO](FileIO/FileIO) -- basic input and output operations
+- [Dafny.Math](Math) --- basic mathematical operations and lemmas
+- [Dafny.Unicode](Unicode) --- tools to manipulate unicode characters and strings
+- [Dafny.Collections](Collections/Collections) -- functions and lemmas about sequences, sets and maps
+- [Dafny.NonlinearArith](NonlinearArithmetic/NonlinearArithmetic) --  lemmas and functions for non-linear arithmetic
+- [Dafny.Relations](Relations) -- predicates and lemmas about properties of functions
 
 
 ## How to use the library
@@ -49,21 +49,4 @@ language files that are included in this Dafny Core distribution.
 
 The procedure for using library code directly with VSCode is not yet settled. For now make a copy of the library in your system and  'include' the `DafnyCore.md` file.
 
-
----
-{% include_relative Boxes.md %}
----
-{% include_relative src/dafny/BoundedInts.md %}
----
-{% include_relative src/dafny/FileIO/FileIO.md %}
----
-{% include_relative src/dafny/Math.md %}
----
-{% include_relative src/dafny/Collections/Collections.md %}
----
-{% include_relative src/dafny/Relations.md %}
----
-{% include_relative src/dafny/Unicode/Unicode.md %}
----
-{% include_relative src/dafny/NonlinearArithmetic/NonlinearArithmetic.md %}
 
