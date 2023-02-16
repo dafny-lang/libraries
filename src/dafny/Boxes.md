@@ -5,7 +5,7 @@ A _Box_ datatype is one whose values can hold either a success indication, optio
 These are particularly useful with Dafny's abrupt-termination-on-failure `:-` operator.
 
 Any user datatype can serve this purpose, as long as it has an `IsFailure?` predicate 
-(in which case it is known as a [_failure-compatible_](https://dafny.org/latest/DafnyRef/DafyRef#TODO) type --- an FC-type). 
+(in which case it is known as a [_failure-compatible_](https://dafny.org/latest/DafnyRef/DafnyRef#sec-failure-compatible-types) type --- an FC-type). 
 In this module Dafny defines three such types, illustrates them with examples, and then describes 
 how they can be used in a system where different parts of the system use different FC-types.
 
@@ -18,7 +18,7 @@ These are common programming idioms. The main complication comes when they are m
 
 ### Option
 
-Consider this routine that looks for a value in a sequence, beginning at position k, returning its index:
+Consider this routine that looks for a value in a sequence, beginning at position `k`, returning its index:
 ```dafny
 import opened Dafny.Boxes
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
@@ -36,7 +36,7 @@ It could be used in a method like this
 method m(s: seq<int>) returns (r: Option<int>) {
   var value: int;
   // do various calculations
-  var index: int :- Find(s, 0, value);
+  int index: int :- Find(s, 0, value);
   // more calculations
   return Some(value);
 }
@@ -46,7 +46,7 @@ You could just capture the result of find using `:=` in a `Option<int>` variable
 generally a rare error, it is easy to forget to always check that each operation was successful. Instead, the `:-` changes the 
 control flow so that if a `None` value is returned from `Find`, the method immediately aborts, with the output value (which has
 the `Option<int>` type) getting that returned value. So this operates something like exceptions.
-See the [reference manual](TODO)) for more on the similarities and differences with exceptions.
+See the [reference manual](TODO) for more on the similarities and differences with exceptions.
 
 ### Outcome
 
@@ -66,14 +66,14 @@ we can call it as
 var matches :- FindAllMatches(s, value);
 ```
 
-Notice that there is no left-hand-side for the first out-parameter. It does not carry a value: if the value is a Fail, the control
-flow will abruptly return; if is is a Pass, the first out-parameter is then discarded and the second is assigned to the remaining LHS.
-An Outcome serves as an automatically-checked error mechanism.
+Notice that there is no left-hand-side for the first out-parameter. It does not carry a value: if the value is a `Fail`, the control
+flow will abruptly return; if is is a `Pass`, the first out-parameter is then discarded and the second is assigned to the remaining LHS.
+An `Outcome` serves as an automatically-checked error mechanism.
 
 
 ### Result
 
-A `Result` carries both a success value and failure information, or two separate, specifiable types. Its use is then very similar to `Option`.
+A `Result` carries both a success value and failure information, with two separate, specifiable types. Its use is then very similar to `Option`.
 
 ### Combining different FC-types in expressions
 
@@ -140,6 +140,10 @@ method m(s: seq<int>) returns (r: Result<int,string>) {
   return Success(value);
 }
 ```
+
+Here the attribute between th `:-` and thte method call indicates that the first out-parameter of the method call
+should be converted by the given function to a new FC-value before invoking the `:-` operation.
+The caller can apply some function whose output is a type appropriate to the caller's own first out-parameter.
 
 Writing this code perhaps does not save much over just capturing the result of `Find` with `:=`.
 However, (a) if `f` is needed repeatedly, it can be defined once and used many times and (b) it allows us to continue to use the `:-` operator to enable a uniform approach to error handling.

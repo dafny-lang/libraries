@@ -15,8 +15,8 @@ with each release of the library and of the Dafny toolset
 - be efficient --- efficient in both proofs and executables that use the libraries
 - be compilable for every supported target language by default, with exceptions being documented and for exceptional reasons
 
-The Dafny code for the library is written to be understandable with a minimum of inline documentation
-and is open source and available [on github](https://github.com/dafny-lang/libraries). This document is
+The Dafny code for the library is written to be understandable with a minimum of inline documentation.
+It is open source and available [on github](https://github.com/dafny-lang/libraries). This document is
 meant to be tutorial and example-based.
 
 ## Content of the Core Library
