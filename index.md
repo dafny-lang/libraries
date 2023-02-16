@@ -1,2 +1,2 @@
 
-{% include_relative src/dafny/DafnyCore.md %}
+<a href="src/dafny/DafnyCore">link</a>
