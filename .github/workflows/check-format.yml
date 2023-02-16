@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: origin/cok-code
+
+      - name: switch branch
+        run: git checkout cok-code
 
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
