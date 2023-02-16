@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          branch: cok-code
+          ref: origin/cok-code
 
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
