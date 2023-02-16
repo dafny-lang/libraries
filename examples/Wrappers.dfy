@@ -8,7 +8,7 @@
 
 include "../src/Wrappers.dfy"
 
-module Demo {
+module {:options "--functions-syntax:4} Demo {
   import opened Wrappers
 
   // ------ Demo for Option ----------------------------
@@ -20,7 +20,7 @@ module Demo {
     constructor () {
       m := map[];
     }
-    function method Get(k: K): Option<V>
+    function Get(k: K): Option<V>
       reads this
     {
       if k in m then Some(m[k]) else None()

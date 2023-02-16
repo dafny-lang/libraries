@@ -1,0 +1,34 @@
+# This workflow does static verification of the legacy modules
+name: Legacy verification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dafny
+        uses: dafny-lang/setup-dafny-action@v1
+        with:
+          dafny-version: "3.11.0"
+
+      - name: Install lit
+        run: pip install lit OutputCheck
+
+      - name: Set up JS dependencies
+        run: npm install bignumber.js
+
+      - name: Check exe
+        run: |
+          pwd
+          ls
+          dafny --version
+          which dafny
+
+      - name: Check formatting
+        run: dafny format --check src 
