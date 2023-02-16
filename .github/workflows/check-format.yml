@@ -32,5 +32,5 @@ jobs:
 
       - name: Check formatting
         run: |
-          chmod +x ./check-format
-          ./check-format src
+          chmod +x ./.github/workflows/check-format
+          ./.github/workflows/check-format src
