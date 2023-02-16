@@ -26,9 +26,6 @@ jobs:
       - name: Check version
         run: |
           dafny --version
-          which dafny
-          ls -laR
-          which z3
 
       - name: Install lit
         run: pip install lit OutputCheck
