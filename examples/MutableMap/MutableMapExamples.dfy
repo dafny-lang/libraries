@@ -31,6 +31,8 @@ module MutableMapExamples {
     assert m.Values() == {"testvalue2"};
     assert m.Items() == {("testkey", "testvalue2"), ("testkey2", "testvalue2")};
     assert m.Size() == 2;
+    print m.Find("testkey"), "\n";
+    print m.Find("testkey2"), "\n";
     assert "testkey" in m.Keys();
     assert "testkey2" in m.Keys();
     m.Remove("testkey");
