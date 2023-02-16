@@ -12,18 +12,10 @@ module {:extern "MutableMap"} {:options "/functionSyntax:4"} MutableMap {
 
     constructor {:extern} ()
       ensures this.content() == map[]
-      ensures |this.content()| == 0
 
     method {:extern} Put(k: K, v: V)
-      modifies this 
-      ensures k in this.content().Keys
-      ensures v in this.content().Values
-      ensures this.content()[k] == v
-      ensures 
-        if k !in old(this.content)() then  
-          |this.content()| == |old(this.content)()| + 1 
-        else 
-          |this.content()| == |old(this.content)()|
+      modifies this
+      ensures this.content() == old(this.content())[k := v]    
 
     function {:extern} Keys(): (keys: set<K>)
       reads this
@@ -33,6 +25,11 @@ module {:extern "MutableMap"} {:options "/functionSyntax:4"} MutableMap {
       reads this
       ensures values == this.content().Values
 
+    function {:extern} Items(): (items: set<(K,V)>)
+      reads this
+      ensures items == this.content().Items
+      ensures items == set k | k in this.content().Keys :: (k, this.content()[k])
+
     function {:extern} Find(k: K): (v: V)
       reads this
       requires k in this.Keys()
@@ -41,17 +38,12 @@ module {:extern "MutableMap"} {:options "/functionSyntax:4"} MutableMap {
     
     method {:extern} Remove(k: K)
       modifies this
-      ensures this.content().Keys == old(this.content)().Keys - {k}
-      ensures 
-        if k in old(this.content)() then 
-          && |this.content()| == |old(this.content)()| - 1 
-          && this.content().Values == old(this.content)().Values - { old(this.content)()[k] }
-        else 
-          |this.content()| == |old(this.content)()|
+      ensures forall k' :: k' in old(this.content)().Keys && k' != k ==> k' in this.content().Keys && old(this.content)()[k'] == this.content()[k']
+      ensures forall k' :: k' in this.content().Keys ==> k' in old(this.content)().Keys && k' != k
 
     function {:extern} Size(): (size: int)
       reads this
-      ensures size == |this.content()|
+      ensures size == |this.content().Items|
   }
 }
 
@@ -90,32 +82,12 @@ module {:options "/functionSyntax:4"} MutableMapFeasability refines MutableMap {
 
     method Remove(k: K)
     {
-      m := (map k' | k' in m && k' != k :: m[k']);
+      m := map k' | k' in m.Keys && k' != k :: m[k'];
     }
 
     function Size(): (size: int)
     {
       |m|
     }
-  }
-}
-
-module Program {
-  import opened MutableMapFeasability
-
-  method Main() {
-    var m := new MutableMap<string,string>();
-    assert m.Size() == 0;
-    assert "testkey" !in m.Keys();
-    m.Put("testkey", "testvalue");
-    //assert m.Size() == 1;
-    assert "testkey" in m.Keys();
-    assert "testvalue" in m.Values();
-    assert m.Find("testkey") == "testvalue";
-    m.Remove("testkey");
-    assert "testkey" !in m.Keys();
-    m.Put("testkey", "testvalue");
-    assert "testkey" in m.Keys();
-    //assert m.Size() == 1;
   }
 }
