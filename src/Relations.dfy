@@ -64,13 +64,13 @@ module {:options "-functionSyntax:4"} Relations {
       m := x;
     } else {
       var m' := LemmaUniqueMinimum(R, s - {x});
-      if 
+      if
       case R(m', x) => m := m';
       case R(x, m') => m := x;
     }
   }
 
-  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool) 
+  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
     requires SortedBy(s, lessThan)
     requires |s| == 0 || lessThan(x, s[0])
     requires TotalOrdering(lessThan)

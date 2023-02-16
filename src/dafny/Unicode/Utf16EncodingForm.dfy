@@ -1,9 +1,9 @@
 // RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 include "../Collections/Seqs.dfy"
 include "../Relations.dfy"
@@ -23,10 +23,10 @@ module {:options "-functionSyntax:4"} Dafny.Utf16EncodingForm refines UnicodeEnc
   {
     if |s| == 1 then IsWellFormedSingleCodeUnitSequence(s)
     else if |s| == 2 then (
-      var b := IsWellFormedDoubleCodeUnitSequence(s);
-      assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
-      b
-    )
+                            var b := IsWellFormedDoubleCodeUnitSequence(s);
+                            assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
+                            b
+                          )
     else false
   }
 
@@ -51,12 +51,12 @@ module {:options "-functionSyntax:4"} Dafny.Utf16EncodingForm refines UnicodeEnc
   function SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (maybePrefix: Option<MinimalWellFormedCodeUnitSeq>)
     ensures |s| == 0 ==> maybePrefix.None?
     ensures (exists i | 0 < i <= |s| :: IsMinimalWellFormedCodeUnitSubsequence(s[..i])) <==>
-      && maybePrefix.Some?
+            && maybePrefix.Some?
     ensures maybePrefix.Some? ==>
-      && var prefix := maybePrefix.Extract();
-      && 0 < |prefix| <= |s|
-      && prefix == s[..|prefix|]
-      && IsMinimalWellFormedCodeUnitSubsequence(prefix)
+              && var prefix := maybePrefix.Extract();
+              && 0 < |prefix| <= |s|
+              && prefix == s[..|prefix|]
+              && IsMinimalWellFormedCodeUnitSubsequence(prefix)
   {
     if |s| >= 1 && IsWellFormedSingleCodeUnitSequence(s[..1]) then Some(s[..1])
     else if |s| >= 2 && IsWellFormedDoubleCodeUnitSequence(s[..2]) then Some(s[..2])

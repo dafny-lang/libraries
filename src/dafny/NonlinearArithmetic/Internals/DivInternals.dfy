@@ -1,12 +1,12 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* lemmas and functions in this file are used in the proofs in DivMod.dfy 
 
@@ -83,12 +83,12 @@ module {:options "-functionSyntax:4"} Dafny.DivInternals {
     && (forall x: int {:trigger x / n} :: 0 <= x < n <==> x / n == 0)
     && (forall x: int, y: int {:trigger (x + y) / n} ::
           (var z := (x % n) + (y % n);
-                    ((0 <= z < n && (x + y) / n == x / n + y / n) ||
-                    (n <= z < n + n && (x + y) / n == x / n + y / n + 1))))
+           ((0 <= z < n && (x + y) / n == x / n + y / n) ||
+            (n <= z < n + n && (x + y) / n == x / n + y / n + 1))))
     && (forall x: int, y: int {:trigger (x - y) / n} ::
           (var z := (x % n) - (y % n);
-                    ((0 <= z < n && (x - y) / n == x / n - y / n) ||
-                    (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))))
+           ((0 <= z < n && (x - y) / n == x / n - y / n) ||
+            (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))))
   }
 
   /* Ensures that DivAuto is true */
@@ -102,13 +102,13 @@ module {:options "-functionSyntax:4"} Dafny.DivInternals {
     assert (0 - n) / n == -1;
     forall x:int, y:int {:trigger (x + y) / n}
       ensures  var z := (x % n) + (y % n);
-                      (|| (0 <= z < n && (x + y) / n == x / n + y / n)
-                        || (n <= z < 2 * n && (x + y) / n == x / n + y / n + 1))
+               (|| (0 <= z < n && (x + y) / n == x / n + y / n)
+                || (n <= z < 2 * n && (x + y) / n == x / n + y / n + 1))
     {
       var f := (xx:int, yy:int) =>
-                  (var z := (xx % n) + (yy % n);
-                      (   (0 <= z < n && (xx + yy) / n == xx / n + yy / n)
-                        || (n <= z < 2 * n && (xx + yy) / n == xx / n + yy / n + 1)));
+          (var z := (xx % n) + (yy % n);
+           (   (0 <= z < n && (xx + yy) / n == xx / n + yy / n)
+               || (n <= z < 2 * n && (xx + yy) / n == xx / n + yy / n + 1)));
       forall i, j
         ensures j >= 0 && f(i, j) ==> f(i, j + n)
         ensures i < n  && f(i, j) ==> f(i - n, j)
@@ -133,13 +133,13 @@ module {:options "-functionSyntax:4"} Dafny.DivInternals {
     }
     forall x:int, y:int {:trigger (x - y) / n}
       ensures  var z := (x % n) - (y % n);
-                      (|| (0 <= z < n && (x - y) / n == x / n - y / n)
-                        || (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))
+               (|| (0 <= z < n && (x - y) / n == x / n - y / n)
+                || (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))
     {
       var f := (xx:int, yy:int) =>
-                  (var z := (xx % n) - (yy % n);
-                      (   (0 <= z < n && (xx - yy) / n == xx / n - yy / n)
-                      || (-n <= z < 0 && (xx - yy) / n == xx / n - yy / n - 1)));
+          (var z := (xx % n) - (yy % n);
+           (   (0 <= z < n && (xx - yy) / n == xx / n - yy / n)
+               || (-n <= z < 0 && (xx - yy) / n == xx / n - yy / n - 1)));
       forall i, j
         ensures j >= 0 && f(i, j) ==> f(i, j + n)
         ensures i < n  && f(i, j) ==> f(i - n, j)
@@ -168,8 +168,8 @@ module {:options "-functionSyntax:4"} Dafny.DivInternals {
   lemma LemmaDivInductionAuto(n: int, x: int, f: int->bool)
     requires n > 0
     requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                            && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
     ensures  DivAuto(n)
     ensures  f(x)
   {
@@ -185,8 +185,8 @@ module {:options "-functionSyntax:4"} Dafny.DivInternals {
   lemma LemmaDivInductionAutoForall(n:int, f:int->bool)
     requires n > 0
     requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                            && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
     ensures  DivAuto(n)
     ensures  forall i {:trigger f(i)} :: f(i)
   {
