@@ -51,7 +51,7 @@ The procedure for using library code directly with VSCode is not yet settled. Fo
 
 
 ---
-{% include_relative src/dafny/Boxes.md %}
+{% include_relative Boxes.md %}
 ---
 {% include_relative src/dafny/BoundedInts.md %}
 ---
