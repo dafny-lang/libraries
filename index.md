@@ -1,4 +1,4 @@
-
+<!--
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -7,8 +7,10 @@
 <body>
 </body>
 </html>
+-->
 
 <!--
 <a href="src/dafny/DafnyCore">link</a>
-{% include_relative src/dafny/DafnyCore.md %}
 -->
+
+[Dafny Core library](src/dafny/DafnyCore.md)
