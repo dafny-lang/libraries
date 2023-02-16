@@ -1,6 +1,8 @@
 
 ## The `FileIO` module {#sec-fileio}
 
+_The FileIO methods currently only work with `--unicode-char:false`, which is not the default for Dafny 4._
+
 The `FileIO` module provides basic file I/O operations.
 Right now, these are limited to reading bytes from a file and writing bytes to a file.
 The API is intentionally limited in scope and will be expanded later.
