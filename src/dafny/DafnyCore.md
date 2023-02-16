@@ -28,7 +28,7 @@ The sections below describe how to use each of the principal modules of the libr
 - [Dafny.BoundedInts](BoundedInts) -- definitions of types and constants for bounded integer arithmetic
 - [Dafny.FileIO](FileIO/FileIO) -- basic input and output operations
 - [Dafny.Math](Math) --- basic mathematical operations and lemmas
-- [Dafny.Unicode](Unicode) --- tools to manipulate unicode characters and strings
+- [Dafny.Unicode](Unicode/Unicode) --- tools to manipulate unicode characters and strings
 - [Dafny.Collections](Collections/Collections) -- functions and lemmas about sequences, sets and maps
 - [Dafny.NonlinearArith](NonlinearArithmetic/NonlinearArithmetic) --  lemmas and functions for non-linear arithmetic
 - [Dafny.Relations](Relations) -- predicates and lemmas about properties of functions
