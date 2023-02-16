@@ -57,13 +57,13 @@ The procedure for using library code directly with VSCode is not yet settled. Fo
 ---
 {% include_relative src/dafny/FileIO/FileIO.md %}
 ---
-{% include_relative src/dafny/Math %}
+{% include_relative src/dafny/Math.md %}
 ---
-{% include_relative src/dafny/Collections/Collections %}
+{% include_relative src/dafny/Collections/Collections.md %}
 ---
-{% include_relative src/dafny/Relations %}
+{% include_relative src/dafny/Relations.md %}
 ---
-{% include_relative src/dafny/Unicode/Unicode %}
+{% include_relative src/dafny/Unicode/Unicode.md %}
 ---
-{% include_relative src/dafny/NonlinearArithmetic/NonlinearArithmetic %}
+{% include_relative src/dafny/NonlinearArithmetic/NonlinearArithmetic.md %}
 
