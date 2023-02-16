@@ -1,4 +1,4 @@
-// RUN: %verify --disable-nonlinear-arithmetic "%s"
+// RUN: %dafny /compile:3 /noNLarith "%s"
 
 /*******************************************************************************
 *  Copyright by the contributors to the Dafny Project
