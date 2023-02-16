@@ -12,7 +12,7 @@ For example, to run a `Program.dfy` file that depends on the `MutableMap` module
 
 ```bash
 # Java
-$ dafny run Program.dfy --target:java --include libraries/src/MutableMap/MutableMap.java
+$ dafny run Program.dfy --target:java --input libraries/src/MutableMap/MutableMap.java
 ```
 
 (If you aren't using `dafny run` to run your program,

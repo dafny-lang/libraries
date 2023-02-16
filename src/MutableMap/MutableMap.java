@@ -2,14 +2,13 @@
 *  Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
+package MutableMap;
 
 import dafny.DafnySet;
 import dafny.DafnyMap;
 import dafny.Tuple2;
 
 import java.util.HashMap;
-
-package DafnyLibraries;
 
 public class MutableMap<K,V> {
   private HashMap<K, V> m;
