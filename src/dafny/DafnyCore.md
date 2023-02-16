@@ -25,7 +25,7 @@ meant to be tutorial and example-based.
 
 The sections below describe how to use each of the principal modules of the library:
 - [Dafny.Boxes](#sec-boxes) -- containers that enable encapsulaton of success and failure results in a single datatype
-- [Bafny.BoundedInts](#sec-boundedints) -- definitions of types and constants for bounded integer arithmetic
+- [Dafny.BoundedInts](#sec-boundedints) -- definitions of types and constants for bounded integer arithmetic
 - [Dafny.FileIO](#sec-fileio) -- basic input and output operations
 - [Dafny.Math](#sec-math) --- basic mathematical operations and lemmas
 - [Dafny.Unicode](#sec-unicode) --- tools to manipulate unicode characters and strings
@@ -51,19 +51,19 @@ The procedure for using library code directly with VSCode is not yet settled. Fo
 
 
 ---
-{% include_relative ./Boxes %}
+{% include_relative src/dafny/Boxes %}
 ---
-{% include_relative BoundedInts %}
+{% include_relative src/dafny/BoundedInts %}
 ---
-{% include_relative FileIO/FileIO %}
+{% include_relative src/dafny/FileIO/FileIO %}
 ---
-{% include_relative Math %}
+{% include_relative src/dafny/Math %}
 ---
-{% include_relative Collections/Collections %}
+{% include_relative src/dafny/Collections/Collections %}
 ---
-{% include_relative Relations %}
+{% include_relative src/dafny/Relations %}
 ---
-{% include_relative Unicode/Unicode %}
+{% include_relative src/dafny/Unicode/Unicode %}
 ---
-{% include_relative NonlinearArithmetic/NonlinearArithmetic %}
+{% include_relative src/dafny/NonlinearArithmetic/NonlinearArithmetic %}
 
