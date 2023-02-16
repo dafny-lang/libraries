@@ -1,3 +1,12 @@
+ddO---
+layout: forward
+target: https://dafny.org/libraries/src/dafny/DafnyCore
+targetname: Dafny Core library
+targettitle: Taking you to Dfny Core
+time: 0
+---
+
+../../index.html
 <!--
 <!DOCTYPE HTML>
 <html>
