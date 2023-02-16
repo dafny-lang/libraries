@@ -31,4 +31,6 @@ jobs:
           which dafny
 
       - name: Check formatting
-        run: dafny format --check src 
+        run: |
+          chmod +x ./check-format
+          ./check-format src

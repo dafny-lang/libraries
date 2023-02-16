@@ -1,0 +1,8 @@
+#! /usr/bin/env bash
+
+FAIL=0
+for f in `find $1 -name '*.dfy'`; do \
+  echo $f ;\
+  dafny format --check $f || FAIL=1 ;\
+done
+exit $FAIL
