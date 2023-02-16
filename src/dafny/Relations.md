@@ -10,8 +10,8 @@ Properties of binary predicates:
 - Transitive : `R(x,y) && R(y,z) ==> R(x,z)`
 - Connected : `x != y ==> R(x,y) || R(y,x)`
 - StronglyConnected : `R(x,y) || R(y,x)`
-- TotalOrdering : Reflexive, AntiSymmetric, Transitive, StronglyConnected (e.g., <= on integers)
-- StrictTotalOrdering : Irreflexive, AntiSymmetric, Transitive, Connected (e.g., < on integers)
+- TotalOrdering : Reflexive, AntiSymmetric, Transitive, StronglyConnected (e.g., `<=` on integers)
+- StrictTotalOrdering : Irreflexive, AntiSymmetric, Transitive, Connected (e.g., `<` on integers)
 
 A property of unary functions:
 - Injective : `f(x) == f(y) ==> x == y`
