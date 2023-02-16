@@ -15,7 +15,7 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.11.0"
+          dafny-version: "nightly-latest"
 
       - name: Install lit
         run: pip install lit OutputCheck
