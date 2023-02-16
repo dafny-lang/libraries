@@ -9,7 +9,7 @@ using System;
 using System.Numerics;
 using System.Collections;
 [assembly: DafnyAssembly.DafnySourceAttribute(@"// dafny 3.11.0.50201
-// Command-line arguments: run --use-basename-for-filename --cores:2 --verification-time-limit:300 --no-verify --target:cs /Users/davidcok/projects/dafny2/libraries/examples/FileIO/WriteBytesToFile.dfy --input /Users/davidcok/projects/dafny2/libraries/examples/FileIO/../../src/FileIO/FileIO.cs -- /Users/davidcok/projects/dafny2/libraries/examples/FileIO/Output/WriteBytesToFile.dfy.tmp_cs System.ArgumentException:
+// Command-line arguments: run --use-basename-for-filename --cores:2 --verification-time-limit:300 --no-verify --unicode-char:false --target:cs /Users/davidcok/projects/dafny2/libraries/examples/FileIO/WriteBytesToFile.dfy --input /Users/davidcok/projects/dafny2/libraries/examples/FileIO/../../src/FileIO/FileIO.cs -- /Users/davidcok/projects/dafny2/libraries/examples/FileIO/Output/WriteBytesToFile.dfy.tmp_cs System.ArgumentException:
 // WriteBytesToFile.dfy
 
 
@@ -80,7 +80,7 @@ module {:options ""-functionSyntax:4""} FileIO {
 
 module {:options ""-functionSyntax:4""} Wrappers {
   datatype Option<+T> = None | Some(value: T) {
-    function method ToResult(): Result<T, string>
+    function ToResult(): Result<T, string>
       decreases this
     {
       match this
@@ -90,7 +90,7 @@ module {:options ""-functionSyntax:4""} Wrappers {
         Failure(""Option is None"")
     }
 
-    function method UnwrapOr(default: T): T
+    function UnwrapOr(default: T): T
       decreases this
     {
       match this
@@ -100,20 +100,20 @@ module {:options ""-functionSyntax:4""} Wrappers {
         default
     }
 
-    predicate method IsFailure()
+    predicate IsFailure()
       decreases this
     {
       None?
     }
 
-    function method PropagateFailure<U>(): Option<U>
+    function PropagateFailure<U>(): Option<U>
       requires None?
       decreases this
     {
       None
     }
 
-    function method Extract(): T
+    function Extract(): T
       requires Some?
       decreases this
     {
@@ -122,7 +122,7 @@ module {:options ""-functionSyntax:4""} Wrappers {
   }
 
   datatype Result<+T, +R> = Success(value: T) | Failure(error: R) {
-    function method ToOption(): Option<T>
+    function ToOption(): Option<T>
       decreases this
     {
       match this
@@ -132,7 +132,7 @@ module {:options ""-functionSyntax:4""} Wrappers {
         None()
     }
 
-    function method UnwrapOr(default: T): T
+    function UnwrapOr(default: T): T
       decreases this
     {
       match this
@@ -142,20 +142,20 @@ module {:options ""-functionSyntax:4""} Wrappers {
         default
     }
 
-    predicate method IsFailure()
+    predicate IsFailure()
       decreases this
     {
       Failure?
     }
 
-    function method PropagateFailure<U>(): Result<U, R>
+    function PropagateFailure<U>(): Result<U, R>
       requires Failure?
       decreases this
     {
       Failure(this.error)
     }
 
-    function method MapFailure<NewR>(reWrap: R -> NewR): Result<T, NewR>
+    function MapFailure<NewR>(reWrap: R -> NewR): Result<T, NewR>
       decreases this
     {
       match this
@@ -165,7 +165,7 @@ module {:options ""-functionSyntax:4""} Wrappers {
         Failure(reWrap(e))
     }
 
-    function method Extract(): T
+    function Extract(): T
       requires Success?
       decreases this
     {
@@ -174,13 +174,13 @@ module {:options ""-functionSyntax:4""} Wrappers {
   }
 
   datatype Outcome<E> = Pass | Fail(error: E) {
-    predicate method IsFailure()
+    predicate IsFailure()
       decreases this
     {
       Fail?
     }
 
-    function method PropagateFailure<U>(): Result<U, E>
+    function PropagateFailure<U>(): Result<U, E>
       requires Fail?
       decreases this
     {
@@ -188,7 +188,7 @@ module {:options ""-functionSyntax:4""} Wrappers {
     }
   }
 
-  function method Need<E>(condition: bool, error: E): (result: Outcome<E>)
+  function Need<E>(condition: bool, error: E): (result: Outcome<E>)
     decreases condition
   {
     if condition then
