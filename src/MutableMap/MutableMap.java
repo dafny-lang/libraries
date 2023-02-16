@@ -14,7 +14,7 @@ package DafnyLibraries;
 public class MutableMap<K,V> {
   private HashMap<K, V> m;
 
-  public DafnyMap<K, V> content() {
+  public DafnyMap<? extends Tuple2<K,V>> content() {
     return new DafnyMap<>(m);
   }
 
@@ -26,15 +26,15 @@ public class MutableMap<K,V> {
     m.put(k, v);
   }
 
-  public DafnySet<K> keys() {
+  public DafnySet<? extends K> keys() {
     return new DafnySet<>(m.keySet());
   }
 
-  public DafnySet<V> values() {
+  public DafnySet<? extends V> values() {
     return new DafnySet<>(m.values());
   }
 
-  public DafnySet<Tuple2<K,V>> items() {
+  public DafnySet<? extends Tuple2<K,V>> items() {
     ArrayList<Tuple2<K, V>> list = new ArrayList<Tuple2<K, V>>();
     for (Entry<K, V> entry : m.entrySet()) {
       list.add(new Tuple2<K, V>(entry.getKey(), entry.getValue()));
