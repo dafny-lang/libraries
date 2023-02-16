@@ -1,4 +1,4 @@
-// RUN: %dafny /compile:0 /noNLarith "%s"
+// RUN: %verify --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
  *  Original: Copyright (c) Microsoft Corporation
