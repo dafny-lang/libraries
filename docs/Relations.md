@@ -1,7 +1,7 @@
 
 ## The `Relations` module {#sec-relations}
 
-The `Relations` module defines a number of properties of functions.
+The `Relations` module defines a number of properties of relations, which are predicates of two arguments. In particular, this module introduces properties of functions, which can be understood as relations of a particular type.
 
 Properties of binary predicates:
 - Reflexive
