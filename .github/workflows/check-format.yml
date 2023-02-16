@@ -1,5 +1,5 @@
 # This workflow does static verification of the legacy modules
-name: Legacy verification
+name: Check formatting
 
 on:
   workflow_dispatch:
