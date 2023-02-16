@@ -7,7 +7,7 @@ To use `MutableMap` in your code, you must:
 1. `include` and `import` the `MutableMap` module as you would any other library module
 2. incorporate the corresponding language-specific implementation file (that is, currently, `MutableMap.java`) when building or running your program
 
-For example, to run the `MutableMapExamples.dfy` file in the `libraries/examples/MutableMap`directory that depends on the `MutableMap` module, run the following.
+For example, to run the `MutableMapExamples.dfy` file in the `libraries/examples/MutableMap` directory that depends on the `MutableMap` module, run the following.
 
 ```bash
 # Java
