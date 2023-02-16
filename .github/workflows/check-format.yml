@@ -30,10 +30,7 @@ jobs:
 
       - name: Check exe
         run: |
-          pwd
-          ls
           dafny --version
-          which dafny
 
       - name: Check formatting
         run: |

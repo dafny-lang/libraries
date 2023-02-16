@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: switch branch
+        run: |
+          git fetch
+          git checkout cok-code
+
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
@@ -33,9 +38,8 @@ jobs:
 
       - name: Verify DafnyCore Code
         run: |
-          pwd
-          ls -la
-          lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
+          lit src/dafny --time-tests -v  
+          ##lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
