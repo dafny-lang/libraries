@@ -6,11 +6,11 @@
 // RUN: %dafny /compile:0 "%s"
 
 module {:extern "MutableMap"} {:options "/functionSyntax:4"} MutableMap {
-  class {:extern "MutableMap"} MutableMap<K(==),V> {
+  class {:extern "MutableMap"} MutableMap<K(==),V(==)> {
     function {:extern "content"} content(): map<K, V>
       reads this
 
-    constructor {:extern"MutableMap"} ()
+    constructor {:extern "MutableMap"} ()
       ensures this.content() == map[]
 
     method {:extern "put"} Put(k: K, v: V)
@@ -25,12 +25,12 @@ module {:extern "MutableMap"} {:options "/functionSyntax:4"} MutableMap {
       reads this
       ensures values == this.content().Values
 
-    function  {:extern "items"} Items(): (items: set<(K,V)>)
+    function {:extern "items"} Items(): (items: set<(K,V)>)
       reads this
       ensures items == this.content().Items
       ensures items == set k | k in this.content().Keys :: (k, this.content()[k])
 
-    function {:extern "find"}  Find(k: K): (v: V)
+    function {:extern "find"} Find(k: K): (v: V)
       reads this
       requires k in this.Keys()
       ensures v in this.content().Values
