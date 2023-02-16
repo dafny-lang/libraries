@@ -34,7 +34,9 @@ module MutableMapExamples {
     assert "testkey" in m.Keys();
     assert "testkey2" in m.Keys();
     m.Remove("testkey");
-    /* assert m.Keys() == {"testkey2"};
+    assert "testkey" !in m.Keys();
+/*  assert "testkey2" in m.Keys();
+    assert m.Keys() == {"testkey2"};
     assert m.Values() == {"testvalue2"};
     assert m.Items() == {("testkey2", "testvalue2")}; */
   }

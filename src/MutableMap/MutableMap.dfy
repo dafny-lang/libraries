@@ -38,8 +38,10 @@ module {:extern "MutableMap"} {:options "/functionSyntax:4"} MutableMap {
     
     method {:extern "remove"} Remove(k: K)
       modifies this
-      ensures forall k' :: k' in old(this.content)().Keys && k' != k ==> k' in this.content().Keys && old(this.content)()[k'] == this.content()[k']
-      ensures forall k' :: k' in this.content().Keys ==> k' in old(this.content)().Keys && k' != k
+      ensures forall k' | k' in old(this.content)().Keys :: k' != k ==> (k' in this.content().Keys && old(this.content)()[k'] == this.content()[k'])
+      ensures forall k' | k' in this.content().Keys :: k' in old(this.content)().Keys && k' != k
+      ensures k in old(this.content)().Keys ==> k !in this.content().Keys
+      ensures this.content().Values == set k' | k' in old(this.content)().Keys && k' != k :: this.content()[k']
 
     function {:extern "size"} Size(): (size: int)
       reads this
