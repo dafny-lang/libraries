@@ -21,10 +21,10 @@ For example, to run a `Program.dfy` file that depends on the `FileIO` module, ru
 $ dafny run Program.dfy --include libraries/src/FileIO/FileIO.cs
 
 # Java
-$ dafny run Program.dfy --target:java --include libraries/src/FileIO/FileIO.java
+$ dafny run Program.dfy --target:java --input libraries/src/FileIO/FileIO.java
 
 # Javascript
-$ dafny run Program.dfy --target:js --include libraries/src/FileIO/FileIO.js
+$ dafny run Program.dfy --target:js --input libraries/src/FileIO/FileIO.js
 ```
 
 (If you aren't using `dafny run` to run your program,
