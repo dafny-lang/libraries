@@ -26,7 +26,7 @@ meant to be tutorial and example-based.
 The sections below describe how to use each of the principal modules of the library:
 - [Dafny.Boxes](#sec-boxes) -- containers that enable encapsulaton of success and failure results in a single datatype
 - [Bafny.BoundedInts](#sec-boundedints) -- definitions of types and constants for bounded integer arithmetic
-- [Dafny.FileIO}(#sec-fileio} -- basic input and output operations
+- [Dafny.FileIO](#sec-fileio) -- basic input and output operations
 - [Dafny.Math](#sec-math) --- basic mathematical operations and lemmas
 - [Dafny.Unicode](#sec-unicode) --- tools to manipulate unicode characters and strings
 - [Dafny.Collections](#sec-collections) -- functions and lemmas about sequences, sets and maps
