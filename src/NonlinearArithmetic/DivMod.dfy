@@ -1,12 +1,12 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The
 former takes arguments and may be more stable and less reliant on Z3
@@ -27,8 +27,8 @@ module {:options "-functionSyntax:4"} DivMod {
   import opened GeneralInternals
 
   /*****************************************************************************
-  * Division:
-  *****************************************************************************/
+   * Division:
+   *****************************************************************************/
 
   /* the common syntax of division gives the same quotient as performing division through recursion */
   lemma LemmaDivIsDivRecursive(x: int, d: int)
@@ -54,7 +54,7 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaDivBySelf(d: int)
     requires d != 0
     ensures d / d == 1
-  { 
+  {
     DivINL.LemmaDivBySelf(d);
   }
 
@@ -62,7 +62,7 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaDivOf0(d: int)
     requires d != 0
     ensures 0 / d == 0
-  { 
+  {
     DivINL.LemmaDivOf0(d);
   }
 
@@ -78,7 +78,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaDivOf0(x);
     }
   }
-    
+
   lemma LemmaDivBasicsAuto()
     ensures forall x {:trigger 0 / x} :: x != 0 ==> 0 / x == 0
     ensures forall x {:trigger x / 1} :: x / 1 == x
@@ -122,8 +122,8 @@ module {:options "-functionSyntax:4"} DivMod {
   {
     reveal DivRecursive();
     LemmaDivIsDivRecursiveAuto();
-    assert forall u: int, d: int {:trigger u / d} {:trigger DivRecursive(u, d)} 
-      :: d > 0 ==> DivRecursive(u, d) == u / d;
+    assert forall u: int, d: int {:trigger u / d} {:trigger DivRecursive(u, d)}
+        :: d > 0 ==> DivRecursive(u, d) == u / d;
 
     if (x < z)
     {
@@ -177,18 +177,18 @@ module {:options "-functionSyntax:4"} DivMod {
     calc ==> {
       a % d + b % d == R + (a + b) % d;
       (a + b) - (a + b) % d - R == a - (a % d) + b - (b % d);
-        {
-          LemmaFundamentalDivMod(a + b, d);
-          LemmaFundamentalDivMod(a, d);
-          LemmaFundamentalDivMod(b, d);
-        }
+      {
+        LemmaFundamentalDivMod(a + b, d);
+        LemmaFundamentalDivMod(a, d);
+        LemmaFundamentalDivMod(b, d);
+      }
       d * ((a + b) / d) - R == d * (a / d) + d * (b / d);
     }
   }
 
   lemma LemmaDividingSumsAuto()
     ensures forall a: int, b: int, d: int, R: int {:trigger d * ((a + b) / d) - R, d*(a/d) + d*(b/d)}
-        :: 0 < d &&  R == a%d + b%d - (a+b)%d ==> d*((a+b)/d) - R == d*(a/d) + d*(b/d)
+              :: 0 < d &&  R == a%d + b%d - (a+b)%d ==> d*((a+b)/d) - R == d*(a/d) + d*(b/d)
   {
     forall (a: int, b: int, d: int, R: int | 0< d &&  R == a%d + b%d - (a+b)%d)
       ensures d*((a+b)/d) - R == d*(a/d) + d*(b/d)
@@ -326,7 +326,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures forall x: int, d: int {:trigger x / d } :: 0 <= x && 0 < d ==> x / d <= x
   {
     forall (x: int, d: int | 0 <= x && 0 < d)
-      ensures x / d <= x 
+      ensures x / d <= x
     {
       LemmaDivNonincreasing(x, d);
     }
@@ -354,46 +354,46 @@ module {:options "-functionSyntax:4"} DivMod {
 
     calc {
       (y * (x / y)) % (y * z) + (x % y) % (y * z);
-        <=    { LemmaPartBound1(x, y, z); }
+    <=    { LemmaPartBound1(x, y, z); }
       y * (z - 1) + (x % y) % (y * z);
-        <    { LemmaPartBound2(x, y, z); }
+    <    { LemmaPartBound2(x, y, z); }
       y * (z - 1) + y;
-            { LemmaMulBasicsAuto(); }
+          { LemmaMulBasicsAuto(); }
       y * (z - 1) + y * 1;
-            { LemmaMulIsDistributiveAuto(); }
+          { LemmaMulIsDistributiveAuto(); }
       y * (z - 1 + 1);
       y * z;
     }
 
     calc {
       x % (y * z);
-            { LemmaFundamentalDivMod(x,y); }
+      { LemmaFundamentalDivMod(x,y); }
       (y * (x / y) + x % y) % (y * z);
-            {
-              LemmaModPropertiesAuto();
-              assert 0 <= x % y;
-              LemmaMulNonnegative(y, x / y);
-              assert (y * (x / y)) % (y * z) + (x % y) % (y * z) < y * z;
-              LemmaModAdds(y * (x / y), x % y, y * z);
-            }
+      {
+        LemmaModPropertiesAuto();
+        assert 0 <= x % y;
+        LemmaMulNonnegative(y, x / y);
+        assert (y * (x / y)) % (y * z) + (x % y) % (y * z) < y * z;
+        LemmaModAdds(y * (x / y), x % y, y * z);
+      }
       (y * (x / y)) % (y * z) + (x % y) % (y * z);
-            {
-              LemmaModPropertiesAuto();
-              LemmaMulIncreases(z, y);
-              LemmaMulIsCommutativeAuto();
-              assert x % y < y <= y * z;
-              LemmaSmallMod(x % y, y * z);
-              assert (x % y) % (y * z) == x % y;
-            }
+      {
+        LemmaModPropertiesAuto();
+        LemmaMulIncreases(z, y);
+        LemmaMulIsCommutativeAuto();
+        assert x % y < y <= y * z;
+        LemmaSmallMod(x % y, y * z);
+        assert (x % y) % (y * z) == x % y;
+      }
       (y * (x / y)) % (y * z) + x % y;
-            { LemmaTruncateMiddle(x / y, y, z); }
+      { LemmaTruncateMiddle(x / y, y, z); }
       y * ((x / y) % z) + x % y;
     }
   }
 
   lemma LemmaBreakdownAuto()
-    ensures forall x: int, y: int, z: int {:trigger y * z, x % (y * z), y * ((x / y) % z) + x % y} 
-        :: 0 <= x && 0 < y && 0 < z ==> 0 < y * z && x % (y * z) == y * ((x / y) % z) + x % y
+    ensures forall x: int, y: int, z: int {:trigger y * z, x % (y * z), y * ((x / y) % z) + x % y}
+              :: 0 <= x && 0 < y && 0 < z ==> 0 < y * z && x % (y * z) == y * ((x / y) % z) + x % y
   {
     forall (x: int, y: int, z: int  | 0 <= x && 0 < y && 0 < z)
       ensures 0 < y * z && x % (y * z) == y * ((x / y) % z) + x % y
@@ -401,7 +401,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaBreakdown(x, y, z);
     }
   }
-  
+
   lemma LemmaRemainderUpper(x: int, d: int)
     requires 0 <= x
     requires 0 < d
@@ -420,7 +420,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaRemainderUpper(x, d);
     }
   }
-  
+
   lemma LemmaRemainderLower(x: int, d: int)
     requires 0 <= x
     requires 0 < d
@@ -439,7 +439,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaRemainderLower(x, d);
     }
   }
-  
+
   lemma LemmaRemainder(x: int, d: int)
     requires 0 <= x
     requires 0 < d
@@ -452,14 +452,14 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaRemainderAuto()
     ensures forall x: int, d: int {:trigger x - (x / d * d)} :: 0 <= x && 0 < d ==> 0 <= x - (x / d * d) < d
   {
-    forall x: int, d: int | 0 <= x && 0 < d 
+    forall x: int, d: int | 0 <= x && 0 < d
       ensures 0 <= x - (x / d * d) < d
     {
       LemmaRemainder(x, d);
     }
   }
 
- /* describes fundementals of the modulus operator */
+  /* describes fundementals of the modulus operator */
   lemma LemmaFundamentalDivMod(x: int, d: int)
     requires d != 0
     ensures x == d * (x / d) + (x % d)
@@ -468,7 +468,7 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaFundamentalDivModAuto()
-    ensures forall x: int, d: int {:trigger d * (x / d) + (x % d)} :: d != 0 ==> x == d * (x / d) + (x % d) 
+    ensures forall x: int, d: int {:trigger d * (x / d) + (x % d)} :: d != 0 ==> x == d * (x / d) + (x % d)
   {
     forall x: int, d: int | d != 0
       ensures x == d * (x / d) + (x % d)
@@ -516,64 +516,64 @@ module {:options "-functionSyntax:4"} DivMod {
 
     calc {
       c * ((x / c) % d) + x % c;
-        { LemmaModMultiplesVanish(-k, x / c, d); LemmaMulIsCommutativeAuto(); }
+      { LemmaModMultiplesVanish(-k, x / c, d); LemmaMulIsCommutativeAuto(); }
       c * ((x / c + (-k) * d) % d) + x % c;
-        { LemmaHoistOverDenominator(x, (-k)*d, c); }
+      { LemmaHoistOverDenominator(x, (-k)*d, c); }
       c * (((x + (((-k) * d) * c)) / c) % d) + x % c;
-        { LemmaMulIsAssociative(-k, d, c); }
+      { LemmaMulIsAssociative(-k, d, c); }
       c * (((x + ((-k) * (d * c))) / c) % d) + x % c;
-        { LemmaMulUnaryNegation(k, d * c); }
+      { LemmaMulUnaryNegation(k, d * c); }
       c * (((x + (-(k * (d * c)))) / c) % d) + x % c;
-        { LemmaMulIsAssociative(k, d, c); }
+      { LemmaMulIsAssociative(k, d, c); }
       c * (((x + (-(k * d * c))) / c) % d) + x % c;
       c * (((x - k * d * c) / c) % d) + x % c;
-        {
-          LemmaMulIsAssociativeAuto();
-          LemmaMulIsCommutativeAuto();
-        }
+      {
+        LemmaMulIsAssociativeAuto();
+        LemmaMulIsCommutativeAuto();
+      }
       c * ((R / c) % d) + x % c;
       c * (R / c) + x % c;
-        { LemmaFundamentalDivMod(R, c);
-          assert R == c * (R / c) + R % c;
-          LemmaModMod(x, c, d);
-          assert R % c == x % c;
-        }
+      { LemmaFundamentalDivMod(R, c);
+        assert R == c * (R / c) + R % c;
+        LemmaModMod(x, c, d);
+        assert R % c == x % c;
+      }
       R;
-        { LemmaModIsModRecursiveAuto(); }
+      { LemmaModIsModRecursiveAuto(); }
       R % (c * d);
       (x - (c * d) * k) % (c * d);
-        { LemmaMulUnaryNegation(c * d, k); }
+      { LemmaMulUnaryNegation(c * d, k); }
       (x + (c * d) * (-k)) % (c * d);
-        { LemmaModMultiplesVanish(-k, x, c * d); }
+      { LemmaModMultiplesVanish(-k, x, c * d); }
       x % (c * d);
     }
     calc ==> {
       c * (x / c) + x % c - R == c * (x / c) - c * ((x / c) % d);
-        { LemmaFundamentalDivMod(x, c); }
+      { LemmaFundamentalDivMod(x, c); }
       x - R == c * (x / c) - c * ((x / c) % d);
     }
     calc ==> {
       true;
-        { LemmaFundamentalDivMod(x / c, d); }
+      { LemmaFundamentalDivMod(x / c, d); }
       d * ((x / c) / d) == x / c - ((x / c) % d);
       c * (d * ((x / c) / d)) == c * (x / c - ((x / c) % d));
-        { LemmaMulIsAssociativeAuto(); }
+      { LemmaMulIsAssociativeAuto(); }
       (c * d) * ((x / c) / d) == c * (x / c - ((x / c) % d));
-        { LemmaMulIsDistributiveAuto(); }
+      { LemmaMulIsDistributiveAuto(); }
       (c * d) * ((x / c) / d) == c * (x / c) - c * ((x / c) % d);
       (c * d) * ((x / c) / d) == x - R;
-        { LemmaFundamentalDivMod(x, c * d); }
+      { LemmaFundamentalDivMod(x, c * d); }
       (c * d) * ((x / c) / d) == (c * d) * (x / (c * d)) + x % (c * d) - R;
       (c * d) * ((x / c) / d) == (c * d) * (x / (c * d));
-        { LemmaMulEqualityConverse(c * d, (x / c) / d, x / (c * d)); }
+      { LemmaMulEqualityConverse(c * d, (x / c) / d, x / (c * d)); }
       (x / c) / d == x / (c * d);
     }
   }
-  
+
   lemma LemmaDivDenominatorAuto()
     ensures forall c: nat, d: nat {:trigger c * d} :: 0 < c && 0 < d ==> c * d != 0
-    ensures forall x: int, c: nat, d: nat {:trigger (x / c) / d} 
-      :: 0 <= x && 0 < c && 0 < d ==> (x / c) / d == x / (c * d)
+    ensures forall x: int, c: nat, d: nat {:trigger (x / c) / d}
+              :: 0 <= x && 0 < c && 0 < d ==> (x / c) / d == x / (c * d)
   {
     LemmaMulNonzeroAuto();
     forall x: int, c: nat, d: nat | 0 <= x && 0 < c && 0 < d
@@ -596,22 +596,22 @@ module {:options "-functionSyntax:4"} DivMod {
       (x * (z * (y / z) + y % z)) / z;
         { LemmaMulIsDistributiveAuto(); }
       (x * (z * (y / z)) + x * (y % z)) / z;
-        >=  {
-            LemmaModPropertiesAuto();
-            LemmaMulNonnegative(x, y % z);
-            LemmaDivIsOrdered(x * (z * (y / z)), x * (z * (y / z)) + x * (y % z), z); }
+    >=  {
+          LemmaModPropertiesAuto();
+          LemmaMulNonnegative(x, y % z);
+          LemmaDivIsOrdered(x * (z * (y / z)), x * (z * (y / z)) + x * (y % z), z); }
       (x * (z * (y / z))) / z;
-          { LemmaMulIsAssociativeAuto();
-            LemmaMulIsCommutativeAuto(); }
+        { LemmaMulIsAssociativeAuto();
+          LemmaMulIsCommutativeAuto(); }
       (z * (x * (y / z))) / z;
-          { LemmaDivMultiplesVanish(x * (y / z), z); }
+        { LemmaDivMultiplesVanish(x * (y / z), z); }
       x * (y / z);
     }
   }
-  
+
   lemma LemmaMulHoistInequalityAuto()
-    ensures forall x: int, y: int, z: int {:trigger x * (y / z), (x * y) / z} 
-      :: 0 <= x && 0 < z ==> x * (y / z) <= (x * y) / z
+    ensures forall x: int, y: int, z: int {:trigger x * (y / z), (x * y) / z}
+              :: 0 <= x && 0 < z ==> x * (y / z) <= (x * y) / z
   {
     forall (x: int, y: int, z: int | 0 <= x && 0 < z)
       ensures x * (y / z) <= (x * y) / z
@@ -629,14 +629,14 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaIndistinguishableQuotientsAuto()
-    ensures forall a: int, b: int, d: int {:trigger a / d, b / d} 
-      :: 0 < d && 0 <= a - a % d <= b < a + d - a % d ==> a / d == b / d
+    ensures forall a: int, b: int, d: int {:trigger a / d, b / d}
+              :: 0 < d && 0 <= a - a % d <= b < a + d - a % d ==> a / d == b / d
   {
-    forall a: int, b: int, d: int | 0 < d && 0 <= a - a % d <= b < a + d - a % d 
+    forall a: int, b: int, d: int | 0 < d && 0 <= a - a % d <= b < a + d - a % d
       ensures a / d == b / d
     {
       LemmaIndistinguishableQuotients(a, b, d);
-    } 
+    }
   }
 
   /* common factors from the dividend and divisor of a modulus operation can be factored out */
@@ -651,30 +651,30 @@ module {:options "-functionSyntax:4"} DivMod {
     LemmaMulNonnegativeAuto();
     calc {
       b * x;
-        { LemmaFundamentalDivMod(b * x, b * c); }
+      { LemmaFundamentalDivMod(b * x, b * c); }
       (b * c) * ((b * x) / (b * c)) + (b * x) % (b * c);
-        { LemmaDivDenominator(b * x, b, c); }
+      { LemmaDivDenominator(b * x, b, c); }
       (b * c) * (((b * x) / b) / c) + (b * x) % (b * c);
-        { LemmaMulIsCommutativeAuto(); LemmaDivByMultiple(x, b); }
+      { LemmaMulIsCommutativeAuto(); LemmaDivByMultiple(x, b); }
       (b * c) * (x / c) + (b * x) % (b * c);
     }
     calc ==> {
       true;
-        { LemmaFundamentalDivMod(x, c); }
+      { LemmaFundamentalDivMod(x, c); }
       x == c * (x / c) + x % c;
       b * x == b * (c * (x / c) + x % c);
-        { LemmaMulIsDistributiveAuto(); }
+      { LemmaMulIsDistributiveAuto(); }
       b * x == b * (c * (x / c)) + b * (x % c);
-        { LemmaMulIsAssociativeAuto(); }
+      { LemmaMulIsAssociativeAuto(); }
       b * x == (b * c) * (x / c) + b * (x % c);
     }
   }
 
   lemma LemmaTruncateMiddleAuto()
-    ensures forall x: int, b: int, c: int {:trigger b * (x % c)} 
-      :: 0 <= x && 0 < b && 0 < c && 0 < b * c ==> (b * x) % (b * c) == b * (x % c)
+    ensures forall x: int, b: int, c: int {:trigger b * (x % c)}
+              :: 0 <= x && 0 < b && 0 < c && 0 < b * c ==> (b * x) % (b * c) == b * (x % c)
   {
-    forall x: int, b: int, c: int | 0 <= x && 0 < b && 0 < c && 0 < b * c 
+    forall x: int, b: int, c: int | 0 <= x && 0 < b && 0 < c && 0 < b * c
       ensures (b * x) % (b * c) == b * (x % c)
     {
       LemmaTruncateMiddle(x, b, c);
@@ -692,18 +692,18 @@ module {:options "-functionSyntax:4"} DivMod {
     LemmaMulStrictlyPositive(x,d);
     calc {
       (x * a) / (x * d);
-        {
-          LemmaMulNonnegative(x, a);
-          LemmaDivDenominator(x * a, x, d); }
+      {
+        LemmaMulNonnegative(x, a);
+        LemmaDivDenominator(x * a, x, d); }
       ((x * a) / x) / d;
-        { LemmaDivMultiplesVanish(a, x); }
+      { LemmaDivMultiplesVanish(a, x); }
       a / d;
     }
   }
 
   lemma LemmaDivMultiplesVanishQuotientAuto()
-    ensures forall x: int, a: int, d: int {:trigger a / d, x * d, x * a} 
-      :: 0 < x && 0 <= a && 0 < d ==> 0 < x * d  &&  a / d == (x * a) / (x * d)
+    ensures forall x: int, a: int, d: int {:trigger a / d, x * d, x * a}
+              :: 0 < x && 0 <= a && 0 < d ==> 0 < x * d  &&  a / d == (x * a) / (x * d)
   {
     forall x: int, a: int, d: int | 0 < x && 0 <= a && 0 < d
       ensures 0 < x * d  &&  a / d == (x * a) / (x * d)
@@ -725,8 +725,8 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaRoundDownAuto()
-    ensures forall a: int, r: int, d: int {:trigger d * ((a + r) / d)} 
-      :: 0 < d && a % d == 0 && 0 <= r < d ==> a == d * ((a + r) / d)
+    ensures forall a: int, r: int, d: int {:trigger d * ((a + r) / d)}
+              :: 0 < d && a % d == 0 && 0 <= r < d ==> a == d * ((a + r) / d)
   {
     forall a: int, r: int, d: int | 0 < d && a % d == 0 && 0 <= r < d
       ensures a == d * ((a + r) / d)
@@ -749,9 +749,9 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaDivMultiplesVanishFancyAuto()
     ensures forall x: int, b: int, d: int {:trigger (d * x + b) / d}
-      :: 0 < d && 0 <= b < d ==> (d * x + b) / d == x
+              :: 0 < d && 0 <= b < d ==> (d * x + b) / d == x
   {
-    forall x: int, b: int, d: int | 0 < d && 0 <= b < d 
+    forall x: int, b: int, d: int | 0 < d && 0 <= b < d
       ensures (d * x + b) / d == x
     {
       LemmaDivMultiplesVanishFancy(x, b, d);
@@ -769,7 +769,7 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaDivMultiplesVanishAuto()
     ensures forall x: int, d: int {:trigger (d * x) / d} :: 0 < d ==> (d * x) / d == x
   {
-    forall x: int, d: int | 0 < d 
+    forall x: int, d: int | 0 < d
       ensures (d * x) / d == x
     {
       LemmaDivMultiplesVanish(x, d);
@@ -781,7 +781,7 @@ module {:options "-functionSyntax:4"} DivMod {
     requires 0 <= b
     requires 0 < d
     ensures  (b * d) / d == b
-  {   
+  {
     LemmaDivMultiplesVanish(b,d);
   }
 
@@ -793,7 +793,7 @@ module {:options "-functionSyntax:4"} DivMod {
     {
       LemmaDivByMultiple(b, d);
     }
-  } 
+  }
 
   /* a dividend y that is a positive multiple of the divisor z will always yield a greater quotient 
   than a dividend x that is less than y */
@@ -808,15 +808,15 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaDivByMultipleIsStronglyOrderedAuto()
-    ensures forall x: int, y: int, m: int, z: int {:trigger x / z, m * z, y / z} 
-      :: x < y && y == m * z && 0 < z ==> x / z < y / z
+    ensures forall x: int, y: int, m: int, z: int {:trigger x / z, m * z, y / z}
+              :: x < y && y == m * z && 0 < z ==> x / z < y / z
   {
     forall x: int, y: int, m: int, z: int | x < y && y == m * z && 0 < z
       ensures x / z < y / z
     {
       LemmaDivByMultipleIsStronglyOrdered(x, y, m, z);
     }
-  } 
+  }
 
   /* if an integer a is less than or equal to the product of two other integers b and c, then the 
   quotient of a/b will be less than or equal to c */
@@ -891,31 +891,31 @@ module {:options "-functionSyntax:4"} DivMod {
     LemmaMulStrictlyPositiveAuto();
     calc {
       b * (a / b) % (b * c);
-        { LemmaFundamentalDivMod(b * (a / b), b * c); }
+      { LemmaFundamentalDivMod(b * (a / b), b * c); }
       b * (a / b) - (b * c) * ((b * (a / b)) / (b * c));
-        { LemmaMulIsAssociativeAuto(); }
+      { LemmaMulIsAssociativeAuto(); }
       b * (a / b) - b * (c * ((b * (a / b)) / (b * c)));
-        { LemmaMulIsDistributiveAuto(); }
+      { LemmaMulIsDistributiveAuto(); }
       b * ((a / b) - (c * ((b * (a / b)) / (b * c))));
     }
 
     calc ==> {
       true;
-        { LemmaModPropertiesAuto(); }
+      { LemmaModPropertiesAuto(); }
       b * (a / b) % (b * c) < b * c;
       b * ((a / b) - (c * ((b * (a / b)) / (b * c)))) < b * c;
-        { LemmaMulIsCommutativeAuto(); LemmaMulStrictInequalityConverseAuto(); }
+      { LemmaMulIsCommutativeAuto(); LemmaMulStrictInequalityConverseAuto(); }
       ((a / b) - (c * ((b * (a / b)) / (b * c)))) < c;
       ((a / b) - (c * ((b * (a / b)) / (b * c)))) <= c - 1;
-        { LemmaMulIsCommutativeAuto(); LemmaMulInequalityAuto(); }
+      { LemmaMulIsCommutativeAuto(); LemmaMulInequalityAuto(); }
       b * ((a / b) - (c * ((b * (a / b)) / (b * c)))) <= b * (c - 1);
       b * (a / b) % (b * c) <= b * (c - 1);
     }
   }
 
   lemma LemmaPartBound1Auto()
-    ensures forall a: int, b: int, c: int {:trigger b * (a / b) % (b * c)} 
-      :: 0 <= a && 0 < b && 0 < c ==> 0 < b * c && (b * (a / b) % (b * c)) <= b * (c - 1)
+    ensures forall a: int, b: int, c: int {:trigger b * (a / b) % (b * c)}
+              :: 0 <= a && 0 < b && 0 < c ==> 0 < b * c && (b * (a / b) % (b * c)) <= b * (c - 1)
   {
     forall a: int, b: int, c: int | 0 <= a && 0 < b && 0 < c
       ensures 0 < b * c && (b * (a / b) % (b * c)) <= b * (c - 1)
@@ -925,10 +925,10 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
 
-/*******************************************************************************
-* Modulus:
-*******************************************************************************/
- 
+  /*******************************************************************************
+   * Modulus:
+   *******************************************************************************/
+
   /* the common syntax of the modulus operation results in the same remainder as recursively
   calculating the modulus */
   lemma LemmaModIsModRecursive(x: int, m: int)
@@ -937,32 +937,32 @@ module {:options "-functionSyntax:4"} DivMod {
     decreases if x < 0 then -x + m else x
   {
     reveal ModRecursive();
-    if x < 0 { 
-      calc { 
+    if x < 0 {
+      calc {
         ModRecursive(x, m);
         ModRecursive(x + m, m);
-          { LemmaModIsModRecursive(x + m, m); }
+        { LemmaModIsModRecursive(x + m, m); }
         (x + m) % m;
-          { LemmaAddModNoop(x, m, m); } 
+        { LemmaAddModNoop(x, m, m); }
         ((x % m) + (m % m)) % m;
-          { LemmaModBasicsAuto(); }
+        { LemmaModBasicsAuto(); }
         (x % m) % m;
-          { LemmaModBasicsAuto(); }
+        { LemmaModBasicsAuto(); }
         x % m;
       }
-    } else if x < m { 
+    } else if x < m {
       LemmaSmallMod(x, m);
     } else {
-      calc { 
+      calc {
         ModRecursive(x, m);
         ModRecursive(x - m, m);
-          { LemmaModIsModRecursive(x - m, m); }
+        { LemmaModIsModRecursive(x - m, m); }
         (x - m) % m;
-          { LemmaSubModNoop(x, m, m); } 
+        { LemmaSubModNoop(x, m, m); }
         ((x % m) - (m % m)) % m;
-          { LemmaModBasicsAuto(); }
+        { LemmaModBasicsAuto(); }
         (x % m) % m;
-          { LemmaModBasicsAuto(); }
+        { LemmaModBasicsAuto(); }
         x % m;
       }
     }
@@ -1040,7 +1040,7 @@ module {:options "-functionSyntax:4"} DivMod {
   {
     calc ==> {
       x < m;
-        { LemmaSmallMod(x, m); }
+      { LemmaSmallMod(x, m); }
       x % m == x;
       false;
     }
@@ -1048,7 +1048,7 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaModIsZeroAuto()
     ensures forall x: nat, m: nat {:trigger x % m} :: (x > 0 && m > 0
-      && x % m == 0) ==> x >= m
+                                                       && x % m == 0) ==> x >= m
   {
     forall x: nat, m: nat | x > 0 && m > 0 && x % m == 0
       ensures x >= m
@@ -1056,7 +1056,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaModIsZero(x, m);
     }
   }
-  
+
   /* a dividend that is any multiple of the divisor will result in a remainder of 0 */
   lemma LemmaModMultiplesBasic(x: int, m: int)
     requires m > 0
@@ -1088,7 +1088,7 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaModAddMultiplesVanishAuto()
     ensures forall b: int, m: int {:trigger b % m} :: 0 < m ==> (m + b) % m == b % m
   {
-    forall b: int, m: int | 0 < m 
+    forall b: int, m: int | 0 < m
       ensures (m + b) % m == b % m
     {
       LemmaModAddMultiplesVanish(b, m);
@@ -1107,7 +1107,7 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaModSubMultiplesVanishAuto()
     ensures forall b: int, m: int {:trigger b % m} :: 0 < m ==> (-m + b) % m == b % m
   {
-    forall b: int, m: int | 0 < m 
+    forall b: int, m: int | 0 < m
       ensures (-m + b) % m == b % m
     {
       LemmaModSubMultiplesVanish(b, m);
@@ -1115,7 +1115,7 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   /* the remainder of adding any multiple of the divisor m to the dividend b will be the same
-  as simply performing b % m */ 
+  as simply performing b % m */
   lemma LemmaModMultiplesVanish(a: int, b: int, m: int)
     decreases if a > 0 then a else -a
     requires 0 < m
@@ -1146,7 +1146,7 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaModSubtractionAuto()
     ensures forall x: nat, s: nat, d: nat {:trigger (x - s) % d}
-      :: 0 < d && 0 <= s <= x % d ==> x % d - s % d == (x - s) % d
+              :: 0 < d && 0 <= s <= x % d ==> x % d - s % d == (x - s) % d
   {
     forall x: nat, s: nat, d: nat | 0 < d && 0 <= s <= x % d
       ensures x % d - s % d == (x - s) % d
@@ -1154,7 +1154,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaModSubtraction(x, s, d);
     }
   }
-  
+
   /* describes expanded and succinct version of modulus operator in relation to addition (read "ensures") */
   lemma LemmaAddModNoop(x: int, y: int, m: int)
     requires 0 < m
@@ -1165,9 +1165,9 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaAddModNoopAuto()
     ensures forall x: int, y: int, m: int {:trigger (x + y) % m}
-      :: 0 < m ==> ((x % m) + (y % m)) % m == (x + y) % m
+              :: 0 < m ==> ((x % m) + (y % m)) % m == (x + y) % m
   {
-    forall x: int, y: int, m: int | 0 < m 
+    forall x: int, y: int, m: int | 0 < m
       ensures ((x % m) + (y % m)) % m == (x + y) % m
     {
       LemmaAddModNoop(x, y, m);
@@ -1184,7 +1184,7 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaAddModNoopRightAuto()
     ensures forall x: int, y: int, m: int {:trigger (x + y) % m}
-      :: 0 < m ==> (x + (y % m)) % m == (x + y) % m
+              :: 0 < m ==> (x + (y % m)) % m == (x + y) % m
   {
     forall x: int, y: int, m: int | 0 < m
       ensures (x + (y % m)) % m == (x + y) % m
@@ -1202,8 +1202,8 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaSubModNoopAuto()
-    ensures forall x: int, y: int, m: int {:trigger (x - y) % m} 
-      :: 0 < m ==> ((x % m) - (y % m)) % m == (x - y) % m
+    ensures forall x: int, y: int, m: int {:trigger (x - y) % m}
+              :: 0 < m ==> ((x % m) - (y % m)) % m == (x - y) % m
   {
     forall x: int, y: int, m: int | 0 < m
       ensures ((x % m) - (y % m)) % m == (x - y) % m
@@ -1221,8 +1221,8 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaSubModNoopRightAuto()
-    ensures forall x: int, y: int, m: int {:trigger (x - y) % m} 
-      :: 0 < m ==> (x - (y % m)) % m == (x - y) % m
+    ensures forall x: int, y: int, m: int {:trigger (x - y) % m}
+              :: 0 < m ==> (x - (y % m)) % m == (x - y) % m
   {
     forall x: int, y: int, m: int | 0 < m
       ensures (x - (y % m)) % m == (x - y) % m
@@ -1242,13 +1242,13 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaModAddsAuto()
-    ensures forall a: int, b: int, d: int {:trigger (a + b) % d} 
-      :: 0 < d ==> a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d) 
-      && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
+    ensures forall a: int, b: int, d: int {:trigger (a + b) % d}
+              :: 0 < d ==> a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
+                           && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
   {
     forall a: int, b: int, d: int | 0 < d
-      ensures a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d) 
-      && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
+      ensures a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
+              && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
     {
       LemmaModAdds(a, b, d);
     }
@@ -1258,8 +1258,8 @@ module {:options "-functionSyntax:4"} DivMod {
     requires 0 < d
     ensures x % d == (x * (1 - d)) % d
   {
-    forall ensures (x - x * d) % d == x % d
-    {
+    assert (x - x * d) % d == x % d
+    by {
       LemmaModAuto(d);
       var f := i => (x - i * d) % d == x % d;
       assert  MulAuto() ==> && f(0)
@@ -1269,13 +1269,13 @@ module {:options "-functionSyntax:4"} DivMod {
     }
     LemmaMulAuto();
   }
-  
+
   /* proves the validity of the quotient and remainder */
   lemma {:timeLimitMultiplier 5} LemmaFundamentalDivModConverse(x: int, d: int, q: int, r: int)
     requires d != 0
     requires 0 <= r < d
     requires x == q * d + r
-    ensures q == x / d 
+    ensures q == x / d
     ensures r == x % d
   {
     LemmaDivAuto(d);
@@ -1285,7 +1285,7 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma {:timeLimitMultiplier 5} LemmaFundamentalDivModConverseAuto()
     ensures forall x: int, d: int, q: int, r: int {:trigger q * d + r, x % d}
-      :: d != 0 && 0 <= r < d && x == q * d + r ==> q == x / d && r == x % d
+              :: d != 0 && 0 <= r < d && x == q * d + r ==> q == x / d && r == x % d
   {
     forall x: int, d: int, q: int, r: int | d != 0 && 0 <= r < d && x == q * d + r
       ensures q == x / d && r == x % d
@@ -1308,13 +1308,13 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaModPosBoundAuto()
     ensures forall x: int, m: int {:trigger x % m} :: 0 <= x && 0 < m ==> 0 <= x % m < m
   {
-    forall x: int, m: int | 0 <= x && 0 < m 
+    forall x: int, m: int | 0 <= x && 0 < m
       ensures 0 <= x % m < m
     {
       LemmaModPosBound(x, m);
     }
   }
-  
+
   lemma LemmaMulModNoopLeft(x: int, y: int, m: int)
     requires 0 < m
     ensures (x % m) * y % m == x * y % m
@@ -1332,7 +1332,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaMulModNoopLeft(x, y, m);
     }
   }
-  
+
   lemma LemmaMulModNoopRight(x: int, y: int, m: int)
     requires 0 < m
     ensures x * (y % m) % m == (x * y) % m
@@ -1342,16 +1342,16 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaMulModNoopRightAuto()
-    ensures forall x: int, y: int, m: int {:trigger (x * y) % m} 
-      :: 0 < m ==> x * (y % m) % m == (x * y) % m
+    ensures forall x: int, y: int, m: int {:trigger (x * y) % m}
+              :: 0 < m ==> x * (y % m) % m == (x * y) % m
   {
-    forall x: int, y: int, m: int | 0 < m 
+    forall x: int, y: int, m: int | 0 < m
       ensures x * (y % m) % m == (x * y) % m
     {
       LemmaMulModNoopRight(x, y, m);
     }
   }
-  
+
   /* combines previous no-op mod lemmas into a general, overarching lemma */
   lemma LemmaMulModNoopGeneral(x: int, y: int, m: int)
     requires 0 < m
@@ -1367,7 +1367,7 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaMulModNoopGeneralAuto()
     ensures forall x: int, y: int, m: int {:trigger (x * y) % m}
-      :: 0 < m ==> ((x % m) * y) % m == (x * (y % m)) % m == ((x % m) * (y % m)) % m == (x * y) % m
+              :: 0 < m ==> ((x % m) * y) % m == (x * (y % m)) % m == ((x % m) * (y % m)) % m == (x * y) % m
   {
     forall x: int, y: int, m: int | 0 < m
       ensures ((x % m) * y) % m == (x * (y % m)) % m == ((x % m) * (y % m)) % m == (x * y) % m
@@ -1375,7 +1375,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaMulModNoopGeneral(x, y, m);
     }
   }
-  
+
   lemma LemmaMulModNoop(x: int, y: int, m: int)
     requires 0 < m
     ensures (x % m) * (y % m) % m == (x * y) % m
@@ -1384,8 +1384,8 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaMulModNoopAuto()
-    ensures forall x: int, y: int, m: int {:trigger (x * y) % m} 
-      :: 0 < m ==> (x % m) * (y % m) % m == (x * y) % m
+    ensures forall x: int, y: int, m: int {:trigger (x * y) % m}
+              :: 0 < m ==> (x % m) * (y % m) % m == (x * y) % m
   {
     forall x: int, y: int, m: int | 0 < m
       ensures (x % m) * (y % m) % m == (x * y) % m
@@ -1403,10 +1403,10 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaModEquivalenceAuto()
-    ensures forall x: int, y: int, m: int {:trigger  x % m , y % m} 
-      :: 0 < m && x % m == y % m <==> 0 < m && (x - y) % m == 0
+    ensures forall x: int, y: int, m: int {:trigger  x % m , y % m}
+              :: 0 < m && x % m == y % m <==> 0 < m && (x - y) % m == 0
   {
-    forall x: int, y: int, m: int | 0 < m 
+    forall x: int, y: int, m: int | 0 < m
       ensures x % m == y % m <==> 0 < m && (x - y) % m == 0
     {
       LemmaModEquivalence(x, y, m);
@@ -1434,8 +1434,8 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaModMulEquivalentAuto()
     ensures forall x: int, y: int, z: int, m: int
-      {:trigger IsModEquivalent(x * z, y * z, m)}  
-      :: m > 0 && IsModEquivalent(x, y, m) ==> IsModEquivalent(x * z, y * z, m)
+              {:trigger IsModEquivalent(x * z, y * z, m)}
+              :: m > 0 && IsModEquivalent(x, y, m) ==> IsModEquivalent(x * z, y * z, m)
   {
     forall x: int, y: int, z: int, m: int | m > 0 && IsModEquivalent(x, y, m)
       ensures IsModEquivalent(x * z, y * z, m)
@@ -1454,31 +1454,31 @@ module {:options "-functionSyntax:4"} DivMod {
     LemmaMulStrictlyIncreases(d,k);
     calc {
       x % d + d * (x / d);
-        { LemmaFundamentalDivMod(x, d); }
+      { LemmaFundamentalDivMod(x, d); }
       x;
-        { LemmaFundamentalDivMod(x, d * k); }
+      { LemmaFundamentalDivMod(x, d * k); }
       x % (d * k) + (d * k) * (x / (d * k));
-        { LemmaMulIsAssociativeAuto(); }
+      { LemmaMulIsAssociativeAuto(); }
       x % (d * k) + d * (k * (x / (d * k)));
     }
     calc {
       x % d;
-        { LemmaModPropertiesAuto(); }
+       { LemmaModPropertiesAuto(); }
       (x % d) % d;
-        { LemmaModMultiplesVanish(x / d  - k * (x / (d * k)), x % d, d); }
+       { LemmaModMultiplesVanish(x / d  - k * (x / (d * k)), x % d, d); }
       (x % d + d * (x / d  - k * (x / (d * k)))) % d;
-        { LemmaMulIsDistributiveSubAuto(); }
+       { LemmaMulIsDistributiveSubAuto(); }
       (x % d + d * (x / d) - d * (k * (x / (d * k)))) % d;
       (x % (d * k)) % d;
-        <= { LemmaModPropertiesAuto();
-            LemmaModDecreases(x % (d * k), d); }
+    <= { LemmaModPropertiesAuto();
+         LemmaModDecreases(x % (d * k), d); }
       x % (d * k);
     }
   }
 
   lemma LemmaModOrderingAuto()
-    ensures forall x: int, k: int, d: int {:trigger x % (d * k)}  
-      :: 1 < d && 0 < k ==> 0 < d * k && x % d <= x % (d * k)
+    ensures forall x: int, k: int, d: int {:trigger x % (d * k)}
+              :: 1 < d && 0 < k ==> 0 < d * k && x % d <= x % (d * k)
   {
     forall x: int, k: int, d: int | 1 < d && 0 < k
       ensures d * k > 0 && x % d <= x % (d * k)
@@ -1486,7 +1486,7 @@ module {:options "-functionSyntax:4"} DivMod {
       LemmaModOrdering(x, k, d);
     }
   }
-  
+
   lemma LemmaModMod(x: int, a: int, b: int)
     requires 0 < a
     requires 0 < b
@@ -1496,13 +1496,13 @@ module {:options "-functionSyntax:4"} DivMod {
     LemmaMulStrictlyPositiveAuto();
     calc {
       x;
-        { LemmaFundamentalDivMod(x, a * b); }
+      { LemmaFundamentalDivMod(x, a * b); }
       (a * b) * (x / (a * b)) + x % (a * b);
-        { LemmaMulIsAssociativeAuto(); }
+      { LemmaMulIsAssociativeAuto(); }
       a * (b * (x / (a * b))) + x % (a * b);
-        { LemmaFundamentalDivMod(x % (a * b), a); }
+      { LemmaFundamentalDivMod(x % (a * b), a); }
       a * (b * (x / (a * b))) + a * (x % (a * b) / a) + (x % (a * b)) % a;
-        { LemmaMulIsDistributiveAuto(); }
+      { LemmaMulIsDistributiveAuto(); }
       a * (b * (x / (a * b)) + x % (a * b) / a) + (x % (a * b)) % a;
     }
     LemmaModPropertiesAuto();
@@ -1511,10 +1511,10 @@ module {:options "-functionSyntax:4"} DivMod {
   }
 
   lemma LemmaModModAuto()
-    ensures forall x: int, a: int, b: int {:trigger a * b, x % a} 
-      :: 0 < a && 0 < b ==> 0 < a * b && (x % (a * b)) % a == x % a
+    ensures forall x: int, a: int, b: int {:trigger a * b, x % a}
+              :: 0 < a && 0 < b ==> 0 < a * b && (x % (a * b)) % a == x % a
   {
-    forall x: int, a: int, b: int | 0 < a && 0 < b  
+    forall x: int, a: int, b: int | 0 < a && 0 < b
       ensures 0 < a * b && (x % (a * b)) % a == x % a
     {
       LemmaModMod(x, a, b);
@@ -1542,7 +1542,7 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaPartBound2Auto()
     ensures forall x: int, y: int, z: int {:trigger y * z, x % y}
-      :: 0 <= x && 0 < y && 0 < z ==> y * z > 0 && (x % y) % (y * z) < y
+              :: 0 <= x && 0 < y && 0 < z ==> y * z > 0 && (x % y) % (y * z) < y
   {
     forall x: int, y: int, z: int | 0 <= x && 0 < y && 0 < z
       ensures y * z > 0 && (x % y) % (y * z) < y
@@ -1566,48 +1566,48 @@ module {:options "-functionSyntax:4"} DivMod {
 
     calc {
       (y * (x / y)) % (y * z) + (x % y) % (y * z);
-        <=    { LemmaPartBound1(x, y, z); }
+    <=    { LemmaPartBound1(x, y, z); }
       y * (z - 1) + (x % y) % (y * z);
-        <    { LemmaPartBound2(x, y, z); }
+    <    { LemmaPartBound2(x, y, z); }
       y * (z - 1) + y;
-            { LemmaMulBasicsAuto(); }
+          { LemmaMulBasicsAuto(); }
       y * (z - 1) + y * 1;
-            { LemmaMulIsDistributiveAuto(); }
+          { LemmaMulIsDistributiveAuto(); }
       y * (z - 1 + 1);
       y * z;
     }
 
     calc {
       x % (y * z);
-            { LemmaFundamentalDivMod(x, y); }
-    (y * (x / y) + x%  y) % (y * z);
-            {
-              LemmaModPropertiesAuto();
-              assert 0 <= x % y;
-              LemmaMulNonnegative(y, x / y);
-              assert (y * (x / y)) % (y * z) + (x % y) % (y * z) < y * z;
-              LemmaModAdds(y * (x / y), x % y, y * z);
-            }
-    (y * (x / y)) % (y * z) + (x % y) % (y * z);
-            {
-              LemmaModPropertiesAuto();
-              LemmaMulIncreases(z, y);
-              LemmaMulIsCommutativeAuto();
-              assert x % y < y <= y * z;
-              LemmaSmallMod(x % y, y * z);
-              assert (x % y) % (y * z) == x % y;
-            }
-    (y * (x / y)) % (y * z) + x % y;
-            { LemmaTruncateMiddle(x / y, y, z); }
-    y * ((x / y) % z) + x % y;
+      { LemmaFundamentalDivMod(x, y); }
+      (y * (x / y) + x%  y) % (y * z);
+      {
+        LemmaModPropertiesAuto();
+        assert 0 <= x % y;
+        LemmaMulNonnegative(y, x / y);
+        assert (y * (x / y)) % (y * z) + (x % y) % (y * z) < y * z;
+        LemmaModAdds(y * (x / y), x % y, y * z);
+      }
+      (y * (x / y)) % (y * z) + (x % y) % (y * z);
+      {
+        LemmaModPropertiesAuto();
+        LemmaMulIncreases(z, y);
+        LemmaMulIsCommutativeAuto();
+        assert x % y < y <= y * z;
+        LemmaSmallMod(x % y, y * z);
+        assert (x % y) % (y * z) == x % y;
+      }
+      (y * (x / y)) % (y * z) + x % y;
+      { LemmaTruncateMiddle(x / y, y, z); }
+      y * ((x / y) % z) + x % y;
     }
   }
 
   lemma LemmaModBreakdownAuto()
     ensures forall x: int, y: int, z: int {:trigger x % (y * z)}
-      :: 0 <= x && 0 < y && 0 < z ==> y * z > 0 && x % (y * z) == y * ((x / y) % z) + x % y
+              :: 0 <= x && 0 < y && 0 < z ==> y * z > 0 && x % (y * z) == y * ((x / y) % z) + x % y
   {
-    forall x: int, y: int, z: int | 0 <= x && 0 < y && 0 < z 
+    forall x: int, y: int, z: int | 0 <= x && 0 < y && 0 < z
       ensures y * z > 0 && x % (y * z) == y * ((x / y) % z) + x % y
     {
       LemmaModBreakdown(x, y, z);

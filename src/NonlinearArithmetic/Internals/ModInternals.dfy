@@ -1,12 +1,12 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* lemmas and functions in this file are used in the proofs in DivMod.dfy
 
@@ -46,7 +46,7 @@ module {:options "-functionSyntax:4"} ModInternals {
       ModRecursive(x - d, d)
   }
 
-  /* performs induction on modulus */ 
+  /* performs induction on modulus */
   lemma LemmaModInductionForall(n: int, f: int -> bool)
     requires n > 0
     requires forall i :: 0 <= i < n ==> f(i)
@@ -91,7 +91,7 @@ module {:options "-functionSyntax:4"} ModInternals {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x + n, n);
     var zp := (x + n) / n - x / n - 1;
-    forall ensures 0 == n * zp + ((x + n) % n) - (x % n) { LemmaMulAuto(); }
+    assert 0 == n * zp + ((x + n) % n) - (x % n) by { LemmaMulAuto(); }
     if (zp > 0) { LemmaMulInequality(1, zp, n); }
     if (zp < 0) { LemmaMulInequality(zp, -1, n); }
   }
@@ -103,7 +103,7 @@ module {:options "-functionSyntax:4"} ModInternals {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x - n, n);
     var zm := (x - n) / n - x / n + 1;
-    forall ensures 0 == n * zm + ((x - n) % n) - (x % n) { LemmaMulAuto(); }
+    assert 0 == n * zm + ((x - n) % n) - (x % n) by { LemmaMulAuto(); }
     if (zm > 0) { LemmaMulInequality(1, zm, n); }
     if (zm < 0) { LemmaMulInequality(zm, -1, n); }
   }
@@ -115,7 +115,7 @@ module {:options "-functionSyntax:4"} ModInternals {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x + n, n);
     var zp := (x + n) / n - x / n - 1;
-    forall ensures 0 == n * zp + ((x + n) % n) - (x % n) { LemmaMulAuto(); }
+    assert 0 == n * zp + ((x + n) % n) - (x % n) by { LemmaMulAuto(); }
     if (zp > 0) { LemmaMulInequality(1, zp, n); }
     if (zp < 0) { LemmaMulInequality(zp, -1, n); }
   }
@@ -127,7 +127,7 @@ module {:options "-functionSyntax:4"} ModInternals {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x - n, n);
     var zm := (x - n) / n - x / n + 1;
-    forall ensures 0 == n * zm + ((x - n) % n) - (x % n) { LemmaMulAuto(); }
+    assert 0 == n * zm + ((x - n) % n) - (x % n) by { LemmaMulAuto(); }
     if (zm > 0) { LemmaMulInequality(1, zm, n); }
     if (zm < 0) { LemmaMulInequality(zm, -1, n); }
   }
@@ -199,22 +199,22 @@ module {:options "-functionSyntax:4"} ModInternals {
 
   /* automates the modulus operator process */
   ghost predicate ModAuto(n: int)
-      requires n > 0;
+    requires n > 0;
   {
-  && (n % n == (-n) % n == 0)
-  && (forall x: int {:trigger (x % n) % n} :: (x % n) % n == x % n)
-  && (forall x: int {:trigger x % n} :: 0 <= x < n <==> x % n == x)
-  && (forall x: int, y: int {:trigger (x + y) % n} ::
-                  (var z := (x % n) + (y % n);
-                      (  (0 <= z < n     && (x + y) % n == z)
-                      || (n <= z < n + n && (x + y) % n == z - n))))
-  && (forall x: int, y: int {:trigger (x - y) % n} ::
-                  (var z := (x % n) - (y % n);
-                      (   (0 <= z < n && (x - y) % n == z)
-                      || (-n <= z < 0 && (x - y) % n == z + n))))
+    && (n % n == (-n) % n == 0)
+    && (forall x: int {:trigger (x % n) % n} :: (x % n) % n == x % n)
+    && (forall x: int {:trigger x % n} :: 0 <= x < n <==> x % n == x)
+    && (forall x: int, y: int {:trigger (x + y) % n} ::
+          (var z := (x % n) + (y % n);
+           (  (0 <= z < n     && (x + y) % n == z)
+              || (n <= z < n + n && (x + y) % n == z - n))))
+    && (forall x: int, y: int {:trigger (x - y) % n} ::
+          (var z := (x % n) - (y % n);
+           (   (0 <= z < n && (x - y) % n == z)
+               || (-n <= z < 0 && (x - y) % n == z + n))))
   }
 
-/* ensures that ModAuto is true */
+  /* ensures that ModAuto is true */
   lemma LemmaModAuto(n: int)
     requires n > 0
     ensures  ModAuto(n)
@@ -267,8 +267,8 @@ module {:options "-functionSyntax:4"} ModInternals {
   lemma LemmaModInductionAuto(n: int, x: int, f: int -> bool)
     requires n > 0
     requires ModAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                            && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
     ensures  ModAuto(n)
     ensures  f(x)
   {
@@ -285,8 +285,8 @@ module {:options "-functionSyntax:4"} ModInternals {
   lemma LemmaModInductionAutoForall(n: int, f: int -> bool)
     requires n > 0
     requires ModAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                            && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
     ensures  ModAuto(n)
     ensures  forall i {:trigger f(i)} :: f(i)
   {

@@ -1,9 +1,9 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../NonlinearArithmetic/DivMod.dfy"
 include "../../NonlinearArithmetic/Mul.dfy"
@@ -105,12 +105,12 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
       calc {
         Small.ToNatRight(ToSmall(xs));
         Small.ToNatRight(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
-          {
-            Small.LemmaSeqPrefix(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)), E());
-            LemmaToSmall(DropFirst(xs));
-          }
+        {
+          Small.LemmaSeqPrefix(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)), E());
+          LemmaToSmall(DropFirst(xs));
+        }
         First(xs) + Large.ToNatRight(DropFirst(xs)) * Pow(Small.BASE(), E());
-          { assert Pow(Small.BASE(), E()) == Large.BASE(); }
+        { assert Pow(Small.BASE(), E()) == Large.BASE(); }
         Large.ToNatRight(xs);
       }
     }
@@ -129,15 +129,15 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
     } else {
       calc {
         Large.ToNatRight(ToLarge(xs));
-          {
-            LemmaModIsZero(|xs|, E());
-            LemmaModSubMultiplesVanishAuto();
-            Small.LemmaSeqNatBound(xs[..E()]);
-          }
+        {
+          LemmaModIsZero(|xs|, E());
+          LemmaModSubMultiplesVanishAuto();
+          Small.LemmaSeqNatBound(xs[..E()]);
+        }
         Large.ToNatRight([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
-          { LemmaToLarge(xs[E()..]); }
+        { LemmaToLarge(xs[E()..]); }
         Small.ToNatRight(xs[..E()]) + Small.ToNatRight(xs[E()..]) * Pow(Small.BASE(), E());
-          { Small.LemmaSeqPrefix(xs, E()); }
+        { Small.LemmaSeqPrefix(xs, E()); }
         Small.ToNatRight(xs);
       }
     }
@@ -157,7 +157,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
 
   /* ToLarge is injective. */
   lemma LemmaToLargeIsInjective(xs: seq<Small.uint>, ys: seq<Small.uint>)
-    requires |xs| % E() == |ys| % E() == 0 
+    requires |xs| % E() == |ys| % E() == 0
     requires ToLarge(xs) == ToLarge(ys)
     requires |xs| == |ys|
     ensures xs == ys
@@ -180,17 +180,17 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
     } else {
       calc {
         ToSmall(ToLarge(xs));
-          {
-            LemmaModIsZero(|xs|, E());
-            Small.LemmaSeqNatBound(xs[..E()]);
-            LemmaModSubMultiplesVanishAuto();
-          }
+        {
+          LemmaModIsZero(|xs|, E());
+          Small.LemmaSeqNatBound(xs[..E()]);
+          LemmaModSubMultiplesVanishAuto();
+        }
         ToSmall([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
         Small.FromNatWithLen(Small.ToNatRight(xs[..E()]), E()) + ToSmall(ToLarge(xs[E()..]));
-          {
-            Small.LemmaSeqNatSeq(xs[..E()]);
-            LemmaSmallLargeSmall(xs[E()..]);
-          }
+        {
+          Small.LemmaSeqNatSeq(xs[..E()]);
+          LemmaSmallLargeSmall(xs[E()..]);
+        }
         xs;
       }
     }
@@ -212,7 +212,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
         ToLarge(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
         [Small.ToNatRight(Small.FromNatWithLen(First(xs), E())) as Large.uint] + ToLarge(ToSmall(DropFirst(xs)));
         [First(xs)] + ToLarge(ToSmall(DropFirst(xs)));
-          { LemmaLargeSmallLarge(DropFirst(xs)); }
+        { LemmaLargeSmallLarge(DropFirst(xs)); }
         [First(xs)] + DropFirst(xs);
         xs;
       }
