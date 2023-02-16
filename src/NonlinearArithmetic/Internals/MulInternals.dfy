@@ -1,12 +1,12 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* lemmas and functions in this file are used in the proofs in Mul.dfy */
 
@@ -26,14 +26,14 @@ module {:options "-functionSyntax:4"} MulInternals {
     else y + MulPos(x - 1, y)
   }
 
-  /* performs multiplication for both positive and negative integers */ 
+  /* performs multiplication for both positive and negative integers */
   function MulRecursive(x: int, y: int) : int
   {
     if x >= 0 then MulPos(x, y)
     else -1 * MulPos(-1 * x, y)
   }
 
-  /* performs induction on multiplication */ 
+  /* performs induction on multiplication */
   lemma LemmaMulInduction(f: int -> bool)
     requires f(0)
     requires forall i {:trigger f(i), f(i + 1)} :: i >= 0 && f(i) ==> f(i + 1)
@@ -113,8 +113,8 @@ module {:options "-functionSyntax:4"} MulInternals {
   /* performs auto induction for multiplication */
   lemma LemmaMulInductionAuto(x: int, f: int -> bool)
     requires MulAuto() ==> f(0)
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1))
-                          && (forall i {:trigger IsLe(i, 0)} :: IsLe(i, 0) && f(i) ==> f(i - 1))
+                           && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1))
+                           && (forall i {:trigger IsLe(i, 0)} :: IsLe(i, 0) && f(i) ==> f(i - 1))
     ensures  MulAuto()
     ensures  f(x)
   {
@@ -129,8 +129,8 @@ module {:options "-functionSyntax:4"} MulInternals {
   /* performs auto induction on multiplication for all i s.t. f(i) exists */
   lemma LemmaMulInductionAutoForall(f: int -> bool)
     requires MulAuto() ==> f(0)
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1))
-                          && (forall i {:trigger IsLe(i, 0)} :: IsLe(i, 0) && f(i) ==> f(i - 1))
+                           && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1))
+                           && (forall i {:trigger IsLe(i, 0)} :: IsLe(i, 0) && f(i) ==> f(i - 1))
     ensures  MulAuto()
     ensures  forall i {:trigger f(i)} :: f(i)
   {
@@ -141,4 +141,4 @@ module {:options "-functionSyntax:4"} MulInternals {
     LemmaMulInduction(f);
   }
 
-} 
+}

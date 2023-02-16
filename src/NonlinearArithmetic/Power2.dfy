@@ -1,12 +1,12 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The
 former takes arguments and may be more stable and less reliant on Z3
@@ -35,7 +35,7 @@ module {:options "-functionSyntax:4"} Power2 {
   {
     reveal Pow();
     reveal Pow2();
-  
+
     if e != 0 {
       LemmaPow2(e - 1);
     }
@@ -46,7 +46,7 @@ module {:options "-functionSyntax:4"} Power2 {
   {
     reveal Pow();
     reveal Pow2();
-    
+
     forall e: nat {:trigger Pow2(e)}
       ensures Pow2(e) == Pow(2, e)
     {
@@ -69,7 +69,7 @@ module {:options "-functionSyntax:4"} Power2 {
 
   lemma LemmaPow2MaskDiv2Auto()
     ensures forall e: nat {:trigger Pow2(e)} :: 0 < e ==>
-      (Pow2(e) - 1) / 2 == Pow2(e - 1) - 1
+                                                  (Pow2(e) - 1) / 2 == Pow2(e - 1) - 1
   {
     reveal Pow2();
     forall e: nat {:trigger Pow2(e)} | 0 < e
@@ -118,4 +118,4 @@ module {:options "-functionSyntax:4"} Power2 {
     reveal Pow2();
   }
 
-} 
+}

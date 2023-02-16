@@ -1,19 +1,19 @@
 // RUN: %dafny /compile:0 /noNLarith "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 module {:options "-functionSyntax:4"} GeneralInternals {
 
   /* this predicate is primarily used as a trigger */
-  ghost predicate IsLe(x: int, y: int) 
-  { 
-    x <= y 
+  ghost predicate IsLe(x: int, y: int)
+  {
+    x <= y
   }
 
   /* aids in the process of induction for modulus */
