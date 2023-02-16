@@ -6,7 +6,7 @@ The `Relations` module defines a number of properties of functions.
 Properties of binary predicates:
 - Reflexive: `R(x,x)` is true
 - Irreflexive: `R(x,x)` is false
-- AntiSymmetric: `R(x,y) ==> R(y.x)`
+- AntiSymmetric: `R(x,y) && R(y,x) ==> x==y`
 - Transitive : `R(x,y) && R(y,z) ==> R(x,z)`
 - Connected : `x != y ==> R(x,y) || R(y,x)`
 - StronglyConnected : `R(x,y) || R(y,x)`
