@@ -50,3 +50,20 @@ language files that are included in this Dafny Core distribution.
 The procedure for using library code directly with VSCode is not yet settled. For now make a copy of the library in your system and  'include' the `DafnyCore.md` file.
 
 
+---
+{% include_relative src/dafny/Boxes.md %}
+---
+{% include_relative src/dafny/BoundedInts.md %}
+---
+{% include_relative src/dafny/FileIO/FileIO.md %}
+---
+{% include_relative src/dafny/Math %}
+---
+{% include_relative src/dafny/Collections/Collections %}
+---
+{% include_relative src/dafny/Relations %}
+---
+{% include_relative src/dafny/Unicode/Unicode %}
+---
+{% include_relative src/dafny/NonlinearArithmetic/NonlinearArithmetic %}
+
