@@ -1258,8 +1258,8 @@ module {:options "-functionSyntax:4"} DivMod {
     requires 0 < d
     ensures x % d == (x * (1 - d)) % d
   {
-    forall ensures (x - x * d) % d == x % d
-    {
+    assert (x - x * d) % d == x % d
+    by {
       LemmaModAuto(d);
       var f := i => (x - i * d) % d == x % d;
       assert  MulAuto() ==> && f(0)

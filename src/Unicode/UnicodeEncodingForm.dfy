@@ -118,10 +118,10 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     decreases |s|
   {
     if s == [] then Some([])
-    else (
+    else
       var maybePrefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
       if maybePrefix.None? then None
-      else (
+      else
         var prefix := maybePrefix.Extract();
         // Recursing on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
         // This definition (and others in the Unicode modules) emphasizes clarify and correctness,
@@ -130,8 +130,6 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
         var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
         if restParts.Some? then Some([prefix] + restParts.Extract())
         else None
-      )
-    )
   }
 
   /**
