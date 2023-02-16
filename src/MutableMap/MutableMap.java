@@ -4,36 +4,53 @@
 *******************************************************************************/
 
 import dafny.DafnySet;
-import dafny.TypeDescriptor
+import dafny.DafnyMap;
+import dafny.Tuple2;
 
-package MutableMap;
+import java.util.HashMap;
 
-public class MutableMap {
-  private m;
+package DafnyLibraries;
+
+public class MutableMap<K,V> {
+  private HashMap<K, V> m;
+
+  public DafnyMap<K, V> content() {
+    return new DafnyMap<>(m);
+  }
 
   public MutableMap() {
-    m = new ;
+    m = new HashMap<>();
   }
 
-  public static void Put(K k, V v) {
+  public void put(K k, V v) {
+    m.put(k, v);
   }
 
-  public static DafnySet<K> Keys() {
+  public DafnySet<K> keys() {
+    return new DafnySet<>(m.keySet());
   }
 
-  public static DafnySet<V> Values() {
+  public DafnySet<V> values() {
+    return new DafnySet<>(m.values());
   }
 
-  public static DafnySet<(K,V)> Items() {
+  public DafnySet<Tuple2<K,V>> items() {
+    ArrayList<Tuple2<K, V>> list = new ArrayList<Tuple2<K, V>>();
+    for (Entry<K, V> entry : m.entrySet()) {
+      list.add(new Tuple2<K, V>(entry.getKey(), entry.getValue()));
+    }
+    return new DafnySet<Tuple2<K, V>>(list);
   }
 
-  public static V Find(K k) {
+  public V find(K k) {
+    m.get(k);
   }
 
-  public static void Remove(K k) {
-
+  public void remove(K k) {
+    m.remove(k);
   }
 
-  public static int Size() {
+  public int size() {
+    return m.size();
   }
 }
