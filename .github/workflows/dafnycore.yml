@@ -9,6 +9,10 @@ on:
 
 jobs:
   verification:
+    strategy
+      matrix:
+        version: [ "3.11.1", "nightly-2023-02-15-567a5ba" ]
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +25,7 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "nightly-2023-02-15-567a5ba"
+          dafny-version: ${{ matrix.version }}
 
       - name: Check version
         run: |
