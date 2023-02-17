@@ -5,10 +5,10 @@
 
 // RUN: %dafny /compile:0 "%s"
 
-include "MutableMap.dfy"
+include "MutableMapTrait.dfy"
    
-module {:options "-functionSyntax:4"} MutableMapDafny refines MutableMap {
-  class MutableMapDafny<K(==),V(==)> extends MutableMap<K,V> {
+module {:options "-functionSyntax:4"} MutableMapDafny refines MutableMapTrait {
+  class MutableMapDafny<K(==),V(==)> extends MutableMapTrait<K,V> {
     var m: map<K,V>
 
     function content(): map<K, V> 

@@ -8,6 +8,7 @@ import dafny.DafnySet;
 import dafny.DafnyMap;
 import dafny.Tuple2;
 import dafny.TypeDescriptor;
+import dafny.Helpers;
 
 import java.util.concurrent.*;
 import java.util.ArrayList;
@@ -26,10 +27,6 @@ public class MutableMap<K,V> {
 
   public MutableMap(TypeDescriptor<K> x, TypeDescriptor<V> y) {
     m = new ConcurrentHashMap<K,V>();
-  }
-
-  public static <K,V> MutableMap<K,V> Make() {
-    return new MutableMap<K,V>();
   }
 
   public void Put(K k, V v) {

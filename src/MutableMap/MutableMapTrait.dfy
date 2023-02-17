@@ -5,48 +5,58 @@
 
 // RUN: %dafny /compile:0 "%s"
 
-include "MutableMapTrait.dfy"
+include "../Wrappers.dfy"
 
-module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap refines MutableMapTrait {
-  class {:extern} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
-    constructor {:extern} ()
-      ensures this.content() == map[]
+module {:options "-functionSyntax:4"} MutableMapTrait {
+  import opened Wrappers
 
-    function {:extern} content(): map<K, V>
+  trait MutableMapTrait<K(==),V(==)> {
+    function content(): map<K, V>
       reads this
 
-    method {:extern} Put(k: K, v: V)
+    method Put(k: K, v: V)
       modifies this
-      ensures this.content() == old(this.content())[k := v]   
+      ensures this.content() == old(this.content())[k := v]    
 
-    function {:extern} Keys(): (keys: set<K>)
+    function Keys(): (keys: set<K>)
       reads this
       ensures keys == this.content().Keys
 
-    predicate {:extern} HasKey(k: K)
+    predicate HasKey(k: K)
       reads this
       ensures HasKey(k) <==> k in this.content().Keys
 
-    function {:extern} Values(): (values: set<V>)
+    function Values(): (values: set<V>)
       reads this
       ensures values == this.content().Values
 
-    function {:extern} Items(): (items: set<(K,V)>)
+    function Items(): (items: set<(K,V)>)
       reads this
       ensures items == this.content().Items
       ensures items == set k | k in this.content().Keys :: (k, this.content()[k])
 
-    function {:extern} Select(k: K): (v: V)
+    function Select(k: K): (v: V)
       reads this
       requires this.HasKey(k)
       ensures v in this.content().Values
       ensures this.content()[k] == v
+
+    function SelectOpt(k: K): (o: Option<V>)
+      reads this
+      ensures o.Some? ==> (this.HasKey(k) && o.value in this.content().Values && this.content()[k] == o.value) 
+      ensures o.None? ==> !this.HasKey(k)
+    {
+      if this.HasKey(k) then
+        Some(this.Select(k))
+      else
+        None
+    }
     
-    method {:extern} Remove(k: K)
+    method Remove(k: K)
       modifies this
       ensures this.content() == old(this.content()) - {k}
 
-    function {:extern} Size(): (size: int)
+    function Size(): (size: int)
       reads this
       ensures size == |this.content().Items|
   }
