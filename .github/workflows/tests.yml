@@ -1,40 +1,57 @@
-# This workflow performs static analysis checks.
-name: legacy tests
+# This workflow does static verification of the DafnyCore library
+name: Dafny Core verification
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verification:
-    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
+        os: [ ubuntu-latest ]
+
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "nightly-2023-02-15-567a5ba"
+          dafny-version: ${{ matrix.version }}
+
+      - name: Check version
+        run: |
+          dafny --version
+          echo ${{ matrix.os }} ${{ runner.os }}
+
+      - name: Upgrade outdated pip
+        run: python -m pip install --upgrade pip
 
       - name: Install lit
-        run: pip install lit OutputCheck
+        run: pip install lit OutputCheck pyyaml
 
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
-      - name: Verify Legacy Code
-        run: lit --time-tests -v .
-        ## run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
+      - name: Verify DafnyCore Code
+        run: |
+          lit src --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
-#      - name: Generate Report
-#        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
-#
-#      - uses: actions/upload-artifact@v2  # upload test results
-#        if: success() || failure()        # run this step even if previous step failed
-#        with:
-#          name: verification-results
-#          path: '**/TestResults/*.trx'
-#          if-no-files-found: error
+      - name: Generate Report
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: verification-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: error
