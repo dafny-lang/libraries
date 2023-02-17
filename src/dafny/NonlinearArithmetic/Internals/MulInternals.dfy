@@ -13,7 +13,7 @@
 include "GeneralInternals.dfy"
 include "MulInternalsNonlinear.dfy"
 
-module {:options "-functionSyntax:4"} MulInternals {
+module {:options "-functionSyntax:4"} Dafny.MulInternals {
 
   import opened GeneralInternals
   import opened MulInternalsNonlinear
@@ -112,7 +112,7 @@ module {:options "-functionSyntax:4"} MulInternals {
 
   /* performs auto induction for multiplication */
   lemma LemmaMulInductionAuto(x: int, f: int -> bool)
-    requires MulAuto() ==> f(0)
+    requires MulAuto() ==> && f(0)
                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1))
                            && (forall i {:trigger IsLe(i, 0)} :: IsLe(i, 0) && f(i) ==> f(i - 1))
     ensures  MulAuto()
@@ -128,7 +128,7 @@ module {:options "-functionSyntax:4"} MulInternals {
 
   /* performs auto induction on multiplication for all i s.t. f(i) exists */
   lemma LemmaMulInductionAutoForall(f: int -> bool)
-    requires MulAuto() ==> f(0)
+    requires MulAuto() ==> && f(0)
                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1))
                            && (forall i {:trigger IsLe(i, 0)} :: IsLe(i, 0) && f(i) ==> f(i - 1))
     ensures  MulAuto()

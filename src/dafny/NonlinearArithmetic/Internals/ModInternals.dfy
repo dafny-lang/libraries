@@ -20,14 +20,14 @@ Note this is consistent: -3 * -1 + 2 == 5 */
 
 include "GeneralInternals.dfy"
 include "MulInternals.dfy"
-include "../Mul.dfy"
+include "../Multiply.dfy"
 include "ModInternalsNonlinear.dfy"
 include "DivInternalsNonlinear.dfy"
 
-module {:options "-functionSyntax:4"} ModInternals {
+module {:options "-functionSyntax:4"} Dafny.ModInternals {
 
   import opened GeneralInternals
-  import opened Mul
+  import opened Multiply
   import opened MulInternalsNonlinear
   import opened MulInternals
   import opened ModInternalsNonlinear
@@ -186,7 +186,7 @@ module {:options "-functionSyntax:4"} ModInternals {
       LemmaQuotientAndRemainder(x - n, q - 1, r, n);
     }
     else if q < 0 {
-      Mul.LemmaMulIsDistributiveSub(n, q + 1, 1);
+      Multiply.LemmaMulIsDistributiveSub(n, q + 1, 1);
       LemmaMulIsCommutativeAuto();
       assert q * n + r == (q + 1) * n - n + r;
       LemmaQuotientAndRemainder(x + n, q + 1, r, n);

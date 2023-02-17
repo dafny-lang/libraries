@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} GeneralInternals {
+module {:options "-functionSyntax:4"} Dafny.GeneralInternals {
 
   /* this predicate is primarily used as a trigger */
   ghost predicate IsLe(x: int, y: int)

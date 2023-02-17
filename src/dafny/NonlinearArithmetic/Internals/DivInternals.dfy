@@ -21,7 +21,7 @@ Note this is consistent: -3 * -1 + 2 == 5 */
 include "GeneralInternals.dfy"
 include "ModInternals.dfy"
 
-module {:options "-functionSyntax:4"} DivInternals {
+module {:options "-functionSyntax:4"} Dafny.DivInternals {
 
   import opened GeneralInternals
   import opened ModInternals

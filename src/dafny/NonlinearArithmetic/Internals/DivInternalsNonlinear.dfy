@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} DivInternalsNonlinear {
+module {:options "-functionSyntax:4"} Dafny.DivInternalsNonlinear {
 
   /* WARNING: Think three times before adding to this file, as nonlinear
   verification is highly unstable! */
