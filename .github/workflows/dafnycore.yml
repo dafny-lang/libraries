@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ master ]
 
+concurrency: 
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   verification:
     continue-on-error: true
