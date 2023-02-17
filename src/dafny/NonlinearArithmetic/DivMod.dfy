@@ -15,15 +15,16 @@ heuristics. The latter includes automation and its use requires less effort */
 include "Internals/DivInternalsNonlinear.dfy"
 include "Internals/DivInternals.dfy"
 include "Internals/GeneralInternals.dfy"
+include "Multiply.dfy"
 
-module {:options "-functionSyntax:4"} DivMod {
+module {:options "-functionSyntax:4"} Dafny.DivMod {
 
   import opened DivInternals
   import DivINL = DivInternalsNonlinear
   import opened ModInternals
   import ModINL = ModInternalsNonlinear
   import opened MulInternals
-  import opened Mul
+  import opened Multiply
   import opened GeneralInternals
 
   /*****************************************************************************
@@ -1243,12 +1244,12 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaModAddsAuto()
     ensures forall a: int, b: int, d: int {:trigger (a + b) % d}
-              :: 0 < d ==> a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
-                           && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
+              :: 0 < d ==> && a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
+                           && ((a % d + b % d) < d ==> a % d + b % d == (a + b) % d)
   {
     forall a: int, b: int, d: int | 0 < d
-      ensures a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
-              && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
+      ensures && a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
+              && ((a % d + b % d) < d ==> a % d + b % d == (a + b) % d)
     {
       LemmaModAdds(a, b, d);
     }

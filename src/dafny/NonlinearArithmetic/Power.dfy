@@ -14,13 +14,13 @@ heuristics. The latter includes automation and its use requires less effort */
 
 include "DivMod.dfy"
 include "Internals/GeneralInternals.dfy"
-include "Mul.dfy"
+include "Multiply.dfy"
 include "Internals/MulInternals.dfy"
 
-module {:options "-functionSyntax:4"} Power {
+module {:options "-functionSyntax:4"} Dafny.Power {
   import opened DivMod
   import opened GeneralInternals
-  import opened Mul
+  import opened Multiply
   import opened MulInternals
 
   function {:opaque} Pow(b: int, e: nat): int

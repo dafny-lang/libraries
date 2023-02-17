@@ -16,7 +16,7 @@ include "Internals/GeneralInternals.dfy"
 include "Internals/MulInternals.dfy"
 include "Power.dfy"
 
-module {:options "-functionSyntax:4"} Power2 {
+module {:options "-functionSyntax:4"} Dafny.Power2 {
   import opened GeneralInternals
   import opened MulInternals
   import opened Power
@@ -68,8 +68,8 @@ module {:options "-functionSyntax:4"} Power2 {
   }
 
   lemma LemmaPow2MaskDiv2Auto()
-    ensures forall e: nat {:trigger Pow2(e)} :: 0 < e ==>
-                                                  (Pow2(e) - 1) / 2 == Pow2(e - 1) - 1
+    ensures forall e: nat {:trigger Pow2(e)} ::
+              0 < e ==> (Pow2(e) - 1) / 2 == Pow2(e - 1) - 1
   {
     reveal Pow2();
     forall e: nat {:trigger Pow2(e)} | 0 < e
