@@ -10,16 +10,20 @@ module {:options "-functionSyntax:4"} Math {
   {
     if a < b
     then a
-    else
-      b
+    else b
   }
 
   function Max(a: int, b: int): int
   {
     if a < b
     then b
-    else
-      a
+    else a
   }
 
+  function Abs(a: int): int
+  {
+    if a < 0
+    then -a
+    else a
+  }
 }
