@@ -18,12 +18,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
+        # version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
+        version: [ nightly-latest , 3.11.0 ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
@@ -53,9 +54,9 @@ jobs:
           ##lit src/dafny --time-tests -v  
           lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
-#      - name: Generate Report
-#        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
-#
+      - name: Generate Report
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+
 #      - uses: actions/upload-artifact@v2  # upload test results
 #        if: success() || failure()        # run this step even if previous step failed
 #        with:
