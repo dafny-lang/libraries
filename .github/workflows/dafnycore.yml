@@ -47,7 +47,7 @@ jobs:
 
       - name: Check - Macos
         if: matrix.os == 'macos-latest'
-          run: brew install lit
+        run: brew install lit
 
       - name: Set up JS dependencies
         run: npm install bignumber.js
