@@ -3,26 +3,30 @@ name: Dafny Core verification
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
 jobs:
   verification:
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
-        os: [ ubuntu-latest ]
-
-    runs-on: ${{ matrix.os }}
+#    continue-on-error: true
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
+#        os: [ ubuntu-latest ]
+#
+#    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: ${{ matrix.version }}
+          dafny-version: 3.11.0
+# ${{ matrix.version }}
 
       - name: Check version
         run: |
