@@ -12,15 +12,15 @@
 first element of a sequence is the least significant position; the last
 element is the most significant position. */
 
-include "../../NonlinearArithmetic/DivMod.dfy"
-include "../../NonlinearArithmetic/Mul.dfy"
-include "../../NonlinearArithmetic/Power.dfy"
-include "Seq.dfy"
+include "../NonlinearArithmetic/DivMod.dfy"
+include "../NonlinearArithmetic/Multiply.dfy"
+include "../NonlinearArithmetic/Power.dfy"
+include "Seqs.dfy"
 
-abstract module {:options "-functionSyntax:4"} LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} Dafny.Collections.LittleEndianNat {
 
   import opened DivMod
-  import opened Mul
+  import opened Multiply
   import opened Power
   import opened Seq
 

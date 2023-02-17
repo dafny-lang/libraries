@@ -5,12 +5,15 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../../Wrappers.dfy"
-include "../../Relations.dfy"
+include "../Boxes.dfy"
+include "../Relations.dfy"
+include "Seqs.dfy"
 
-module BinarySearch {
-  import opened Wrappers
+module Dafny.Collections.Arrays {
+
+  import opened Boxes
   import opened Relations
+  import opened Seq
 
   method BinarySearch<T>(a: array<T>, key: T, less: (T, T) -> bool) returns (r: Option<nat>)
     requires SortedBy(a[..], (x, y) => less(x, y) || x == y)

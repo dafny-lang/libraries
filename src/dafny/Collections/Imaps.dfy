@@ -9,10 +9,10 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../../Wrappers.dfy"
+include "../Boxes.dfy"
 
-module {:options "-functionSyntax:4"} Imaps {
-  import opened Wrappers
+module {:options "-functionSyntax:4"} Dafny.Collections.Imaps {
+  import opened Boxes
 
   function Get<X, Y>(m: imap<X, Y>, x: X): Option<Y>
   {

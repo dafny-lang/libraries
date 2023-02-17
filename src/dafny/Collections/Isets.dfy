@@ -13,11 +13,11 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../../Functions.dfy"
+include "../Relations.dfy"
 
-module {:options "-functionSyntax:4"} Isets {
+module {:options "-functionSyntax:4"} Dafny.Collections.Isets {
 
-  import opened Functions
+  import opened Relations
 
   /* If all elements in iset x are in iset y, x is a subset of y. */
   lemma LemmaSubset<T>(x: iset<T>, y: iset<T>)

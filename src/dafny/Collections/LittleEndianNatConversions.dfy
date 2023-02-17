@@ -5,14 +5,14 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../../NonlinearArithmetic/DivMod.dfy"
-include "../../NonlinearArithmetic/Mul.dfy"
-include "../../NonlinearArithmetic/Power.dfy"
-include "Seq.dfy"
+include "../NonlinearArithmetic/DivMod.dfy"
+include "../NonlinearArithmetic/Multiply.dfy"
+include "../NonlinearArithmetic/Power.dfy"
+include "Seqs.dfy"
 include "LittleEndianNat.dfy"
 
 /* Sequence with smaller base. */
-abstract module {:options "-functionSyntax:4"} SmallSeq refines LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} Dafny.Collections.SmallSeq refines LittleEndianNat {
 
   function BITS(): nat
     ensures BITS() > 1
@@ -27,7 +27,7 @@ abstract module {:options "-functionSyntax:4"} SmallSeq refines LittleEndianNat 
 }
 
 /* Sequence with larger base. */
-abstract module {:options "-functionSyntax:4"} LargeSeq refines LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} Dafny.Collections.LargeSeq refines LittleEndianNat {
 
   import Small : SmallSeq
 
@@ -43,10 +43,10 @@ abstract module {:options "-functionSyntax:4"} LargeSeq refines LittleEndianNat 
 
 }
 
-abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
+abstract module {:options "-functionSyntax:4"} Dafny.Collections.LittleEndianNatConversions {
 
   import opened DivMod
-  import opened Mul
+  import opened Multiply
   import opened Power
   import opened Seq
 
@@ -222,7 +222,7 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
 }
 
 /* Conversions between sequences of uint8 and uint16. */
-module {:options "-functionSyntax:4"} Uint8_16 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Dafny.Collections.Uint8_16 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
     function BITS(): nat { 8 }
@@ -239,7 +239,7 @@ module {:options "-functionSyntax:4"} Uint8_16 refines LittleEndianNatConversion
 }
 
 /* Conversions between sequences of uint8 and uint32. */
-module {:options "-functionSyntax:4"} Uint8_32 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Dafny.Collections.Uint8_32 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
     function BITS(): nat { 8 }
@@ -256,7 +256,7 @@ module {:options "-functionSyntax:4"} Uint8_32 refines LittleEndianNatConversion
 }
 
 /* Conversions between sequences of uint8 and uint64. */
-module {:options "-functionSyntax:4"} Uint8_64 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Dafny.Collections.Uint8_64 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
     function BITS(): nat { 8 }
@@ -273,7 +273,7 @@ module {:options "-functionSyntax:4"} Uint8_64 refines LittleEndianNatConversion
 }
 
 /* Conversions between sequences of uint16 and uint32. */
-module {:options "-functionSyntax:4"} Uint16_32 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Dafny.Collections.Uint16_32 refines LittleEndianNatConversions {
 
   module Uint16Seq refines SmallSeq {
     function BITS(): nat { 16 }
@@ -290,7 +290,7 @@ module {:options "-functionSyntax:4"} Uint16_32 refines LittleEndianNatConversio
 }
 
 /* Conversions between sequences of uint32 and uint64. */
-module {:options "-functionSyntax:4"} Uint32_64 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Dafny.Collections.Uint32_64 refines LittleEndianNatConversions {
 
   module Uint32Seq refines SmallSeq {
     function BITS(): nat { 32 }

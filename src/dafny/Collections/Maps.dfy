@@ -9,10 +9,10 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../../Wrappers.dfy"
+include "../Boxes.dfy"
 
-module {:options "-functionSyntax:4"} Maps {
-  import opened Wrappers
+module {:options "-functionSyntax:4"} Dafny.Collections.Maps {
+  import opened Boxes
 
   function Get<X, Y>(m: map<X, Y>, x: X): Option<Y>
   {

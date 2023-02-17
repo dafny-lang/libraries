@@ -13,15 +13,13 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../../Wrappers.dfy"
-include "../../Math.dfy"
-include "MergeSort.dfy"
-include "../../Relations.dfy"
+include "../Boxes.dfy"
+include "../Math.dfy"
+include "../Relations.dfy"
 
-module {:options "-functionSyntax:4"} Seq {
+module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
-  import opened Wrappers
-  import opened MergeSort
+  import opened Boxes
   import opened Relations
   import Math
 
@@ -866,5 +864,88 @@ module {:options "-functionSyntax:4"} Seq {
     xs := SetToSeq(s);
     xs := MergeSortBy(xs, R);
     SortedUnique(xs, SetToSortedSeq(s, R), R);
+  }
+
+
+  /****************************
+   **  Sorting sequences
+   ***************************** */
+
+  //Splits a sequence in two, sorts the two subsequences (recursively), and merges the two sorted sequences using `MergeSortedWith`
+  function MergeSortBy<T>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
+    requires TotalOrdering(lessThanOrEq)
+    ensures multiset(a) == multiset(result)
+    ensures SortedBy(result, lessThanOrEq)
+  {
+    if |a| <= 1 then
+      a
+    else
+      var splitIndex := |a| / 2;
+      var left, right := a[..splitIndex], a[splitIndex..];
+
+      assert a == left + right;
+
+      var leftSorted := MergeSortBy(left, lessThanOrEq);
+      var rightSorted := MergeSortBy(right, lessThanOrEq);
+
+      MergeSortedWith(leftSorted, rightSorted, lessThanOrEq)
+  }
+
+  ghost predicate SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
+    forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
+  }
+
+  /* An element in an ordered set is called minimal, if it is less than every element of the set. */
+  ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
+    m in s && forall y: T | y in s :: R(m, y)
+  }
+
+  /* Any totally ordered set contains a unique minimal element. */
+  lemma LemmaUniqueMinimum<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (m: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMinimum(R, m, s) && (forall n: T | IsMinimum(R, n, s) :: m == n)
+  {
+    var x :| x in s;
+    if s == {x} {
+      m := x;
+    } else {
+      var m' := LemmaUniqueMinimum(R, s - {x});
+      if
+      case R(m', x) => m := m';
+      case R(x, m') => m := x;
+    }
+  }
+
+  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
+    requires SortedBy(s, lessThan)
+    requires |s| == 0 || lessThan(x, s[0])
+    requires TotalOrdering(lessThan)
+    ensures SortedBy([x] + s, lessThan)
+  {}
+
+
+  // Helper function for MergeSortBy
+  function {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool) : (result :seq<T>)
+    requires SortedBy(left, lessThanOrEq)
+    requires SortedBy(right, lessThanOrEq)
+    requires TotalOrdering(lessThanOrEq)
+    ensures multiset(left + right) == multiset(result)
+    ensures SortedBy(result, lessThanOrEq)
+  {
+    if |left| == 0 then
+      right
+    else if |right| == 0 then
+      left
+    else if lessThanOrEq(left[0], right[0]) then
+      LemmaNewFirstElementStillSortedBy(left[0], MergeSortedWith(left[1..], right, lessThanOrEq), lessThanOrEq);
+      assert left == [left[0]] + left[1..];
+
+      [left[0]] + MergeSortedWith(left[1..], right, lessThanOrEq)
+
+    else
+      LemmaNewFirstElementStillSortedBy(right[0], MergeSortedWith(left, right[1..], lessThanOrEq), lessThanOrEq);
+      assert right == [right[0]] + right[1..];
+
+      [right[0]] + MergeSortedWith(left, right[1..], lessThanOrEq)
   }
 }
