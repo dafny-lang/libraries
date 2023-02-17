@@ -2,46 +2,53 @@
 *  Copyright by the contributors to the Dafny Project
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
-package MutableMap;
+package DafnyLibraries;
 
 import dafny.DafnySet;
 import dafny.DafnyMap;
 import dafny.Tuple2;
 import dafny.TypeDescriptor;
 
-import java.util.HashMap;
+import java.util.concurrent.*;
 import java.util.ArrayList;
 import java.util.Map;
 
-
 public class MutableMap<K,V> {
-  private HashMap<K, V> m;
+  private ConcurrentHashMap<K,V> m;
 
-  public DafnyMap<K,V> content() {
-    return new DafnyMap<>(m);
+  public DafnyMap<K,V> Content() {
+    return new DafnyMap<K,V>(m);
   }
 
   public MutableMap() {
-    m = new HashMap<>();
+    m = new ConcurrentHashMap<K,V>();
   }
 
   public MutableMap(TypeDescriptor<K> x, TypeDescriptor<V> y) {
-    m = new HashMap<>();
+    m = new ConcurrentHashMap<K,V>();
   }
 
-  public void put(K k, V v) {
+  public static <K,V> MutableMap<K,V> Make() {
+    return new MutableMap<K,V>();
+  }
+
+  public void Put(K k, V v) {
     m.put(k, v);
   }
 
-  public DafnySet<? extends K> keys() {
-    return new DafnySet<>(m.keySet());
+  public DafnySet<? extends K> Keys() {
+    return new DafnySet(m.keySet());
   }
 
-  public DafnySet<? extends V> values() {
-    return new DafnySet<>(m.values());
+  public boolean HasKey(K k) {
+    return m.containsKey(k);
   }
 
-  public DafnySet<? extends Tuple2<K,V>> items() {
+  public DafnySet<? extends V> Values() {
+    return new DafnySet(m.values());
+  }
+
+  public DafnySet<? extends Tuple2<K,V>> Items() {
     ArrayList<Tuple2<K, V>> list = new ArrayList<Tuple2<K, V>>();
     for (Map.Entry<K, V> entry : m.entrySet()) {
       list.add(new Tuple2<K, V>(entry.getKey(), entry.getValue()));
@@ -49,15 +56,15 @@ public class MutableMap<K,V> {
     return new DafnySet<Tuple2<K, V>>(list);
   }
 
-  public V find(K k) {
+  public V Select(K k) {
     return m.get(k);
   }
 
-  public void remove(K k) {
+  public void Remove(K k) {
     m.remove(k);
   }
 
-  public int size() {
+  public int Size() {
     return m.size();
   }
 }
