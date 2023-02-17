@@ -11,7 +11,7 @@ jobs:
   verification:
     strategy:
       matrix:
-        version: [ nightly-2023-02-15-567a5ba , 3.11.1 ]
+        version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
