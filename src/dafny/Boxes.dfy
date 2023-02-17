@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "--function-syntax:4"} Boxes {
+module {:options "--function-syntax:4"} Dafny.Boxes {
 
   datatype Option<+T> = None | Some(value: T) {
     predicate IsFailure() {

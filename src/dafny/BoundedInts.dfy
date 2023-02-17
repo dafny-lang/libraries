@@ -1,6 +1,6 @@
 // RUN: %verify "%s"
 
-module {:options "-functionSyntax:4"} BoundedInts {
+module {:options "-functionSyntax:4"} Dafny.BoundedInts {
   const TWO_TO_THE_0:   int := 1
 
   const TWO_TO_THE_1:   int := 2

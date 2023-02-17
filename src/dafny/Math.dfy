@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Math {
+module {:options "-functionSyntax:4"} Dafny.Math {
   function Min(a: int, b: int): int
   {
     if a < b

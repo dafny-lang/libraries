@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Relations {
+module {:options "-functionSyntax:4"} Dafny.Relations {
 
   ghost predicate Injective<X(!new), Y>(f: X-->Y)
     reads f.reads
