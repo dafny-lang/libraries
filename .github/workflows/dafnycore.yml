@@ -44,6 +44,10 @@ jobs:
       - name: Install lit
         run: pip install lit OutputCheck pyyaml
 
+      - name: Check - Windows
+        if: runner.os == 'Macos'
+          run: brew install lit
+
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
