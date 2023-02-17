@@ -16,7 +16,7 @@ jobs:
       - name: switch branch
         run: |
           git fetch
-          git checkout cok-code
+          git checkout cok-newcode
 
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
