@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../Collections/Sequences/Seq.dfy"
+include "../Collections/Seqs.dfy"
 include "../BoundedInts.dfy"
 
 include "Unicode.dfy"
@@ -28,11 +28,11 @@ include "Utf8EncodingForm.dfy"
   * Proving those lemmas are easier to write using `calc`,
   * but that runs into <https://github.com/dafny-lang/dafny/issues/1639>.
   */
-module {:options "-functionSyntax:4"} Utf8EncodingScheme {
-  import opened Wrappers
+module {:options "-functionSyntax:4"} Dafny.Utf8EncodingScheme {
+  import opened Boxes
 
   import BoundedInts
-  import Seq
+  import Collections.Seq
   import Unicode
   import Utf8EncodingForm
 

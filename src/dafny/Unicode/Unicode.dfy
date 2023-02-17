@@ -5,14 +5,11 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../Wrappers.dfy"
-include "../Collections/Sequences/Seq.dfy"
+include "../Boxes.dfy"
+include "../Collections/Seqs.dfy"
 
 // This module implements basic functionality of Unicode 14.0.
-module {:options "-functionSyntax:4"} Unicode {
-  import opened Wrappers
-
-  import Seq
+module {:options "-functionSyntax:4"} Dafny.Unicode {
 
   /**
     * Any value in the Unicode codespace (a range of integers from 0 to 10FFFF_16). (Section 3.9 D9-D10)

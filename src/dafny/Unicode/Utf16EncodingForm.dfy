@@ -5,14 +5,14 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../Collections/Sequences/Seq.dfy"
-include "../Functions.dfy"
+include "../Collections/Seqs.dfy"
+include "../Relations.dfy"
 
 include "Unicode.dfy"
 include "UnicodeEncodingForm.dfy"
 
 // Definition of the UTF-16 Unicode Encoding Form, as specified in Section 3.9 D91.
-module {:options "-functionSyntax:4"} Utf16EncodingForm refines UnicodeEncodingForm {
+module {:options "-functionSyntax:4"} Dafny.Utf16EncodingForm refines UnicodeEncodingForm {
   type CodeUnit = bv16
 
   //

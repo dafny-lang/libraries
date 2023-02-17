@@ -5,9 +5,9 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../Wrappers.dfy"
-include "../Functions.dfy"
-include "../Collections/Sequences/Seq.dfy"
+include "../Boxes.dfy"
+include "../Relations.dfy"
+include "../Collections/Seqs.dfy"
 
 include "Unicode.dfy"
 
@@ -25,11 +25,11 @@ include "Unicode.dfy"
   *  - The function `DecodeMinimalWellFormedCodeUnitSubsequence`, which defines the mapping from minimal well-formed
   *    code unit subsequences to scalar values.
   */
-abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
-  import opened Wrappers
+abstract module {:options "-functionSyntax:4"} Dafny.UnicodeEncodingForm {
+  import opened Boxes
 
-  import Functions
-  import Seq
+  import Relations
+  import Collections.Seq
   import Unicode
 
   type CodeUnitSeq = seq<CodeUnit>
