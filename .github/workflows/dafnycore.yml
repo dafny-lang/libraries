@@ -8,8 +8,8 @@ on:
   pull_request:
     branches: [ master ]
 
-concurrency: 
-  group: ${{ github.head_ref }}
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
