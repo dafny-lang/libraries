@@ -3,11 +3,11 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
-// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:"
-// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:"
-// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT"
+// RUN: %run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:"
+// RUN: %run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:"
+// RUN: %run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT"
 
 //// Check that written files match expectations
 // RUN: %diff "%S/data.txt" "%t_cs/output_plain"

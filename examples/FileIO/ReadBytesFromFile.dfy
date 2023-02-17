@@ -3,11 +3,11 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
-// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%S/data.txt" "System.ArgumentException:"
-// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%S/data.txt" "java.io.IOException:"
-// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%S/data.txt" "Error: ENOENT"
+// RUN: %run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%S/data.txt" "System.ArgumentException:"
+// RUN: %run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%S/data.txt" "java.io.IOException:"
+// RUN: %run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%S/data.txt" "Error: ENOENT"
 
 include "../../src/FileIO/FileIO.dfy"
 
