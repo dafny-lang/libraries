@@ -1,0 +1,50 @@
+# This workflow does static verification of the DafnyCore library
+name: Dafny Core verification
+
+on:
+#  push:
+#    branches: [ master , 'cok*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: switch branch
+        run: |
+          git fetch
+          git checkout cok-code
+
+      - name: Install Dafny
+        uses: dafny-lang/setup-dafny-action@v1
+        with:
+          dafny-version: "nightly-2023-02-15-567a5ba"
+
+      - name: Check version
+        run: |
+          dafny --version
+
+      - name: Install lit
+        run: pip install lit OutputCheck
+
+      - name: Set up JS dependencies
+        run: npm install bignumber.js
+
+      - name: Verify DafnyCore Code
+        run: |
+          lit src/dafny --time-tests -v  
+          ##lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
+
+      - name: Generate Report
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: verification-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: error
+
