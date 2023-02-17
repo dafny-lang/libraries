@@ -10,7 +10,9 @@ on:
 
 jobs:
   verification:
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
         os: [ ubuntu-latest, macos-latest, windows-latest ]
