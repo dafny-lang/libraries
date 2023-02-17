@@ -38,13 +38,13 @@ jobs:
           lit src/dafny --time-tests -v  
           ##lit src/dafny --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' 
 
-      - name: Generate Report
-        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
-
-      - uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
-        with:
-          name: verification-results
-          path: '**/TestResults/*.trx'
-          if-no-files-found: error
+#      - name: Generate Report
+#        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+#
+#      - uses: actions/upload-artifact@v2  # upload test results
+#        if: success() || failure()        # run this step even if previous step failed
+#        with:
+#          name: verification-results
+#          path: '**/TestResults/*.trx'
+#          if-no-files-found: error
 
