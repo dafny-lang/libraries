@@ -35,18 +35,15 @@ jobs:
           dafny --version
           echo ${{ matrix.os }} ${{ runner.os }}
 
-      - name: Check - Macos
+      - name: Install - Macos
         if: matrix.os == 'macos-latest'
-        run: brew install python3 pip
+        run: brew install python3 lit
 
       - name: Upgrade outdated pip
         run: python -m pip install --upgrade pip
+
       - name: Install lit
         run: pip install lit OutputCheck pyyaml
-
-      - name: Check - Macos
-        if: matrix.os == 'macos-latest'
-        run: brew install lit
 
       - name: Set up JS dependencies
         run: npm install bignumber.js
