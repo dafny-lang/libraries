@@ -1,3 +1,5 @@
+// RUN: %diff "%s" "%s"
+
 include "./BoundedInts.dfy"
 include "./Boxes.dfy"
 include "./Collections/Collections.dfy"
