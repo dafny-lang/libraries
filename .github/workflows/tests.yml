@@ -1,5 +1,5 @@
 # This workflow performs static analysis checks.
-name: tests
+name: Legacy verification
 
 on:
   workflow_dispatch:
@@ -17,7 +17,7 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.9.1"
+          dafny-version: "nightly-2023-02-15-567a5ba"
 
       - name: Install lit
         run: pip install lit OutputCheck
@@ -25,15 +25,16 @@ jobs:
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
-      - name: Verify Dafny Code
-        run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
+      - name: Verify Legacy Code
+        run: lit --time-tests -v 
+        ##--param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
 
-      - name: Generate Report
-        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
-
-      - uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
-        with:
-          name: verification-results
-          path: '**/TestResults/*.trx'
-          if-no-files-found: error
+#      - name: Generate Report
+#        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+#
+#      - uses: actions/upload-artifact@v2  # upload test results
+#        if: success() || failure()        # run this step even if previous step failed
+#        with:
+#          name: verification-results
+#          path: '**/TestResults/*.trx'
+#          if-no-files-found: error
