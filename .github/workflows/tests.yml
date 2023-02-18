@@ -30,10 +30,10 @@ jobs:
         with:
           dafny-version: ${{ matrix.version }}
 
-      - name: Version informatino
+      - name: Version information
         run: |
           dafny --version
-          echo ${{ matrix.os }} ${{ runner.os }}a $\{{ matrix.version }}
+          echo ${{ matrix.os }} ${{ runner.os }} ${{ matrix.version }}
 
       - name: Upgrade outdated pip
         run: python -m pip install --upgrade pip
@@ -45,11 +45,12 @@ jobs:
         run: npm install bignumber.js
 
       - name: Verify Code and Examples
-        if: ${{ matrix.version }} != '3.11.0'
+        if: matrix.version != '3.11.0'
         run: lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Verify Code and Examples without logging
-        if: ${{ matrix.version }} == '3.11.0'
+        # if: matrix.version == '3.11.0'
+        if: failure()
         run: lit --time-tests -v .
 
       - name: Generate Report
