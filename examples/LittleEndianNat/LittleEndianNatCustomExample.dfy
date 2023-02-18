@@ -7,7 +7,7 @@
 
 include "../../src/Collections/Sequences/LittleEndianNatConversions.dfy"
 
-module Uint3_6 {:options "--function-syntax:4"} refines LittleEndianNatConversions {
+module {:options "--function-syntax:4"} Uint3_6 refines LittleEndianNatConversions {
 
   module Uint3Seq refines SmallSeq {
     function BITS(): nat { 3 }
