@@ -18,7 +18,7 @@ jobs:
         # nightly-latest to catch anything that breaks these tests in current development
         # 2/28/2023 version is the first that supports logging
         # 3.11.0 supports new CLI but does not support logging
-        version: [ nightly-latest, dafny-nightly-2023-02-18-ef4f346, 3.11.0]
+        version: [ nightly-latest, nightly-2023-02-18-ef4f346, 3.11.0]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -45,7 +45,12 @@ jobs:
         run: npm install bignumber.js
 
       - name: Verify Code and Examples
+        if: ${{ matrix.version }} != '3.11.0'
         run: lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
+
+      - name: Verify Code and Examples without logging
+        if: ${{ matrix.version }} == '3.11.0'
+        run: lit --time-tests -v .
 
       - name: Generate Report
         if: always()
