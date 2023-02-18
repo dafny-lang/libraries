@@ -44,14 +44,16 @@ jobs:
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
+      - name: Verify Code and Examples without logging
+        id: nolog
+        if: matrix.version == '3.11.0'
+        run: lit --time-tests -v .
+
       - name: Verify Code and Examples
         if: matrix.version != '3.11.0'
-        run: lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
-
-      - name: Verify Code and Examples without logging
-        # if: matrix.version == '3.11.0'
-        if: failure()
-        run: lit --time-tests -v .
+        run: |
+          echo  ${{ steps.nolog.conclusion }}
+          lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Generate Report
         if: always()
