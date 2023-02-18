@@ -16,8 +16,9 @@ with each release of the library and of the Dafny toolset
 - be compilable for every supported target language by default, with exceptions being documented and for exceptional reasons
 
 The Dafny code for the library is written to be understandable with a minimum of inline documentation.
-It is open source and available [on github](https://github.com/dafny-lang/libraries). This document is
-meant to be tutorial and example-based.
+It is open source and available [on github](https://github.com/dafny-lang/libraries). 
+This document is meant to give an overall introduction. Also helpful are the annotated examples
+in the github repository [here](https://github.com/dafny-lang/libraries/tree/master/examples).
 
 ## Content of the Core Library
 

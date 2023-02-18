@@ -70,7 +70,16 @@ Notice that there is no left-hand-side for the first out-parameter. It does not 
 flow will abruptly return; if is is a `Pass`, the first out-parameter is then discarded and the second is assigned to the remaining LHS.
 An `Outcome` serves as an automatically-checked error mechanism.
 
+A useful function in conjunction with Outcome values is `Need`. 
+This function takes a boolean condition and a value `e` of an error type `E` and returns an
+`Outcome<E>` value: `Pass` if the condition is true, `Fail(e)` if it is false. 
+It provides a simple runtime check that does not abort the program (like the `expect` statement does);
+rather it propagates the Dafny equivalent of an exception.
 
+```dafny
+:- Need(IsEverythingOK(), "failure in method M");
+```
+ 
 ### Result
 
 A `Result` carries both a success value and failure information, with two separate, specifiable types. Its use is then very similar to `Option`.
@@ -102,7 +111,7 @@ method m(s: seq<int>) returns (r: Result<int,string>) {
   // do various calculations
   var index: int :- Find(s, 0, value).ToResult("not found");
   // more calculations
-  return Success(value);
+  return Success(index);
 }
 ```
 
@@ -126,24 +135,39 @@ _This is an experimental, tentatively planned, not yet implemented feature._
 
 The conversion functions used in the last section work syntactically because we had boxed values that were returned by expressions (function calls), to which the conversion functions could
 be applied. When a FC-value is returned by a method there is no place to call such a conversion function: the return value of the method must be captured by either `:=` or `:-`.
+So some new syntax will be needed --- what this will be is under design and discussion.
 
-For this situation there is one more piece of syntax to make working with boxed values convenient. Suppose `Find` in our example is a method instead of a function. Then we have
+The workaround, however, is straitforward: just capture the results using `:=` and make the conversion directly. Here the is example above restated using a method.
 
 ```dafny
+import opened Dafny.Boxes
+
+method Find<T(==)>(s: seq<T>, k: int, value: T) returns (r: Option<int>, v: T)
+  requires 0 <= k <= |s|
+  ensures  r.Some? ==> k <= r.Extract() < |s|
+  ensures  r.Some? ==> s[r.Extract()] == value;
+  ensures  r.None? ==> forall i | k <= i < |s| :: s[i] != value
+  decreases |s| - k
+{
+  if k >= |s| { return None, value; }
+  else if s[k] == value {
+    return Some(k), value;
+  else {
+    return Find(s, k+1, value), value;
+  }
+}
+
 method m(s: seq<int>) returns (r: Result<int,string>) {
   var value: int := *;
   // do various calculations
-  var f = (o: Option<int>) => match o case Some(v) => Success(v) 
-                                      case None => Failure("not found")
-  var index: int :- {:convert f} Find(s, 0, value);
+  var maybeIndex, v := Find(s, 0, value);
+  var index :- maybeIndex.ToResult("not found"); // or f(maybeIndex)
   // more calculations
-  return Success(value);
+  return Success(index);
 }
 ```
 
-Here the attribute between th `:-` and thte method call indicates that the first out-parameter of the method call
-should be converted by the given function to a new FC-value before invoking the `:-` operation.
-The caller can apply some function whose output is a type appropriate to the caller's own first out-parameter.
+Besides the extra writing, the caution for this workaround is the the programmer must remember to catch and convert the error result.
+However, if one just uses `:-` in this case, it will either be OK (because the types match) or it will give a type error (because they don't match).
+So it does not silently do something unexpected.
 
-Writing this code perhaps does not save much over just capturing the result of `Find` with `:=`.
-However, (a) if `f` is needed repeatedly, it can be defined once and used many times and (b) it allows us to continue to use the `:-` operator to enable a uniform approach to error handling.
