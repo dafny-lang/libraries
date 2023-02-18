@@ -1,7 +1,7 @@
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 // RUN: %verify "%s"
 
@@ -31,7 +31,7 @@ module WriteBytesToFile {
     var outputDir := args[1];
     var expectedErrorPrefix := args[2];
 
-    // Happy paths: write files to the output dir. (The %diff LIT commands check that we wrote the correct content.)
+      // Happy paths: write files to the output dir. (The %diff LIT commands check that we wrote the correct content.)
     {
       // Ideally we would define `str` as a constant and compute `bytes` automatically.
       // To do so, we would need to convert each `char` in `str` to a `bv8` value, by using `as bv8`.
@@ -47,7 +47,7 @@ module WriteBytesToFile {
       ];
       assert forall i | 0 <= i < |bytes| :: bytes[i] as int == str[i] as int;
 
-      // Write directly into the output directory
+        // Write directly into the output directory
       {
         var res := FileIO.WriteBytesToFile(outputDir + "/output_plain", bytes);
         expect res.Success?, "unexpected failure writing to output_plain: " + res.error;
@@ -64,7 +64,7 @@ module WriteBytesToFile {
       }
     }
 
-    // Failure path: attempting to write to a blank file path should never work.
+      // Failure path: attempting to write to a blank file path should never work.
     {
       var res := FileIO.WriteBytesToFile("", []);
       expect res.Failure?, "unexpected success";

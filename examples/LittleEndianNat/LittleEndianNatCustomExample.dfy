@@ -1,9 +1,9 @@
 // RUN: %run --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../src/Collections/Sequences/LittleEndianNatConversions.dfy"
 
