@@ -3,8 +3,6 @@ name: Dafny Core verification
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -31,8 +29,8 @@ jobs:
           dafny --version
           echo ${{ matrix.os }} ${{ runner.os }}
 
-#      - name: Upgrade outdated pip
-#        run: python -m pip install --upgrade pip
+      - name: Upgrade outdated pip
+        run: python -m pip install --upgrade pip
 
       - name: Install lit
         run: pip install lit OutputCheck
@@ -41,7 +39,8 @@ jobs:
         run: npm install bignumber.js
 
       - name: Verify DafnyCore Code
-        run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
+        run: lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
+        ##run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
 
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
