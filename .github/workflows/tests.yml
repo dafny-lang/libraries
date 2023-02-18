@@ -4,7 +4,7 @@ name: Dafny Core verification
 on:
   # Scheduled to be run sometime after the nightly build of dafny
   schedule:
-    - cron: "7 9 * * *"
+    - cron: "7 10 * * *"
   workflow_dispatch:
   pull_request:
     branches: [ master ]
@@ -50,17 +50,17 @@ jobs:
         run: lit --time-tests -v .
 
       - name: Verify Code and Examples
-        if: matrix.version != '3.11.0'
+        id: withlog
+        if: steps.nolog.conclusion == 'skipped'
         run: |
-          echo  ${{ steps.nolog.conclusion }}
           lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Generate Report
-        if: always()
+        if: always() && steps.withlog.conclusion != 'skipped'
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
 
       - uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
+        if: always() && steps.withlog.conclusion != 'skipped'
         with:
           name: verification-results
           path: '**/TestResults/*.trx'
