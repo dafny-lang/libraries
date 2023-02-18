@@ -2,6 +2,7 @@
 name: tests
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master , 'cok*' ]
   pull_request:
