@@ -2,6 +2,9 @@
 name: Dafny Core verification
 
 on:
+  # Scheduled to be run sometime after the nightly build of dafny
+  schedule:
+    - cron: "7 10 * * *"
   workflow_dispatch:
   pull_request:
     branches: [ master ]
@@ -12,7 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [ nightly-2023-02-15-567a5ba , 3.11.0 ]
+        # nightly-latest to catch anything that breaks these tests in current development
+        # 2/28/2023 version is the first that supports logging
+        # 3.11.0 supports new CLI but does not support logging
+        version: [ nightly-latest, nightly-2023-02-18-ef4f346, 3.11.0]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -20,14 +26,14 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Dafny
-        uses: dafny-lang/setup-dafny-action@v1
+        uses: dafny-lang/setup-dafny-action@v1.6.0
         with:
           dafny-version: ${{ matrix.version }}
 
-      - name: Check version
+      - name: Version information
         run: |
           dafny --version
-          echo ${{ matrix.os }} ${{ runner.os }}
+          echo ${{ matrix.os }} ${{ runner.os }} ${{ matrix.version }}
 
       - name: Upgrade outdated pip
         run: python -m pip install --upgrade pip
@@ -38,15 +44,23 @@ jobs:
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
-      - name: Verify DafnyCore Code
-        run: lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
+      - name: Verify Code and Examples without logging
+        id: nolog
+        if: matrix.version == '3.11.0'
+        run: lit --time-tests -v .
+
+      - name: Verify Code and Examples
+        id: withlog
+        if: steps.nolog.conclusion == 'skipped'
+        run: |
+          lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Generate Report
-        if: always()
+        if: always() && steps.withlog.conclusion != 'skipped'
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
 
       - uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
+        if: always() && steps.withlog.conclusion != 'skipped'
         with:
           name: verification-results
           path: '**/TestResults/*.trx'
