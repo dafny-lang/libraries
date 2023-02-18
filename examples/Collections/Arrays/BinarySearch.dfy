@@ -4,9 +4,9 @@
 // CHECK-NEXT-L: 3
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../../src/Relations.dfy"
 include "../../../src/Collections/Arrays/BinarySearch.dfy"
@@ -20,14 +20,14 @@ module BinarySearchExamples {
   import opened Seq.MergeSort
   import opened Relations
 
-  lemma SortedByLessThanOrEqualTo(s: seq<int>) 
+  lemma SortedByLessThanOrEqualTo(s: seq<int>)
     requires SortedBy(s, (x, y) => x <= y)
     ensures SortedBy(s, (x, y) => x < y || x == y)
   {}
 
   method {:vcs_split_on_every_assert} SortAndSearch() {
     var input := [1, 7, 7, 3, 9, 0, -6];
-    
+
     var sortedInput := MergeSortBy(input, (x, y) => x <= y);
     print sortedInput, "\n";
 

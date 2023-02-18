@@ -1,9 +1,9 @@
 // RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 include "../../src/Unicode/Utf16EncodingForm.dfy"
 
@@ -20,7 +20,7 @@ module Utf16EncodingFormExamples {
 
   lemma TestEncodeScalarValue()
     ensures forall pair | pair in TEST_SCALAR_VALUES
-      :: EncodeScalarValue(pair.0) == pair.1
+              :: EncodeScalarValue(pair.0) == pair.1
   {}
 
   // Because surrogate code points are not Unicode scalar values, isolated UTF-16 code units in the range
@@ -33,6 +33,6 @@ module Utf16EncodingFormExamples {
 
   lemma TestDecodeIllFormedSequence()
     ensures forall s | s in TEST_ILL_FORMED_SEQUENCES
-      :: DecodeCodeUnitSequenceChecked(s).None?
+              :: DecodeCodeUnitSequenceChecked(s).None?
   {}
 }

@@ -25,7 +25,7 @@ module {:options "--function-syntax:4"} Demo {
     {
       if k in m then Some(m[k]) else None()
     }
-    method Put(k: K, v: V) 
+    method Put(k: K, v: V)
       modifies this
     {
       this.m := this.m[k := v];
@@ -163,13 +163,13 @@ module {:options "--function-syntax:4"} Demo {
     // Get a string that we can't reason about statically
     var contents :- fs.ReadFile(fromPath);
 
-    // Dynamically test whether the string is at least 5 characters long, and return a failure if not. 
+    // Dynamically test whether the string is at least 5 characters long, and return a failure if not.
     // If we pass this line, Dafny can now assume that the string is long enough.
     :- Need(|contents| >= 5, "File contents not long enough.");
 
     // Now we can get the character
     var c := contents[4];
-    
+
     return Success(c);
   }
 
