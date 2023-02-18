@@ -39,9 +39,11 @@ jobs:
         run: npm install bignumber.js
 
       - name: Verify DafnyCore Code
-        run: |
-          -lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
-          find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+        run: lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
+
+      - name: Generate Report
+        if: always()
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
 
       - uses: actions/upload-artifact@v2  # upload test results
         if: success() || failure()        # run this step even if previous step failed
