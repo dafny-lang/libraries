@@ -15,14 +15,14 @@ include "UnicodeEncodingForm.dfy"
  * The Unicode encoding form that assigns each Unicode scalar value to an unsigned byte sequence of one to four bytes
  * in length, as specified in Table 3-6 and Table 3-7.
  */
-module Utf8EncodingForm refines UnicodeEncodingForm {
+module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingForm {
   type CodeUnit = bv8
 
   //
   // Definitions of well-formedness.
   //
 
-  function method IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
+  function IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
   {
     if |s| == 1 then (
       var b := IsWellFormedSingleCodeUnitSequence(s);
@@ -47,14 +47,14 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     else false
   }
 
-  function method IsWellFormedSingleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedSingleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 1
   {
     var firstByte := s[0];
     && 0x00 <= firstByte <= 0x7F
   }
 
-  function method IsWellFormedDoubleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedDoubleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 2
     ensures b ==>
       && !IsWellFormedSingleCodeUnitSequence(s[..1])
@@ -65,7 +65,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     && 0x80 <= secondByte <= 0xBF
   }
 
-  function method IsWellFormedTripleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedTripleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 3
     ensures b ==>
       && !IsWellFormedSingleCodeUnitSequence(s[..1])
@@ -83,7 +83,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     && 0x80 <= thirdByte <= 0xBF
   }
 
-  function method IsWellFormedQuadrupleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedQuadrupleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 4
     ensures b ==>
       && !IsWellFormedSingleCodeUnitSequence(s[..1])
@@ -103,7 +103,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     && 0x80 <= fourthByte <= 0xBF
   }
 
-  function method SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq):
+  function SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq):
     (maybePrefix: Option<MinimalWellFormedCodeUnitSeq>)
   {
     if |s| >= 1 && IsWellFormedSingleCodeUnitSequence(s[..1]) then Some(s[..1])
@@ -118,7 +118,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
   // See Table 3-6. UTF-8 Bit Distribution of the Unicode Standard 14.0.
   //
 
-  function method EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
+  function EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
   {
     if v <= 0x7F then EncodeScalarValueSingleByte(v)
     else if v <= 0x7FF then EncodeScalarValueDoubleByte(v)
@@ -126,7 +126,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     else EncodeScalarValueQuadrupleByte(v)
   }
 
-  function method EncodeScalarValueSingleByte(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
+  function EncodeScalarValueSingleByte(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
     requires 0 <= v <= 0x7F
     ensures |m| == 1
     ensures IsWellFormedSingleCodeUnitSequence(m)
@@ -138,7 +138,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     [firstByte]
   }
 
-  function method EncodeScalarValueDoubleByte(v: Unicode.ScalarValue): (s: CodeUnitSeq)
+  function EncodeScalarValueDoubleByte(v: Unicode.ScalarValue): (s: CodeUnitSeq)
     requires 0x80 <= v <= 0x7FF
     ensures |s| == 2
     ensures IsWellFormedDoubleCodeUnitSequence(s)
@@ -152,7 +152,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     [firstByte, secondByte]
   }
 
-  function method EncodeScalarValueTripleByte(v: Unicode.ScalarValue): (s: CodeUnitSeq)
+  function EncodeScalarValueTripleByte(v: Unicode.ScalarValue): (s: CodeUnitSeq)
     requires 0x800 <= v <= 0xFFFF
     ensures |s| == 3
     ensures IsWellFormedTripleCodeUnitSequence(s)
@@ -168,7 +168,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     [firstByte, secondByte, thirdByte]
   }
 
-  function method EncodeScalarValueQuadrupleByte(v: Unicode.ScalarValue): (s: CodeUnitSeq)
+  function EncodeScalarValueQuadrupleByte(v: Unicode.ScalarValue): (s: CodeUnitSeq)
     requires 0x10000 <= v <= 0x10FFFF
     ensures |s| == 4
     ensures IsWellFormedQuadrupleCodeUnitSequence(s)
@@ -191,7 +191,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     [firstByte, secondByte, thirdByte, fourthByte]
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequence(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequence(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
   {
     if |m| == 1 then DecodeMinimalWellFormedCodeUnitSubsequenceSingleByte(m)
     else if |m| == 2 then DecodeMinimalWellFormedCodeUnitSubsequenceDoubleByte(m)
@@ -199,7 +199,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     else assert |m| == 4; DecodeMinimalWellFormedCodeUnitSubsequenceQuadrupleByte(m)
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequenceSingleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequenceSingleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     requires |m| == 1
     ensures 0 <= v <= 0x7F
     ensures EncodeScalarValueSingleByte(v) == m
@@ -209,7 +209,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     x as Unicode.ScalarValue
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequenceDoubleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequenceDoubleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     requires |m| == 2
     ensures 0x80 <= v <= 0x7FF
     ensures EncodeScalarValueDoubleByte(v) == m
@@ -221,7 +221,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     (y << 6) | x as Unicode.ScalarValue
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequenceTripleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequenceTripleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     requires |m| == 3
     ensures 0x800 <= v <= 0xFFFF
     ensures EncodeScalarValueTripleByte(v) == m
@@ -236,7 +236,7 @@ module Utf8EncodingForm refines UnicodeEncodingForm {
     (z << 12) | (y << 6) | x as Unicode.ScalarValue
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequenceQuadrupleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequenceQuadrupleByte(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     requires |m| == 4
     ensures 0x10000 <= v <= 0x10FFFF
     ensures EncodeScalarValueQuadrupleByte(v) == m

@@ -13,13 +13,13 @@
 include "GeneralInternals.dfy"
 include "MulInternalsNonlinear.dfy"
 
-module MulInternals {
+module {:options "-functionSyntax:4"} MulInternals {
 
   import opened GeneralInternals
   import opened MulInternalsNonlinear
 
   /* performs multiplication for positive integers using recursive addition */
-  function method {:opaque} MulPos(x: int, y: int) : int
+  function {:opaque} MulPos(x: int, y: int) : int
     requires x >= 0
   {
     if x == 0 then 0
@@ -27,7 +27,7 @@ module MulInternals {
   }
 
   /* performs multiplication for both positive and negative integers */ 
-  function method MulRecursive(x: int, y: int) : int
+  function MulRecursive(x: int, y: int) : int
   {
     if x >= 0 then MulPos(x, y)
     else -1 * MulPos(-1 * x, y)
@@ -95,7 +95,7 @@ module MulInternals {
   }
 
   /* groups distributive and associative properties of multiplication */
-  predicate MulAuto()
+  ghost predicate MulAuto()
   {
     && (forall x:int, y:int {:trigger x * y} :: x * y == y * x)
     && (forall x:int, y:int, z:int {:trigger (x + y) * z} :: (x + y) * z == x * z + y * z)

@@ -16,12 +16,12 @@ include "Internals/GeneralInternals.dfy"
 include "Internals/MulInternals.dfy"
 include "Power.dfy"
 
-module Power2 {
+module {:options "-functionSyntax:4"} Power2 {
   import opened GeneralInternals
   import opened MulInternals
   import opened Power
 
-  function method {:opaque} Pow2(e: nat): nat
+  function {:opaque} Pow2(e: nat): nat
     ensures Pow2(e) > 0
   {
     reveal Pow();

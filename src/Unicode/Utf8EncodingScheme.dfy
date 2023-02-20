@@ -28,7 +28,7 @@ include "Utf8EncodingForm.dfy"
  * Proving those lemmas are easier to write using `calc`,
  * but that runs into <https://github.com/dafny-lang/dafny/issues/1639>.
  */
-module Utf8EncodingScheme {
+module {:options "-functionSyntax:4"} Utf8EncodingScheme {
   import opened Wrappers
 
   import BoundedInts
@@ -41,7 +41,7 @@ module Utf8EncodingScheme {
   /**
    * Returns the byte serialization of the given code unit sequence.
    */
-  function method Serialize(s: Utf8EncodingForm.CodeUnitSeq): (b: seq<byte>)
+  function Serialize(s: Utf8EncodingForm.CodeUnitSeq): (b: seq<byte>)
   {
     Seq.Map(c => c as byte, s)
   }
@@ -49,7 +49,7 @@ module Utf8EncodingScheme {
   /**
    * Returns the code unit sequence that serializes to the given byte sequence.
    */
-  function method Deserialize(b: seq<byte>): (s: Utf8EncodingForm.CodeUnitSeq)
+  function Deserialize(b: seq<byte>): (s: Utf8EncodingForm.CodeUnitSeq)
   {
     Seq.Map(b => b as Utf8EncodingForm.CodeUnit, b)
   }

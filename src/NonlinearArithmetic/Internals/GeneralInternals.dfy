@@ -8,10 +8,10 @@
 *  SPDX-License-Identifier: MIT 
 *******************************************************************************/
 
-module GeneralInternals {
+module {:options "-functionSyntax:4"} GeneralInternals {
 
   /* this predicate is primarily used as a trigger */
-  predicate IsLe(x: int, y: int) 
+  ghost predicate IsLe(x: int, y: int) 
   { 
     x <= y 
   }
