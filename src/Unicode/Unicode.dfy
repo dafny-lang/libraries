@@ -1,9 +1,9 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
@@ -15,32 +15,32 @@ module {:options "-functionSyntax:4"} Unicode {
   import Seq
 
   /**
-   * Any value in the Unicode codespace (a range of integers from 0 to 10FFFF_16). (Section 3.9 D9-D10)
-   */
+    * Any value in the Unicode codespace (a range of integers from 0 to 10FFFF_16). (Section 3.9 D9-D10)
+    */
   type CodePoint = i: bv24 | 0 <= i <= 0x10FFFF
 
   /**
-   * A Unicode code point in the range U+D800 to U+DBFF. (Section 3.8 D71)
-   */
+    * A Unicode code point in the range U+D800 to U+DBFF. (Section 3.8 D71)
+    */
   type HighSurrogateCodePoint = p: CodePoint | HIGH_SURROGATE_MIN <= p <= HIGH_SURROGATE_MAX
     witness HIGH_SURROGATE_MIN
   const HIGH_SURROGATE_MIN: CodePoint := 0xD800
   const HIGH_SURROGATE_MAX: CodePoint := 0xDBFF
 
   /**
-   * A Unicode code point in the range U+DC00 to U+DFFF. (Section 3.8 D73)
-   */
+    * A Unicode code point in the range U+DC00 to U+DFFF. (Section 3.8 D73)
+    */
   type LowSurrogateCodePoint = p: CodePoint | LOW_SURROGATE_MIN <= p <= LOW_SURROGATE_MAX
     witness LOW_SURROGATE_MIN
   const LOW_SURROGATE_MIN: CodePoint := 0xDC00
   const LOW_SURROGATE_MAX: CodePoint := 0xDFFF
 
   /**
-   * Any Unicode code point except high-surrogate and low-surrogate code points. (Section 3.9 D76)
-   */
+    * Any Unicode code point except high-surrogate and low-surrogate code points. (Section 3.9 D76)
+    */
   type ScalarValue = p: CodePoint |
-    && (p < HIGH_SURROGATE_MIN || p > HIGH_SURROGATE_MAX)
-    && (p < LOW_SURROGATE_MIN || p > LOW_SURROGATE_MAX)
+      && (p < HIGH_SURROGATE_MIN || p > HIGH_SURROGATE_MAX)
+      && (p < LOW_SURROGATE_MIN || p > LOW_SURROGATE_MAX)
 
   const ASSIGNED_PLANES: set<bv8> := {
     0,  // Basic Multilingual Plane
