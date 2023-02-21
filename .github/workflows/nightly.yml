@@ -1,5 +1,5 @@
 # This workflow does static verification of the DafnyCore library
-name: Dafny Core verification
+name: Nightly Dafny Core verification
 
 on:
   # Scheduled to be run sometime after the nightly build of dafny
