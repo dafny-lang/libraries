@@ -5,7 +5,7 @@
 
 // RUN: %verify "%s"
 
-include "../Boxes.dfy"
+include "../Results.dfy"
 
 /**
   * This module provides basic file I/O operations: reading and writing bytes from/to a file.
@@ -18,9 +18,9 @@ include "../Boxes.dfy"
   * File path symbols including . and .. are allowed.
   */
 module {:options "-functionSyntax:4"} Dafny.FileIO {
-  import opened Boxes
+  import opened Results
 
-  export provides ReadBytesFromFile, WriteBytesToFile, Boxes
+  export provides ReadBytesFromFile, WriteBytesToFile, Results
 
   /*
    * Public API

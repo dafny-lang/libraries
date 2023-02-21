@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../Boxes.dfy"
+include "../Results.dfy"
 include "../Relations.dfy"
 include "../Collections/Seqs.dfy"
 
@@ -26,7 +26,7 @@ include "Unicode.dfy"
   *    code unit subsequences to scalar values.
   */
 abstract module {:options "-functionSyntax:4"} Dafny.UnicodeEncodingForm {
-  import opened Boxes
+  import opened Results
 
   import Relations
   import Collections.Seq

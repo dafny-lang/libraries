@@ -5,13 +5,13 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../Boxes.dfy"
+include "../Results.dfy"
 include "../Relations.dfy"
 include "Seqs.dfy"
 
 module Dafny.Collections.Arrays {
 
-  import opened Boxes
+  import opened Results
   import opened Relations
   import opened Seq
 

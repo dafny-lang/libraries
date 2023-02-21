@@ -5,7 +5,6 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../Boxes.dfy"
 include "../Collections/Seqs.dfy"
 
 // This module implements basic functionality of Unicode 14.0.

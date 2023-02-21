@@ -13,13 +13,13 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../Boxes.dfy"
+include "../Results.dfy"
 include "../Math.dfy"
 include "../Relations.dfy"
 
 module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
-  import opened Boxes
+  import opened Results
   import opened Relations
   import Math
 
