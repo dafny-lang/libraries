@@ -23,7 +23,7 @@ jobs:
         # 2/18/2023 version is the first that supports logging
         # 3.11.0 supports new CLI but does not support logging
         # And only run the nightly-latest on scheduled builds
-        version: ${{ github.event_name == 'schedule' && [nightly-latest] || [nightly-2023-02-18-ef4f346, 3.11.0] }}
+        version: ${{ (github.event_name == 'schedule') && [nightly-latest] || [nightly-2023-02-18-ef4f346, 3.11.0] }}
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
