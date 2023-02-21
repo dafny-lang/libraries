@@ -1,4 +1,4 @@
-// RUN: %diff "%s" "%s"
+// RUN: %resolve "%s" > "%t"
 
 module Collections {
 
