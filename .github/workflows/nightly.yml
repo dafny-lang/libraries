@@ -3,9 +3,9 @@ name: Dafny Core verification
 
 on:
   # Scheduled to be run sometime after the nightly build of dafny
+  schedule:
+    - cron: "7 10 * * *"
   workflow_dispatch:
-  pull_request:
-    branches: [ master ]
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
@@ -20,7 +20,7 @@ jobs:
         # nightly-latest to catch anything that breaks these tests in current development
         # 2/18/2023 version is the first that supports logging
         # 3.11.0 supports new CLI but does not support logging
-        version: [nightly-2023-02-18-ef4f346, 3.11.0 ]
+        version: [nightly-latest, nightly-2023-02-18-ef4f346, 3.11.0 ]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
