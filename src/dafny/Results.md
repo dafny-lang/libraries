@@ -1,7 +1,7 @@
 
-## The `Boxes` module {#sec-boxes}
+## The `Results` module {#sec-results}
 
-A _Box_ datatype is one whose values can hold either a success indication, optionally along with a value, or a failure indication, optionally with error information.
+A _Results_ datatype is one whose values can hold either a success indication, optionally along with a value, or a failure indication, optionally with error information.
 These are particularly useful with Dafny's abrupt-termination-on-failure `:-` operator.
 
 Any user datatype can serve this purpose, as long as it has an `IsFailure?` predicate 
@@ -20,7 +20,7 @@ These are common programming idioms. The main complication comes when they are m
 
 Consider this routine that looks for a value in a sequence, beginning at position `k`, returning its index:
 ```dafny
-import opened Dafny.Boxes
+import opened Dafny.Results
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
   ensures  r.Some? ==> s[r.Extract()] == value;
@@ -50,7 +50,7 @@ See the [reference manual](TODO) for more on the similarities and differences wi
 
 ### Outcome
 
-`Outcome` is a variation on these boxed types in which we mostly just care whether the operations succeeded or failed.
+`Outcome` is a variation on these types in which we mostly just care whether the operations succeeded or failed.
 It has no place to carry a value, just information about the error. 
 
 This datatype is most useful when used with methods with multiple return values.
@@ -94,7 +94,7 @@ When values of these types are used in expressions, the library types offer mean
 convert to values of the other types. For example, we can rewrite the example above this way:
 
 ```dafny
-import opened Dafny.Boxes
+import opened Dafny.Results
 
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
@@ -140,7 +140,7 @@ So some new syntax will be needed --- what this will be is under design and disc
 The workaround, however, is straitforward: just capture the results using `:=` and make the conversion directly. Here the is example above restated using a method.
 
 ```dafny
-import opened Dafny.Boxes
+import opened Dafny.Results
 
 method Find<T(==)>(s: seq<T>, k: int, value: T) returns (r: Option<int>, v: T)
   requires 0 <= k <= |s|
