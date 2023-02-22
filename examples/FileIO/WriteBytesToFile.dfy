@@ -1,13 +1,13 @@
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
-// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:"
-// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:"
-// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT"
+// RUN: %run --no-verify --unicode-char:false --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%t_cs" "System.ArgumentException:"
+// RUN: %run --no-verify --unicode-char:false --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%t_java" "java.nio.file.FileSystemException:"
+// RUN: %run --no-verify --unicode-char:false --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%t_js" "Error: ENOENT"
 
 //// Check that written files match expectations
 // RUN: %diff "%S/data.txt" "%t_cs/output_plain"
@@ -31,7 +31,7 @@ module WriteBytesToFile {
     var outputDir := args[1];
     var expectedErrorPrefix := args[2];
 
-    // Happy paths: write files to the output dir. (The %diff LIT commands check that we wrote the correct content.)
+      // Happy paths: write files to the output dir. (The %diff LIT commands check that we wrote the correct content.)
     {
       // Ideally we would define `str` as a constant and compute `bytes` automatically.
       // To do so, we would need to convert each `char` in `str` to a `bv8` value, by using `as bv8`.
@@ -47,7 +47,7 @@ module WriteBytesToFile {
       ];
       assert forall i | 0 <= i < |bytes| :: bytes[i] as int == str[i] as int;
 
-      // Write directly into the output directory
+        // Write directly into the output directory
       {
         var res := FileIO.WriteBytesToFile(outputDir + "/output_plain", bytes);
         expect res.Success?, "unexpected failure writing to output_plain: " + res.error;
@@ -64,7 +64,7 @@ module WriteBytesToFile {
       }
     }
 
-    // Failure path: attempting to write to a blank file path should never work.
+      // Failure path: attempting to write to a blank file path should never work.
     {
       var res := FileIO.WriteBytesToFile("", []);
       expect res.Failure?, "unexpected success";
