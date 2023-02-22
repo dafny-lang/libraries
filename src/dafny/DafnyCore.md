@@ -35,7 +35,7 @@ The sections below describe how to use each of the principal modules of the libr
 
 ## How to use the library
 
-One uses the library on the command-line by including a path to the library in the `--library` option.
+One uses the library on the command-line by including a path to the library as an argument to the `--library` option.
 
 At present, you must have a copy of the library in your file system to use the library. Either
 - obtain a release zip file from [the library github release page](https://github.com/dafny-lang/libraries/releases) and unzip it in a folder of your choice, or
