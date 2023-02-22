@@ -43,8 +43,9 @@ At present, you must have a copy of the library in your file system to use the l
 
 In either case, the relevant directory to point the `--library` option to is named `dafny`, either at the top of the zip file or at `libraries/src/dafny` in the clone, or to the `DafnyCore.dfy` file in that directory. 
 
-Some functionality is implemented using native target language capabilities (e.g. FileIO). In these cases, a compiled program must also includ the relevant target
-language files that are included in this Dafny Core distribution.
+Some functionality is implemented using native target language capabilities (e.g. FileIO). In these cases, a compiled program must also include the relevant target
+language files that are included in this Dafny Core distribution. See the FileIO examples and documentation
+for an instance of this requirement.
 
 The procedure for using library code directly with VSCode is not yet settled. For now make a copy of the library in your system and  'include' the `DafnyCore.dfy` file.
 
