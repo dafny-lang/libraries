@@ -1,9 +1,9 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 include "../Collections/Sequences/Seq.dfy"
 include "../Functions.dfy"
@@ -12,9 +12,9 @@ include "Unicode.dfy"
 include "UnicodeEncodingForm.dfy"
 
 /**
- * The Unicode encoding form that assigns each Unicode scalar value to an unsigned byte sequence of one to four bytes
- * in length, as specified in Table 3-6 and Table 3-7.
- */
+  * The Unicode encoding form that assigns each Unicode scalar value to an unsigned byte sequence of one to four bytes
+  * in length, as specified in Table 3-6 and Table 3-7.
+  */
 module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingForm {
   type CodeUnit = bv8
 
@@ -25,25 +25,25 @@ module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingFo
   function IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
   {
     if |s| == 1 then (
-      var b := IsWellFormedSingleCodeUnitSequence(s);
-      assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
-      b
-    )
+                       var b := IsWellFormedSingleCodeUnitSequence(s);
+                       assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
+                       b
+                     )
     else if |s| == 2 then (
-      var b := IsWellFormedDoubleCodeUnitSequence(s);
-      assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
-      b
-    )
+                            var b := IsWellFormedDoubleCodeUnitSequence(s);
+                            assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
+                            b
+                          )
     else if |s| == 3 then (
-      var b := IsWellFormedTripleCodeUnitSequence(s);
-      assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
-      b
-    )
+                            var b := IsWellFormedTripleCodeUnitSequence(s);
+                            assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
+                            b
+                          )
     else if |s| == 4 then (
-      var b := IsWellFormedQuadrupleCodeUnitSequence(s);
-      assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
-      b
-    )
+                            var b := IsWellFormedQuadrupleCodeUnitSequence(s);
+                            assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
+                            b
+                          )
     else false
   }
 
@@ -57,7 +57,7 @@ module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingFo
   function IsWellFormedDoubleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 2
     ensures b ==>
-      && !IsWellFormedSingleCodeUnitSequence(s[..1])
+              && !IsWellFormedSingleCodeUnitSequence(s[..1])
   {
     var firstByte := s[0];
     var secondByte := s[1];
@@ -68,37 +68,37 @@ module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingFo
   function IsWellFormedTripleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 3
     ensures b ==>
-      && !IsWellFormedSingleCodeUnitSequence(s[..1])
-      && !IsWellFormedDoubleCodeUnitSequence(s[..2])
+              && !IsWellFormedSingleCodeUnitSequence(s[..1])
+              && !IsWellFormedDoubleCodeUnitSequence(s[..2])
   {
     var firstByte := s[0];
     var secondByte := s[1];
     var thirdByte := s[2];
     && (
-      || (firstByte == 0xE0 && 0xA0 <= secondByte <= 0xBF)
-      || (0xE1 <= firstByte <= 0xEC && 0x80 <= secondByte <= 0xBF)
-      || (firstByte == 0xED && 0x80 <= secondByte <= 0x9F)
-      || (0xEE <= firstByte <= 0xEF && 0x80 <= secondByte <= 0xBF)
-    )
+         || (firstByte == 0xE0 && 0xA0 <= secondByte <= 0xBF)
+         || (0xE1 <= firstByte <= 0xEC && 0x80 <= secondByte <= 0xBF)
+         || (firstByte == 0xED && 0x80 <= secondByte <= 0x9F)
+         || (0xEE <= firstByte <= 0xEF && 0x80 <= secondByte <= 0xBF)
+       )
     && 0x80 <= thirdByte <= 0xBF
   }
 
   function IsWellFormedQuadrupleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 4
     ensures b ==>
-      && !IsWellFormedSingleCodeUnitSequence(s[..1])
-      && !IsWellFormedDoubleCodeUnitSequence(s[..2])
-      && !IsWellFormedTripleCodeUnitSequence(s[..3])
+              && !IsWellFormedSingleCodeUnitSequence(s[..1])
+              && !IsWellFormedDoubleCodeUnitSequence(s[..2])
+              && !IsWellFormedTripleCodeUnitSequence(s[..3])
   {
     var firstByte := s[0];
     var secondByte := s[1];
     var thirdByte := s[2];
     var fourthByte := s[3];
     && (
-      || (firstByte == 0xF0 && 0x90 <= secondByte <= 0xBF)
-      || (0xF1 <= firstByte <= 0xF3 && 0x80 <= secondByte <= 0xBF)
-      || (firstByte == 0xF4 && 0x80 <= secondByte <= 0x8F)
-    )
+         || (firstByte == 0xF0 && 0x90 <= secondByte <= 0xBF)
+         || (0xF1 <= firstByte <= 0xF3 && 0x80 <= secondByte <= 0xBF)
+         || (firstByte == 0xF4 && 0x80 <= secondByte <= 0x8F)
+       )
     && 0x80 <= thirdByte <= 0xBF
     && 0x80 <= fourthByte <= 0xBF
   }

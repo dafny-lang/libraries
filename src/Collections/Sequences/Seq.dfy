@@ -1,17 +1,17 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original Copyright under the following: 
-*  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
-*  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
-*  Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT 
-* 
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original Copyright under the following: 
+ *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+ *  ETH Zurich, and University of Washington
+ *  SPDX-License-Identifier: BSD-2-Clause 
+ * 
+ *  Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT 
+ * 
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../Wrappers.dfy"
 include "../../Math.dfy"
@@ -26,10 +26,10 @@ module {:options "-functionSyntax:4"} Seq {
   import Math
 
   /**********************************************************
-  *
-  *  Manipulating the End of a Sequence
-  *
-  ***********************************************************/
+   *
+   *  Manipulating the End of a Sequence
+   *
+   ***********************************************************/
 
   /* Returns the first element of a non-empty sequence. */
   function First<T>(xs: seq<T>): T
@@ -55,7 +55,7 @@ module {:options "-functionSyntax:4"} Seq {
 
   /* Returns the subsequence of a non-empty sequence obtained by
      dropping the last element. */
-  function DropLast<T>(xs: seq<T>): seq<T> 
+  function DropLast<T>(xs: seq<T>): seq<T>
     requires |xs| > 0;
   {
     xs[..|xs|-1]
@@ -85,18 +85,18 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /**********************************************************
-  *
-  *  Manipulating the Content of a Sequence
-  *
-  ***********************************************************/
-  
+   *
+   *  Manipulating the Content of a Sequence
+   *
+   ***********************************************************/
+
   /* Is true if the sequence xs is a prefix of the sequence ys. */
   ghost predicate IsPrefix<T>(xs: seq<T>, ys: seq<T>)
     ensures IsPrefix(xs, ys) ==> (|xs| <= |ys| && xs == ys[..|xs|])
   {
-    xs <= ys    
+    xs <= ys
   }
-  
+
   /* Is true if the sequence xs is a suffix of the sequence ys. */
   ghost predicate IsSuffix<T>(xs: seq<T>, ys: seq<T>)
   {
@@ -149,7 +149,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Converts a sequence to a set. */
-  function {:opaque} ToSet<T>(xs: seq<T>): set<T> 
+  function {:opaque} ToSet<T>(xs: seq<T>): set<T>
   {
     set x: T | x in xs
   }
@@ -157,7 +157,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* The cardinality of a set of elements is always less than or 
      equal to that of the full sequence of elements. */
   lemma LemmaCardinalityOfSet<T>(xs: seq<T>)
-    ensures |ToSet(xs)| <= |xs| 
+    ensures |ToSet(xs)| <= |xs|
   {
     reveal ToSet();
     if |xs| == 0 {
@@ -166,7 +166,7 @@ module {:options "-functionSyntax:4"} Seq {
       LemmaCardinalityOfSet(DropLast(xs));
     }
   }
-  
+
   /* A sequence is of length 0 if and only if its conversion to
      a set results in the empty set. */
   lemma LemmaCardinalityOfEmptySetIs0<T>(xs: seq<T>)
@@ -179,7 +179,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Is true if there are no duplicate values in the sequence. */
-  ghost predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>) 
+  ghost predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>)
   {
     (forall i, j {:trigger xs[i], xs[j]}:: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j])
   }
@@ -197,11 +197,11 @@ module {:options "-functionSyntax:4"} Seq {
     var zs := xs + ys;
     if |zs| > 1 {
       assert forall i {:trigger zs[i]} :: 0 <= i < |xs| ==>
-        zs[i] in multiset(xs);
+                                            zs[i] in multiset(xs);
       assert forall j {:trigger zs[j]} :: |xs| <= j < |zs| ==>
-        zs[j] in multiset(ys);
+                                            zs[j] in multiset(ys);
       assert forall i, j {:trigger zs[i], zs[j]} :: i != j && 0 <= i < |xs| && |xs| <= j < |zs| ==>
-        zs[i] != zs[j];
+                                                      zs[i] != zs[j];
     }
   }
 
@@ -281,10 +281,10 @@ module {:options "-functionSyntax:4"} Seq {
   {
     if |xs| == 0 then None()
     else
-      if xs[0] == v then Some(0)
-      else
-        var o' := IndexOfOption(xs[1..], v);
-        if o'.Some? then Some(o'.value + 1) else None()
+    if xs[0] == v then Some(0)
+    else
+      var o' := IndexOfOption(xs[1..], v);
+      if o'.Some? then Some(o'.value + 1) else None()
   }
 
   /* For an element that occurs at least once in a sequence, the index of its
@@ -355,7 +355,7 @@ module {:options "-functionSyntax:4"} Seq {
   {
     if xs == [] then [] else [xs[|xs|-1]] + Reverse(xs[0 .. |xs|-1])
   }
-    
+
   /* Returns a constant sequence of a given length. */
   function {:opaque} Repeat<T>(v: T, length: nat): (xs: seq<T>)
     ensures |xs| == length
@@ -366,12 +366,12 @@ module {:options "-functionSyntax:4"} Seq {
     else
       [v] + Repeat(v, length - 1)
   }
-  
+
   /* Unzips a sequence that contains pairs into two separate sequences. */
   function {:opaque} Unzip<A,B>(xs: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(xs).0| == |Unzip(xs).1| == |xs|
-    ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]} 
-        :: 0 <= i < |xs| ==> (Unzip(xs).0[i], Unzip(xs).1[i]) == xs[i]
+    ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]}
+              :: 0 <= i < |xs| ==> (Unzip(xs).0[i], Unzip(xs).1[i]) == xs[i]
   {
     if |xs| == 0 then ([], [])
     else
@@ -398,10 +398,10 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /**********************************************************
-  *
-  *  Extrema in Sequences
-  *
-  ***********************************************************/
+   *
+   *  Extrema in Sequences
+   *
+   ***********************************************************/
 
   /* Returns the maximum integer value in a non-empty sequence of integers. */
   function {:opaque} Max(xs: seq<int>): int
@@ -483,10 +483,10 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /**********************************************************
-  *
-  *  Sequences of Sequences
-  *
-  ***********************************************************/
+   *
+   *  Sequences of Sequences
+   *
+   ***********************************************************/
 
   /* Flattens a sequence of sequences into a single sequence by concatenating 
      subsequences, starting from the first element. */
@@ -508,7 +508,7 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc == {
         Flatten(xs + ys);
-          { assert (xs + ys)[0] == xs[0];  assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0];  assert (xs + ys)[1..] == xs[1..] + ys; }
         xs[0] + Flatten(xs[1..] + ys);
         xs[0] + Flatten(xs[1..]) + Flatten(ys);
         Flatten(xs) + Flatten(ys);
@@ -538,7 +538,7 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc == {
         FlattenReverse(xs + ys);
-          { assert Last(xs + ys) == Last(ys);  assert DropLast(xs + ys) == xs + DropLast(ys); }
+        { assert Last(xs + ys) == Last(ys);  assert DropLast(xs + ys) == xs + DropLast(ys); }
         FlattenReverse(xs + DropLast(ys)) + Last(ys);
         FlattenReverse(xs) + FlattenReverse(DropLast(ys)) + Last(ys);
         FlattenReverse(xs) + FlattenReverse(ys);
@@ -556,11 +556,11 @@ module {:options "-functionSyntax:4"} Seq {
       calc == {
         FlattenReverse(xs);
         FlattenReverse(DropLast(xs)) + Last(xs);
-          { LemmaFlattenAndFlattenReverseAreEquivalent(DropLast(xs)); }
+        { LemmaFlattenAndFlattenReverseAreEquivalent(DropLast(xs)); }
         Flatten(DropLast(xs)) + Last(xs);
         Flatten(DropLast(xs)) + Flatten([Last(xs)]);
-          { LemmaFlattenConcat(DropLast(xs), [Last(xs)]); 
-        assert xs == DropLast(xs) + [Last(xs)]; }
+        { LemmaFlattenConcat(DropLast(xs), [Last(xs)]);
+          assert xs == DropLast(xs) + [Last(xs)]; }
         Flatten(xs);
       }
     }
@@ -593,10 +593,10 @@ module {:options "-functionSyntax:4"} Seq {
 
 
   /**********************************************************
-  *
-  *  Higher-Order Sequence Functions
-  *
-  ***********************************************************/
+   *
+   *  Higher-Order Sequence Functions
+   *
+   ***********************************************************/
 
   /* Returns the sequence one obtains by applying a function to every element 
      of a sequence. */
@@ -610,16 +610,16 @@ module {:options "-functionSyntax:4"} Seq {
     else [f(xs[0])] + Map(f, xs[1..])
   }
 
-/* Applies a function to every element of a sequence, returning a Result value (which is a 
-   failure-compatible type). Returns either a failure, or, if successful at every element, 
-   the transformed sequence.  */
+  /* Applies a function to every element of a sequence, returning a Result value (which is a 
+     failure-compatible type). Returns either a failure, or, if successful at every element, 
+     the transformed sequence.  */
   function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures result.Success? ==>
-      && |result.value| == |xs|
-      && (forall i :: 0 <= i < |xs| ==> 
-        && f(xs[i]).Success?
-        && result.value[i] == f(xs[i]).value)
+              && |result.value| == |xs|
+              && (forall i :: 0 <= i < |xs| ==>
+                                && f(xs[i]).Success?
+                                && result.value[i] == f(xs[i]).value)
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then Success([])
@@ -643,10 +643,10 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc {
         Map(f, xs + ys);
-          { assert (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
         Map(f, [xs[0]]) + Map(f, xs[1..] + ys);
         Map(f, [xs[0]]) + Map(f, xs[1..]) + Map(f, ys);
-          {assert [(xs + ys)[0]] + xs[1..] + ys == xs + ys;}
+        {assert [(xs + ys)[0]] + xs[1..] + ys == xs + ys;}
         Map(f, xs) + Map(f, ys);
       }
     }
@@ -678,16 +678,16 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc {
         Filter(f, xs + ys);
-          { assert {:split_here} (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert {:split_here} (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
         Filter(f, [xs[0]]) + Filter(f, xs[1..] + ys);
-          { assert Filter(f, xs[1..] + ys) == Filter(f, xs[1..]) + Filter(f, ys); }
+        { assert Filter(f, xs[1..] + ys) == Filter(f, xs[1..]) + Filter(f, ys); }
         Filter(f, [xs[0]]) + (Filter(f, xs[1..]) + Filter(f, ys));
-          { assert {:split_here} [(xs + ys)[0]] + (xs[1..] + ys) == xs + ys; }
+        { assert {:split_here} [(xs + ys)[0]] + (xs[1..] + ys) == xs + ys; }
         Filter(f, xs) + Filter(f, ys);
       }
     }
   }
-  
+
   /* Folds a sequence xs from the left (the beginning), by repeatedly acting on the accumulator
      init via the function f. */
   function {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, xs: seq<T>): A
@@ -712,10 +712,10 @@ module {:options "-functionSyntax:4"} Seq {
       calc {
         FoldLeft(f, FoldLeft(f, init, xs), ys);
         FoldLeft(f, FoldLeft(f, f(init, xs[0]), xs[1..]), ys);
-          { LemmaFoldLeftDistributesOverConcat(f, f(init, xs[0]), xs[1..], ys); }
+        { LemmaFoldLeftDistributesOverConcat(f, f(init, xs[0]), xs[1..], ys); }
         FoldLeft(f, f(init, xs[0]), xs[1..] + ys);
-          { assert (xs + ys)[0] == xs[0];
-            assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0];
+          assert (xs + ys)[1..] == xs[1..] + ys; }
         FoldLeft(f, init, xs + ys);
       }
     }
@@ -724,7 +724,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* Is true, if inv is an invariant under stp, which is a relational 
      version of the function f passed to fold. */
   ghost predicate InvFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
-                                         stp: (B, A, B) -> bool)
+                                               stp: (B, A, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
       inv(b, [x] + xs) && stp(b, x, b') ==> inv(b', xs)
@@ -772,8 +772,8 @@ module {:options "-functionSyntax:4"} Seq {
         FoldRight(f, xs, FoldRight(f, ys, init));
         f(xs[0], FoldRight(f, xs[1..], FoldRight(f, ys, init)));
         f(xs[0], FoldRight(f, xs[1..] + ys, init));
-          { assert (xs + ys)[0] == xs[0];
-            assert (xs +ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0];
+          assert (xs +ys)[1..] == xs[1..] + ys; }
         FoldRight(f, xs + ys, init);
       }
     }
@@ -782,7 +782,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* Is true, if inv is an invariant under stp, which is a relational version
      of the function f passed to fold. */
   ghost predicate InvFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
-                                          stp: (A, B, B) -> bool)
+                                                stp: (A, B, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
       inv(xs, b) && stp(x, b, b') ==> inv(([x] + xs), b')
@@ -808,10 +808,10 @@ module {:options "-functionSyntax:4"} Seq {
 
 
   /**********************************************************
-  *
-  *  Sets to Ordered Sequences
-  *
-  ***********************************************************/  
+   *
+   *  Sets to Ordered Sequences
+   *
+   ***********************************************************/
 
   /* Converts a set to a sequence (ghost). */
   ghost function SetToSeqSpec<T>(s: set<T>): (xs: seq<T>)
