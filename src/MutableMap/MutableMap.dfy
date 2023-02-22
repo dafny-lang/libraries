@@ -18,6 +18,8 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap refi
     method {:extern} Put(k: K, v: V)
       modifies this
       ensures this.content() == old(this.content())[k := v]   
+      ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values + {v}
+      ensures k !in old(this.content()).Keys ==> this.content().Values == old(this.content()).Values + {v}
 
     function {:extern} Keys(): (keys: set<K>)
       reads this
@@ -45,6 +47,7 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap refi
     method {:extern} Remove(k: K)
       modifies this
       ensures this.content() == old(this.content()) - {k}
+      ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values
 
     function {:extern} Size(): (size: int)
       reads this

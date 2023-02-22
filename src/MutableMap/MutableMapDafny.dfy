@@ -23,11 +23,30 @@ module {:options "-functionSyntax:4"} MutableMapDafny refines MutableMapTrait {
       m := map[];
     }
 
-    method Put(k: K, v: V) 
+    method Put(k: K, v: V)
       modifies this
-      ensures this.content() == old(this.content())[k := v] 
+      ensures this.content() == old(this.content())[k := v]   
+      ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values + {v}
+      ensures k !in old(this.content()).Keys ==> this.content().Values == old(this.content()).Values + {v}
     {
       m := m[k := v];
+      if k in old(m).Keys {
+        forall v' | v' in old(m).Values + {v} ensures v' in m.Values + {old(m)[k]} {
+          if v' == v || v' == old(m)[k] {
+            assert m[k] == v;
+          } else {
+            assert m.Keys == old(m).Keys + {k};
+          }
+        }
+      }
+      if k !in old(m).Keys {
+        forall v' | v' in old(m).Values + {v} ensures v' in m.Values {
+          if v' == v {
+          } else {
+            assert m.Keys == old(m).Keys + {k};
+          }
+        }
+      }
     }
 
     function Keys(): (keys: set<K>)
@@ -82,8 +101,18 @@ module {:options "-functionSyntax:4"} MutableMapDafny refines MutableMapTrait {
     method Remove(k: K)
       modifies this
       ensures this.content() == old(this.content()) - {k}
+      ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values
     {
       m := map k' | k' in m.Keys && k' != k :: m[k'];
+      if k in old(m).Keys {
+        var v := old(m)[k];
+        forall v' | v' in old(m).Values ensures v' in m.Values + {v} {
+          if v' == v {
+          } else {
+            assert exists k' | k' in m.Keys :: old(m)[k'] == v';
+          }
+        }
+      }
     }
 
     function Size(): (size: int)

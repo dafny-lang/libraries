@@ -10,13 +10,15 @@ include "../Wrappers.dfy"
 module {:options "-functionSyntax:4"} MutableMapTrait {
   import opened Wrappers
 
-  trait MutableMapTrait<K(==),V(==)> {
+  trait {:termination false} MutableMapTrait<K(==),V(==)> {
     function content(): map<K, V>
       reads this
 
     method Put(k: K, v: V)
       modifies this
-      ensures this.content() == old(this.content())[k := v]    
+      ensures this.content() == old(this.content())[k := v]   
+      ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values + {v}
+      ensures k !in old(this.content()).Keys ==> this.content().Values == old(this.content()).Values + {v}
 
     function Keys(): (keys: set<K>)
       reads this
@@ -55,7 +57,8 @@ module {:options "-functionSyntax:4"} MutableMapTrait {
     method Remove(k: K)
       modifies this
       ensures this.content() == old(this.content()) - {k}
-
+      ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values
+ 
     function Size(): (size: int)
       reads this
       ensures size == |this.content().Items|
