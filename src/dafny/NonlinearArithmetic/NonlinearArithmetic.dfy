@@ -1,4 +1,4 @@
-// RUN: %resolve "%s"
+// RUN: %verify "%s"
 
 include "DivMod.dfy"
 include "Multiply.dfy"

@@ -1,4 +1,4 @@
-// RUN: %resolve "%s" > "%t"
+// RUN: %verify "%s" > "%t"
 
 include "./BoundedInts.dfy"
 include "./Results.dfy"

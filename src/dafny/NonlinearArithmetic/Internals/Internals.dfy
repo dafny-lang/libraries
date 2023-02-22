@@ -1,4 +1,4 @@
-// RUN: %resolve "%s"
+// RUN: %verify "%s"
 
 include "DivInternals.dfy"
 include "DivInternalsNonlinear.dfy"
