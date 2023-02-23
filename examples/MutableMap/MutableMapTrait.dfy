@@ -49,7 +49,7 @@ module {:options "-functionSyntax:4"} MutableMapTrait {
       requires this.HasKey(k)
       ensures v in this.content().Values
       ensures this.content()[k] == v
-
+        
     function SelectOpt(k: K): (o: Option<V>)
       reads this
       ensures o.Some? ==> (this.HasKey(k) && o.value in this.content().Values && this.content()[k] == o.value) 
@@ -60,7 +60,7 @@ module {:options "-functionSyntax:4"} MutableMapTrait {
       else
         None
     }
-    
+
     method Remove(k: K)
       modifies this
       ensures this.content() == old(this.content()) - {k}

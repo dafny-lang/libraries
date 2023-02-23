@@ -8,13 +8,13 @@
 include "../../examples/Mutablemap/MutableMapTrait.dfy"
 
 /**
-  *  Implements mutable maps by interfacing with external code, e.g. 
-  *  "MutableMap.java".
+  *  Implements mutable maps by interfacing with external code, e.g. "MutableMap.java".
   */
+
 module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap {
   import opened MutableMapTrait
 
-  class {:extern "MutableMap"} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
+  class {:extern} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
     constructor {:extern} ()
       ensures this.content() == map[]
 

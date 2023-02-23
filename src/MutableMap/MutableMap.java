@@ -13,6 +13,7 @@ import dafny.Helpers;
 import java.util.concurrent.*;
 import java.util.ArrayList;
 import java.util.Map;
+import java.math.BigInteger;
 
 public class MutableMap<K,V> {
   private ConcurrentHashMap<K,V> m;
@@ -61,7 +62,7 @@ public class MutableMap<K,V> {
     m.remove(k);
   }
 
-  public int Size() {
-    return m.size();
+  public BigInteger Size() {
+    return BigInteger.valueOf(m.size());
   }
 }
