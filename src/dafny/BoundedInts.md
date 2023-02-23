@@ -23,7 +23,7 @@ that is, just 7-bits worth of values. But it can be directly converted to an `in
 native signed 8-bit integer type.
 - if you need a general unsigned 8-bit type, with values running up to 256, use `uint8`
 - if you want natural numbers that interact well with signed numbers and do not mind the restriction in range, use `nat8`
-- if the target platform for compilation does not have native unsigned int types, then use nat types because of the smaller range
+- if the target platform for compilation does not have native unsigned int types, then use nat types because of the smaller range.
 
 In addition, the module defines a number of constants that are powers of two (not all of them, just those that are generally useful).
 They are useful in stating the ranges of fixed-bit-width integers. Examples are `TWO_TO_THE_15`, `TWO_TO_THE_32`.
