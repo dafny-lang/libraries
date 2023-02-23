@@ -27,7 +27,7 @@ module {:options "-functionSyntax:4"} MutableMapExamples {
   }
 
   method Main() {
-/*     var m := new MutableMap<string,string>();
+    var m := new MutableMap<string,string>();
     AssertAndExpect(m.Keys() == {});
     AssertAndExpect(m.Values() == {});
     AssertAndExpect(m.Items() == {});
@@ -57,10 +57,10 @@ module {:options "-functionSyntax:4"} MutableMapExamples {
     print m.Select("testkey2"), "\n";
 
     m.Remove("testkey");
-    //AssertAndExpect(m.SelectOpt("testkey").None?);
-    //AssertAndExpect(m.SelectOpt("testkey2").Some? && m.SelectOpt("testkey2").value == "testvalue2");
+    AssertAndExpect(m.SelectOpt("testkey").None?);
+    AssertAndExpect(m.SelectOpt("testkey2").Some? && m.SelectOpt("testkey2").value == "testvalue2");
     AssertAndExpect(m.Keys() == {"testkey2"});
     AssertAndExpect(m.Values() == {"testvalue2"});
-    AssertAndExpect(m.Items() == {("testkey2", "testvalue2")}); */
+    AssertAndExpect(m.Items() == {("testkey2", "testvalue2")});
   }
 }
