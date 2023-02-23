@@ -5,10 +5,16 @@
 
 // RUN: %dafny /compile:0 "%s"
 
-include "MutableMapTrait.dfy"
+include "../../examples/Mutablemap/MutableMapTrait.dfy"
 
-module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap refines MutableMapTrait {
-  class {:extern} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
+/**
+  *  Implements mutable maps by interfacing with external code, e.g. 
+  *  "MutableMap.java".
+  */
+module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries {
+  import opened MutableMapTrait
+
+  class {:extern "MutableMap"} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
     constructor {:extern} ()
       ensures this.content() == map[]
 

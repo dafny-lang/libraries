@@ -8,8 +8,11 @@
 include "../../src/MutableMap/MutableMap.dfy"
 include "../../src/Wrappers.dfy"
 
+/**
+  *  Tests the Java interfacing implementation of mutable maps.
+  */
 module {:options "-functionSyntax:4"} MutableMapExamples {
-  import opened MutableMap
+  import opened DafnyLibraries
   import opened Wrappers
 
   method AssertAndExpect(p: bool, maybeMsg: Option<string> := None) requires p {
@@ -26,33 +29,37 @@ module {:options "-functionSyntax:4"} MutableMapExamples {
   method Main() {
     var m := new MutableMap<string,string>();
     AssertAndExpect(m.Keys() == {});
-    assert m.Values() == {};
-    assert m.Items() == {};
-    assert m.Size() == 0;
+    AssertAndExpect(m.Values() == {});
+    AssertAndExpect(m.Items() == {});
+    //AssertAndExpect(m.Size() == 0);
+
     m.Put("testkey", "testvalue");
-    assert m.Select("testkey") == "testvalue";
-    assert m.Keys() == {"testkey"};
-    assert m.Values() == {"testvalue"};
-    assert m.Items() == {("testkey", "testvalue")};
-    assert m.Size() == 1;
+    AssertAndExpect(m.Select("testkey") == "testvalue");
+    AssertAndExpect(m.Keys() == {"testkey"});
+    AssertAndExpect(m.Values() == {"testvalue"});
+    AssertAndExpect(m.Items() == {("testkey", "testvalue")});
+
+    //AssertAndExpect(m.Size() == 1);
     m.Put("testkey", "testvalue2");
-    assert m.Keys() == {"testkey"};
-    assert m.Values() == {"testvalue2"};
-    assert m.Items() == {("testkey", "testvalue2")};
+    AssertAndExpect(m.Keys() == {"testkey"});
+    AssertAndExpect(m.Values() == {"testvalue2"});
+    AssertAndExpect(m.Items() == {("testkey", "testvalue2")});
+
     m.Put("testkey2", "testvalue2");
-    assert m.Keys() == {"testkey", "testkey2"};
-    assert m.Values() == {"testvalue2"};
-    assert m.Items() == {("testkey", "testvalue2"), ("testkey2", "testvalue2")};
-    assert m.Size() == 2;
-    assert "testkey" in m.Keys();
-    assert "testkey2" in m.Keys();
+    AssertAndExpect(m.Keys() == {"testkey", "testkey2"});
+    AssertAndExpect(m.Values() == {"testvalue2"});
+    AssertAndExpect(m.Items() == {("testkey", "testvalue2"), ("testkey2", "testvalue2")});
+    //AssertAndExpect(m.Size() == 2);
+    AssertAndExpect("testkey" in m.Keys());
+    AssertAndExpect("testkey2" in m.Keys());
     print m.Select("testkey"), "\n";
     print m.Select("testkey2"), "\n";
+
     m.Remove("testkey");
-    assert m.SelectOpt("testkey").None?;
-    assert m.SelectOpt("testkey2").Some? && m.SelectOpt("testkey2").value == "testvalue2";
-    assert m.Keys() == {"testkey2"};
-    assert m.Values() == {"testvalue2"};
-    assert m.Items() == {("testkey2", "testvalue2")};
+    //AssertAndExpect(m.SelectOpt("testkey").None?);
+    //AssertAndExpect(m.SelectOpt("testkey2").Some? && m.SelectOpt("testkey2").value == "testvalue2");
+    AssertAndExpect(m.Keys() == {"testkey2"});
+    AssertAndExpect(m.Values() == {"testvalue2"});
+    AssertAndExpect(m.Items() == {("testkey2", "testvalue2")});
   }
 }

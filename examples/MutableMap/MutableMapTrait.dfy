@@ -5,8 +5,13 @@
 
 // RUN: %dafny /compile:0 "%s"
 
-include "../Wrappers.dfy"
+include "../../src/Wrappers.dfy"
 
+/* Specifications that should be satisfied by any implementation of mutable maps.
+   Possible instantiations are given in "MutableMapDafny.dfy" (not meant for usage, 
+   only exists to verify feasability) and "../../src/MutableMap/MutableMap.dfy" 
+   (meant for usage; interfaces with external code, e.g. "../../src/MutableMap/
+   MutableMap.java"). */
 module {:options "-functionSyntax:4"} MutableMapTrait {
   import opened Wrappers
 
