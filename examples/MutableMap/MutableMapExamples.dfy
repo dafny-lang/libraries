@@ -12,7 +12,7 @@ include "../../src/Wrappers.dfy"
   *  Tests the Java interfacing implementation of mutable maps.
   */
 module {:options "-functionSyntax:4"} MutableMapExamples {
-  import opened DafnyLibraries
+  import opened MutableMap
   import opened Wrappers
 
   method AssertAndExpect(p: bool, maybeMsg: Option<string> := None) requires p {
