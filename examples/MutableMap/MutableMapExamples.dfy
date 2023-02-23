@@ -3,16 +3,29 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s"
+// RUN: %run -t:java "%s" --input ../../src/MutableMap/MutableMap.java
 
 include "../../src/MutableMap/MutableMap.dfy"
+include "../../src/Wrappers.dfy"
 
 module {:options "-functionSyntax:4"} MutableMapExamples {
   import opened MutableMap
+  import opened Wrappers
+
+  method AssertAndExpect(p: bool, maybeMsg: Option<string> := None) requires p {
+    match maybeMsg {
+      case None => {
+          expect p;
+      }
+      case Some(msg) => {
+          expect p, msg;
+      }
+    }
+  }
 
   method Main() {
     var m := new MutableMap<string,string>();
-    assert m.Keys() == {};
+    AssertAndExpect(m.Keys() == {});
     assert m.Values() == {};
     assert m.Items() == {};
     assert m.Size() == 0;
