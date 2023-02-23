@@ -28,15 +28,15 @@ native signed 8-bit integer type.
 In addition, the module defines a number of constants that are powers of two (not all of them, just those that are generally useful).
 They are useful in stating the ranges of fixed-bit-width integers. Examples are `TWO_TO_THE_15`, `TWO_TO_THE_32`.
 
-Here are two example methods. In the first, the module `Dafny.BoundedInts` is renamed to `T`, which is then used as the prefix for type and constant names.
+Here are two example methods. In the first, the module `Dafny.BoundedInts` is renamed to `BI`, which is then used as the prefix for type and constant names.
 In the second, the module is imported as opened, in which case the type and constant names can be used without qualification.
 <!-- %check-verify -->
 ```dafny
 module M {
-  import T = Dafny.BoundedInts
+  import BI = Dafny.BoundedInts
   
-  method m(k: T.int16) {
-    assert k as int < T.TWO_TO_THE_15;
+  method m(k: BI.int16) {
+    assert k as int < BI.TWO_TO_THE_15;
   }
 }
 

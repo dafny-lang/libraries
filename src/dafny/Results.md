@@ -1,7 +1,7 @@
 
-## The `Results` module {#sec-results}
+## The `Wrappers` module {#sec-results}
 
-A _Results_ datatype is one whose values can hold either a success indication, optionally along with a value, or a failure indication, optionally with error information.
+A _Wrappers_  datatype is one whose values can hold either a success indication, optionally along with a value, or a failure indication, optionally with error information.
 These are particularly useful with Dafny's abrupt-termination-on-failure `:-` operator.
 
 Any user datatype can serve this purpose, as long as it has an `IsFailure?` predicate 
@@ -20,7 +20,7 @@ These are common programming idioms. The main complication comes when they are m
 
 Consider this routine that looks for a value in a sequence, beginning at position `k`, returning its index:
 ```dafny
-import opened Dafny.Results
+import opened Dafny.Wrappers
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
   ensures  r.Some? ==> s[r.Extract()] == value;
@@ -94,7 +94,7 @@ When values of these types are used in expressions, the library types offer mean
 convert to values of the other types. For example, we can rewrite the example above this way:
 
 ```dafny
-import opened Dafny.Results
+import opened Dafny.Wrappers
 
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
@@ -136,8 +136,6 @@ An alternative is to write
 
 ### Combining different FC-types in methods
 
-_This is an experimental, tentatively planned, not yet implemented feature._
-
 The conversion functions used in the last section work syntactically because we had boxed values that were returned by expressions (function calls), to which the conversion functions could
 be applied. When a FC-value is returned by a method there is no place to call such a conversion function: the return value of the method must be captured by either `:=` or `:-`.
 So some new syntax will be needed --- what this will be is under design and discussion.
@@ -145,7 +143,7 @@ So some new syntax will be needed --- what this will be is under design and disc
 The workaround, however, is straitforward: just capture the results using `:=` and make the conversion directly. Here the is example above restated using a method.
 
 ```dafny
-import opened Dafny.Results
+import opened Dafny.Wrappers
 
 method Find<T(==)>(s: seq<T>, k: int, value: T) returns (r: Option<int>, v: T)
   requires 0 <= k <= |s|

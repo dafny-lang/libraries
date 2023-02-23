@@ -8,7 +8,7 @@ verification soundness, Dafny imposes a strict non-circular dependency relations
 among modules. This Core library contains functionality that may be needed
 by other libraries, but it itself is standalone.
 
-All the supported, delivered libraries will
+Our goal is that, eventually, all the supported, delivered libraries will
 - be stable --- a minimum of backwards incompatible changes
 - be verified --- proved to meet specifications and tested with expected use cases,
 with each release of the library and of the Dafny toolset
@@ -23,7 +23,7 @@ in the github repository [here](https://github.com/dafny-lang/libraries/tree/mas
 ## Content of the Core Library
 
 The sections below describe how to use each of the principal modules of the library:
-- [Dafny.Results](Results) -- containers that enable encapsulaton of success and failure results in a single datatype
+- [Dafny.Wrappers](Results) -- containers that enable encapsulaton of success and failure results in a single datatype
 - [Dafny.BoundedInts](BoundedInts) -- definitions of types and constants for bounded integer arithmetic
 - [Dafny.FileIO](FileIO/FileIO) -- basic input and output operations
 - [Dafny.Math](Math) --- basic mathematical operations and lemmas
