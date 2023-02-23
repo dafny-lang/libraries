@@ -18,6 +18,10 @@ import java.math.BigInteger;
 public class MutableMap<K,V> extends _ExternBase_MutableMap<K,V> {
   private ConcurrentHashMap<K,V> m;
 
+  public MutableMap(dafny.TypeDescriptor<K> _td_K, dafny.TypeDescriptor<V> _td_V) {
+    super(_td_K, _td_V);
+  }
+
   @Override 
   public DafnyMap<K,V> content() {
     return new DafnyMap<K,V>(m);
