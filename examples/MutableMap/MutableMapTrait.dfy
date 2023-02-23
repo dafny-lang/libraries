@@ -3,7 +3,7 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 include "../../src/Wrappers.dfy"
 
