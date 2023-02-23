@@ -15,37 +15,35 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.math.BigInteger;
 
-public class MutableMap<K,V> {
+public class MutableMap<K,V> extends _ExternBase_MutableMap<K,V> {
   private ConcurrentHashMap<K,V> m;
 
-  public DafnyMap<K,V> Content() {
+  @Override 
+  public DafnyMap<K,V> content() {
     return new DafnyMap<K,V>(m);
   }
 
-  public MutableMap() {
-    m = new ConcurrentHashMap<K,V>();
-  }
-
-  public MutableMap(TypeDescriptor<K> x, TypeDescriptor<V> y) {
-    m = new ConcurrentHashMap<K,V>();
-  }
-
+  @Override 
   public void Put(K k, V v) {
     m.put(k, v);
   }
 
+  @Override 
   public DafnySet<? extends K> Keys() {
     return new DafnySet(m.keySet());
   }
 
+  @Override 
   public boolean HasKey(K k) {
     return m.containsKey(k);
   }
 
+  @Override 
   public DafnySet<? extends V> Values() {
     return new DafnySet(m.values());
   }
 
+  @Override 
   public DafnySet<? extends Tuple2<K,V>> Items() {
     ArrayList<Tuple2<K, V>> list = new ArrayList<Tuple2<K, V>>();
     for (Map.Entry<K, V> entry : m.entrySet()) {
@@ -54,14 +52,17 @@ public class MutableMap<K,V> {
     return new DafnySet<Tuple2<K, V>>(list);
   }
 
+  @Override 
   public V Select(K k) {
     return m.get(k);
   }
 
+  @Override 
   public void Remove(K k) {
     m.remove(k);
   }
 
+  @Override 
   public BigInteger Size() {
     return BigInteger.valueOf(m.size());
   }

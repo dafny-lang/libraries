@@ -5,8 +5,6 @@
 
 // RUN: %verify "%s"
 
-include "../../src/Wrappers.dfy"
-
 /**
   *  Specifications that should be satisfied by any implementation of mutable maps.
   *  Possible instantiations are given in "MutableMapDafny.dfy" (not meant for usage, 
@@ -15,8 +13,6 @@ include "../../src/Wrappers.dfy"
   *  MutableMap.java").
   */
 module {:options "-functionSyntax:4"} MutableMapTrait {
-  import opened Wrappers
-
   trait {:termination false} MutableMapTrait<K(==),V(==)> {
     function content(): map<K, V>
       reads this
@@ -49,17 +45,6 @@ module {:options "-functionSyntax:4"} MutableMapTrait {
       requires this.HasKey(k)
       ensures v in this.content().Values
       ensures this.content()[k] == v
-        
-    function SelectOpt(k: K): (o: Option<V>)
-      reads this
-      ensures o.Some? ==> (this.HasKey(k) && o.value in this.content().Values && this.content()[k] == o.value) 
-      ensures o.None? ==> !this.HasKey(k)
-    {
-      if this.HasKey(k) then
-        Some(this.Select(k))
-      else
-        None
-    }
 
     method Remove(k: K)
       modifies this

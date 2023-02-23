@@ -6,6 +6,7 @@
 // RUN: %verify "%s"
 
 include "../../examples/Mutablemap/MutableMapTrait.dfy"
+include "../../src/Wrappers.dfy"
 
 /**
   *  Implements mutable maps by interfacing with external code, e.g. "MutableMap.java".
@@ -13,6 +14,7 @@ include "../../examples/Mutablemap/MutableMapTrait.dfy"
 
 module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap {
   import opened MutableMapTrait
+  import opened Wrappers
 
   class {:extern} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
     constructor {:extern} ()
@@ -50,6 +52,17 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap {
       ensures v in this.content().Values
       ensures this.content()[k] == v
     
+    function SelectOpt(k: K): (o: Option<V>)
+      reads this
+      ensures o.Some? ==> (this.HasKey(k) && o.value in this.content().Values && this.content()[k] == o.value) 
+      ensures o.None? ==> !this.HasKey(k)
+    {
+      if this.HasKey(k) then
+        Some(this.Select(k))
+      else
+        None
+    }
+
     method {:extern} Remove(k: K)
       modifies this
       ensures this.content() == old(this.content()) - {k}
