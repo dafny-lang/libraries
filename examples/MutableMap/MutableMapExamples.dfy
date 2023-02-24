@@ -3,7 +3,7 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %run -t:java "%s" --input ../../src/MutableMap/MutableMap.java
+// RUN: %run -target:java "%s" --input "%S/../../src/MutableMap/MutableMap.java"
 
 include "../../src/MutableMap/MutableMap.dfy"
 include "../../src/Wrappers.dfy"
