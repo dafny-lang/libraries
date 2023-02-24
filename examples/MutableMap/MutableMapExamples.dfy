@@ -3,7 +3,7 @@
 *  SPDX-License-Identifier: MIT
 *******************************************************************************/
 
-// RUN: %run --target:java "%s" --input /../../src/MutableMap/MutableMap.java
+// RUN: %run --target:java "%s" --input "%S/../../src/MutableMap/MutableMap.java"
 
 include "../../src/MutableMap/MutableMap.dfy"
 include "../../src/Wrappers.dfy"
@@ -12,7 +12,7 @@ include "../../src/Wrappers.dfy"
   *  Tests the Java interfacing implementation of mutable maps.
   */
 module {:options "-functionSyntax:4"} MutableMapExamples {
-  import opened MutableMap
+  import opened DafnyLibraries
   import opened Wrappers
 
   method AssertAndExpect(p: bool, maybeMsg: Option<string> := None) requires p {

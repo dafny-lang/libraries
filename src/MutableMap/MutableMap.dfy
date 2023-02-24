@@ -12,7 +12,7 @@ include "../../src/Wrappers.dfy"
   *  Implements mutable maps by interfacing with external code, e.g. "MutableMap.java".
   */
 
-module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} MutableMap {
+module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries {
   import opened MutableMapTrait
   import opened Wrappers
 
