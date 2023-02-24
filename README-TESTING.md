@@ -24,7 +24,7 @@ each .dfy file. The tests use dafny's new command-line syntax, using the lit
 macros `%verify` and `%run` and the like.
 
 The versions of dafny being run are set in the `tests.yml` file. The versions tested
-must be recent enough to support the new CLI syntax, so 3.11ff. Also, if 
+must be recent enough to support the new CLI syntax, so 3.11 and later. Also, if 
 verification logging is desired, the version must be at least that of 3/18/2023 when
 the logging parameters were implemented in the new CLI.
 
