@@ -18,4 +18,16 @@ module RelationsExamples {
   lemma BuiltInIntLEIsTotalOrdering()
     ensures TotalOrdering((x: int, y: int) => x <= y)
   {}
+
+  function Modulo(n: nat): (R: (int, int) -> bool)
+    requires n > 1
+    ensures EquivalenceRelation(R)
+  {
+    (x, y) => (x % n ==  y % n)
+  }
+
+  lemma EqualityEquivalence()
+    ensures EquivalenceRelation((x: int, y: int) => (x == y))
+  {}
 }
+
