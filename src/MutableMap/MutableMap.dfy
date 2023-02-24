@@ -5,7 +5,7 @@
 
 // RUN: %verify "%s"
 
-include "../../examples/Mutablemap/MutableMapTrait.dfy"
+include "../../examples/MutableMap/MutableMapTrait.dfy"
 include "../../src/Wrappers.dfy"
 
 /**
