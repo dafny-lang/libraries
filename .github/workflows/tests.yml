@@ -27,6 +27,6 @@ jobs:
 
     uses: ./.github/workflows/reusable-tests.yml
     with:
-      dafny-version: ${{ matrix.version }}
-      os: ${{ matrix.os }}
+      dafny-version: '${{ matrix.version }}'
+      os: '${{ matrix.os }}'
     secrets: inherit
