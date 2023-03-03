@@ -1,8 +1,7 @@
 # This workflow does static verification of the DafnyCore library
-name: Dafny Core verification
+name: Reusable Dafny Core verification
 
 on:
-  # Scheduled to be run sometime after the nightly build of dafny
   workflow_call:
     inputs:
       dafny-version:
@@ -11,12 +10,15 @@ on:
       os:
         required: true
         type: string
+    secrets:
+      token:
+        requires: true
 
 jobs:
   reusable_verification:
     continue-on-error: true
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ inputs.os }}
     steps:
       - uses: actions/checkout@v3
 
