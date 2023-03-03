@@ -20,7 +20,7 @@ jobs:
         # 3.11.0 supports new CLI but does not support logging
         # setup-dafny-action does not yet support 3.13.1 or recent nightly-lates
 t
-        ##version: [ nightly-latest, nightly-2023-02-18-ef4f346, 3.11.0, 3.12.0, 3.13.1 ]
+        ## version: [ nightly-latest, nightly-2023-02-18-ef4f346, 3.11.0, 3.12.0, 3.13.1 ]
         version: [ nightly-2023-02-18-ef4f346, 3.11.0, 3.12.0 ]
 
     uses: ./.github/workflows/reusable-tests.yml
