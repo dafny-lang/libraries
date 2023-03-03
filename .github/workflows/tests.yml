@@ -1,14 +1,12 @@
-# This workflow does static verification of the DafnyCore library
 name: Dafny Core verification
 
 on:
-  # Scheduled to be run sometime after the nightly build of dafny
   workflow_dispatch:
   pull_request:
     branches: [ master ]
 
 concurrency:
-  group: build-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

@@ -1,4 +1,3 @@
-# This workflow does static verification of the DafnyCore library
 name: Nightly Dafny Core verification
 
 on:
@@ -8,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: build-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
