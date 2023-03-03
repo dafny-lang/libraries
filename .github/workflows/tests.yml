@@ -15,4 +15,5 @@ jobs:
   verification:
     uses: ./.github/workflows/reusable-tests.yml
     with:
+      dafny-version: 3.11.0
       os: ubuntu-latest

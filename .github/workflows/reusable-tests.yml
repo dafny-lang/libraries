@@ -4,6 +4,9 @@ name: Dafny Core verification (Reusable)
 on:
   workflow_call:
     inputs:
+      dafny-version:
+        required: true
+        type: string
       os:
         required: true
         type: string
@@ -11,6 +14,15 @@ on:
 jobs:
   reusable_verification:
     continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        # nightly-latest to catch anything that breaks these tests in current development
+        # 2/18/2023 version is the first that supports logging
+        # 3.11.0 supports new CLI but does not support logging
+        version: [nightly-2023-02-18-ef4f346, 3.11.0 ]
+        os: [ ubuntu-latest ]
+
     runs-on: ${{ inputs.os }}
 
     steps:
@@ -19,8 +31,8 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.0
         with:
-          dafny-version: 3.11.0
-          ##dafny-version: ${{ inputs.dafny_version }}
+          ##dafny-version: 3.11.0
+          dafny-version: ${{ inputs.dafny_version }}
 
       - name: Version information
         run: |
