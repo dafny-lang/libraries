@@ -13,4 +13,5 @@ concurrency:
 
 jobs:
   verification:
+    runs-on: ubuntu-latest
     uses: ./.github/workflows/reusable-tests.yml

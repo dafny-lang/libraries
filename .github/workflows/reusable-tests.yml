@@ -6,7 +6,6 @@ on:
 
 jobs:
   reusable_verification:
-    runs-on: ubuntu-latest
     continue-on-error: true
 
     steps:
