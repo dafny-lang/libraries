@@ -7,9 +7,6 @@ on:
       dafny-version:
         required: true
         type: string
-      os:
-        required: true
-        type: string
 
 jobs:
   reusable_verification:
@@ -20,10 +17,10 @@ jobs:
         # nightly-latest to catch anything that breaks these tests in current development
         # 2/18/2023 version is the first that supports logging
         # 3.11.0 supports new CLI but does not support logging
-        version: [nightly-2023-02-18-ef4f346, 3.11.0 ]
+        ##version: [nightly-2023-02-18-ef4f346, 3.11.0 ]
         os: [ ubuntu-latest ]
 
-    runs-on: ${{ inputs.os }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
@@ -31,7 +28,6 @@ jobs:
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.0
         with:
-          ##dafny-version: 3.11.0
           dafny-version: ${{ inputs.dafny-version }}
 
       - name: Version information
