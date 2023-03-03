@@ -3,10 +3,15 @@ name: Dafny Core verification (Reusable)
 
 on:
   workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
 
 jobs:
   reusable_verification:
     continue-on-error: true
+    runs-on: ${{ inputs.os }}
 
     steps:
       - uses: actions/checkout@v3
