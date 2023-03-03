@@ -3,9 +3,6 @@ name: Reusable Dafny Core verification
 
 on:
   workflow_call:
-    secrets:
-      token:
-        requires: true
 
 jobs:
   reusable_verification:

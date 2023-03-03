@@ -25,4 +25,3 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     uses: ./.github/workflows/reusable-tests.yml
-    secrets: inherit
