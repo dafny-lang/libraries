@@ -69,7 +69,7 @@ method FindAllMatches<T(==)>(s: seq<T>, value: T) returns (status: Outcome<strin
 we can call it as
 <!-- %check-resolve %use tmp-matches.dfy -->
 ```dafny
-class A {
+method m(s: seq<int>, value: int) returns (r: Outcome<string>) {
   var matches :- FindAllMatches(s, value);
 }
 ```
