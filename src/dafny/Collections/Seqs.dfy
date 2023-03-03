@@ -652,7 +652,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
   /* Returns the subsequence consisting of those elements of a sequence that satisfy a given 
      predicate. */
-  function {:opaque} Filter<T(!new)>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
+  function {:opaque} Filter<T>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| <= |xs|
     ensures forall i: nat {:trigger result[i]} :: i < |result| && f.requires(result[i]) ==> f(result[i])
