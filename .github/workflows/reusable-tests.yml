@@ -1,5 +1,5 @@
 # This workflow does static verification of the DafnyCore library
-name: Reusable Dafny Core verification
+name: Dafny Core verification (Reusable)
 
 on:
   workflow_call:
