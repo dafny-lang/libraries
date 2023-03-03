@@ -24,9 +24,5 @@ jobs:
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
-
     uses: ./.github/workflows/reusable-tests.yml
-    with:
-      dafny_version: '${{ matrix.version }}'
-      os: '${{ matrix.os }}'
     secrets: inherit
