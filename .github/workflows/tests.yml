@@ -23,4 +23,3 @@ jobs:
     uses: ./.github/workflows/reusable-tests.yml
     with:
       dafny-version: ${{ matrix.version }}
-      os: ubuntu-latest
