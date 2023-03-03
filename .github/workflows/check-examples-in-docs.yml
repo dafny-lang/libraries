@@ -1,5 +1,4 @@
-# This workflow does static verification of the DafnyCore library
-name: Dafny Core verification
+name: Checking examples in library documentationn
 
 on:
   workflow_dispatch:
