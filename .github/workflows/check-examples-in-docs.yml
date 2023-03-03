@@ -32,12 +32,6 @@ jobs:
           dafny --version
           echo ${{ matrix.os }} ${{ runner.os }} ${{ matrix.version }}
 
-      - name: Upgrade outdated pip
-        run: python -m pip install --upgrade pip
-
-      - name: Install lit
-        run: pip install lit OutputCheck
-
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
