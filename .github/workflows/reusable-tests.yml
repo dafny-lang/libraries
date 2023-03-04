@@ -1,0 +1,62 @@
+# This workflow does static verification of the DafnyCore library
+name: Dafny Core verification (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      dafny-version:
+        required: true
+        type: string
+
+jobs:
+  reusable_verification:
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dafny
+        uses: dafny-lang/setup-dafny-action@v1.6.0
+        with:
+          dafny-version: ${{ inputs.dafny-version }}
+
+      - name: Version information
+        run: |
+          dafny --version
+
+      - name: Upgrade outdated pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install lit
+        run: pip install lit OutputCheck
+
+      - name: Set up JS dependencies
+        run: npm install bignumber.js
+
+      - name: Verify Code and Examples without logging
+        id: nolog
+        if: inputs.dafny-version == '3.11.0'
+        run: lit --time-tests -v .
+
+      - name: Verify Code and Examples
+        id: withlog
+        if: steps.nolog.conclusion == 'skipped'
+        run: |
+          lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
+
+      - name: Generate Report
+        if: always() && steps.withlog.conclusion != 'skipped'
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: always() && steps.withlog.conclusion != 'skipped'
+        with:
+          name: verification-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: error

@@ -1,15 +1,15 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 module {:options "-functionSyntax:4"} Math {
   function Min(a: int, b: int): int
   {
     if a < b
-      then a
+    then a
     else
       b
   }
@@ -17,7 +17,7 @@ module {:options "-functionSyntax:4"} Math {
   function Max(a: int, b: int): int
   {
     if a < b
-      then b
+    then b
     else
       a
   }
