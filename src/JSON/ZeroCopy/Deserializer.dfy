@@ -1,4 +1,4 @@
-// RUN: %dafny -compile:0 "%s"
+// RUN: %verify "%s"
 
 include "../Errors.dfy"
 include "../Grammar.dfy"

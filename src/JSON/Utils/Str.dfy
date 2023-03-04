@@ -1,4 +1,4 @@
-// RUN: %dafny -compile:0 -noNLarith "%s"
+// RUN: %verify -noNLarith "%s"
 
 include "../../BoundedInts.dfy"
 include "../../Wrappers.dfy"

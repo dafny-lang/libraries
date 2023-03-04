@@ -1,4 +1,4 @@
-// RUN: %dafny -compile:0 "%s"
+// RUN: %verify "%s"
 
 include "Serializer.dfy"
 include "Deserializer.dfy"

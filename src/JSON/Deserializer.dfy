@@ -1,4 +1,4 @@
-// RUN: %dafny -compile:0 "%s"
+// RUN: %verify "%s"
 
 /// ===============================================
 ///  Deserialization from JSON.Grammar to JSON.AST

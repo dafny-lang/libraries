@@ -1,4 +1,4 @@
-// RUN: %dafny -compile:0 "%s"
+// RUN: %verify "%s"
 
 module {:options "-functionSyntax:4"} JSON.AST {
   datatype Decimal =

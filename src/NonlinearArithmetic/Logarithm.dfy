@@ -4,12 +4,12 @@ include "Mul.dfy"
 include "DivMod.dfy"
 include "Power.dfy"
 
-module Logarithm {
+module {:options "-functionSyntax:4"} Logarithm {
   import opened Mul
   import opened DivMod
   import opened Power
 
-  function method {:opaque} Log(base: nat, pow: nat): nat
+  function {:opaque} Log(base: nat, pow: nat): nat
     requires base > 1
     decreases pow
   {
