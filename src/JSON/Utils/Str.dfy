@@ -1,4 +1,4 @@
-// RUN: %verify -noNLarith "%s"
+// RUN: %verify --disable-nonlinear-arithmetic "%s"
 
 include "../../BoundedInts.dfy"
 include "../../Wrappers.dfy"

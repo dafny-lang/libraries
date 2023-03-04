@@ -1,4 +1,4 @@
-// RUN: %dafny -compile:3 -runAllTests:1 "%s"
+// RUN: %test "%s"
 /// # Using the JSON library
 
 include "API.dfy"
