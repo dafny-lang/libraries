@@ -13,13 +13,13 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../Results.dfy"
+include "../Wrappers.dfy"
 include "../Math.dfy"
 include "../Relations.dfy"
 
 module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
-  import opened Results
+  import opened Wrappers
   import opened Relations
   import Math
 
