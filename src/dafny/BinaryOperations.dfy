@@ -44,11 +44,11 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     forall x, y :: bop(x, y) == bop(y, x)
   }
 
-  ghost predicate DistributiveLeft<T(!new)>(bop1: (T, T) -> T, bop2: (T, T) -> T) {
+  ghost predicate DistributiveRight<T(!new)>(bop1: (T, T) -> T, bop2: (T, T) -> T) {
     forall x, y, z :: bop2(bop1(x, y), z) == bop1(bop2(x, z), bop2(y, z))
   }
 
-  ghost predicate DistributiveRight<T(!new)>(bop1: (T, T) -> T, bop2: (T, T) -> T) {
+  ghost predicate DistributiveLeft<T(!new)>(bop1: (T, T) -> T, bop2: (T, T) -> T) {
     forall x, y, z :: bop2(x, bop1(y, z)) == bop1(bop2(x, y), bop2(x, z))
   }
 
@@ -70,6 +70,13 @@ module {:options "-functionSyntax:4"} BinaryOperations {
   ghost predicate AbelianGroup<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
     && Group(bop, inverse, unit)
     && Abelian(bop)
+  }
+
+  ghost predicate Ring<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, one: T) {
+    && AbelianGroup(add, minus, zero)
+    && Monoid(mult, one)
+    && DistributiveLeft(add, mult)
+    && DistributiveRight(add, mult)
   }
 
   ghost predicate Field<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T) 

@@ -12,4 +12,5 @@ Properties of binary operations `bop`:
 - Monoid: Associative, Unital
 - Group: Monoid, Inverse
 - Abelian Group: Abelian, Group
+- Ring: AbelianGroup A, Monoid B, Distributive
 - Field: Abelian Group A, Abelian Group B (without 0), Distributive

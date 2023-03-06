@@ -7,6 +7,28 @@
 
 include "../src/dafny/BinaryOperations.dfy"
 
+module {:options "-functionSyntax:4"} IntegersAsRingExample {
+
+  import opened BinaryOperations
+
+  ghost function add(x: int, y: int): int {
+    x + y
+  }
+
+  ghost function minus(x: int): int {
+    -x
+  }
+
+  ghost function mult(x: int, y: int): int {
+    x * y
+  }
+
+  lemma IsRing()
+    ensures Ring(add, minus, 0, mult, 1)
+  {}
+
+}
+
 module {:options "-functionSyntax:4"} RealsAsFieldExample {
 
   import opened BinaryOperations
