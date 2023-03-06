@@ -26,7 +26,7 @@ module RelationsExamples {
     (x, y) => (x % n ==  y % n)
   }
 
-  lemma EqualityEquivalence()
+  lemma BuiltInIntEqIsEquivalenceRelation()
     ensures EquivalenceRelation((x: int, y: int) => (x == y))
   {}
 }
