@@ -27,7 +27,7 @@ As a simple example, you might define a predicate like this:
   const IntLT := ((i: int, j: int) => (i < j))
 ```
 
-and then need to proof this lemma to use it in a sorting routine:
+and then need to prove this lemma to use it in a sorting routine:
 <!-- %check-verify %use tmp-intlt.dfy -->
 ```dafny
   import opened Dafny.Relations
