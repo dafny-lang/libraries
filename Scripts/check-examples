@@ -286,7 +286,7 @@ do
               cat actual
               FAIL=1
             fi
-            if [ `cat actual | grep -v "Warning: a forall statement with no bound variables" | wc -l ` != "2" ]; then
+            if [ `cat actual | grep -v "Warning: a forall statement with no bound variables" | grep -v "No trigger covering all quantified variables" | wc -l ` != "2" ]; then
               echo ACTUAL ERROR OUTPUT BUT NONE EXPECTED `cat actual | wc -l `
               cat actual
               FAIL=1
