@@ -20,7 +20,7 @@ module RelationsExamples {
   {}
 
   function Modulo(n: nat): (R: (int, int) -> bool)
-    requires n > 1
+    requires n >= 1
     ensures EquivalenceRelation(R)
   {
     (x, y) => (x % n ==  y % n)
