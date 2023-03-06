@@ -286,7 +286,8 @@ do
               cat actual
               FAIL=1
             fi
-            if [ `cat actual | grep -v "Warning: a forall statement with no bound variables" | grep -v "No trigger covering all quantified variables" | wc -l ` != "2" ]; then
+            # Warnings differ from version to version; "No trigger" is sometimes on a different line
+            if [ `cat actual | grep -v "Warning" | grep -v "No trigger" | wc -l ` != "2" ]; then
               echo ACTUAL ERROR OUTPUT BUT NONE EXPECTED `cat actual | wc -l `
               cat actual
               FAIL=1
@@ -297,7 +298,8 @@ do
               FAIL=1
             fi
             if [ -e "$dir/$expect" ]; then
-              cat actual | grep -v "Warning: a forall statement with no bound variables" | diff - "$dir/$expect"
+              # Warnings differ from version to version; "No trigger" is sometimes on a different line
+              cat actual | grep -v "Warning" | grep -v "No trigger" | diff - "$dir/$expect"
               if [ "$?" != "0" ]; then
                 FAIL=1
                 echo Actual output differs from expected
