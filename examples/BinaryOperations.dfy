@@ -7,7 +7,7 @@
 
 include "../src/BinaryOperations.dfy"
 
-module RealsAsFieldExample {
+module {:options "-functionSyntax:4"} RealsAsFieldExample {
 
   ghost function plus(x: real, y: real): real {
     x + y
@@ -30,5 +30,5 @@ module RealsAsFieldExample {
   lemma IsField()
     ensures Field(plus, minus, 0.0, mult, div, 1.0)
   {}
-  
+
 }
