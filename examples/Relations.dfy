@@ -30,4 +30,3 @@ module RelationsExamples {
     ensures EquivalenceRelation((x: int, y: int) => (x == y))
   {}
 }
-
