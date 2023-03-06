@@ -1,7 +1,7 @@
 
 ## The `Binary Operations` module {#sec-binaryop}
 
-The `Binary Operations` module defines a number of properties of properties of binary operations.
+The `Binary Operations` module defines a number of properties of binary operations.
 
 Properties of binary operations `bop`:
 - Associative: `bop(bop(x, y), z) == bop(x, bop(y, z))`
