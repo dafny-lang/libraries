@@ -26,12 +26,12 @@ module {:options "-functionSyntax:4"} Dafny.BinaryOperations {
 
   ghost predicate InverseLeft<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T)
   {
-    forall x | inv.requires(x) :: bop(inv(x), x) == e)
+    forall x | inv.requires(x) :: bop(inv(x), x) == e
   }
 
   ghost predicate InverseRight<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T)
   {
-    forall x | inv.requires(x) :: bop(x, inv(x)) == e)
+    forall x | inv.requires(x) :: bop(x, inv(x)) == e
   }
 
   ghost predicate Inverse<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T)
