@@ -5,13 +5,13 @@
  *  SPDX-License-Identifier: MIT
  *******************************************************************************/
 
-include "../src/BinaryOperations.dfy"
+include "../src/dafny/BinaryOperations.dfy"
 
 module {:options "-functionSyntax:4"} RealsAsFieldExample {
 
   import opened BinaryOperations
 
-  ghost function plus(x: real, y: real): real {
+  ghost function add(x: real, y: real): real {
     x + y
   }
 
@@ -30,7 +30,7 @@ module {:options "-functionSyntax:4"} RealsAsFieldExample {
   }
 
   lemma IsField()
-    ensures Field(plus, minus, 0.0, mult, div, 1.0)
+    ensures Field(add, minus, 0.0, mult, div, 1.0)
   {}
 
 }

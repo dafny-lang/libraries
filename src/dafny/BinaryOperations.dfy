@@ -5,39 +5,39 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Dafny.BinaryOperations {
+module {:options "-functionSyntax:4"} BinaryOperations {
 
   ghost predicate Associative<T(!new)>(bop: (T, T) -> T) {
     forall x, y, z :: bop(bop(x, y), z) == bop(x, bop(y, z))
   }
 
-  ghost predicate UnitalLeft<T(!new)>(bop: (T, T) -> T, e: T) {
-    forall x :: bop(e, x) == x
+  ghost predicate UnitalLeft<T(!new)>(bop: (T, T) -> T, unit: T) {
+    forall x :: bop(unit, x) == x
   }
 
-  ghost predicate UnitalRight<T(!new)>(bop: (T, T) -> T, e: T) {
-    forall x :: bop(x, e) == x
+  ghost predicate UnitalRight<T(!new)>(bop: (T, T) -> T, unit: T) {
+    forall x :: bop(x, unit) == x
   }
 
-  ghost predicate Unital<T(!new)>(bop: (T, T) -> T, e: T) {
-    && UnitalLeft(bop, e)
-    && UnitalRight(bop, e)
+  ghost predicate Unital<T(!new)>(bop: (T, T) -> T, unit: T) {
+    && UnitalLeft(bop, unit)
+    && UnitalRight(bop, unit)
   }
 
-  ghost predicate InverseLeft<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T)
+  ghost predicate InverseLeft<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T)
   {
-    forall x | inv.requires(x) :: bop(inv(x), x) == e
+    forall x | inverse.requires(x) :: bop(inverse(x), x) == unit
   }
 
-  ghost predicate InverseRight<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T)
+  ghost predicate InverseRight<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T)
   {
-    forall x | inv.requires(x) :: bop(x, inv(x)) == e
+    forall x | inverse.requires(x) :: bop(x, inverse(x)) == unit
   }
 
-  ghost predicate Inverse<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T)
+  ghost predicate Inverse<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T)
   {
-    && InverseLeft(bop, inv, e) 
-    && InverseRight(bop, inv, e)
+    && InverseLeft(bop, inverse, unit) 
+    && InverseRight(bop, inverse, unit)
   }
   
   ghost predicate Abelian<T(!new)>(bop: (T, T) -> T) {
@@ -57,27 +57,27 @@ module {:options "-functionSyntax:4"} Dafny.BinaryOperations {
     && DistributiveRight(bop1, bop2)
   }
 
-  ghost predicate Monoid<T(!new)>(bop: (T, T) -> T, e: T) {
+  ghost predicate Monoid<T(!new)>(bop: (T, T) -> T, unit: T) {
     && Associative(bop) 
-    && Unital(bop, e)
+    && Unital(bop, unit)
   }
 
-  ghost predicate Group<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T) {
-    && Monoid(bop, e) 
-    && Inverse(bop, inv, e)
+  ghost predicate Group<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
+    && Monoid(bop, unit) 
+    && Inverse(bop, inverse, unit)
   }
 
-  ghost predicate AbelianGroup<T(!new)>(bop: (T, T) -> T, inv: T --> T, e: T) {
-    && Group(bop, inv, e)
+  ghost predicate AbelianGroup<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
+    && Group(bop, inverse, unit)
     && Abelian(bop)
   }
 
-  ghost predicate Field<T(!new)>(plus: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T) 
+  ghost predicate Field<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T) 
     requires forall t :: (t != zero) ==> div.requires(t) 
   {
-    && AbelianGroup(plus, minus, zero)
+    && AbelianGroup(add, minus, zero)
     && AbelianGroup(mult, div, one)
-    && DistributiveLeft(plus, mult)
+    && DistributiveLeft(add, mult)
   }
 
 }
