@@ -1,17 +1,17 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original Copyright under the following: 
-*  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
-*  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
-*  Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT 
-* 
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original Copyright under the following: 
+ *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+ *  ETH Zurich, and University of Washington
+ *  SPDX-License-Identifier: BSD-2-Clause 
+ * 
+ *  Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT 
+ * 
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../Functions.dfy"
 

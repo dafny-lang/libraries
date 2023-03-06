@@ -1,39 +1,25 @@
-# This workflow performs static analysis checks.
-name: tests
+name: Dafny Core verification
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verification:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+    strategy:
+      matrix:
+        # nightly-latest to catch anything that breaks these tests in current development
+        # 2/18/2023 version is the first that supports logging
+        # 3.11.0 supports new CLI but does not support logging
+        # setup-dafny-action does not yet support 3.13.1 or recent nightly-latest
+        ## version: [ nightly-2023-02-18-ef4f346, 3.11.0, 3.12.0, 3.13.1 ]
+        version: [ nightly-2023-02-18-ef4f346, 3.11.0, 3.12.0 ]
 
-      - name: Install Dafny
-        uses: dafny-lang/setup-dafny-action@v1
-        with:
-          dafny-version: "3.9.1"
-
-      - name: Install lit
-        run: pip install lit OutputCheck
-
-      - name: Set up JS dependencies
-        run: npm install bignumber.js
-
-      - name: Verify Dafny Code
-        run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
-
-      - name: Generate Report
-        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
-
-      - uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
-        with:
-          name: verification-results
-          path: '**/TestResults/*.trx'
-          if-no-files-found: error
+    uses: ./.github/workflows/reusable-tests.yml
+    with:
+      dafny-version: ${{ matrix.version }}

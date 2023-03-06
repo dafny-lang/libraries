@@ -1,17 +1,17 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original Copyright under the following: 
-*  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
-*  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
-*  Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT 
-* 
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original Copyright under the following: 
+ *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+ *  ETH Zurich, and University of Washington
+ *  SPDX-License-Identifier: BSD-2-Clause 
+ * 
+ *  Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT 
+ * 
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../Wrappers.dfy"
 include "../../Math.dfy"
@@ -26,10 +26,10 @@ module {:options "-functionSyntax:4"} Seq {
   import Math
 
   /**********************************************************
-  *
-  *  Manipulating the End of a Sequence
-  *
-  ***********************************************************/
+   *
+   *  Manipulating the End of a Sequence
+   *
+   ***********************************************************/
 
   /* Returns the first element of a non-empty sequence. */
   function First<T>(xs: seq<T>): T
@@ -55,7 +55,7 @@ module {:options "-functionSyntax:4"} Seq {
 
   /* Returns the subsequence of a non-empty sequence obtained by
      dropping the last element. */
-  function DropLast<T>(xs: seq<T>): seq<T> 
+  function DropLast<T>(xs: seq<T>): seq<T>
     requires |xs| > 0;
   {
     xs[..|xs|-1]
@@ -85,18 +85,18 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /**********************************************************
-  *
-  *  Manipulating the Content of a Sequence
-  *
-  ***********************************************************/
-  
+   *
+   *  Manipulating the Content of a Sequence
+   *
+   ***********************************************************/
+
   /* Is true if the sequence xs is a prefix of the sequence ys. */
   ghost predicate IsPrefix<T>(xs: seq<T>, ys: seq<T>)
     ensures IsPrefix(xs, ys) ==> (|xs| <= |ys| && xs == ys[..|xs|])
   {
-    xs <= ys    
+    xs <= ys
   }
-  
+
   /* Is true if the sequence xs is a suffix of the sequence ys. */
   ghost predicate IsSuffix<T>(xs: seq<T>, ys: seq<T>)
   {
@@ -149,7 +149,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Converts a sequence to a set. */
-  function {:opaque} ToSet<T>(xs: seq<T>): set<T> 
+  function {:opaque} ToSet<T>(xs: seq<T>): set<T>
   {
     set x: T | x in xs
   }
@@ -157,7 +157,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* The cardinality of a set of elements is always less than or 
      equal to that of the full sequence of elements. */
   lemma LemmaCardinalityOfSet<T>(xs: seq<T>)
-    ensures |ToSet(xs)| <= |xs| 
+    ensures |ToSet(xs)| <= |xs|
   {
     reveal ToSet();
     if |xs| == 0 {
@@ -166,7 +166,7 @@ module {:options "-functionSyntax:4"} Seq {
       LemmaCardinalityOfSet(DropLast(xs));
     }
   }
-  
+
   /* A sequence is of length 0 if and only if its conversion to
      a set results in the empty set. */
   lemma LemmaCardinalityOfEmptySetIs0<T>(xs: seq<T>)
@@ -179,9 +179,9 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Is true if there are no duplicate values in the sequence. */
-  ghost predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>) 
+  ghost predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>)
   {
-    (forall i, j {:trigger xs[i], xs[j]}:: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j])
+    forall i, j :: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j]
   }
 
   /* If sequences xs and ys don't have duplicates and there are no 
@@ -196,12 +196,9 @@ module {:options "-functionSyntax:4"} Seq {
     reveal HasNoDuplicates();
     var zs := xs + ys;
     if |zs| > 1 {
-      assert forall i {:trigger zs[i]} :: 0 <= i < |xs| ==>
-        zs[i] in multiset(xs);
-      assert forall j {:trigger zs[j]} :: |xs| <= j < |zs| ==>
-        zs[j] in multiset(ys);
-      assert forall i, j {:trigger zs[i], zs[j]} :: i != j && 0 <= i < |xs| && |xs| <= j < |zs| ==>
-        zs[i] != zs[j];
+      assert forall i :: 0 <= i < |xs| ==> zs[i] in multiset(xs);
+      assert forall j :: |xs| <= j < |zs| ==> zs[j] in multiset(ys);
+      assert forall i, j :: i != j && 0 <= i < |xs| && |xs| <= j < |zs| ==> zs[i] != zs[j];
     }
   }
 
@@ -247,7 +244,7 @@ module {:options "-functionSyntax:4"} Seq {
      once in its conversion to a multiset. */
   lemma LemmaMultisetHasNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
-    ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs):: multiset(xs)[x] == 1
+    ensures forall x | x in multiset(xs) :: multiset(xs)[x] == 1
   {
     if |xs| == 0 {
     } else {
@@ -267,7 +264,7 @@ module {:options "-functionSyntax:4"} Seq {
   function {:opaque} IndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
-    ensures forall j {:trigger xs[j]} :: 0 <= j < i ==> xs[j] != v
+    ensures forall j :: 0 <= j < i ==> xs[j] != v
   {
     if xs[0] == v then 0 else 1 + IndexOf(xs[1..], v)
   }
@@ -276,15 +273,15 @@ module {:options "-functionSyntax:4"} Seq {
      the index of its first occurrence. Otherwise the return is None. */
   function {:opaque} IndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
-                            forall j {:trigger xs[j]} :: 0 <= j < o.value ==> xs[j] != v
+                            forall j :: 0 <= j < o.value ==> xs[j] != v
             else v !in xs
   {
     if |xs| == 0 then None()
     else
-      if xs[0] == v then Some(0)
-      else
-        var o' := IndexOfOption(xs[1..], v);
-        if o'.Some? then Some(o'.value + 1) else None()
+    if xs[0] == v then Some(0)
+    else
+      var o' := IndexOfOption(xs[1..], v);
+      if o'.Some? then Some(o'.value + 1) else None()
   }
 
   /* For an element that occurs at least once in a sequence, the index of its
@@ -292,7 +289,7 @@ module {:options "-functionSyntax:4"} Seq {
   function {:opaque} LastIndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
-    ensures forall j {:trigger xs[j]} :: i < j < |xs| ==> xs[j] != v
+    ensures forall j :: i < j < |xs| ==> xs[j] != v
   {
     if xs[|xs|-1] == v then |xs| - 1 else LastIndexOf(xs[..|xs|-1], v)
   }
@@ -301,7 +298,7 @@ module {:options "-functionSyntax:4"} Seq {
      the index of its last occurrence. Otherwise the return is None. */
   function {:opaque} LastIndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
-                            forall j {:trigger xs[j]} :: o.value < j < |xs| ==> xs[j] != v
+                            forall j :: o.value < j < |xs| ==> xs[j] != v
             else v !in xs
   {
     if |xs| == 0 then None()
@@ -355,23 +352,23 @@ module {:options "-functionSyntax:4"} Seq {
   {
     if xs == [] then [] else [xs[|xs|-1]] + Reverse(xs[0 .. |xs|-1])
   }
-    
+
   /* Returns a constant sequence of a given length. */
   function {:opaque} Repeat<T>(v: T, length: nat): (xs: seq<T>)
     ensures |xs| == length
-    ensures forall i: nat {:trigger xs[i]} | i < |xs| :: xs[i] == v
+    ensures forall i: nat | i < |xs| :: xs[i] == v
   {
     if length == 0 then
       []
     else
       [v] + Repeat(v, length - 1)
   }
-  
+
   /* Unzips a sequence that contains pairs into two separate sequences. */
   function {:opaque} Unzip<A,B>(xs: seq<(A, B)>): (seq<A>, seq<B>)
     ensures |Unzip(xs).0| == |Unzip(xs).1| == |xs|
-    ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]} 
-        :: 0 <= i < |xs| ==> (Unzip(xs).0[i], Unzip(xs).1[i]) == xs[i]
+    ensures forall i {:trigger Unzip(xs).0[i]} {:trigger Unzip(xs).1[i]}
+              :: 0 <= i < |xs| ==> (Unzip(xs).0[i], Unzip(xs).1[i]) == xs[i]
   {
     if |xs| == 0 then ([], [])
     else
@@ -383,7 +380,7 @@ module {:options "-functionSyntax:4"} Seq {
   function {:opaque} Zip<A,B>(xs: seq<A>, ys: seq<B>): seq<(A, B)>
     requires |xs| == |ys|
     ensures |Zip(xs, ys)| == |xs|
-    ensures forall i {:trigger Zip(xs, ys)[i]}:: 0 <= i < |Zip(xs, ys)| ==> Zip(xs, ys)[i] == (xs[i], ys[i])
+    ensures forall i {:trigger Zip(xs, ys)[i]} :: 0 <= i < |Zip(xs, ys)| ==> Zip(xs, ys)[i] == (xs[i], ys[i])
     ensures Unzip(Zip(xs, ys)).0 == xs
     ensures Unzip(Zip(xs, ys)).1 == ys
   {
@@ -398,15 +395,15 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /**********************************************************
-  *
-  *  Extrema in Sequences
-  *
-  ***********************************************************/
+   *
+   *  Extrema in Sequences
+   *
+   ***********************************************************/
 
   /* Returns the maximum integer value in a non-empty sequence of integers. */
   function {:opaque} Max(xs: seq<int>): int
     requires 0 < |xs|
-    ensures forall k {:trigger k in xs} :: k in xs ==> Max(xs) >= k
+    ensures forall k :: k in xs ==> Max(xs) >= k
     ensures Max(xs) in xs
   {
     assert xs == [xs[0]] + xs[1..];
@@ -432,7 +429,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* Returns the minimum integer value in a non-empty sequence of integers. */
   function {:opaque} Min(xs: seq<int>): int
     requires 0 < |xs|
-    ensures forall k {:trigger k in xs} :: k in xs ==> Min(xs) <= k
+    ensures forall k :: k in xs ==> Min(xs) <= k
     ensures Min(xs) in xs
   {
     assert xs == [xs[0]] + xs[1..];
@@ -445,7 +442,7 @@ module {:options "-functionSyntax:4"} Seq {
     requires 0 < |xs| && 0 < |ys|
     ensures Min(xs+ys) <= Min(xs)
     ensures Min(xs+ys) <= Min(ys)
-    ensures forall i {:trigger i in xs + ys} :: i in xs + ys ==> Min(xs + ys) <= i
+    ensures forall i :: i in xs + ys ==> Min(xs + ys) <= i
   {
     reveal Min();
     if |xs| == 1 {
@@ -483,10 +480,10 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /**********************************************************
-  *
-  *  Sequences of Sequences
-  *
-  ***********************************************************/
+   *
+   *  Sequences of Sequences
+   *
+   ***********************************************************/
 
   /* Flattens a sequence of sequences into a single sequence by concatenating 
      subsequences, starting from the first element. */
@@ -508,7 +505,7 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc == {
         Flatten(xs + ys);
-          { assert (xs + ys)[0] == xs[0];  assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0];  assert (xs + ys)[1..] == xs[1..] + ys; }
         xs[0] + Flatten(xs[1..] + ys);
         xs[0] + Flatten(xs[1..]) + Flatten(ys);
         Flatten(xs) + Flatten(ys);
@@ -538,7 +535,7 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc == {
         FlattenReverse(xs + ys);
-          { assert Last(xs + ys) == Last(ys);  assert DropLast(xs + ys) == xs + DropLast(ys); }
+        { assert Last(xs + ys) == Last(ys);  assert DropLast(xs + ys) == xs + DropLast(ys); }
         FlattenReverse(xs + DropLast(ys)) + Last(ys);
         FlattenReverse(xs) + FlattenReverse(DropLast(ys)) + Last(ys);
         FlattenReverse(xs) + FlattenReverse(ys);
@@ -556,11 +553,11 @@ module {:options "-functionSyntax:4"} Seq {
       calc == {
         FlattenReverse(xs);
         FlattenReverse(DropLast(xs)) + Last(xs);
-          { LemmaFlattenAndFlattenReverseAreEquivalent(DropLast(xs)); }
+        { LemmaFlattenAndFlattenReverseAreEquivalent(DropLast(xs)); }
         Flatten(DropLast(xs)) + Last(xs);
         Flatten(DropLast(xs)) + Flatten([Last(xs)]);
-          { LemmaFlattenConcat(DropLast(xs), [Last(xs)]); 
-        assert xs == DropLast(xs) + [Last(xs)]; }
+        { LemmaFlattenConcat(DropLast(xs), [Last(xs)]);
+          assert xs == DropLast(xs) + [Last(xs)]; }
         Flatten(xs);
       }
     }
@@ -581,7 +578,7 @@ module {:options "-functionSyntax:4"} Seq {
      to the length of xs multiplied by a number not smaller than the length of the 
      longest sequence in xs. */
   lemma LemmaFlattenLengthLeMul<T>(xs: seq<seq<T>>, j: int)
-    requires forall i {:trigger xs[i]} | 0 <= i < |xs| :: |xs[i]| <= j
+    requires forall i | 0 <= i < |xs| :: |xs[i]| <= j
     ensures |FlattenReverse(xs)| <= |xs| * j
   {
     if |xs| == 0 {
@@ -593,33 +590,33 @@ module {:options "-functionSyntax:4"} Seq {
 
 
   /**********************************************************
-  *
-  *  Higher-Order Sequence Functions
-  *
-  ***********************************************************/
+   *
+   *  Higher-Order Sequence Functions
+   *
+   ***********************************************************/
 
   /* Returns the sequence one obtains by applying a function to every element 
      of a sequence. */
   function {:opaque} Map<T,R>(f: (T ~> R), xs: seq<T>): (result: seq<R>)
-    requires forall i {:trigger xs[i]} :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| == |xs|
-    ensures forall i {:trigger result[i]}:: 0 <= i < |xs| ==> result[i] == f(xs[i]);
-    reads set i, o {:trigger o in f.reads(xs[i])} | 0 <= i < |xs| && o in f.reads(xs[i]):: o
+    ensures forall i {:trigger result[i]} :: 0 <= i < |xs| ==> result[i] == f(xs[i]);
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then []
     else [f(xs[0])] + Map(f, xs[1..])
   }
 
-/* Applies a function to every element of a sequence, returning a Result value (which is a 
-   failure-compatible type). Returns either a failure, or, if successful at every element, 
-   the transformed sequence.  */
+  /* Applies a function to every element of a sequence, returning a Result value (which is a 
+     failure-compatible type). Returns either a failure, or, if successful at every element, 
+     the transformed sequence.  */
   function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures result.Success? ==>
-      && |result.value| == |xs|
-      && (forall i :: 0 <= i < |xs| ==> 
-        && f(xs[i]).Success?
-        && result.value[i] == f(xs[i]).value)
+              && |result.value| == |xs|
+              && (forall i :: 0 <= i < |xs| ==>
+                                && f(xs[i]).Success?
+                                && result.value[i] == f(xs[i]).value)
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then Success([])
@@ -633,8 +630,8 @@ module {:options "-functionSyntax:4"} Seq {
      two sequences and then applying Map is the same as applying Map to each sequence separately, 
      and then concatenating the two resulting sequences. */
   lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
-    requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
-    requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires forall j :: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Map(f, xs + ys) == Map(f, xs) + Map(f, ys)
   {
     reveal Map();
@@ -643,10 +640,10 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc {
         Map(f, xs + ys);
-          { assert (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
         Map(f, [xs[0]]) + Map(f, xs[1..] + ys);
         Map(f, [xs[0]]) + Map(f, xs[1..]) + Map(f, ys);
-          {assert [(xs + ys)[0]] + xs[1..] + ys == xs + ys;}
+        {assert [(xs + ys)[0]] + xs[1..] + ys == xs + ys;}
         Map(f, xs) + Map(f, ys);
       }
     }
@@ -657,8 +654,8 @@ module {:options "-functionSyntax:4"} Seq {
   function {:opaque} Filter<T>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| <= |xs|
-    ensures forall i: nat {:trigger result[i]} :: i < |result| && f.requires(result[i]) ==> f(result[i])
-    reads f.reads
+    ensures forall i: nat :: i < |result| && f.requires(result[i]) ==> f(result[i])
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then []
     else (if f(xs[0]) then [xs[0]] else []) + Filter(f, xs[1..])
@@ -668,8 +665,8 @@ module {:options "-functionSyntax:4"} Seq {
      and then using "Filter" is the same as using "Filter" on each sequence separately, and then 
      concatenating the two resulting sequences. */
   lemma {:opaque} LemmaFilterDistributesOverConcat<T>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
-    requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
-    requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires forall j :: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Filter(f, xs + ys) == Filter(f, xs) + Filter(f, ys)
   {
     reveal Filter();
@@ -678,16 +675,16 @@ module {:options "-functionSyntax:4"} Seq {
     } else {
       calc {
         Filter(f, xs + ys);
-          { assert {:split_here} (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert {:split_here} (xs + ys)[0] == xs[0]; assert (xs + ys)[1..] == xs[1..] + ys; }
         Filter(f, [xs[0]]) + Filter(f, xs[1..] + ys);
-          { assert Filter(f, xs[1..] + ys) == Filter(f, xs[1..]) + Filter(f, ys); }
+        { assert Filter(f, xs[1..] + ys) == Filter(f, xs[1..]) + Filter(f, ys); }
         Filter(f, [xs[0]]) + (Filter(f, xs[1..]) + Filter(f, ys));
-          { assert {:split_here} [(xs + ys)[0]] + (xs[1..] + ys) == xs + ys; }
+        { assert {:split_here} [(xs + ys)[0]] + (xs[1..] + ys) == xs + ys; }
         Filter(f, xs) + Filter(f, ys);
       }
     }
   }
-  
+
   /* Folds a sequence xs from the left (the beginning), by repeatedly acting on the accumulator
      init via the function f. */
   function {:opaque} FoldLeft<A,T>(f: (A, T) -> A, init: A, xs: seq<T>): A
@@ -712,10 +709,10 @@ module {:options "-functionSyntax:4"} Seq {
       calc {
         FoldLeft(f, FoldLeft(f, init, xs), ys);
         FoldLeft(f, FoldLeft(f, f(init, xs[0]), xs[1..]), ys);
-          { LemmaFoldLeftDistributesOverConcat(f, f(init, xs[0]), xs[1..], ys); }
+        { LemmaFoldLeftDistributesOverConcat(f, f(init, xs[0]), xs[1..], ys); }
         FoldLeft(f, f(init, xs[0]), xs[1..] + ys);
-          { assert (xs + ys)[0] == xs[0];
-            assert (xs + ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0];
+          assert (xs + ys)[1..] == xs[1..] + ys; }
         FoldLeft(f, init, xs + ys);
       }
     }
@@ -724,7 +721,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* Is true, if inv is an invariant under stp, which is a relational 
      version of the function f passed to fold. */
   ghost predicate InvFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
-                                         stp: (B, A, B) -> bool)
+                                               stp: (B, A, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
       inv(b, [x] + xs) && stp(b, x, b') ==> inv(b', xs)
@@ -772,8 +769,8 @@ module {:options "-functionSyntax:4"} Seq {
         FoldRight(f, xs, FoldRight(f, ys, init));
         f(xs[0], FoldRight(f, xs[1..], FoldRight(f, ys, init)));
         f(xs[0], FoldRight(f, xs[1..] + ys, init));
-          { assert (xs + ys)[0] == xs[0];
-            assert (xs +ys)[1..] == xs[1..] + ys; }
+        { assert (xs + ys)[0] == xs[0];
+          assert (xs +ys)[1..] == xs[1..] + ys; }
         FoldRight(f, xs + ys, init);
       }
     }
@@ -782,7 +779,7 @@ module {:options "-functionSyntax:4"} Seq {
   /* Is true, if inv is an invariant under stp, which is a relational version
      of the function f passed to fold. */
   ghost predicate InvFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
-                                          stp: (A, B, B) -> bool)
+                                                stp: (A, B, B) -> bool)
   {
     forall x: A, xs: seq<A>, b: B, b': B ::
       inv(xs, b) && stp(x, b, b') ==> inv(([x] + xs), b')
@@ -808,10 +805,10 @@ module {:options "-functionSyntax:4"} Seq {
 
 
   /**********************************************************
-  *
-  *  Sets to Ordered Sequences
-  *
-  ***********************************************************/  
+   *
+   *  Sets to Ordered Sequences
+   *
+   ***********************************************************/
 
   /* Converts a set to a sequence (ghost). */
   ghost function SetToSeqSpec<T>(s: set<T>): (xs: seq<T>)
