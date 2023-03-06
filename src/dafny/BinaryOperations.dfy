@@ -75,8 +75,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
   ghost predicate Ring<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, one: T) {
     && AbelianGroup(add, minus, zero)
     && Monoid(mult, one)
-    && DistributiveLeft(add, mult)
-    && DistributiveRight(add, mult)
+    && Distributive(add, mult)
   }
 
   ghost predicate Field<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T) 

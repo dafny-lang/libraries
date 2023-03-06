@@ -7,7 +7,7 @@
 
 include "../src/dafny/BinaryOperations.dfy"
 
-module {:options "-functionSyntax:4"} IntegersAsRingExample {
+module {:options "-functionSyntax:4"} IntegersExample {
 
   import opened BinaryOperations
 
@@ -23,13 +23,25 @@ module {:options "-functionSyntax:4"} IntegersAsRingExample {
     x * y
   }
 
+  lemma IsAbelianGroup()
+    ensures AbelianGroup(add, minus, 0)
+  {}
+
+  lemma IsMonoid()
+    ensures Monoid(mult, 1)
+  {}
+
+  lemma IsDistributive()
+    ensures Distributive(add, mult)
+  {}
+
   lemma IsRing()
     ensures Ring(add, minus, 0, mult, 1)
   {}
 
 }
 
-module {:options "-functionSyntax:4"} RealsAsFieldExample {
+module {:options "-functionSyntax:4"} RealsExample {
 
   import opened BinaryOperations
 
@@ -50,6 +62,18 @@ module {:options "-functionSyntax:4"} RealsAsFieldExample {
   {
     1.0 / x
   }
+
+  lemma IsAdditiveAbelianGroup()
+    ensures AbelianGroup(add, minus, 0.0)
+  {}
+
+  lemma IsPartlyMultiplicativeAbelianGroup()
+    ensures AbelianGroup(mult, div, 1.0)
+  {}
+
+  lemma IsDistributive()
+    ensures Distributive(add, mult) 
+  {}
 
   lemma IsField()
     ensures Field(add, minus, 0.0, mult, div, 1.0)
