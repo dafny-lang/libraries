@@ -31,6 +31,7 @@ The sections below describe how to use each of the principal modules of the libr
 - [Dafny.Collections](Collections/Collections) -- functions and lemmas about sequences, sets and maps
 - [Dafny.NonlinearArith](NonlinearArithmetic/NonlinearArithmetic) --  lemmas and functions for non-linear arithmetic
 - [Dafny.Relations](Relations) -- predicates and lemmas about properties of functions
+- [Dafny.BinaryOperations](BinaryOperations) -- properties of binary operations
 
 
 ## How to use the library
