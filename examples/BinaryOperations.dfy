@@ -75,6 +75,10 @@ module {:options "-functionSyntax:4"} RealsExample {
     ensures Distributive(add, mult) 
   {}
 
+  lemma IsRing()
+    ensures Ring(add, minus, 0.0, mult, 1.0)
+  {}
+
   lemma IsField()
     ensures Field(add, minus, 0.0, mult, div, 1.0)
   {}
