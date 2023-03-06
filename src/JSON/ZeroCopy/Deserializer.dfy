@@ -492,7 +492,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       else Success(sp)
     }
 
-    function {:opaque} Exp(cs: FreshCursor) : (pr: ParseResult<Maybe<jexp>>)
+    function {:opaque} {:vcs_split_on_every_assert} Exp(cs: FreshCursor) : (pr: ParseResult<Maybe<jexp>>)
       ensures pr.Success? ==> pr.value.SplitFrom?(cs, exp => Spec.Maybe(exp, Spec.Exp))
     {
       var SP(e, cs) :=
