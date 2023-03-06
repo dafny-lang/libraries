@@ -9,6 +9,8 @@ include "../src/BinaryOperations.dfy"
 
 module {:options "-functionSyntax:4"} RealsAsFieldExample {
 
+  import opened BinaryOperations
+
   ghost function plus(x: real, y: real): real {
     x + y
   }
