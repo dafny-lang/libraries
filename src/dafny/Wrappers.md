@@ -1,18 +1,17 @@
 
 ## The `Wrappers` module {#sec-results}
 
-A _Wrappers_  datatype is one whose values can hold either a success indication, optionally along with a value, or a failure indication, optionally with error information.
-These are particularly useful with Dafny's abrupt-termination-on-failure `:-` operator.
+The Wrappers module holds some
+simple datatypes to support common patterns, such as optional values or the result of operations that can fail.
+These are additionally useful with Dafny's abrupt-termination-on-failure `:-` operator.
 
 Any user datatype can serve this purpose, as long as it has an `IsFailure?` predicate 
 (in which case it is known as a [_failure-compatible_](https://dafny.org/latest/DafnyRef/DafnyRef#sec-failure-compatible-types) type --- an FC-type). 
-In this module Dafny defines three such types, illustrates them with examples, and then describes 
-how they can be used in a system where different parts of the system use different FC-types.
 
-The three types are
+In this ilibrary module Dafny defines three such types:
 - `Option<R>` - which is either `Some` with a value of type `T` or a `None` with no information
 - `Outcome<E>` - which is either `Pass` with no informatino or `Fail` with an error value of type `E` (often a `string`) 
-- `Result<R,E>` - which is either `Success` with a value of type `R` or `Failure` with error value of type `E` (often a `string`)
+- `Result<R,E>` - which is either `Success` with a value of type `R` or `Failure` with error value of type `E`
 
 These are common programming idioms. The main complication comes when they are mixed in the same program.
 
@@ -45,11 +44,12 @@ method m(s: seq<int>) returns (r: Option<int>) {
 }
 ```
 
-You could just capture the result of find using `:=` in a `Option<int>` variable and inspect it. But if the `None` condition is 
+You could just capture the result of `Find` using `:=` in a `Option<int>` variable and inspect it. But if the `None` condition is 
 generally a rare error, it is easy to forget to always check that each operation was successful. Instead, the `:-` changes the 
 control flow so that if a `None` value is returned from `Find`, the method immediately aborts, with the output value (which has
-the `Option<int>` type) getting that returned value. So this operates something like exceptions.
-See the [reference manual](TODO) for more on the similarities and differences with exceptions.
+the `Option<int>` type) getting that returned `None` value. So this operates something like exceptions.
+See the [reference manual](https://dafny.org/latest/DafnyRef/DafnyRef#sec-update-with-failure-statement) i
+for more on the similarities and differences with exceptions.
 
 ### Outcome
 

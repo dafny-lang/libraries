@@ -23,7 +23,7 @@ in the github repository [here](https://github.com/dafny-lang/libraries/tree/mas
 ## Content of the Core Library
 
 The sections below describe how to use each of the principal modules of the library:
-- [Dafny.Wrappers](Wrappers) -- simple datatypes to support common patterns, such as optional values or the result of operations that can fail.
+- [Dafny.Wrappers](Wrappers) -- simple datatypes to support common patterns, such as optional values or the result of operations that can fail
 - [Dafny.BoundedInts](BoundedInts) -- definitions of types and constants for bounded integer arithmetic
 - [Dafny.FileIO](FileIO/FileIO) -- basic input and output operations
 - [Dafny.Math](Math) --- basic mathematical operations and lemmas
