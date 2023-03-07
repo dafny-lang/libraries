@@ -8,7 +8,7 @@ These are additionally useful with Dafny's abrupt-termination-on-failure `:-` op
 Any user datatype can serve this purpose, as long as it has an `IsFailure?` predicate 
 (in which case it is known as a [_failure-compatible_](https://dafny.org/latest/DafnyRef/DafnyRef#sec-failure-compatible-types) type --- an FC-type). 
 
-In this ilibrary module Dafny defines three such types:
+In this library module Dafny defines three such types:
 - `Option<R>` - which is either `Some` with a value of type `T` or a `None` with no information
 - `Outcome<E>` - which is either `Pass` with no informatino or `Fail` with an error value of type `E` (often a `string`) 
 - `Result<R,E>` - which is either `Success` with a value of type `R` or `Failure` with error value of type `E`
