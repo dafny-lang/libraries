@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "--function-syntax:4"} Dafny.Results {
+module {:options "--function-syntax:4"} Dafny.Wrappers {
 
   datatype Option<+T> = None | Some(value: T) {
     predicate IsFailure() {

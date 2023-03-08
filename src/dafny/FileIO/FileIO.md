@@ -39,7 +39,7 @@ These sample programs from the examples folder illustrate how to read and write 
 ```dafny
 include "../../FileIO/FileIO.dfy"
 module ReadBytesFromFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;
@@ -74,7 +74,7 @@ module ReadBytesFromFile {
 ```dafny
 include "../../FileIO/FileIO.dfy"
 module WriteBytesToFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;

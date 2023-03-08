@@ -22,13 +22,13 @@ or a _Strict Total Ordering_.
 In fact, that is part of the precondition of a sorting function.
 
 As a simple example, you might define a predicate like this:
-<!-- %check-resolve -->
+<!-- %check-resolve %save tmp-intlt.dfy -->
 ```dafny
   const IntLT := ((i: int, j: int) => (i < j))
 ```
 
-and then need to proof this lemma to use it in a sorting routine:
-<!-- %check-verify -->
+and then need to prove this lemma to use it in a sorting routine:
+<!-- %check-verify %use tmp-intlt.dfy -->
 ```dafny
   import opened Dafny.Relations
   lemma IntLTisStrictTotalOrder()

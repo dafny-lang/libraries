@@ -1,32 +1,32 @@
 
 ## The `Wrappers` module {#sec-results}
 
-A _Wrappers_  datatype is one whose values can hold either a success indication, optionally along with a value, or a failure indication, optionally with error information.
-These are particularly useful with Dafny's abrupt-termination-on-failure `:-` operator.
+The Wrappers module holds some
+simple datatypes to support common patterns, such as optional values or the result of operations that can fail.
+These are additionally useful with Dafny's abrupt-termination-on-failure `:-` operator.
 
 Any user datatype can serve this purpose, as long as it has an `IsFailure?` predicate 
 (in which case it is known as a [_failure-compatible_](https://dafny.org/latest/DafnyRef/DafnyRef#sec-failure-compatible-types) type --- an FC-type). 
-In this module Dafny defines three such types, illustrates them with examples, and then describes 
-how they can be used in a system where different parts of the system use different FC-types.
 
-The three types are
+In this library module Dafny defines three such types:
 - `Option<R>` - which is either `Some` with a value of type `T` or a `None` with no information
 - `Outcome<E>` - which is either `Pass` with no informatino or `Fail` with an error value of type `E` (often a `string`) 
-- `Result<R,E>` - which is either `Success` with a value of type `R` or `Failure` with error value of type `E` (often a `string`)
+- `Result<R,E>` - which is either `Success` with a value of type `R` or `Failure` with error value of type `E`
 
 These are common programming idioms. The main complication comes when they are mixed in the same program.
 
 ### Option
 
 Consider this routine that looks for a value in a sequence, beginning at position `k`, returning its index:
-<!-- %check-resolve -->
+<!-- %check-verify %save tmp-find.dfy -->
 ```dafny
 include "../Wrappers.dfy"
 import opened Wrappers
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
-  ensures  r.Some? ==> s[r.Extract()] == value;
+  ensures  r.Some? ==> 0 <= r.Extract() < |s| && s[r.Extract()] == value;
   ensures  r.None? ==> forall i | k <= i < |s| :: s[i] != value
+  decreases |s| - k
 {
   if k >= |s| then None else if s[k] == value then Some(k) else Find(s, k+1, value)
 }
@@ -34,24 +34,25 @@ function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
 
 It could be used in a method like this
 
-<!-- %check-resolve -->
+<!-- %check-resolve %use tmp-find.dfy -->
 ```dafny
 include "../Wrappers.dfy"
 import opened Wrappers
 method m(s: seq<int>) returns (r: Option<int>) {
   var value: int;
   // do various calculations
-  int index: int :- Find(s, 0, value);
+  var index: int :- Find(s, 0, value);
   // more calculations
   return Some(value);
 }
 ```
 
-You could just capture the result of find using `:=` in a `Option<int>` variable and inspect it. But if the `None` condition is 
+You could just capture the result of `Find` using `:=` in a `Option<int>` variable and inspect it. But if the `None` condition is 
 generally a rare error, it is easy to forget to always check that each operation was successful. Instead, the `:-` changes the 
 control flow so that if a `None` value is returned from `Find`, the method immediately aborts, with the output value (which has
-the `Option<int>` type) getting that returned value. So this operates something like exceptions.
-See the [reference manual](TODO) for more on the similarities and differences with exceptions.
+the `Option<int>` type) getting that returned `None` value. So this operates something like exceptions.
+See the [reference manual](https://dafny.org/latest/DafnyRef/DafnyRef#sec-update-with-failure-statement) i
+for more on the similarities and differences with exceptions.
 
 ### Outcome
 
@@ -63,16 +64,17 @@ Then the first return value can be an `Outcome` to indicate success or failure, 
 appropriate values in the success situation.
 
 For example, if we have this method
-<!-- %check-resolve %save d.tmp -->
+<!-- %check-resolve %save tmp-matches.dfy -->
 ```dafny
-include "../Wrappers.dfy"
-import opened Wrappers
-method FindAllMatches<T(==)(s: seq<T>, value: T) returns (status: Outcome<string>, matches: seq<int>)
+import opened Dafny.Wrappers
+method FindAllMatches<T(==)>(s: seq<T>, value: T) returns (status: Outcome<string>, matches: seq<int>)
 ```
 we can call it as
-<!-- %check-resolve %use d.tmp -->
+<!-- %check-resolve %use tmp-matches.dfy -->
 ```dafny
-var matches :- FindAllMatches(s, value);
+method m(s: seq<int>, value: int) returns (r: Outcome<string>) {
+  var matches :- FindAllMatches(s, value);
+}
 ```
 
 Notice that there is no left-hand-side for the first out-parameter. It does not carry a value: if the value is a `Fail`, the control
@@ -103,7 +105,7 @@ but happens to be using code supplied by someone else that returns an `Outcome`.
 When values of these types are used in expressions, the library types offer means to convert among them: each type has instance functions that
 convert to values of the other types. For example, we can rewrite the example above this way:
 
-<!-- %check-resolve -->
+<!-- %check-verify %save tmp-find.dfy -->
 ```dafny
 include "../Wrappers.dfy"
 import opened Wrappers
@@ -156,7 +158,7 @@ So some new syntax will be needed --- what this will be is under design and disc
 
 The workaround, however, is straitforward: just capture the results using `:=` and make the conversion directly. Here the is example above restated using a method.
 
-<!-- %check-resolve -->
+<!-- %check-verify -->
 ```dafny
 include "../Wrappers.dfy"
 import opened Wrappers
@@ -168,11 +170,13 @@ method Find<T(==)>(s: seq<T>, k: int, value: T) returns (r: Option<int>, v: T)
   ensures  r.None? ==> forall i | k <= i < |s| :: s[i] != value
   decreases |s| - k
 {
-  if k >= |s| { return None, value; }
-  else if s[k] == value {
+  if k >= |s| {
+    return None, value;
+  } else if s[k] == value {
     return Some(k), value;
   } else {
-    return Find(s, k+1, value), value;
+    r, v := Find(s, k+1, value);
+    return r, v;
   }
 }
 
