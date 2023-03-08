@@ -142,6 +142,9 @@ module {:options "-functionSyntax:4"} RealsExample {
   {}
 
   lemma RealsAreRing()
+    ensures AbelianGroup(add, minus, 0.0)
+    ensures Monoid(mult, 1.0)
+    ensures Distributive(add, mult)
     ensures Ring(add, minus, 0.0, mult, 1.0)
   {}
 
