@@ -23,19 +23,37 @@ module {:options "-functionSyntax:4"} IntegersExample {
     x * y
   }
 
-  lemma IsAbelianGroup()
-    ensures AbelianGroup(add, minus, 0)
+  lemma IntegersAreAssociative()
+    ensures Associative(add)
+    ensures Associative(mult)
   {}
 
-  lemma IsMonoid()
+  lemma IntegersAreMonoid()
+    ensures Monoid(add, 0)
     ensures Monoid(mult, 1)
   {}
 
-  lemma IsDistributive()
+  lemma IntegersAreAbelian()
+    ensures Abelian(add)
+    ensures Abelian(mult)
+
+  lemma IntegersAreAdditiveGroup()
+    ensures Group(add, minus, 0)
+  {}
+
+  lemma IntegersAreAdditiveAbelianGroup()
+    ensures AbelianGroup(add, minus, 0)
+  {}
+
+  lemma IntegersHaveAdditiveInverse()
+    ensures Inverse(add, minus, 0)
+  {}
+
+  lemma IntegersAreDistributive()
     ensures Distributive(add, mult)
   {}
 
-  lemma IsRing()
+  lemma IntegersAreRing()
     ensures Ring(add, minus, 0, mult, 1)
   {}
 
@@ -63,23 +81,23 @@ module {:options "-functionSyntax:4"} RealsExample {
     1.0 / x
   }
 
-  lemma IsAdditiveAbelianGroup()
+  lemma RealsAreAbelianGroup()
     ensures AbelianGroup(add, minus, 0.0)
   {}
 
-  lemma IsPartlyMultiplicativeAbelianGroup()
+  lemma RealsArePartlyAbelianGroup()
     ensures AbelianGroup(mult, div, 1.0)
   {}
 
-  lemma IsDistributive()
+  lemma RealsAreDistributive()
     ensures Distributive(add, mult) 
   {}
 
-  lemma IsRing()
+  lemma RealsAreRing()
     ensures Ring(add, minus, 0.0, mult, 1.0)
   {}
 
-  lemma IsField()
+  lemma RealsAreField()
     ensures Field(add, minus, 0.0, mult, div, 1.0)
   {}
 
