@@ -33,6 +33,15 @@ module {:options "-functionSyntax:4"} IntegersExample {
     ensures Monoid(mult, 1)
   {}
 
+  lemma IntegersHaveUnit()
+    ensures UnitalLeft(add, 0)
+    ensures UnitalRight(add, 0)
+    ensures Unital(add, 0)
+    ensures UnitalLeft(mult, 1)
+    ensures UnitalRight(mult, 1)
+    ensures Unital(mult, 1)
+  {}
+
   lemma IntegersAreAbelian()
     ensures Abelian(add)
     ensures Abelian(mult)
@@ -50,6 +59,8 @@ module {:options "-functionSyntax:4"} IntegersExample {
   {}
 
   lemma IntegersAreDistributive()
+    ensures DistributiveLeft(add, mult)
+    ensures DistributiveRight(add, mult)
     ensures Distributive(add, mult)
   {}
 
@@ -81,16 +92,53 @@ module {:options "-functionSyntax:4"} RealsExample {
     1.0 / x
   }
 
-  lemma RealsAreAbelianGroup()
+ lemma RealsAreAssociative()
+    ensures Associative(add)
+    ensures Associative(mult)
+  {}
+
+  lemma RealsAreMonoid()
+    ensures Monoid(add, 0.0)
+    ensures Monoid(mult, 1.0)
+  {}
+
+  lemma RealsHaveUnit()
+    ensures UnitalLeft(add, 0.0)
+    ensures UnitalRight(add, 0.0)
+    ensures Unital(add, 0.0)
+    ensures UnitalLeft(mult, 1.0)
+    ensures UnitalRight(mult, 1.0)
+    ensures Unital(mult, 1.0)
+  {}
+
+  lemma RealsAreAbelian()
+    ensures Abelian(add)
+    ensures Abelian(mult)
+
+  lemma RealsAreAdditiveGroup()
+    ensures Group(add, minus, 0.0)
+  {}
+
+  lemma RealsAreAdditiveAbelianGroup()
     ensures AbelianGroup(add, minus, 0.0)
   {}
 
-  lemma RealsArePartlyAbelianGroup()
+  lemma NonZeroRealsAreMultiplicativeGroup()
+    ensures Group(mult, div, 1.0)
+  {}
+
+  lemma NonZeroRealsAreMultiplicativeAbelianGroup()
     ensures AbelianGroup(mult, div, 1.0)
   {}
 
+  lemma RealsHaveAdditiveInverse()
+    ensures Inverse(add, minus, 0.0)
+  {}
+
   lemma RealsAreDistributive()
-    ensures Distributive(add, mult) 
+    ensures DistributiveLeft(add, mult)
+    ensures DistributiveRight(add, mult)
+    ensures Distributive(add, mult)
   {}
 
   lemma RealsAreRing()
