@@ -35,7 +35,9 @@ then you should instead integrate the appropriate language-specific implementati
 
 These sample programs from the examples folder illustrate how to read and write files:
 
+<!-- %check-resolve -->
 ```dafny
+include "../../FileIO/FileIO.dfy"
 module ReadBytesFromFile {
   import FileIO
 
@@ -68,7 +70,9 @@ module ReadBytesFromFile {
 }
 ```
 
+<!-- %check-resolve -->
 ```dafny
+include "../../FileIO/FileIO.dfy"
 module WriteBytesToFile {
   import FileIO
 

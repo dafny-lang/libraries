@@ -30,6 +30,7 @@ As a simple example, you might define a predicate like this:
 and then need to proof this lemma to use it in a sorting routine:
 <!-- %check-verify -->
 ```dafny
+  import opened Dafny.Relations
   lemma IntLTisStrictTotalOrder()
     ensures StrictTotalOrdering(IntLT) {}
 ```
