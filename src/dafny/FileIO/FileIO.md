@@ -35,9 +35,10 @@ then you should instead integrate the appropriate language-specific implementati
 
 These sample programs from the examples folder illustrate how to read and write files:
 
+<!-- %check-resolve -->
 ```dafny
 module ReadBytesFromFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;
@@ -68,9 +69,10 @@ module ReadBytesFromFile {
 }
 ```
 
+<!-- %check-resolve -->
 ```dafny
 module WriteBytesToFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;
