@@ -65,5 +65,17 @@ module {:options "-functionSyntax:4"} Dafny.Utf8EncodingScheme {
     */
   lemma LemmaDeserializeSerialize(b: seq<byte>)
     ensures Serialize(Deserialize(b)) == b
-  {}
+  {
+    calc {
+      Serialize(Deserialize(b));
+    == // Definitions of Serialize, Deserialize
+      Seq.Map(c => c as byte, Seq.Map(b => b as Utf8EncodingForm.CodeUnit, b));
+    == // Compositionality of Map
+      Seq.Map(b => (b as Utf8EncodingForm.CodeUnit) as byte, b);
+    == // Simplify map
+      Seq.Map(b => b, b);
+    == // Identity function
+      b;
+    }
+  }
 }
