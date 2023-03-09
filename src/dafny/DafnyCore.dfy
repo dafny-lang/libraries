@@ -1,7 +1,7 @@
 // RUN: %verify "%s" > "%t"
 
 include "./BoundedInts.dfy"
-include "./Results.dfy"
+include "./Wrappers.dfy"
 include "./Collections/Collections.dfy"
 include "./FileIO/FileIO.dfy"
 include "./Math.dfy"
