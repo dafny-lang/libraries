@@ -24,18 +24,15 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     && UnitalRight(bop, unit)
   }
 
-  ghost predicate InverseLeft<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T)
-  {
+  ghost predicate InverseLeft<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
     forall x | inverse.requires(x) :: bop(inverse(x), x) == unit
   }
 
-  ghost predicate InverseRight<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T)
-  {
+  ghost predicate InverseRight<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
     forall x | inverse.requires(x) :: bop(x, inverse(x)) == unit
   }
 
-  ghost predicate Inverse<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T)
-  {
+  ghost predicate Inverse<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
     && InverseLeft(bop, inverse, unit) 
     && InverseRight(bop, inverse, unit)
   }
