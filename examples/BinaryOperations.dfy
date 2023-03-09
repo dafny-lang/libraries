@@ -45,7 +45,8 @@ module {:options "-functionSyntax:4"} IntegersExample {
   lemma IntegersAreAbelian()
     ensures Abelian(add)
     ensures Abelian(mult)
-
+  {}
+  
   lemma IntegersAreAdditiveGroup()
     ensures Group(add, minus, 0)
   {}
@@ -92,7 +93,7 @@ module {:options "-functionSyntax:4"} RealsExample {
     1.0 / x
   }
 
- lemma RealsAreAssociative()
+  lemma RealsAreAssociative()
     ensures Associative(add)
     ensures Associative(mult)
   {}
@@ -114,6 +115,7 @@ module {:options "-functionSyntax:4"} RealsExample {
   lemma RealsAreAbelian()
     ensures Abelian(add)
     ensures Abelian(mult)
+  {}
 
   lemma RealsAreAdditiveGroup()
     ensures Group(add, minus, 0.0)
