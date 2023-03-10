@@ -33,10 +33,10 @@ module {:options "-functionSyntax:4"} BinaryOperations {
   }
 
   ghost predicate Inverse<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
-    && InverseLeft(bop, inverse, unit) 
+    && InverseLeft(bop, inverse, unit)
     && InverseRight(bop, inverse, unit)
   }
-  
+
   ghost predicate Abelian<T(!new)>(bop: (T, T) -> T) {
     forall x, y :: bop(x, y) == bop(y, x)
   }
@@ -55,12 +55,12 @@ module {:options "-functionSyntax:4"} BinaryOperations {
   }
 
   ghost predicate Monoid<T(!new)>(bop: (T, T) -> T, unit: T) {
-    && Associative(bop) 
+    && Associative(bop)
     && Unital(bop, unit)
   }
 
   ghost predicate Group<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
-    && Monoid(bop, unit) 
+    && Monoid(bop, unit)
     && Inverse(bop, inverse, unit)
   }
 
@@ -75,8 +75,8 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     && Distributive(add, mult)
   }
 
-  ghost predicate Field<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T) 
-    requires forall t :: (t != zero) ==> div.requires(t) 
+  ghost predicate Field<T(!new)>(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T)
+    requires forall t :: (t != zero) ==> div.requires(t)
   {
     && AbelianGroup(add, minus, zero)
     && AbelianGroup(mult, div, one)
