@@ -174,9 +174,9 @@ module {:options "-functionSyntax:4"} BinaryOperations {
 
   lemma GroupHomomorphismPreservesInverse<S(!new),T(!new)>(g1: Group<S>, g2: Group<T>, f: S -> T)
     requires IsHomomorphism(g1.bop, g2.bop, f)
-    ensures forall x :: f(g1.inverse(x)) == g2.inverse(f(x))
+    ensures forall x | g1.inverse.requires(x) :: f(g1.inverse(x)) == g2.inverse(f(x))
   {
-    forall x ensures f(g1.inverse(x)) == g2.inverse(f(x)) {
+    forall x | g1.inverse.requires(x) ensures f(g1.inverse(x)) == g2.inverse(f(x)) {
       calc {
         f(g1.inverse(x));
       == { assert IsRightUnital(g2.bop, g2.unit); }
@@ -185,11 +185,11 @@ module {:options "-functionSyntax:4"} BinaryOperations {
         g2.bop(f(g1.inverse(x)), g2.bop(f(x), g2.inverse(f(x))));
       == { assert IsAssociative(g2.bop); }
         g2.bop(g2.bop(f(g1.inverse(x)), f(x)), g2.inverse(f(x)));
-      == { assert IsHomomorphism(g1.bop, g2.bop, f); assert g2.bop(f(g1.inverse(x)), f(x)) == f(g1.bop(g1.inverse(x), x)); }
+      == { assert IsHomomorphism(g1.bop, g2.bop, f); }
         g2.bop(f(g1.bop(g1.inverse(x), x)), g2.inverse(f(x)));
-      == { assert IsLeftInverse(g1.bop, g1.inverse, g1.unit); assert g1.bop(g1.inverse(x), x) == g1.unit; }
+      == { assert IsLeftInverse(g1.bop, g1.inverse, g1.unit); }
         g2.bop(f(g1.unit), g2.inverse(f(x)));
-      == { GroupHomomorphismPreservesUnit(g1, g2, f); assert f(g1.unit) == g2.unit; }
+      == { GroupHomomorphismPreservesUnit(g1, g2, f); }
         g2.bop(g2.unit, g2.inverse(f(x)));
       == { assert IsLeftUnital(g2.bop, g2.unit); }
         g2.inverse(f(x));

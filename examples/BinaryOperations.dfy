@@ -154,3 +154,29 @@ module {:options "-functionSyntax:4"} RealsExample {
   {}
 
 }
+
+module {:options "-functionSyntax:4"} HomomorphismExamples {
+
+  import opened BinaryOperations
+  import IntegersExample
+  import RealsExample
+
+  lemma IdentityIsHomomorphism<T>(bop: (T, T) -> T)
+    ensures IsHomomorphism(bop, bop, x => x)
+  {}
+
+  lemma IntRealEmbeddingIsHomomorphism()
+    ensures IsHomomorphism(IntegersExample.add, RealsExample.add, (x: int) => x as real)
+  {}
+
+  lemma ConstUnitIsHomomorphism<S,T>(bop1: (S, S) -> S, bop2: (T, T) -> T, unit: T)
+    requires IsUnital(bop2, unit)
+    ensures IsHomomorphism(bop1, bop2, x => unit)
+  {}
+
+  lemma ConstMultIsHomomorphism(n: int) 
+    ensures IsHomomorphism(IntegersExample.add, IntegersExample.add, x => n * x)
+  {}
+
+}
+
