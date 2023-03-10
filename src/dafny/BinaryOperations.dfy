@@ -107,7 +107,6 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     requires IsInverse(m.bop, inverse2, m.unit)
     ensures forall x :: inverse1(x) == inverse2(x)
   {
-    assert IsMonoid(m.bop, m.unit);
     forall x ensures inverse1(x) == inverse2(x) {
       calc {
         inverse1(x);
@@ -117,7 +116,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
         m.bop(inverse1(x), m.bop(x, inverse2(x)));
       == { assert IsAssociative(m.bop); }
         m.bop(m.bop(inverse1(x), x), inverse2(x));
-      == { assert IsLeftInverse(m.bop, inverse1, m.unit); assert m.bop(inverse1(x), x) == m.unit;}
+      == { assert IsLeftInverse(m.bop, inverse1, m.unit); }
         m.bop(m.unit, inverse2(x));
       == { assert IsLeftUnital(m.bop, m.unit); }
         inverse2(x);
@@ -159,13 +158,13 @@ module {:options "-functionSyntax:4"} BinaryOperations {
       f(g1.unit);
     == { assert IsRightUnital(g2.bop, g2.unit); }
       g2.bop(f(g1.unit), g2.unit);
-    == { assert IsRightInverse(g2.bop, g2.inverse, g2.unit); assert g2.unit ==  g2.bop(f(g1.unit), g2.inverse(f(g1.unit))); }
+    == { assert IsRightInverse(g2.bop, g2.inverse, g2.unit); }
       g2.bop(f(g1.unit), g2.bop(f(g1.unit), g2.inverse(f(g1.unit))));
     == { assert IsAssociative(g2.bop); }
       g2.bop(g2.bop(f(g1.unit), f(g1.unit)), g2.inverse(f(g1.unit)));
-    == { assert IsHomomorphism(g1.bop, g2.bop, f); assert g2.bop(f(g1.unit), f(g1.unit)) == f(g1.bop(g1.unit, g1.unit)); }
+    == { assert IsHomomorphism(g1.bop, g2.bop, f); }
       g2.bop(f(g1.bop(g1.unit, g1.unit)), g2.inverse(f(g1.unit)));
-    == { assert IsLeftUnital(g1.bop, g1.unit); assert g1.bop(g1.unit, g1.unit) == g1.unit; }
+    == { assert IsLeftUnital(g1.bop, g1.unit); }
       g2.bop(f(g1.unit), g2.inverse(f(g1.unit)));
     == { assert IsRightInverse(g2.bop, g2.inverse, g2.unit); }
       g2.unit;
