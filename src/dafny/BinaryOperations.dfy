@@ -107,6 +107,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     requires IsInverse(m.bop, inverse2, m.unit)
     ensures forall x :: inverse1(x) == inverse2(x)
   {
+    assert IsMonoid(m.bop, m.unit);
     forall x ensures inverse1(x) == inverse2(x) {
       calc {
         inverse1(x);
