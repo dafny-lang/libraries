@@ -81,7 +81,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     && (exists x :: x in s)
     && (forall x, y | x in s && y in s :: x == y)
   }
-  
+
   /* A set has exactly one element, if and only if, it has at least one element and any two elements are equal. */
   lemma LemmaIsSingleton<T>(s: set<T>)
     ensures |s| == 1 <==> IsSingleton(s)
