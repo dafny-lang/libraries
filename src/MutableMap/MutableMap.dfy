@@ -1,7 +1,7 @@
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 // RUN: %verify "%s"
 
@@ -15,16 +15,16 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries 
   import opened Wrappers
 
   /**
-  *  NOTE: Only here because of #2500; once resolved import "../../examples/MutableMap/
-  *  MutableMapTrait.dfy".
-  */
+    *  NOTE: Only here because of #2500; once resolved import "../../examples/MutableMap/
+    *  MutableMapTrait.dfy".
+    */
   trait {:termination false} MutableMapTrait<K(==),V(==)> {
     function content(): map<K, V>
       reads this
 
     method Put(k: K, v: V)
       modifies this
-      ensures this.content() == old(this.content())[k := v]   
+      ensures this.content() == old(this.content())[k := v]
       ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values + {v}
       ensures k !in old(this.content()).Keys ==> this.content().Values == old(this.content()).Values + {v}
 
@@ -55,7 +55,7 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries 
       modifies this
       ensures this.content() == old(this.content()) - {k}
       ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values
- 
+
     function Size(): (size: int)
       reads this
       ensures size == |this.content().Items|
@@ -70,7 +70,7 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries 
 
     method {:extern} Put(k: K, v: V)
       modifies this
-      ensures this.content() == old(this.content())[k := v]   
+      ensures this.content() == old(this.content())[k := v]
       ensures k in old(this.content()).Keys ==> this.content().Values + {old(this.content())[k]} == old(this.content()).Values + {v}
       ensures k !in old(this.content()).Keys ==> this.content().Values == old(this.content()).Values + {v}
 
@@ -96,10 +96,10 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries 
       requires this.HasKey(k)
       ensures v in this.content().Values
       ensures this.content()[k] == v
-    
+
     function SelectOpt(k: K): (o: Option<V>)
       reads this
-      ensures o.Some? ==> (this.HasKey(k) && o.value in this.content().Values && this.content()[k] == o.value) 
+      ensures o.Some? ==> (this.HasKey(k) && o.value in this.content().Values && this.content()[k] == o.value)
       ensures o.None? ==> !this.HasKey(k)
     {
       if this.HasKey(k) then

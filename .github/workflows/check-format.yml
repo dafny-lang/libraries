@@ -12,11 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: switch branch
-        run: |
-          git fetch
-          git checkout cok-code
-
       - name: Install Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
