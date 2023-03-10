@@ -24,49 +24,49 @@ module {:options "-functionSyntax:4"} IntegersExample {
   }
 
   lemma IntegersAreAssociative()
-    ensures Associative(add)
-    ensures Associative(mult)
+    ensures IsAssociative(add)
+    ensures IsAssociative(mult)
   {}
 
   lemma IntegersAreMonoid()
-    ensures Monoid(add, 0)
-    ensures Monoid(mult, 1)
+    ensures IsMonoid(add, 0)
+    ensures IsMonoid(mult, 1)
   {}
 
   lemma IntegersHaveUnit()
-    ensures UnitalLeft(add, 0)
-    ensures UnitalRight(add, 0)
-    ensures Unital(add, 0)
-    ensures UnitalLeft(mult, 1)
-    ensures UnitalRight(mult, 1)
-    ensures Unital(mult, 1)
+    ensures IsLeftUnital(add, 0)
+    ensures IsRightUnital(add, 0)
+    ensures IsUnital(add, 0)
+    ensures IsLeftUnital(mult, 1)
+    ensures IsRightUnital(mult, 1)
+    ensures IsUnital(mult, 1)
   {}
 
   lemma IntegersAreAbelian()
-    ensures Abelian(add)
-    ensures Abelian(mult)
+    ensures IsAbelian(add)
+    ensures IsAbelian(mult)
   {}
-  
+
   lemma IntegersAreAdditiveGroup()
-    ensures Group(add, minus, 0)
+    ensures IsGroup(add, minus, 0)
   {}
 
   lemma IntegersAreAdditiveAbelianGroup()
-    ensures AbelianGroup(add, minus, 0)
+    ensures IsAbelianGroup(add, minus, 0)
   {}
 
   lemma IntegersHaveAdditiveInverse()
-    ensures Inverse(add, minus, 0)
+    ensures IsInverse(add, minus, 0)
   {}
 
   lemma IntegersAreDistributive()
-    ensures DistributiveLeft(add, mult)
-    ensures DistributiveRight(add, mult)
-    ensures Distributive(add, mult)
+    ensures IsLeftDistributive(add, mult)
+    ensures IsRightDistributive(add, mult)
+    ensures IsDistributive(add, mult)
   {}
 
   lemma IntegersAreRing()
-    ensures Ring(add, minus, 0, mult, 1)
+    ensures IsRing(add, minus, 0, mult, 1)
   {}
 
 }
@@ -94,64 +94,63 @@ module {:options "-functionSyntax:4"} RealsExample {
   }
 
   lemma RealsAreAssociative()
-    ensures Associative(add)
-    ensures Associative(mult)
+    ensures IsAssociative(add)
+    ensures IsAssociative(mult)
   {}
 
   lemma RealsAreMonoid()
-    ensures Monoid(add, 0.0)
-    ensures Monoid(mult, 1.0)
+    ensures IsMonoid(add, 0.0)
+    ensures IsMonoid(mult, 1.0)
   {}
 
   lemma RealsHaveUnit()
-    ensures UnitalLeft(add, 0.0)
-    ensures UnitalRight(add, 0.0)
-    ensures Unital(add, 0.0)
-    ensures UnitalLeft(mult, 1.0)
-    ensures UnitalRight(mult, 1.0)
-    ensures Unital(mult, 1.0)
+    ensures IsLeftUnital(add, 0.0)
+    ensures IsRightUnital(add, 0.0)
+    ensures IsUnital(add, 0.0)
+    ensures IsLeftUnital(mult, 1.0)
+    ensures IsRightUnital(mult, 1.0)
+    ensures IsUnital(mult, 1.0)
   {}
 
   lemma RealsAreAbelian()
-    ensures Abelian(add)
-    ensures Abelian(mult)
+    ensures IsAbelian(add)
+    ensures IsAbelian(mult)
   {}
 
   lemma RealsAreAdditiveGroup()
-    ensures Group(add, minus, 0.0)
+    ensures IsGroup(add, minus, 0.0)
   {}
 
   lemma RealsAreAdditiveAbelianGroup()
-    ensures AbelianGroup(add, minus, 0.0)
+    ensures IsAbelianGroup(add, minus, 0.0)
   {}
 
   lemma NonZeroRealsAreMultiplicativeGroup()
-    ensures Group(mult, div, 1.0)
+    ensures IsGroup(mult, div, 1.0)
   {}
 
   lemma NonZeroRealsAreMultiplicativeAbelianGroup()
-    ensures AbelianGroup(mult, div, 1.0)
+    ensures IsAbelianGroup(mult, div, 1.0)
   {}
 
   lemma RealsHaveAdditiveInverse()
-    ensures Inverse(add, minus, 0.0)
+    ensures IsInverse(add, minus, 0.0)
   {}
 
   lemma RealsAreDistributive()
-    ensures DistributiveLeft(add, mult)
-    ensures DistributiveRight(add, mult)
-    ensures Distributive(add, mult)
+    ensures IsLeftDistributive(add, mult)
+    ensures IsRightDistributive(add, mult)
+    ensures IsDistributive(add, mult)
   {}
 
   lemma RealsAreRing()
-    ensures AbelianGroup(add, minus, 0.0)
-    ensures Monoid(mult, 1.0)
-    ensures Distributive(add, mult)
-    ensures Ring(add, minus, 0.0, mult, 1.0)
-  {}
+    ensures IsRing(add, minus, 0.0, mult, 1.0)
+  {
+    assert IsDistributive(add, mult);
+  }
 
   lemma RealsAreField()
-    ensures Field(add, minus, 0.0, mult, div, 1.0)
+    ensures IsField(add, minus, 0.0, mult, div, 1.0)
   {}
 
 }
