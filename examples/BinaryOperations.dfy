@@ -174,7 +174,7 @@ module {:options "-functionSyntax:4"} HomomorphismExamples {
     ensures IsHomomorphism(bop1, bop2, x => unit)
   {}
 
-  lemma ConstMultIsHomomorphism(n: int) 
+  lemma ConstMultIsHomomorphism(n: int)
     ensures IsHomomorphism(IntegersExample.add, IntegersExample.add, x => n * x)
   {}
 
