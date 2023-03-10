@@ -102,24 +102,24 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     forall x, y :: f(bop1(x, y)) == bop2(f(x), f(y))
   }
 
-  lemma MonoidInverseIsUnique<T(!new)>(bop: (T, T) -> T, inverse1: T -> T, inverse2: T -> T, unit: T)
-    requires IsMonoid(bop, unit)
-    requires IsInverse(bop, inverse1, unit)
-    requires IsInverse(bop, inverse2, unit)
+  lemma MonoidInverseIsUnique<T(!new)>(m: Monoid<T>, inverse1: T -> T, inverse2: T -> T)
+    requires IsInverse(m.bop, inverse1, m.unit)
+    requires IsInverse(m.bop, inverse2, m.unit)
     ensures forall x :: inverse1(x) == inverse2(x)
   {
+    assert IsMonoid(m.bop, m.unit);
     forall x ensures inverse1(x) == inverse2(x) {
       calc {
         inverse1(x);
-      == { assert IsRightUnital(bop, unit); }
-        bop(inverse1(x), unit);
-      == { assert IsRightInverse(bop, inverse2, unit); assert unit == bop(x, inverse2(x)); }
-        bop(inverse1(x), bop(x, inverse2(x)));
-      == { assert IsAssociative(bop); }
-        bop(bop(inverse1(x), x), inverse2(x));
-      == { assert IsLeftInverse(bop, inverse1, unit); assert bop(inverse1(x), x) == unit;}
-        bop(unit, inverse2(x));
-      == { assert IsLeftUnital(bop, unit); }
+      == { assert IsRightUnital(m.bop, m.unit); }
+        m.bop(inverse1(x), m.unit);
+      == { assert IsRightInverse(m.bop, inverse2, m.unit); assert m.unit == m.bop(x, inverse2(x)); }
+        m.bop(inverse1(x), m.bop(x, inverse2(x)));
+      == { assert IsAssociative(m.bop); }
+        m.bop(m.bop(inverse1(x), x), inverse2(x));
+      == { assert IsLeftInverse(m.bop, inverse1, m.unit); assert m.bop(inverse1(x), x) == m.unit;}
+        m.bop(m.unit, inverse2(x));
+      == { assert IsLeftUnital(m.bop, m.unit); }
         inverse2(x);
       }
     }
@@ -139,8 +139,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     }
   }
 
-
-  lemma UnitIsSelfInverse<T(!new)>(g: Group<T>)
+  lemma GroupUnitIsSelfInverse<T(!new)>(g: Group<T>)
     ensures g.unit == g.inverse(g.unit)
   {
     calc {
