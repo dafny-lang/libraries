@@ -6,10 +6,10 @@
 // CHECK-NEXT-L: Dafny
 // CHECK-NEXT-L: Test dummy file
 
-include "../src/Wrappers.dfy"
+include "../src/dafny/Wrappers.dfy"
 
 module {:options "--function-syntax:4"} Demo {
-  import opened Wrappers
+  import opened Dafny.Wrappers
 
   // ------ Demo for Option ----------------------------
   // We use Option when we don't need to pass around a reason for the failure,
@@ -67,7 +67,7 @@ module {:options "--function-syntax:4"} Demo {
     case None => res := Failure("'name' was not found");
   }
 
-  // Propogating failures using :- statements
+  // Propagating failures using :- statements
   method GetGreeting(m: MyMap<string, string>) returns (res: Option<string>) {
     var message: string :- m.Get("message");
     var nameResult := FindName(m);
@@ -118,7 +118,7 @@ module {:options "--function-syntax:4"} Demo {
     }
   }
 
-  // Propogating failures using :- statements
+  // Propagating failures using :- statements
   method CopyFile(fs: MyFilesystem, fromPath: string, toPath: string) returns (res: Result<(), string>)
     modifies fs
   {
