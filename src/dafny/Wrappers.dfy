@@ -137,12 +137,33 @@ module {:options "--function-syntax:4"} Dafny.Wrappers {
       case Pass => Success(default)
       case Fail(e) => Failure(rewrap(e))
     }
+
+    // A helper function to ensure a requirement is true at runtime,
+    // returning an Outcome<>
+    // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
+    static function Need(condition: bool, error: E): (result: Outcome<E>)
+    {
+      if condition then Pass else Fail(error)
+    }
+  }
+
+  // A special case of Outcome that is just used for Need below, and
+  // returns a Result<>
+  datatype OutcomeResult<+E> = Pass' | Fail'(error: E) {
+    predicate IsFailure() {
+      Fail'?
+    }
+    function PropagateFailure<U>(): Result<U,E>
+      requires IsFailure()
+    {
+      Failure(this.error)
+    }
   }
 
   // A helper function to ensure a requirement is true at runtime
   // :- Need(5 == |mySet|, "The set MUST have 5 elements.")
-  function Need<E>(condition: bool, error: E): (result: Outcome<E>)
+  function Need<E>(condition: bool, error: E): (result: OutcomeResult<E>)
   {
-    if condition then Pass else Fail(error)
+    if condition then Pass' else Fail'(error)
   }
 }
