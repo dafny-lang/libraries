@@ -62,7 +62,7 @@ abstract module {:options "-functionSyntax:4"} Dafny.Collections.LittleEndianNat
     LemmaPowMultipliesAuto();
     LemmaFundamentalDivMod(Large.BITS(), Small.BITS());
     assert Large.BITS() == Small.BITS() * (Large.BITS() / Small.BITS()) + (Large.BITS() % Small.BITS());
-    assert (Large.BITS() / Small.BITS()) > 0;
+    assert (Large.BITS() / Small.BITS()) != 0;
     Large.BITS() / Small.BITS()
   }
 

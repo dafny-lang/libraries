@@ -90,6 +90,9 @@ module {:options "-functionSyntax:4"} MutableMapDafny {
       if k !in old(m).Keys {
         forall v' | v' in old(m).Values + {v} ensures v' in m.Values {
           if v' == v {
+            assert m[k] == v;
+            assert m[k] == v';
+            assert v' in m.Values;
           } else {
             assert m.Keys == old(m).Keys + {k};
           }
