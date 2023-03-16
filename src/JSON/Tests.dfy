@@ -122,8 +122,8 @@ module JSON.Tests {
     "  true  ",
     " {  } ",
     "\"\\t\\r\\n\\f\"",
-    "\"\U{2200}ABC // \\u2200ABC\"", // ∀
-    "\"\U{1F1EB}\U{1F1F7} // \\u1f1eb\\u1f1EBABC\"", // 🇫🇷
+    "\"∀ABC // \\u2200ABC\"", // ∀
+    "\"🇫🇷 // \\u1f1eb\\u1f1EBABC\"", // 🇫🇷
 
     "[true, false , null, { \"some\" : \"string\", \"and\": [ \"a number\", -123.456e-18 ] } ]  "
   ];
