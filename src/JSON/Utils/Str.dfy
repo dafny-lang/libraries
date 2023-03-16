@@ -118,7 +118,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
           ToNat_any(str[..|str| - 1], base, digits) * base + (base - 1);
           { ToNat_bound(str[..|str| - 1], base, digits);
             LemmaMulInequalityAuto(); }
-            (Pow(base, |str| - 1) - 1) * base + base - 1;
+          (Pow(base, |str| - 1) - 1) * base + base - 1;
           { LemmaMulIsDistributiveAuto(); }
           Pow(base, |str| - 1) * base - 1;
           { reveal Pow(); LemmaMulIsCommutativeAuto(); }
@@ -184,11 +184,12 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
 
   const HEX_DIGITS: seq<char> := "0123456789ABCDEF"
 
-  const HEX_TABLE := map[
-    '0' := 0, '1' := 1, '2' := 2, '3' := 3, '4' := 4, '5' := 5, '6' := 6, '7' := 7, '8' := 8, '9' := 9,
-    'a' := 0xA, 'b' := 0xB, 'c' := 0xC, 'd' := 0xD, 'e' := 0xE, 'f' := 0xF,
-    'A' := 0xA, 'B' := 0xB, 'C' := 0xC, 'D' := 0xD, 'E' := 0xE, 'F' := 0xF
-  ]
+  const HEX_TABLE :=
+    map[
+      '0' := 0, '1' := 1, '2' := 2, '3' := 3, '4' := 4, '5' := 5, '6' := 6, '7' := 7, '8' := 8, '9' := 9,
+      'a' := 0xA, 'b' := 0xB, 'c' := 0xC, 'd' := 0xD, 'e' := 0xE, 'f' := 0xF,
+      'A' := 0xA, 'B' := 0xB, 'C' := 0xC, 'D' := 0xD, 'E' := 0xE, 'F' := 0xF
+    ]
 
   function OfNat(n: nat, base: int := 10) : (str: string)
     requires 2 <= base <= 16

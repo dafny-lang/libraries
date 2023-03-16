@@ -39,11 +39,11 @@ module {:options "-functionSyntax:4"} Logarithm {
 
   lemma {:induction false} LemmaLogSAuto()
     ensures forall base: nat, pow: nat
-      {:trigger Log(base, pow / base)}
-      | && base > 1
-        && pow >= base
-      :: && pow / base >= 0
-         && Log(base, pow) == 1 + Log(base, pow / base)
+              {:trigger Log(base, pow / base)}
+              | && base > 1
+                && pow >= base
+              :: && pow / base >= 0
+                 && Log(base, pow) == 1 + Log(base, pow / base)
   {
     forall base: nat, pow: nat | && base > 1 && pow >= base
       ensures && pow / base >= 0

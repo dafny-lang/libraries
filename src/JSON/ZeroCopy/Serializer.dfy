@@ -50,9 +50,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     ensures wr.Bytes() == writer.Bytes() + Spec.JSON(js)
   {
     writer
-      .Append(js.before)
-      .Then(wr => Value(js.t, wr))
-      .Append(js.after)
+    .Append(js.before)
+    .Then(wr => Value(js.t, wr))
+    .Append(js.after)
   }
 
   function {:opaque} Value(v: Value, writer: Writer) : (wr: Writer)
@@ -60,12 +60,12 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     ensures wr.Bytes() == writer.Bytes() + Spec.Value(v)
   {
     match v
-      case Null(n) => writer.Append(n)
-      case Bool(b) => writer.Append(b)
-      case String(str) => String(str, writer)
-      case Number(num) => Number(num, writer)
-      case Object(obj) => Object(obj, writer)
-      case Array(arr) => Array(arr, writer)
+    case Null(n) => writer.Append(n)
+    case Bool(b) => writer.Append(b)
+    case String(str) => String(str, writer)
+    case Number(num) => Number(num, writer)
+    case Object(obj) => Object(obj, writer)
+    case Array(arr) => Array(arr, writer)
   }
 
   function {:opaque} String(str: jstring, writer: Writer) : (wr: Writer)
@@ -73,9 +73,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     ensures wr.Bytes() == writer.Bytes() + Spec.String(str)
   {
     writer
-      .Append(str.lq)
-      .Append(str.contents)
-      .Append(str.rq)
+    .Append(str.lq)
+    .Append(str.contents)
+    .Append(str.rq)
   }
 
   function {:opaque} Number(num: jnumber, writer: Writer) : (wr: Writer)
@@ -84,11 +84,11 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   {
     var writer := writer.Append(num.minus).Append(num.num);
     var writer := if num.frac.NonEmpty? then
-        writer.Append(num.frac.t.period).Append(num.frac.t.num)
-      else writer;
+                    writer.Append(num.frac.t.period).Append(num.frac.t.num)
+                  else writer;
     var writer := if num.exp.NonEmpty? then
-        writer.Append(num.exp.t.e).Append(num.exp.t.sign).Append(num.exp.t.num)
-      else writer;
+                    writer.Append(num.exp.t.e).Append(num.exp.t.sign).Append(num.exp.t.num)
+                  else writer;
     writer
   }
 

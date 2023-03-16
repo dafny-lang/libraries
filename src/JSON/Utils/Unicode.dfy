@@ -20,7 +20,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Unicode {
   {
     (0x10000
      + ((((c0 as bv32) & 0x03FF) << 10)
-       | ((c1 as bv32) & 0x03FF)))
+     | ((c1 as bv32) & 0x03FF)))
     as uint32
   }
 
@@ -104,19 +104,19 @@ module {:options "-functionSyntax:4"} JSON.Utils.Unicode {
     if (c0 as bv32 & 0x80) == 0 then
       (c0 as uint32, 1)
     else if (c0 as bv32 & 0xE0) == 0xC0 && c1 > -1 then
-	    (( (((c0 as bv32) & 0x1F) <<  6)
-	      | ((c1 as bv32) & 0x3F       )) as uint32,
+      (( (((c0 as bv32) & 0x1F) <<  6)
+       | ((c1 as bv32) & 0x3F       )) as uint32,
        2)
     else if (c0 as bv32 & 0xF0) == 0xE0 && c1 > -1 && c2 > -1 then
       ((  (((c0 as bv32) & 0x0F) << 12)
-        | (((c1 as bv32) & 0x3F) <<  6)
-        | ( (c2 as bv32) & 0x3F       )) as uint32,
+       | (((c1 as bv32) & 0x3F) <<  6)
+       | ( (c2 as bv32) & 0x3F       )) as uint32,
        3)
     else if (c0 as bv32 & 0xF8) == 0xF0 && c1 > -1 && c2 > -1 && c3 > -1 then
       ((  (((c0 as bv32) & 0x07) << 18)
-        | (((c1 as bv32) & 0x3F) << 12)
-        | (((c2 as bv32) & 0x3F) <<  6)
-        | ( (c3 as bv32) & 0x3F       )) as uint32,
+       | (((c1 as bv32) & 0x3F) << 12)
+       | (((c2 as bv32) & 0x3F) <<  6)
+       | ( (c3 as bv32) & 0x3F       )) as uint32,
        4)
     else
       (0xFFFD, 1) // Replacement character

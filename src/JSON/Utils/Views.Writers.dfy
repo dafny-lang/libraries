@@ -66,8 +66,8 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Writers {
 
     ghost const Valid? :=
       length == // length is a saturating counter
-        if chain.Length() >= TWO_TO_THE_32 then UINT32_MAX
-        else chain.Length() as uint32
+      if chain.Length() >= TWO_TO_THE_32 then UINT32_MAX
+      else chain.Length() as uint32
 
     function Bytes() : (bs: bytes)
       ensures |bs| == Length()

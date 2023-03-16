@@ -40,15 +40,15 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
   { // TODO: Include positions in errors
     function ToString(pr: R -> string) : string {
       match this
-        case EOF => "Reached EOF"
-        case ExpectingByte(b0, b) =>
-          var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
-          "Expecting '" + [b0 as char] + "', read " + c
-        case ExpectingAnyByte(bs0, b) =>
-          var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
-          var c0s := seq(|bs0|, idx requires 0 <= idx < |bs0| => bs0[idx] as char);
-          "Expecting one of '" + c0s + "', read " + c
-        case OtherError(err) => pr(err)
+      case EOF => "Reached EOF"
+      case ExpectingByte(b0, b) =>
+        var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
+        "Expecting '" + [b0 as char] + "', read " + c
+      case ExpectingAnyByte(bs0, b) =>
+        var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
+        var c0s := seq(|bs0|, idx requires 0 <= idx < |bs0| => bs0[idx] as char);
+        "Expecting one of '" + c0s + "', read " + c
+      case OtherError(err) => pr(err)
     }
   }
   type CursorResult<+R> = Result<Cursor, CursorError<R>>
@@ -82,10 +82,10 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
     ghost predicate StrictlyAdvancedFrom?(other: Cursor): (b: bool)
       requires Valid?
       ensures b ==>
-        SuffixLength() < other.SuffixLength()
+                SuffixLength() < other.SuffixLength()
       ensures b ==>
-        beg == other.beg && end == other.end ==>
-        forall idx | beg <= idx < point :: s[idx] == other.s[idx]
+                beg == other.beg && end == other.end ==>
+                  forall idx | beg <= idx < point :: s[idx] == other.s[idx]
     {
       && s == other.s
       && beg == other.beg
@@ -103,7 +103,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
     ghost predicate StrictSuffixOf?(other: Cursor)
       requires Valid?
       ensures StrictSuffixOf?(other) ==>
-        Length() < other.Length()
+                Length() < other.Length()
     {
       && s == other.s
       && beg > other.beg
@@ -307,11 +307,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       ensures pr.Success? ==> pr.value.AdvancedFrom?(this)
     {
       match step(st, Peek())
-        case Accept => Success(this)
-        case Reject(err) => Failure(OtherError(err))
-        case Partial(st) =>
-          if EOF? then Failure(EOF)
-          else Skip(1).SkipWhileLexer(step, st)
+      case Accept => Success(this)
+      case Reject(err) => Failure(OtherError(err))
+      case Partial(st) =>
+        if EOF? then Failure(EOF)
+        else Skip(1).SkipWhileLexer(step, st)
     } by method {
       var point' := point;
       var end := this.end;
@@ -325,11 +325,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
         var minusone: opt_byte := -1; // BUG(https://github.com/dafny-lang/dafny/issues/2191)
         var c := if eof then minusone else this.s[point'] as opt_byte;
         match step(st', c)
-          case Accept => return Success(Cursor(this.s, this.beg, point', this.end));
-          case Reject(err) => return Failure(OtherError(err));
-          case Partial(st'') =>
-            if eof { return Failure(EOF); }
-            else { st' := st''; point' := point' + 1; }
+        case Accept => return Success(Cursor(this.s, this.beg, point', this.end));
+        case Reject(err) => return Failure(OtherError(err));
+        case Partial(st'') =>
+          if eof { return Failure(EOF); }
+          else { st' := st''; point' := point' + 1; }
       }
     }
   }

@@ -42,16 +42,16 @@ module {:options "-functionSyntax:4"} JSON.Spec {
     if start >= |str| then []
     else
       (match str[start] as uint16
-         case 0x22 => "\\\"" // quotation mark
-         case 0x5C => "\\\\"  // reverse solidus
-         case 0x08 => "\\b"  // backspace
-         case 0x0C => "\\f"  // form feed
-         case 0x0A => "\\n"  // line feed
-         case 0x0D => "\\r"  // carriage return
-         case 0x09 => "\\t"  // tab
-         case c =>
-           if c < 0x001F then "\\u" + EscapeUnicode(c)
-           else [str[start]])
+       case 0x22 => "\\\"" // quotation mark
+       case 0x5C => "\\\\"  // reverse solidus
+       case 0x08 => "\\b"  // backspace
+       case 0x0C => "\\f"  // form feed
+       case 0x0A => "\\n"  // line feed
+       case 0x0D => "\\r"  // carriage return
+       case 0x09 => "\\t"  // tab
+       case c =>
+      if c < 0x001F then "\\u" + EscapeUnicode(c)
+      else [str[start]])
       + Escape(str, start + 1)
   }
 
@@ -68,8 +68,8 @@ module {:options "-functionSyntax:4"} JSON.Spec {
 
   function Number(dec: Decimal): bytes {
     Transcode16To8(Str.OfInt(dec.n)) +
-      (if dec.e10 == 0 then []
-       else ToBytes("e") + Transcode16To8(Str.OfInt(dec.e10)))
+    (if dec.e10 == 0 then []
+    else ToBytes("e") + Transcode16To8(Str.OfInt(dec.e10)))
   }
 
   function KeyValue(kv: (string, JSON)): bytes {
@@ -96,11 +96,11 @@ module {:options "-functionSyntax:4"} JSON.Spec {
 
   function JSON(js: JSON): bytes {
     match js
-      case Null => ToBytes("null")
-      case Bool(b) => if b then ToBytes("true") else ToBytes("false")
-      case String(str) => String(str)
-      case Number(dec) => Number(dec)
-      case Object(obj) => Object(obj)
-      case Array(arr) => Array(arr)
+    case Null => ToBytes("null")
+    case Bool(b) => if b then ToBytes("true") else ToBytes("false")
+    case String(str) => String(str)
+    case Number(dec) => Number(dec)
+    case Object(obj) => Object(obj)
+    case Array(arr) => Array(arr)
   }
 }

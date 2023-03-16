@@ -164,12 +164,12 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
 
   function Value(js: AST.JSON): Result<Grammar.Value> {
     match js
-      case Null => Success(Grammar.Null(View.OfBytes(NULL)))
-      case Bool(b) => Success(Grammar.Bool(Bool(b)))
-      case String(str) => var s :- String(str); Success(Grammar.String(s))
-      case Number(dec) => var n :- Number(dec); Success(Grammar.Number(n))
-      case Object(obj) => var o :- Object(obj); Success(Grammar.Object(o))
-      case Array(arr) => var a :- Array(arr); Success(Grammar.Array(a))
+    case Null => Success(Grammar.Null(View.OfBytes(NULL)))
+    case Bool(b) => Success(Grammar.Bool(Bool(b)))
+    case String(str) => var s :- String(str); Success(Grammar.String(s))
+    case Number(dec) => var n :- Number(dec); Success(Grammar.Number(n))
+    case Object(obj) => var o :- Object(obj); Success(Grammar.Object(o))
+    case Array(arr) => var a :- Array(arr); Success(Grammar.Array(a))
   }
 
   function JSON(js: AST.JSON): Result<Grammar.JSON> {

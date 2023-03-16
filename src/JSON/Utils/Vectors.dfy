@@ -122,13 +122,13 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       ensures Valid?()
       ensures o.Fail? <==> old(capacity) == MAX_CAPACITY
       ensures o.Fail? ==>
-        && unchanged(this)
-        && unchanged(data)
+                && unchanged(this)
+                && unchanged(data)
       ensures o.Pass? ==>
-        && fresh(data)
-        && old(capacity) < MAX_CAPACITY
-        && capacity == old(if capacity < MAX_CAPACITY_BEFORE_DOUBLING
-                          then 2 * capacity else MAX_CAPACITY)
+                && fresh(data)
+                && old(capacity) < MAX_CAPACITY
+                && capacity == old(if capacity < MAX_CAPACITY_BEFORE_DOUBLING
+                                   then 2 * capacity else MAX_CAPACITY)
 
     {
       if capacity == MAX_CAPACITY {
@@ -144,11 +144,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       ensures Valid?()
       modifies `capacity, `data, `Repr, data
       ensures reserved <= capacity - size ==>
-        o.Pass?
+                o.Pass?
       ensures o.Pass? ==>
-        old(size as int + reserved as int) <= capacity as int
+                old(size as int + reserved as int) <= capacity as int
       ensures o.Fail? ==>
-        reserved > MAX_CAPACITY - size
+                reserved > MAX_CAPACITY - size
     {
       if reserved > MAX_CAPACITY - size {
         return Fail(OutOfMemory);
@@ -197,14 +197,14 @@ module {:options "-functionSyntax:4"} JSON.Utils.Vectors {
       modifies this, data
       ensures Valid?()
       ensures o.Fail? ==>
-        && unchanged(this)
-        && unchanged(data)
+                && unchanged(this)
+                && unchanged(data)
       ensures o.Pass? ==>
-        && old(size) < MAX_CAPACITY
-        && size == old(size) + 1
-        && items == old(items) + [a]
-        && capacity >= old(capacity)
-        && if old(size == capacity) then fresh(data) else unchanged(`data)
+                && old(size) < MAX_CAPACITY
+                && size == old(size) + 1
+                && items == old(items) + [a]
+                && capacity >= old(capacity)
+                && if old(size == capacity) then fresh(data) else unchanged(`data)
     {
       if size == capacity {
         var d := ReallocDefault();

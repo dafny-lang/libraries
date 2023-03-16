@@ -63,14 +63,14 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
               Success([hd as char] + tl)
         else
           var unescaped: uint16 := match c
-             case '\"' => 0x22 as uint16 // quotation mark
-             case '\\' => 0x5C as uint16 // reverse solidus
-             case 'b'  => 0x08 as uint16 // backspace
-             case 'f'  => 0x0C as uint16 // form feed
-             case 'n'  => 0x0A as uint16 // line feed
-             case 'r'  => 0x0D as uint16 // carriage return
-             case 't'  => 0x09 as uint16 // tab
-             case _    => 0 as uint16;
+            case '\"' => 0x22 as uint16 // quotation mark
+            case '\\' => 0x5C as uint16 // reverse solidus
+            case 'b'  => 0x08 as uint16 // backspace
+            case 'f'  => 0x0C as uint16 // form feed
+            case 'n'  => 0x0A as uint16 // line feed
+            case 'r'  => 0x0D as uint16 // carriage return
+            case 't'  => 0x09 as uint16 // tab
+            case _    => 0 as uint16;
           if unescaped == 0 as uint16 then
             Failure(UnsupportedEscape(str[start..start+2]))
           else
@@ -96,11 +96,12 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     type Char = byte
   }
 
-  const DIGITS := map[
-    '0' as uint8 := 0, '1' as uint8 := 1, '2' as uint8 := 2, '3' as uint8 := 3,
-    '4' as uint8 := 4, '5' as uint8 := 5, '6' as uint8 := 6, '7' as uint8 := 7,
-    '8' as uint8 := 8, '9' as uint8 := 9
-  ]
+  const DIGITS :=
+    map[
+      '0' as uint8 := 0, '1' as uint8 := 1, '2' as uint8 := 2, '3' as uint8 := 3,
+      '4' as uint8 := 4, '5' as uint8 := 5, '6' as uint8 := 6, '7' as uint8 := 7,
+      '8' as uint8 := 8, '9' as uint8 := 9
+    ]
 
   const MINUS := '-' as uint8
 
@@ -117,11 +118,11 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
       case Empty => Success(0)
       case NonEmpty(JExp(_, sign, num)) => ToInt(sign, num);
     match frac
-      case Empty => Success(AST.Decimal(n, e10))
-      case NonEmpty(JFrac(_, num)) =>
-        var pow10 := num.Length() as int;
-        var frac :- ToInt(minus, num);
-        Success(AST.Decimal(n * Pow(10, pow10) + frac, e10 - pow10))
+    case Empty => Success(AST.Decimal(n, e10))
+    case NonEmpty(JFrac(_, num)) =>
+      var pow10 := num.Length() as int;
+      var frac :- ToInt(minus, num);
+      Success(AST.Decimal(n * Pow(10, pow10) + frac, e10 - pow10))
   }
 
   function KeyValue(js: Grammar.jKeyValue): DeserializationResult<(string, AST.JSON)> {
@@ -140,12 +141,12 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
 
   function Value(js: Grammar.Value): DeserializationResult<AST.JSON> {
     match js
-      case Null(_) => Success(AST.Null())
-      case Bool(b) => Success(AST.Bool(Bool(b)))
-      case String(str) => var s :- String(str); Success(AST.String(s))
-      case Number(dec) => var n :- Number(dec); Success(AST.Number(n))
-      case Object(obj) => var o :- Object(obj); Success(AST.Object(o))
-      case Array(arr) => var a :- Array(arr); Success(AST.Array(a))
+    case Null(_) => Success(AST.Null())
+    case Bool(b) => Success(AST.Bool(Bool(b)))
+    case String(str) => var s :- String(str); Success(AST.String(s))
+    case Number(dec) => var n :- Number(dec); Success(AST.Number(n))
+    case Object(obj) => var o :- Object(obj); Success(AST.Object(o))
+    case Array(arr) => var a :- Array(arr); Success(AST.Array(a))
   }
 
   function JSON(js: Grammar.JSON): DeserializationResult<AST.JSON> {

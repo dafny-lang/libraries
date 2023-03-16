@@ -75,7 +75,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     type ValueParser = sp: SubParser<Value> |
-      forall t :: sp.spec(t) == Spec.Value(t)
+        forall t :: sp.spec(t) == Spec.Value(t)
       witness *
   }
   type Error = Core.Error
@@ -149,9 +149,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:opaque} BracketedFromParts(ghost cs: Cursor,
-                                open: Split<Structural<jopen>>,
-                                elems: Split<seq<TSuffixedElement>>,
-                                close: Split<Structural<jclose>>)
+                                          open: Split<Structural<jopen>>,
+                                          elems: Split<seq<TSuffixedElement>>,
+                                          close: Split<Structural<jclose>>)
       : (sp: Split<TBracketed>)
       requires Grammar.NoTrailingSuffix(elems.t)
       requires open.StrictlySplitFrom?(cs, c => Spec.Structural(c, SpecView))
@@ -171,10 +171,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:opaque} AppendWithSuffix(ghost cs0: FreshCursor,
-                              ghost json: ValueParser,
-                              elems: Split<seq<TSuffixedElement>>,
-                              elem: Split<TElement>,
-                              sep: Split<Structural<jcomma>>)
+                                        ghost json: ValueParser,
+                                        elems: Split<seq<TSuffixedElement>>,
+                                        elem: Split<TElement>,
+                                        sep: Split<Structural<jcomma>>)
       : (elems': Split<seq<TSuffixedElement>>)
       requires elems.cs.StrictlySplitFrom?(json.cs)
       requires elems.SplitFrom?(cs0, SuffixedElementsSpec)
@@ -193,10 +193,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:opaque} AppendLast(ghost cs0: FreshCursor,
-                              ghost json: ValueParser,
-                              elems: Split<seq<TSuffixedElement>>,
-                              elem: Split<TElement>,
-                              sep: Split<Structural<jclose>>)
+                                  ghost json: ValueParser,
+                                  elems: Split<seq<TSuffixedElement>>,
+                                  elem: Split<TElement>,
+                                  sep: Split<Structural<jclose>>)
       : (elems': Split<seq<TSuffixedElement>>)
       requires elems.cs.StrictlySplitFrom?(json.cs)
       requires elems.SplitFrom?(cs0, SuffixedElementsSpec)
@@ -223,7 +223,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       open: Split<Structural<jopen>>,
       elems: Split<seq<TSuffixedElement>>
     ) // DISCUSS: Why is this function reverified once per instantiation of the module?
-    : (pr: ParseResult<TBracketed>)
+      : (pr: ParseResult<TBracketed>)
       requires open.StrictlySplitFrom?(cs0, c => Spec.Structural(c, SpecView))
       requires elems.cs.StrictlySplitFrom?(json.cs)
       requires elems.SplitFrom?(open.cs, SuffixedElementsSpec)
@@ -264,7 +264,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures x.r.t.Byte?(CLOSE)
       ensures NoTrailingSuffix(x.data)
       ensures forall pf | pf in x.data ::
-        pf.suffix.NonEmpty? ==> pf.suffix.t.t.Byte?(SEPARATOR)
+                pf.suffix.NonEmpty? ==> pf.suffix.t.t.Byte?(SEPARATOR)
     { // DISCUSS: Why is this lemma needed?  Why does it require a body?
       var xlt: jopen := x.l.t;
       var xrt: jclose := x.r.t;
@@ -291,10 +291,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function LiftCursorError(err: Cursors.CursorError<DeserializationError>): DeserializationError {
       match err
-        case EOF => ReachedEOF
-        case ExpectingByte(expected, b) => ExpectingByte(expected, b)
-        case ExpectingAnyByte(expected_sq, b) => ExpectingAnyByte(expected_sq, b)
-        case OtherError(err) => err
+      case EOF => ReachedEOF
+      case ExpectingByte(expected, b) => ExpectingByte(expected, b)
+      case ExpectingAnyByte(expected_sq, b) => ExpectingAnyByte(expected_sq, b)
+      case OtherError(err) => err
     }
 
     function {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
@@ -361,16 +361,16 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       else
         var SP(num, cs) :- Numbers.Number(cs);
         Success(SP(Grammar.Number(num), cs))
-      }
+    }
 
-      function {:opaque} ValueParser(cs: FreshCursor) : (p: ValueParser)
-        decreases cs.Length(), 0
-        ensures cs.SplitFrom?(p.cs)
-      {
-        var pre := (ps': FreshCursor) => ps'.Length() < cs.Length();
-        var fn := (ps': FreshCursor) requires pre(ps') => Value(ps');
-        Parsers.SubParser(cs, pre, fn, Spec.Value)
-      }
+    function {:opaque} ValueParser(cs: FreshCursor) : (p: ValueParser)
+      decreases cs.Length(), 0
+      ensures cs.SplitFrom?(p.cs)
+    {
+      var pre := (ps': FreshCursor) => ps'.Length() < cs.Length();
+      var fn := (ps': FreshCursor) requires pre(ps') => Value(ps');
+      Parsers.SubParser(cs, pre, fn, Spec.Value)
+    }
   }
 
   module Constants {
@@ -603,7 +603,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:opaque} KeyValueFromParts(ghost cs: Cursor, k: Split<jstring>,
-                                   colon: Split<Structural<jcolon>>, v: Split<Value>)
+                                         colon: Split<Structural<jcolon>>, v: Split<Value>)
       : (sp: Split<jKeyValue>)
       requires k.StrictlySplitFrom?(cs, Spec.String)
       requires colon.StrictlySplitFrom?(k.cs, c => Spec.Structural(c, SpecView))

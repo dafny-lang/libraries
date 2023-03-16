@@ -3,7 +3,7 @@
 include "ConcreteSyntax.Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
-  // Some useful properties about the functions used in `ConcreteSyntax.Spec`.
+// Some useful properties about the functions used in `ConcreteSyntax.Spec`.
 {
   import opened BoundedInts
 
@@ -13,15 +13,15 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
 
   lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>)
     ensures forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
-      | && (forall d | d < bracketed :: pd0.requires(d))
-        && (forall d | d < bracketed :: pd1.requires(d))
-        && (forall d | d < bracketed :: pd0(d) == pd1(d))
-      :: Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
+              | && (forall d | d < bracketed :: pd0.requires(d))
+                && (forall d | d < bracketed :: pd1.requires(d))
+                && (forall d | d < bracketed :: pd0(d) == pd1(d))
+              :: Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
   {
     forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
       | && (forall d | d < bracketed :: pd0.requires(d))
-        && (forall d | d < bracketed :: pd1.requires(d))
-        && (forall d | d < bracketed :: pd0(d) == pd1(d))
+      && (forall d | d < bracketed :: pd1.requires(d))
+      && (forall d | d < bracketed :: pd0(d) == pd1(d))
     {
       calc {
         Spec.Bracketed(bracketed, pd0);

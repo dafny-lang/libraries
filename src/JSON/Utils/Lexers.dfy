@@ -9,7 +9,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Lexers {
     import opened BoundedInts
 
     datatype LexerResult<+T, +R> =
-      // A Lexer may return three results:
+        // A Lexer may return three results:
       | Accept // The input is valid.
       | Reject(err: R) // The input is not valid; `err` says why.
       | Partial(st: T) // More input is needed to finish lexing.
@@ -39,15 +39,15 @@ module {:options "-functionSyntax:4"} JSON.Utils.Lexers {
       : LexerResult<StringLexerState, string>
     {
       match st
-        case Start() =>
-          if byte == '\"' as opt_byte then Partial(Body(false))
-          else Reject("String must start with double quote")
-        case End() =>
-          Accept
-        case Body(escaped) =>
-          if byte == '\\' as opt_byte then Partial(Body(!escaped))
-          else if byte == '\"' as opt_byte && !escaped then Partial(End)
-          else Partial(Body(false))
+      case Start() =>
+        if byte == '\"' as opt_byte then Partial(Body(false))
+        else Reject("String must start with double quote")
+      case End() =>
+        Accept
+      case Body(escaped) =>
+        if byte == '\\' as opt_byte then Partial(Body(!escaped))
+        else if byte == '\"' as opt_byte && !escaped then Partial(End)
+        else Partial(Body(false))
     }
   }
 }

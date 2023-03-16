@@ -55,28 +55,29 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
           }
         ]
       }");
-    var CITIES_AST := Object([
-      ("Cities", Array([
-         Object([
-           ("Name", String("Boston")),
-           ("Founded", Number(Int(1630))),
-           ("Population", Number(Int(689386))),
-           ("Area (km2)", Number(Decimal(45842, -1)))
-         ]),
-         Object([
-           ("Name", String("Rome")),
-           ("Founded", Number(Int(-753))),
-           ("Population", Number(Decimal(2873, 3))),
-           ("Area (km2)", Number(Int(1285)))
-         ]),
-         Object([
-           ("Name", String("Paris")),
-           ("Founded", Null),
-           ("Population", Number(Decimal(2161, 3))),
-           ("Area (km2)", Number(Decimal(23835, -1)))
-         ])
-       ]))
-    ]);
+    var CITIES_AST :=
+      Object([
+               ("Cities", Array([
+                Object([
+                ("Name", String("Boston")),
+                ("Founded", Number(Int(1630))),
+                ("Population", Number(Int(689386))),
+                ("Area (km2)", Number(Decimal(45842, -1)))
+                ]),
+                Object([
+                ("Name", String("Rome")),
+                ("Founded", Number(Int(-753))),
+                ("Population", Number(Decimal(2873, 3))),
+                ("Area (km2)", Number(Int(1285)))
+                ]),
+                Object([
+                ("Name", String("Paris")),
+                ("Founded", Null),
+                ("Population", Number(Decimal(2161, 3))),
+                ("Area (km2)", Number(Decimal(23835, -1)))
+                ])
+                ]))
+             ]);
     expect API.Deserialize(CITIES_JS) == Success(CITIES_AST);
 
 /// Serialization works similarly, with `API.Serialize`.  For this first example
@@ -86,9 +87,11 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 
 /// For more complex object, the generated layout may not be exactly the same; note in particular how the representation of numbers and the whitespace have changed.
 
-    expect API.Serialize(CITIES_AST) == Success(Unicode.Transcode16To8(
+    var EXPECTED := Unicode.Transcode16To8(
       @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1},{""Name"":""Rome"",""Founded"":-753,""Population"":2873e3,""Area (km2)"":1285},{""Name"":""Paris"",""Founded"":null,""Population"":2161e3,""Area (km2)"":23835e-1}]}"
-    ));
+    );
+
+    expect API.Serialize(CITIES_AST) == Success(EXPECTED);
 
 /// Additional methods are defined in `API.dfy` to serialize an object into an
 /// existing buffer or into an array.  Below is the smaller example from the
@@ -100,18 +103,21 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
       ""Population"": 689386,
       ""Area (km2)"": 4584.2}]}");
 
-    var CITY_AST := Object([("Cities", Array([
-      Object([
-        ("Name", String("Boston")),
-        ("Founded", Number(Int(1630))),
-        ("Population", Number(Int(689386))),
-        ("Area (km2)", Number(Decimal(45842, -1)))])]))]);
+    var CITY_AST :=
+      Object([("Cities", Array([
+               Object([
+               ("Name", String("Boston")),
+               ("Founded", Number(Int(1630))),
+               ("Population", Number(Int(689386))),
+               ("Area (km2)", Number(Decimal(45842, -1)))])]))]);
 
     expect API.Deserialize(CITY_JS) == Success(CITY_AST);
 
-    expect API.Serialize(CITY_AST) == Success(Unicode.Transcode16To8(
+    var EXPECTED' := Unicode.Transcode16To8(
       @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
-    ));
+    );
+
+    expect API.Serialize(CITY_AST) == Success(EXPECTED');
   }
 }
 
@@ -213,25 +219,25 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
 
 /// Non-recursive cases are untouched:
 
-      case Bool(_) => js
-      case String(_) => js
-      case Number(_) => js
+    case Bool(_) => js
+    case String(_) => js
+    case Number(_) => js
 
 /// `Null` is replaced with the new `replacement` value:
 
-      case Null(_) => replacement
+    case Null(_) => replacement
 
 /// … and objects and arrays are traversed recursively (only the data part of is
 /// traversed: other fields record information about the formatting of braces,
 /// square brackets, and whitespace, and can thus be reused without
 /// modifications):
 
-      case Object(obj) =>
-        Object(obj.(data := MapSuffixedSequence(obj.data, (s: Suffixed<jKeyValue, jcomma>) requires s in obj.data =>
-          s.t.(v := ReplaceNull(s.t.v, replacement)))))
-      case Array(arr) =>
-        Array(arr.(data := MapSuffixedSequence(arr.data, (s: Suffixed<Value, jcomma>) requires s in arr.data =>
-          ReplaceNull(s.t, replacement))))
+    case Object(obj) =>
+      Object(obj.(data := MapSuffixedSequence(obj.data, (s: Suffixed<jKeyValue, jcomma>) requires s in obj.data =>
+                                                s.t.(v := ReplaceNull(s.t.v, replacement)))))
+    case Array(arr) =>
+      Array(arr.(data := MapSuffixedSequence(arr.data, (s: Suffixed<Value, jcomma>) requires s in arr.data =>
+                                               ReplaceNull(s.t, replacement))))
   }
 
 /// Note that well-formedness criteria on the low-level AST are enforced using

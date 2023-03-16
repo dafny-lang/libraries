@@ -22,20 +22,20 @@ module {:options "-functionSyntax:4"} JSON.Errors {
   {
     function ToString() : string {
       match this
-        case UnterminatedSequence => "Unterminated sequence"
-        case UnsupportedEscape(str) => "Unsupported escape sequence: " + str
-        case EscapeAtEOS => "Escape character at end of string"
-        case EmptyNumber => "Number must contain at least one digit"
-        case ExpectingEOF => "Expecting EOF"
-        case IntOverflow => "Input length does not fit in a 32-bit counter"
-        case ReachedEOF => "Reached EOF"
-        case ExpectingByte(b0, b) =>
-          var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
-          "Expecting '" + [b0 as char] + "', read " + c
-        case ExpectingAnyByte(bs0, b) =>
-          var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
-          var c0s := seq(|bs0|, idx requires 0 <= idx < |bs0| => bs0[idx] as char);
-          "Expecting one of '" + c0s + "', read " + c
+      case UnterminatedSequence => "Unterminated sequence"
+      case UnsupportedEscape(str) => "Unsupported escape sequence: " + str
+      case EscapeAtEOS => "Escape character at end of string"
+      case EmptyNumber => "Number must contain at least one digit"
+      case ExpectingEOF => "Expecting EOF"
+      case IntOverflow => "Input length does not fit in a 32-bit counter"
+      case ReachedEOF => "Reached EOF"
+      case ExpectingByte(b0, b) =>
+        var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
+        "Expecting '" + [b0 as char] + "', read " + c
+      case ExpectingAnyByte(bs0, b) =>
+        var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
+        var c0s := seq(|bs0|, idx requires 0 <= idx < |bs0| => bs0[idx] as char);
+        "Expecting one of '" + c0s + "', read " + c
     }
   }
 
@@ -46,9 +46,9 @@ module {:options "-functionSyntax:4"} JSON.Errors {
   {
     function ToString() : string {
       match this
-        case OutOfMemory => "Out of memory"
-        case IntTooLarge(i: int) => "Integer too large: " + Str.OfInt(i)
-        case StringTooLong(s: string) => "String too long: " + s
+      case OutOfMemory => "Out of memory"
+      case IntTooLarge(i: int) => "Integer too large: " + Str.OfInt(i)
+      case StringTooLong(s: string) => "String too long: " + s
     }
   }
 

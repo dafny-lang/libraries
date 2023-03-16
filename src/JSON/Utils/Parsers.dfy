@@ -14,7 +14,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Parsers {
   type SplitResult<+T, +R> = Result<Split<T>, CursorError<R>>
 
   type Parser<!T, +R> = p: Parser_<T, R> | p.Valid?()
-    // BUG(https://github.com/dafny-lang/dafny/issues/2103)
+      // BUG(https://github.com/dafny-lang/dafny/issues/2103)
     witness ParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
   datatype Parser_<!T, +R> = Parser(fn: FreshCursor -> SplitResult<T, R>,
                                     ghost spec: T -> bytes) {
