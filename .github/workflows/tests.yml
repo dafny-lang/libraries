@@ -12,6 +12,7 @@ concurrency:
 jobs:
   verification:
     strategy:
+      matrix:
         version: [ 3.13.1, 4.0.0 ]
 
     uses: ./.github/workflows/reusable-tests.yml
