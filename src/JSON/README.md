@@ -14,25 +14,35 @@ Both APIs provides functions for serialization (utf-8 bytes to AST) and deserial
 
 The tutorial in [`Tutorial.dfy`](Tutorial.dfy) shows how to import the library, call the high-level API, and use the low-level API to make localized modifications to a partial parse of a JSON AST.  The main entry points are `API.Serialize` (to go from utf-8 bytes to a JSON AST), and `API.Deserialize` (for the reverse operation):
 
+<!-- %check-verify %save tmp-json.dfy -->
 ```dafny
-var CITY_JS := Unicode.Transcode16To8(@"{""Cities"": [{
-  ""Name"": ""Boston"",
-  ""Founded"": 1630,
-  ""Population"": 689386,
-  ""Area (km2)"": 4584.2}]}");
+include "src/JSON/API.dfy"
 
-var CITY_AST := Object([("Cities", Array([
-  Object([
-    ("Name", String("Boston")),
-    ("Founded", Number(Int(1630))),
-    ("Population", Number(Int(689386))),
-    ("Area (km2)", Number(Decimal(45842, -1)))])]))]);
+import JSON.API
+import JSON.Utils.Unicode
+import opened JSON.AST
+import opened Wrappers
 
-expect API.Deserialize(CITY_JS) == Success(CITY_AST);
+method Test(){
+  var CITY_JS := Unicode.Transcode16To8(@"{""Cities"": [{
+    ""Name"": ""Boston"",
+    ""Founded"": 1630,
+    ""Population"": 689386,
+    ""Area (km2)"": 4584.2}]}");
 
-expect API.Serialize(CITY_AST) == Success(Unicode.Transcode16To8(
-  @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
-));
+  var CITY_AST := Object([("Cities", Array([
+    Object([
+      ("Name", String("Boston")),
+      ("Founded", Number(Int(1630))),
+      ("Population", Number(Int(689386))),
+      ("Area (km2)", Number(Decimal(45842, -1)))])]))]);
+
+  expect API.Deserialize(CITY_JS) == Success(CITY_AST);
+
+  expect API.Serialize(CITY_AST) == Success(Unicode.Transcode16To8(
+    @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
+  ));
+}
 ```
 
 ## What is verified?
