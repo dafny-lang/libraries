@@ -67,6 +67,9 @@
 ##   check
 
 dir=$(dirname "${BASH_SOURCE[0]}")
+## Root of libraries repo
+lib=$(cd $dir/..; pwd)
+
 dafny="dafny"
 
 defaultCommand=
@@ -95,6 +98,7 @@ ANYFAIL=0
 ## Loop over all remaining command-line arguments
 for file in $@ ; do
 dir=$(dirname "$file")
+filename=$(basename "$file")
 
 ## Whether this file fails
 FAIL=0
@@ -242,7 +246,7 @@ do
           elif [ "$com" == "%check-legacy" ]; then
             "$dafny" $com $dOptions ${options[@]} $text > actual
           else
-            "$dafny" $com --function-syntax:4 $dOptions ${options[@]} $text > actual
+            "$dafny" $com --function-syntax:4 $dOptions ${options[@]} $text $lib/src/dafny/DafnyCore.dfy > actual
           fi
           actualec=$?
           if [ "$useHeadings" == "1" ]; then
@@ -282,8 +286,9 @@ do
               cat actual
               FAIL=1
             fi
-            if [ `cat actual | wc -l ` != "2" ]; then
-              echo ACTUAL ERROR OUTPUT BUT NONE EXPECTED
+            # Warnings differ from version to version; "No trigger" is sometimes on a different line
+            if [ `cat actual | grep -v "Warning" | grep -v "No trigger" | wc -l ` != "2" ]; then
+              echo ACTUAL ERROR OUTPUT BUT NONE EXPECTED `cat actual | wc -l `
               cat actual
               FAIL=1
             fi
@@ -293,7 +298,8 @@ do
               FAIL=1
             fi
             if [ -e "$dir/$expect" ]; then
-              diff actual "$dir/$expect"
+              # Warnings differ from version to version; "No trigger" is sometimes on a different line
+              cat actual | grep -v "Warning" | grep -v "No trigger" | diff - "$dir/$expect"
               if [ "$?" != "0" ]; then
                 FAIL=1
                 echo Actual output differs from expected

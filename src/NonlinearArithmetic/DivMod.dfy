@@ -1259,12 +1259,12 @@ module {:options "-functionSyntax:4"} DivMod {
 
   lemma LemmaModAddsAuto()
     ensures forall a: int, b: int, d: int {:trigger (a + b) % d}
-              :: 0 < d ==> a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
-                           && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
+              :: 0 < d ==> && a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
+                           && ((a % d + b % d) < d ==> a % d + b % d == (a + b) % d)
   {
     forall a: int, b: int, d: int | 0 < d
-      ensures a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
-              && (a % d + b % d) < d ==> a % d + b % d == (a + b) % d
+      ensures && a % d + b % d == (a + b) % d + d * ((a % d + b % d) / d)
+              && ((a % d + b % d) < d ==> a % d + b % d == (a + b) % d)
     {
       LemmaModAdds(a, b, d);
     }

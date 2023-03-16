@@ -13,13 +13,13 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-include "../Results.dfy"
+include "../Wrappers.dfy"
 include "../Math.dfy"
 include "../Relations.dfy"
 
 module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
-  import opened Results
+  import opened Wrappers
   import opened Relations
   import Math
 
@@ -665,7 +665,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Filtering a sequence is distributive over concatenation. That is, concatenating two sequences 
      and then using "Filter" is the same as using "Filter" on each sequence separately, and then 
      concatenating the two resulting sequences. */
-  lemma {:opaque} LemmaFilterDistributesOverConcat<T>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
+  lemma {:opaque} LemmaFilterDistributesOverConcat<T(!new)>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
     requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Filter(f, xs + ys) == Filter(f, xs) + Filter(f, ys)
