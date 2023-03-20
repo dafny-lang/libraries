@@ -60,7 +60,11 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
               var tl :- Unescape(str, start + 6);
               var hd := Str.ToNat(code, 16);
               assert hd < 0x10000 by { reveal Pow(); }
-              Success([hd as char] + tl)
+              if 0xD7FF < hd then
+                Failure(UnsupportedEscape(code))
+              else
+                Success([hd as char])
+
         else
           var unescaped: uint16 := match c
             case '\"' => 0x22 as uint16 // quotation mark
