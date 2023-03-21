@@ -94,7 +94,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     && IsLeftDistributive(add, mult)
   }
 
-  datatype FieldStructure<!T(!new)> = RingStructure(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T)
+  datatype FieldStructure<!T(!new)> = FieldStructure(add: (T, T) -> T, minus: T -> T, zero: T, mult: (T, T) -> T, div: T --> T, one: T)
   type FieldPre<!T(!new)> = f: FieldStructure | (forall t :: (t != f.zero) ==> f.div.requires(t)) witness *
   type Field<!T(!new)> = f: FieldPre | IsField(f.add, f.minus, f.zero, f.mult, f.div, f.one) witness *
 
