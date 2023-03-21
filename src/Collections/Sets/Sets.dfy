@@ -101,6 +101,7 @@ module {:options "-functionSyntax:4"} Sets {
   /* Non-deterministically extracts an element from a set that contains at least one element. */
   ghost function ExtractFromNonEmptySet<T>(s: set<T>): (x: T)
     requires |s| != 0
+    ensures x in s
   {
     var x :| x in s;
     x
