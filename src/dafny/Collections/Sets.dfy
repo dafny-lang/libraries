@@ -98,12 +98,23 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     }
   }
 
-  /* Extracts the unique element from a singleton set. */
-  method ExtractFromSingleton<T>(s: set<T>) returns (x: T)
+  /* Non-deterministically extracts an element from a set that contains at least one element. */
+  ghost function ExtractFromNonEmptySet<T>(s: set<T>): (x: T)
+    requires |s| != 0
+  {
+    var x :| x in s;
+    x
+  }
+
+  /* Deterministically extracts the unique element from a singleton set. In contrast to 
+     `ExtractFromNonEmptySet`, this implementation compiles, as the uniqueness of the element 
+     being picked can be proven. */
+  function ExtractFromSingleton<T>(s: set<T>): (x: T)
     requires IsSingleton(s)
     ensures s == {x}
   {
-    x :| x in s;
+    var x :| x in s;
+    x
   }
 
   /* If an injective function is applied to each element of a set to construct
