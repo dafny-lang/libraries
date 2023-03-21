@@ -15,8 +15,8 @@ module {:options "-functionSyntax:4"} SetsExamples {
 
     var x := ExtractFromNonEmptySet(s);
     assert x == 0 || x == 1;
-    // assert x == 0; this fails due to non-deterministic
-    // assert x == 1; this fails due to non-deterministicy
+    // assert x == 0; fails due to non-determinacy
+    // assert x == 1; fails due to non-determinacy
 
     var y := ExtractFromSingleton(t);
     assert y == 0;
