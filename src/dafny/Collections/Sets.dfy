@@ -110,9 +110,10 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
      `ExtractFromNonEmptySet`, this implementation compiles, as the uniqueness of the element 
      being picked can be proven. */
   function ExtractFromSingleton<T>(s: set<T>): (x: T)
-    requires IsSingleton(s)
+    requires |s| == 1
     ensures s == {x}
   {
+    LemmaIsSingleton(s);
     var x :| x in s;
     x
   }
