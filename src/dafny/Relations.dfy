@@ -26,6 +26,10 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     forall x, y :: R(x, y) && R(y, x) ==> x == y
   }
 
+  ghost predicate Symmetric<T(!new)>(R: (T, T) -> bool) {
+    forall x, y :: R(x, y) <==> R(y, x)
+  }
+
   ghost predicate Connected<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: x != y ==> R(x, y) || R(y, x)
   }
@@ -52,4 +56,30 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     && Connected(R)
   }
 
+  ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Symmetric(R)
+    && Transitive(R)
+  }
+
+  ghost predicate SortedBy<T>(a: seq<T>, lessThan: (T, T) -> bool) {
+    forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
+  }
+
+  /* An element in an ordered set is called minimal, if it is less than every other element of the set. */
+  ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
+    m in s && forall y | y in s :: R(m, y)
+  }
+
+  /* An element in an ordered set is called maximal, if it is greater than every other element of the set. */
+  ghost predicate IsMaximum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
+    m in s && forall y | y in s :: R(y, m)
+  }
+
+  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
+    requires SortedBy(s, lessThan)
+    requires |s| == 0 || lessThan(x, s[0])
+    requires TotalOrdering(lessThan)
+    ensures SortedBy([x] + s, lessThan)
+    {}
 }

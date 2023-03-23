@@ -193,4 +193,35 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     LemmaSubsetSize(x, range);
   }
 
+  /* Any totally ordered set contains a unique minimal element. */
+  lemma LemmaUniqueMinimum<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (m: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMinimum(R, m, s) && (forall n: T | IsMinimum(R, n, s) :: m == n)
+  {
+    var x :| x in s;
+    if s == {x} {
+      m := x;
+    } else {
+      var m' := LemmaUniqueMinimum(R, s - {x});
+      if
+      case R(m', x) => m := m';
+      case R(x, m') => m := x;
+    }
+  }
+
+  /* Any totally ordered set contains a unique maximal element. */
+  lemma LemmaUniqueMaximum<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (m: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMaximum(R, m, s) && (forall n: T | IsMaximum(R, n, s) :: m == n)
+  {
+    var x :| x in s;
+    if s == {x} {
+      m := x;
+    } else {
+      var m' := LemmaUniqueMaximum(R, s - {x});
+      if
+      case R(m', x) => m := x;
+      case R(x, m') => m := m';
+    }
+  }
 }
