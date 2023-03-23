@@ -1,9 +1,9 @@
 // RUN: %verify "%s"
 
 /*******************************************************************************
-  *  Copyright by the contributors to the Dafny Project
-  *  SPDX-License-Identifier: MIT 
-  *******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 module {:options "-functionSyntax:4"} Dafny.Relations {
 
