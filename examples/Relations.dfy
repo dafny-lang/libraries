@@ -29,5 +29,4 @@ module RelationsExamples {
   lemma BuiltInIntEqIsEquivalenceRelation()
     ensures EquivalenceRelation((x: int, y: int) => (x == y))
   {}
-
 }
