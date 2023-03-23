@@ -85,5 +85,5 @@ module {:options "-functionSyntax:4"} Relations {
     requires |s| == 0 || lessThan(x, s[0])
     requires TotalOrdering(lessThan)
     ensures SortedBy([x] + s, lessThan)
-    {}
+  {}
 }
