@@ -43,8 +43,8 @@ module {:options "-functionSyntax:4"} IntegersExample {
   {}
 
   lemma IntegersAreAbelian()
-    ensures IsAbelian(add)
-    ensures IsAbelian(mult)
+    ensures IsCommutative(add)
+    ensures IsCommutative(mult)
   {}
 
   lemma IntegersAreAdditiveGroup()
@@ -113,8 +113,8 @@ module {:options "-functionSyntax:4"} RealsExample {
   {}
 
   lemma RealsAreAbelian()
-    ensures IsAbelian(add)
-    ensures IsAbelian(mult)
+    ensures IsCommutative(add)
+    ensures IsCommutative(mult)
   {}
 
   lemma RealsAreAdditiveGroup()

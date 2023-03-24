@@ -37,7 +37,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
     && IsRightInverse(bop, inverse, unit)
   }
 
-  ghost predicate IsAbelian<T(!new)>(bop: (T, T) -> T) {
+  ghost predicate IsCommutative<T(!new)>(bop: (T, T) -> T) {
     forall x, y :: bop(x, y) == bop(y, x)
   }
 
@@ -72,7 +72,7 @@ module {:options "-functionSyntax:4"} BinaryOperations {
 
   ghost predicate IsAbelianGroup<T(!new)>(bop: (T, T) -> T, inverse: T --> T, unit: T) {
     && IsGroup(bop, inverse, unit)
-    && IsAbelian(bop)
+    && IsCommutative(bop)
   }
 
   type AbelianGroup<!T(!new)> = g: GroupStructure | IsAbelianGroup(g.bop, g.inverse, g.unit) witness *
