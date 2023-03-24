@@ -59,12 +59,12 @@ module {:options "-functionSyntax:4"} Relations {
     forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
 
-  /* An element in an ordered set is called minimal, if it is less than every other element of the set. */
+  /** An element in an ordered set is called minimal, if it is less than every other element of the set. */
   ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
     m in s && forall y | y in s :: R(m, y)
   }
 
-  /* An element in an ordered set is called maximal, if it is greater than every other element of the set. */
+  /** An element in an ordered set is called maximal, if it is greater than every other element of the set. */
   ghost predicate IsMaximum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
     m in s && forall y | y in s :: R(y, m)
   }
