@@ -246,7 +246,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
   {}
 
   /** Any totally-ordered set contains a unique minimal (equivalently, least) element. */
-  lemma LemmaConstructUniqueMinimal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (min: T)
+  lemma LemmaFindUniqueMinimal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (min: T)
     requires |s| > 0 && TotalOrdering(R)
     ensures IsMinimal(R, min, s) && (forall min': T | IsMinimal(R, min', s) :: min == min')
   {
@@ -254,7 +254,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     if s == {x} {
       min := x;
     } else {
-      var min' := LemmaConstructUniqueMinimal(R, s - {x});
+      var min' := LemmaFindUniqueMinimal(R, s - {x});
       if
       case R(min', x) => min := min';
       case R(x, min') => min := x;
@@ -262,7 +262,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
   }
 
   /** Any totally ordered set contains a unique greatest (equivalently, maximal) element */
-  lemma LemmaUniqueGreatest<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
+  lemma LemmaFindUniqueGreatest<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
     requires |s| > 0 && TotalOrdering(R)
     ensures IsGreatest(R, max, s) && (forall max': T | IsGreatest(R, max', s) :: max == max')
   {
@@ -270,7 +270,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     if s == {x} {
       max := x;
     } else {
-      var max' := LemmaUniqueGreatest(R, s - {x});
+      var max' := LemmaFindUniqueGreatest(R, s - {x});
       if
       case R(max', x) => max := x;
       case R(x, max') => max := max';
