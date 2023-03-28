@@ -26,6 +26,10 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     forall x, y :: R(x, y) && R(y, x) ==> x == y
   }
 
+  ghost predicate Symmetric<T(!new)>(R: (T, T) -> bool) {
+    forall x, y :: R(x, y) <==> R(y, x)
+  }
+
   ghost predicate Connected<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: x != y ==> R(x, y) || R(y, x)
   }
@@ -83,5 +87,10 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
   /** An element in an ordered set is called a maximal element, if no other element is greater than it. */
   ghost predicate IsMaximal<T>(R: (T, T) -> bool, max: T, s: set<T>) {
     max in s && forall x | x in s && R(max, x) :: R(x, max)
+
+  ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Symmetric(R)
+    && Transitive(R)
   }
 }

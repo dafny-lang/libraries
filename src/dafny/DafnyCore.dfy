@@ -8,6 +8,8 @@ include "./Math.dfy"
 include "./NonlinearArithmetic/NonlinearArithmetic.dfy"
 include "./Relations.dfy"
 include "./Unicode/Unicode.dfy"
+include "./BinaryOperations.dfy"
+
 
 module Dafny {
 
