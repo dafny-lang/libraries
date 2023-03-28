@@ -52,13 +52,36 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     && Connected(R)
   }
 
-  /** An element in an ordered set is called minimal, if it is less than every other element of the set. */
-  ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
-    m in s && forall y | y in s :: R(m, y)
+  ghost predicate PreOrdering<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Transitive(R) 
   }
 
-  /** An element in an ordered set is called maximal, if it is greater than every other element of the set. */
-  ghost predicate IsMaximum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
-    m in s && forall y | y in s :: R(y, m)
+  ghost predicate PartialOrdering<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Transitive(R) 
+    && AntiSymmetric(R)
+  }
+
+  /** An element in an ordered set is called a least element (or a minimum), if it is less than 
+      every other element of the set. */
+  ghost predicate IsLeast<T>(R: (T, T) -> bool, min: T, s: set<T>) {
+    min in s && forall x | x in s :: R(min, x)
+  }
+
+  /** An element in an ordered set is called a minimal element, if no other element is less than it. */
+  ghost predicate IsMinimal<T>(R: (T, T) -> bool, min: T, s: set<T>) {
+    min in s && forall x | x in s && R(x, min) :: R(min, x)
+  }
+
+  /** An element in an ordered set is called a greatest element (or a maximum), if it is greater than 
+      every other element of the set. */
+  ghost predicate IsGreatest<T>(R: (T, T) -> bool, max: T, s: set<T>) {
+    max in s && forall x | x in s :: R(x, max)
+  }
+
+  /** An element in an ordered set is called a maximal element, if no other element is greater than it. */
+  ghost predicate IsMaximal<T>(R: (T, T) -> bool, max: T, s: set<T>) {
+    max in s && forall x | x in s && R(max, x) :: R(x, max)
   }
 }
