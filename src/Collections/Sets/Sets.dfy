@@ -263,16 +263,16 @@ module {:options "-functionSyntax:4"} Sets {
     }
   }
 
-  /** Any totally ordered set contains a unique greatest (equivalently, maximal) element */
-  lemma LemmaFindUniqueGreatest<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
+  /** Any totally ordered set contains a unique maximal (equivalently, greatest) element */
+  lemma LemmaFindUniqueMaximal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
     requires |s| > 0 && TotalOrdering(R)
-    ensures IsGreatest(R, max, s) && (forall max': T | IsGreatest(R, max', s) :: max == max')
+    ensures IsMaximal(R, max, s) && (forall max': T | IsMaximal(R, max', s) :: max == max')
   {
     var x :| x in s;
     if s == {x} {
       max := x;
     } else {
-      var max' := LemmaFindUniqueGreatest(R, s - {x});
+      var max' := LemmaFindUniqueMaximal(R, s - {x});
       if
       case R(max', x) => max := x;
       case R(x, max') => max := max';
