@@ -67,6 +67,12 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     && AntiSymmetric(R)
   }
 
+  ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Symmetric(R)
+    && Transitive(R)
+  }
+  
   /** An element in an ordered set is called a least element (or a minimum), if it is less than 
       every other element of the set. */
   ghost predicate IsLeast<T>(R: (T, T) -> bool, min: T, s: set<T>) {
@@ -87,10 +93,6 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
   /** An element in an ordered set is called a maximal element, if no other element is greater than it. */
   ghost predicate IsMaximal<T>(R: (T, T) -> bool, max: T, s: set<T>) {
     max in s && forall x | x in s && R(max, x) :: R(x, max)
-
-  ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
-    && Reflexive(R)
-    && Symmetric(R)
-    && Transitive(R)
   }
+
 }

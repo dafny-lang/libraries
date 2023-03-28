@@ -221,25 +221,25 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
   {
   }
 
-  /** In a partially-ordered set, there exists at most one least element */
+  /** In a partially-ordered set, there exists at most one least element. */
   lemma LemmaLeastIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
     requires PartialOrdering(R)
     ensures forall min, min' | IsLeast(R, min, s) && IsLeast(R, min', s) :: min == min'
   {}
 
-  /** In a partially-ordered set, there exists at most one greatest element */
+  /** In a partially-ordered set, there exists at most one greatest element. */
   lemma LemmaGreatestIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
     requires PartialOrdering(R)
     ensures forall max, max' | IsGreatest(R, max, s) && IsGreatest(R, max', s) :: max == max'
   {}
 
-  /** In a totally-ordered set, there exists at most one minimal element */
+  /** In a totally-ordered set, there exists at most one minimal element. */
   lemma LemmaMinimalIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
     requires TotalOrdering(R)
     ensures forall min, min' | IsMinimal(R, min, s) && IsMinimal(R, min', s) :: min == min'
   {}
 
-  /** In a totally-ordered set, there exists at most one maximal element */
+  /** In a totally-ordered set, there exists at most one maximal element. */
   lemma LemmaMaximalIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
     requires TotalOrdering(R)
     ensures forall max, max' | IsMaximal(R, max, s) && IsMaximal(R, max', s) :: max == max'
@@ -261,7 +261,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     }
   }
 
-  /** Any totally ordered set contains a unique maximal (equivalently, greatest) element */
+  /** Any totally ordered set contains a unique maximal (equivalently, greatest) element. */
   lemma LemmaFindUniqueMaximal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
     requires |s| > 0 && TotalOrdering(R)
     ensures IsMaximal(R, max, s) && (forall max': T | IsMaximal(R, max', s) :: max == max')
