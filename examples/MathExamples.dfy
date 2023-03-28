@@ -13,3 +13,11 @@ method m() {
   assert Relations.Associative(Math.Min);
   assert Relations.Commutative(Math.Max);
 }
+
+lemma MinAssociates(a: int, b: int, c: int)
+  ensures Math.Min3(a,b,c) == Math.Min3(c,b,a)
+{}
+
+lemma MaxAssociates(a: int, b: int, c: int)
+  ensures Math.Max3(a,b,c) == Math.Max3(c,b,a)
+{}
