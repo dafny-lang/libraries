@@ -72,7 +72,7 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     && Symmetric(R)
     && Transitive(R)
   }
-  
+
   /** An element in an ordered set is called a least element (or a minimum), if it is less than 
       every other element of the set. */
   ghost predicate IsLeast<T>(R: (T, T) -> bool, min: T, s: set<T>) {
