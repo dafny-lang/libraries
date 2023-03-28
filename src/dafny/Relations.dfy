@@ -5,6 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
+/** Various properties of methematical Relations (see also BinaryOperations) */
 module {:options "-functionSyntax:4"} Dafny.Relations {
 
   ghost predicate Injective<X(!new), Y>(f: X-->Y)
@@ -28,7 +29,6 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     forall x, y, z: T :: f(x,f(y,z)) == f(f(x,y),z)
   }
     
-
   ghost predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
     forall x :: R(x, x)
   }
