@@ -58,12 +58,12 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
 
   ghost predicate PreOrdering<T(!new)>(R: (T, T) -> bool) {
     && Reflexive(R)
-    && Transitive(R) 
+    && Transitive(R)
   }
 
   ghost predicate PartialOrdering<T(!new)>(R: (T, T) -> bool) {
     && Reflexive(R)
-    && Transitive(R) 
+    && Transitive(R)
     && AntiSymmetric(R)
   }
 
