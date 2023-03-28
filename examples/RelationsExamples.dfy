@@ -7,7 +7,7 @@
 
 include "../src/dafny/Relations.dfy"
 
-module RelationsExamples {
+module {:options "-functionSyntax:4"} RelationsExamples {
 
   import opened Dafny.Relations
 
