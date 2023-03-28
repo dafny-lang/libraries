@@ -209,7 +209,7 @@ module {:options "--function-syntax:4"} Dafny.Wrappers {
       at run-time functions as an `expect`. The arguments may not be ghost.
    */
   method Expect(condition: bool, message: string)
-    requires condition;
+    requires condition
   {
     expect condition, message;
   }
