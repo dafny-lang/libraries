@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-/** Various properties of methematical Relations (see also BinaryOperations) */
+/** Various properties of mathematical Relations (see also BinaryOperations) */
 module {:options "-functionSyntax:4"} Dafny.Relations {
 
   ghost predicate Injective<X(!new), Y>(f: X-->Y)
