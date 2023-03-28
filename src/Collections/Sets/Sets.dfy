@@ -278,5 +278,4 @@ module {:options "-functionSyntax:4"} Sets {
       case R(x, max') => max := max';
     }
   }
-
 }
