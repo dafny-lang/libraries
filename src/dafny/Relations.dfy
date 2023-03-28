@@ -26,6 +26,10 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     forall x, y :: R(x, y) && R(y, x) ==> x == y
   }
 
+  ghost predicate Symmetric<T(!new)>(R: (T, T) -> bool) {
+    forall x, y :: R(x, y) <==> R(y, x)
+  }
+
   ghost predicate Connected<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: x != y ==> R(x, y) || R(y, x)
   }
@@ -52,4 +56,9 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     && Connected(R)
   }
 
+  ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Symmetric(R)
+    && Transitive(R)
+  }
 }
