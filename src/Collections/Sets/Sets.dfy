@@ -236,4 +236,15 @@ module {:options "-functionSyntax:4"} Sets {
     LemmaSubsetSize(x, range);
   }
 
+  function method OfSeq<T(==)>(sq: seq<T>): set<T> {
+    set x | x in sq
+  }
+
+  function method OfSlice<T(==)>(arr: array<T>, lo: int, hi: int): set<T>
+    requires 0 <= lo <= hi <= arr.Length
+    reads arr
+  {
+    OfSeq(arr[lo..hi])
+  }
+
 }
