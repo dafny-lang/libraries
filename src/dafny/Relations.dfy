@@ -94,5 +94,4 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
   ghost predicate IsMaximal<T>(R: (T, T) -> bool, max: T, s: set<T>) {
     max in s && forall x | x in s && R(max, x) :: R(x, max)
   }
-
 }
