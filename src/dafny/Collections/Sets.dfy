@@ -76,6 +76,49 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     }
   }
 
+  /* A singleton set has at least one element and any two elements are equal. */
+  ghost predicate IsSingleton<T>(s: set<T>) {
+    && (exists x :: x in s)
+    && (forall x, y | x in s && y in s :: x == y)
+  }
+
+  /* A set has exactly one element, if and only if, it has at least one element and any two elements are equal. */
+  lemma LemmaIsSingleton<T>(s: set<T>)
+    ensures |s| == 1 <==> IsSingleton(s)
+  {
+    if |s| == 1 {
+      forall x, y | x in s && y in s ensures x == y {
+        LemmaSingletonEquality(s, x, y);
+      }
+    }
+    if IsSingleton(s) {
+      var x :| x in s;
+      assert s == {x};
+      assert |s| == 1;
+    }
+  }
+
+  /* Non-deterministically extracts an element from a set that contains at least one element. */
+  ghost function ExtractFromNonEmptySet<T>(s: set<T>): (x: T)
+    requires |s| != 0
+    ensures x in s
+  {
+    var x :| x in s;
+    x
+  }
+
+  /* Deterministically extracts the unique element from a singleton set. In contrast to 
+     `ExtractFromNonEmptySet`, this implementation compiles, as the uniqueness of the element 
+     being picked can be proven. */
+  function ExtractFromSingleton<T>(s: set<T>): (x: T)
+    requires |s| == 1
+    ensures s == {x}
+  {
+    LemmaIsSingleton(s);
+    var x :| x in s;
+    x
+  }
+
   /* If an injective function is applied to each element of a set to construct
   another set, the two sets have the same size.  */
   lemma LemmaMapSize<X(!new), Y>(xs: set<X>, ys: set<Y>, f: X-->Y)
