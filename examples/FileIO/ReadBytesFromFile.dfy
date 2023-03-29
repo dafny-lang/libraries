@@ -9,10 +9,10 @@
 // #RUN: %run --no-verify --unicode-char:false --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%S/data.txt" "java.io.IOException:"
 // #RUN: %run --no-verify --unicode-char:false --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%S/data.txt" "Error: ENOENT"
 
-include "../../src/FileIO/FileIO.dfy"
+include "../../src/dafny/FileIO/FileIO.dfy"
 
 module ReadBytesFromFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;
