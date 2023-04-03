@@ -2,17 +2,17 @@ module RNG {
   type rng = nat -> bool
 
   // Definition 14
-  function shd(s: rng): bool {
+  function SHd(s: rng): bool {
     s(0)
   }
 
   // Definition 14
-  function stl(s: rng): rng {
+  function STl(s: rng): rng {
     (n: nat) => s(n+1)
   }
 
   // Definition 14
-  function scons(a: bool, s: rng, n: nat): bool {
+  function SCons(a: bool, s: rng, n: nat): bool {
     if n == 0 then 
       a 
     else 
@@ -20,75 +20,75 @@ module RNG {
   }
 
   // Definition 14
-  function stake(n: nat, s: rng): seq<bool> {
+  function STake(n: nat, s: rng): seq<bool> {
     if n == 0 then
       []
     else
-      [shd(s)] + stake(n-1, stl(s))
+      [SHd(s)] + STake(n-1, STl(s))
   }
 
   // Definition 14
-  function sdrop(n: nat, s: rng): rng {
+  function SDrop(n: nat, s: rng): rng {
     if n == 0 then
       s
     else
-      sdrop(n-1, stl(s))
+      SDrop(n-1, STl(s))
   }
 
   // Definition 14
   function sdest(s: rng): (bool, rng) {
-    (shd(s), stl(s))
+    (SHd(s), STl(s))
   }
 
   // Definition 15
-  ghost function siter<A>(h: A -> bool, t: A -> A, x: A): rng {
+  ghost function SIter<A>(h: A -> bool, t: A -> A, x: A): rng {
     assume false;
-    (n: nat) => scons(h(x), siter(h, t, t(x)), n)
+    (n: nat) => SCons(h(x), SIter(h, t, t(x)), n)
   }
 
   // Definition 16
-  ghost function mirror(s: rng): rng {
-    (n: nat) => scons(!shd(s), stl(s), n)
+  ghost function Mirror(s: rng): rng {
+    (n: nat) => SCons(!SHd(s), STl(s), n)
   }
 
   // Definition 17
-  ghost function prefix_set(l: seq<bool>): iset<rng> {
-    iset s: rng | stake(|l|, s) == l
+  ghost function PrefixSet(l: seq<bool>): iset<rng> {
+    iset s: rng | STake(|l|, s) == l
   }
 
   // Definition 17
-  ghost function prefix_seq(l: seq<bool>, a: bool): seq<bool> {
+  ghost function PrefixSeq(l: seq<bool>, a: bool): seq<bool> {
     if l == [] then
       [a]
     else
-      [l[0]] + prefix_seq(l[1..], a)
+      [l[0]] + PrefixSeq(l[1..], a)
   }
 
   // Equation (2.45)
   lemma LemmaHdCons(h: bool, t: rng) 
-    ensures shd((n: nat) => scons(h, t, n)) == h
+    ensures SHd((n: nat) => SCons(h, t, n)) == h
   {}
 
   // Equation (2.46)
   lemma LemmaTlCons(h: bool, t: rng, n: nat)
-    ensures stl((n: nat) => scons(h, t, n))(n) == t(n)
+    ensures STl((n: nat) => SCons(h, t, n))(n) == t(n)
   {}
 
   // Equation (2.47), (2.48)
   lemma LemmaHdtlDecomp(s: rng, n: nat) returns (x: (bool, rng))
-    ensures s(n) == scons(x.0, x.1, n)
+    ensures s(n) == SCons(x.0, x.1, n)
   {
-    x := (shd(s), stl(s));
+    x := (SHd(s), STl(s));
   }
 
   // Equation (2.50)
   lemma LemmaMirrorIdempotent(s: rng, n: nat) 
-    ensures mirror(mirror(s))(n) == s(n)
+    ensures Mirror(Mirror(s))(n) == s(n)
   {}
 
   // Equation (2.51)
   lemma LemmaTlMirror(s: rng, n: nat)
-    ensures stl(mirror(s))(n) == stl(s)(n)
+    ensures STl(Mirror(s))(n) == STl(s)(n)
   {}
 }
 
@@ -269,7 +269,7 @@ module RNGProbability {
   // Equation (2.82)
   lemma {:axiom} RandomBit(n: nat)
     ensures 
-      var e := (iset s: rng | shd(sdrop(n, s)) == true);
+      var e := (iset s: rng | SHd(SDrop(n, s)) == true);
       e in event_space && mu(e) == 0.5
 
   // Definition 30
@@ -357,7 +357,7 @@ module ExampleFlip {
 
   function Flip(): Hurd<Coin> 
   {
-    (s: rng) => (if s(0) then Head else Tail, stl(s))
+    (s: rng) => (if s(0) then Head else Tail, STl(s))
   }
 
   function Spec1(a: (), b: Coin): bool {
@@ -377,8 +377,8 @@ module ExampleFlip {
     var e1 := RNGSatisfyingSpec(Spec1, (x: ()) => Flip(), ());
     var e2 := RNGSatisfyingSpec(Spec2, (x: ()) => Flip(), ());
     RandomBit(0);
-    assert mu((iset s: rng | shd(sdrop(0, s)) == true)) == 0.5;
-    assert mu(e1) == 0.5 by { assert e1 == (iset s: rng | shd(sdrop(0, s)) == true); }
+    assert mu((iset s: rng | SHd(SDrop(0, s)) == true)) == 0.5;
+    assert mu(e1) == 0.5 by { assert e1 == (iset s: rng | SHd(SDrop(0, s)) == true); }
     assert e1 + e2 == sample_space;
     assert IsSigmaAlgebra(event_space, sample_space) by { LemmaProbabilitySpace(); }
     var ms := MeasurableSpaceStructure.Pair(event_space, sample_space);
