@@ -93,13 +93,13 @@ module {:options "-functionSyntax:4"} Generator {
 }
 
 method Main() {
-  var xs := Generator.PseudoSeq(103, 95, 79, 0, 1000);
+  var xs := Generator.PseudoSeq(103, 95, 75, 94, 100);
   for i := 0 to |xs| {
     var b := if xs[i] then "1" else "0";
     print b;
   }
   print "\n\n";
-  for i := 0 to 100 {
+  for i := 0 to 20 {
     var (n, ys) := Generator.ProbUniformSeq(6, (0,[]), |xs|)(xs);
     print n;
     xs := ys;
