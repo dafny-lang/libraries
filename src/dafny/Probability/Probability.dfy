@@ -344,7 +344,7 @@ module RNGProbability {
     else
       var f: nat -> Hurd<nat> := 
         (m: nat) => 
-          var g: bool -> Hurd<nat> := (b: bool) => Unit(if b then 2 * m + 1 else 2 * m);
+          var g: bool -> Hurd<nat> := (b: bool) => Unit(if b then 2*m + 1 else 2*m);
           Bind(Dest, g);
       Bind(ProbUnif(n / 2), f)
   }
