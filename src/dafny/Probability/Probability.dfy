@@ -2,17 +2,17 @@ module RNG {
   type rng = nat -> bool
 
   // Definition 14
-  function SHd(s: rng): bool {
+  function Head(s: rng): bool {
     s(0)
   }
 
   // Definition 14
-  function STl(s: rng): rng {
+  function Tail(s: rng): rng {
     (n: nat) => s(n+1)
   }
 
   // Definition 14
-  function SCons(a: bool, s: rng, n: nat): bool {
+  function Cons(a: bool, s: rng, n: nat): bool {
     if n == 0 then 
       a 
     else 
@@ -20,40 +20,40 @@ module RNG {
   }
 
   // Definition 14
-  function STake(n: nat, s: rng): seq<bool> {
+  function Take(n: nat, s: rng): seq<bool> {
     if n == 0 then
       []
     else
-      [SHd(s)] + STake(n-1, STl(s))
+      [Head(s)] + Take(n-1, Tail(s))
   }
 
   // Definition 14
-  function SDrop(n: nat, s: rng): rng {
+  function Drop(n: nat, s: rng): rng {
     if n == 0 then
       s
     else
-      SDrop(n-1, STl(s))
+      Drop(n-1, Tail(s))
   }
 
   // Definition 14
-  function sdest(s: rng): (bool, rng) {
-    (SHd(s), STl(s))
+  function Dest(s: rng): (bool, rng) {
+    (Head(s), Tail(s))
   }
 
   // Definition 15
-  ghost function SIter<A>(h: A -> bool, t: A -> A, x: A): rng {
+  ghost function Iter<A>(h: A -> bool, t: A -> A, x: A): rng {
     assume false;
-    (n: nat) => SCons(h(x), SIter(h, t, t(x)), n)
+    (n: nat) => Cons(h(x), Iter(h, t, t(x)), n)
   }
 
   // Definition 16
   ghost function Mirror(s: rng): rng {
-    (n: nat) => SCons(!SHd(s), STl(s), n)
+    (n: nat) => Cons(!Head(s), Tail(s), n)
   }
 
   // Definition 17
   ghost function PrefixSet(l: seq<bool>): iset<rng> {
-    iset s: rng | STake(|l|, s) == l
+    iset s: rng | Take(|l|, s) == l
   }
 
   // Definition 17
@@ -66,19 +66,19 @@ module RNG {
 
   // Equation (2.45)
   lemma LemmaHdCons(h: bool, t: rng) 
-    ensures SHd((n: nat) => SCons(h, t, n)) == h
+    ensures Head((n: nat) => Cons(h, t, n)) == h
   {}
 
   // Equation (2.46)
   lemma LemmaTlCons(h: bool, t: rng, n: nat)
-    ensures STl((n: nat) => SCons(h, t, n))(n) == t(n)
+    ensures Tail((n: nat) => Cons(h, t, n))(n) == t(n)
   {}
 
   // Equation (2.47), (2.48)
   lemma LemmaHdtlDecomp(s: rng, n: nat) returns (x: (bool, rng))
-    ensures s(n) == SCons(x.0, x.1, n)
+    ensures s(n) == Cons(x.0, x.1, n)
   {
-    x := (SHd(s), STl(s));
+    x := (Head(s), Tail(s));
   }
 
   // Equation (2.50)
@@ -88,7 +88,7 @@ module RNG {
 
   // Equation (2.51)
   lemma LemmaTlMirror(s: rng, n: nat)
-    ensures STl(Mirror(s))(n) == STl(s)(n)
+    ensures Tail(Mirror(s))(n) == Tail(s)(n)
   {}
 }
 
@@ -269,7 +269,7 @@ module RNGProbability {
   // Equation (2.82)
   lemma {:axiom} RandomBit(n: nat)
     ensures 
-      var e := (iset s: rng | SHd(SDrop(n, s)) == true);
+      var e := (iset s: rng | Head(Drop(n, s)) == true);
       e in event_space && mu(e) == 0.5
 
   // Definition 30
@@ -305,9 +305,25 @@ module RNGProbability {
   //     arb
   // }
 
-
   // Definition 44
   function ProbUntil<A>(b: Hurd<A>, c: A -> bool): Hurd<A> 
+
+  // Definition 46
+  ghost function Pseudo(A: nat, B: nat, N: nat, n: nat): rng {
+    var h := (x: nat) => (x as int) % 2 == 0;
+    var t := (x: nat) => (((A*x + B) as int) % (2*N + 1)) as nat;
+    Iter(h, t, n)
+  }
+
+  // Equation (3.42)
+  lemma AboutPseudoHead(A: nat, B: nat, N: nat, n: nat) 
+    ensures Head(Pseudo(A, B, N, n)) == ((n as int) % 2 == 0)
+  {}
+
+  // Equation (3.43)
+  lemma AboutPseudoTail(A: nat, B: nat, N: nat, n: nat, m: nat)
+    ensures Tail(Pseudo(A, B, N, n))(m) == Pseudo(A, B, N, (((A*n + B) as int) % (2*N + 1)) as nat)(m)
+  {}
 
   // Definition 47
   function ProbBinomial(n: nat): Hurd<nat> {
@@ -317,7 +333,7 @@ module RNGProbability {
       var f: nat -> Hurd<nat> := 
         (m: nat) =>
           var g: bool -> Hurd<nat> := (b: bool) => Unit(if b then m + 1 else m);
-          Bind(sdest, g);
+          Bind(Dest, g);
       Bind(ProbBinomial(n - 1), f)
   }
 
@@ -329,7 +345,7 @@ module RNGProbability {
       var f: nat -> Hurd<nat> := 
         (m: nat) => 
           var g: bool -> Hurd<nat> := (b: bool) => Unit(if b then 2 * m + 1 else 2 * m);
-          Bind(sdest, g);
+          Bind(Dest, g);
       Bind(ProbUnif(n / 2), f)
   }
 
@@ -340,6 +356,21 @@ module RNGProbability {
     ProbUntil(ProbUnif(n-1), (x: nat) => x < n)
   }
 
+  // Definition 53
+  function CoinFlip(a: Hurd<nat>, b: Hurd<nat>): Hurd<nat> {
+    Bind(Dest, ((x: bool) => if x then a else b))
+  }
+
+  // Equation (4.37)
+  function RandomWalk(n: nat, k: nat): Hurd<nat>
+  {
+    assume false;
+    if n == 0 then
+      Unit(k)
+    else
+      CoinFlip(RandomWalk(n+1, k+1), RandomWalk(n-1, k+1))
+  }
+
 }
 
 module ExampleFlip {
@@ -348,7 +379,7 @@ module ExampleFlip {
   import opened RNGProbability
   import opened Probability
 
-  datatype Coin = Head | Tail
+  datatype Coin = Heads | Tails
 
   // p15
   ghost function RNGSatisfyingSpec<A,B>(spec: (A, B) -> bool, f: A -> Hurd<B>, a: A): iset<rng> {
@@ -357,15 +388,15 @@ module ExampleFlip {
 
   function Flip(): Hurd<Coin> 
   {
-    (s: rng) => (if s(0) then Head else Tail, STl(s))
+    (s: rng) => (if s(0) then Heads else Tails, Tail(s))
   }
 
   function Spec1(a: (), b: Coin): bool {
-    b == Head
+    b == Heads
   }
 
   function Spec2(a: (), b: Coin): bool {
-    b == Tail
+    b == Tails
   }
 
   lemma AboutFlip() 
@@ -377,8 +408,8 @@ module ExampleFlip {
     var e1 := RNGSatisfyingSpec(Spec1, (x: ()) => Flip(), ());
     var e2 := RNGSatisfyingSpec(Spec2, (x: ()) => Flip(), ());
     RandomBit(0);
-    assert mu((iset s: rng | SHd(SDrop(0, s)) == true)) == 0.5;
-    assert mu(e1) == 0.5 by { assert e1 == (iset s: rng | SHd(SDrop(0, s)) == true); }
+    assert mu((iset s: rng | Head(Drop(0, s)) == true)) == 0.5;
+    assert mu(e1) == 0.5 by { assert e1 == (iset s: rng | Head(Drop(0, s)) == true); }
     assert e1 + e2 == sample_space;
     assert IsSigmaAlgebra(event_space, sample_space) by { LemmaProbabilitySpace(); }
     var ms := MeasurableSpaceStructure.Pair(event_space, sample_space);
