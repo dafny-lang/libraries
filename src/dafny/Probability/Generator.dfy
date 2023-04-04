@@ -72,7 +72,7 @@ module {:options "-functionSyntax:4"} Generator {
     BindSeq(b, (a: A) => ProbWhileSeq(c', b', arb, a, length))
   }
 
-  // Definition 48
+  // Variaton of Definition 48
   function ProbUnifSeq(n: nat): HurdSeq<nat> {
     if n == 0 then
       UnitSeq(0)
