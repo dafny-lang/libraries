@@ -387,29 +387,31 @@ module RNGProbability {
   }
 
   // Equation (4.12)
-  lemma LemmaProbUniform(n: nat, arb: (nat, rng), m: nat)
-    requires m < n 
-    ensures mu(iset s: rng | ProbUniform(n, arb)(s).0 == m) == 1.0/(n as real)
-  {
-    var b := ProbUnif(n-1);
-    var c := (x: nat) => x < n;
-    var spec := (x: nat) => x == m;
-    var spec_and_c := (x: nat) => spec(x) && c(x);
-    LemmaProbUntil(b, c, arb, spec);
-    forall s: rng ensures spec_and_c(ProbUntil(b, c, arb)(s).0) {
-      calc {
-        spec_and_c(ProbUntil(b, c, arb)(s).0);
-      <==>
-        spec(ProbUntil(b, c, arb)(s).0) && c(ProbUntil(b, c, arb)(s).0);
-      <==>
-        ProbUntil(b, c, arb)(s).0 == m && ProbUntil(b, c, arb)(s).0 < n;
-      <==>
-        m < n;
-      <==>
-        true;
-      }
-    }
-  }
+  // lemma LemmaProbUniform(n: nat, arb: (nat, rng), m: nat)
+  //   requires m < n 
+  //   ensures mu(iset s: rng | ProbUniform(n, arb)(s).0 == m) == 1.0/(n as real)
+  // {
+  //   var b := ProbUnif(n-1);
+  //   var c := (x: nat) => x < n;
+  //   var spec := (x: nat) => x == m;
+  //   var spec_and_c := (x: nat) => spec(x) && c(x);
+  //   LemmaProbUntil(b, c, arb, spec);
+  //   forall s: rng ensures spec_and_c(ProbUntil(b, c, arb)(s).0) <==> spec(ProbUntil(b, c, arb)(s).0) {
+  //     var x := ProbUntil(b, c, arb)(s).0;
+  //     calc {
+  //       spec_and_c(x);
+  //     <==>
+  //       spec(x) && c(x);
+  //     <==>
+  //       x == m && x < n;
+  //     <==>
+  //       x == m;
+  //     <==>
+  //       spec(x);
+  //     }
+  //   }
+  // }
+
 
   // Definition 53
   function CoinFlip(a: Hurd<nat>, b: Hurd<nat>): Hurd<nat> {
