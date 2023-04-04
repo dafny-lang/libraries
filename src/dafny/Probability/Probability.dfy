@@ -126,29 +126,46 @@ module HurdMonad {
     (a: A) => Bind(f(a), g)
   }
 
-  // Monad law
+  lemma LemmaCompositionAssociative<A,B,C,D>(f: A -> Hurd<B>, g: B -> Hurd<C>, h: C -> Hurd<D>, a: A, s: rng) 
+    ensures Composition(Composition(f, g), h)(a)(s) == Composition(f, Composition(g, h))(a)(s)
+  {
+    var (b, t) := f(a)(s);
+    var (c, u) := g(b)(t);
+    calc {
+      Composition(Composition(f, g), h)(a)(s);
+    ==
+      h(c)(u);
+    ==
+      Composition(f, Composition(g, h))(a)(s);
+    }
+  }
+
   lemma LemmaUnitalityJoin<A>(f: Hurd<A>, s: rng)
     ensures Join(Map(Unit, f))(s) == Join(Unit(f))(s)
   {
-    var (a, s') := f(s);
+    var (a, t) := f(s);
     calc {
       Join(Unit(f))(s);
     ==
-      f(s);
-    ==
-      (a, s');
-    ==
-      Unit(a)(s');
+      (a, t);
     ==
       Join(Map(Unit, f))(s);
     }
   }
   
-  // Monad law
-  // lemma LemmaAssociativityJoin<A>(fff: Hurd<Hurd<Hurd<A>>>)
-  //   ensures Join(Map(Join, fff)) == Join(Join(fff))
-  // {
-  // }
+  lemma LemmaAssociativityJoin<A>(fff: Hurd<Hurd<Hurd<A>>>, s: rng)
+    ensures Join(Map(Join, fff))(s) == Join(Join(fff))(s)
+  {
+    var (ff, t) := fff(s);
+    var (f, u) := ff(t);
+    calc {
+      Join(Map(Join, fff))(s);
+    ==
+      f(u);
+    ==
+      Join(Join(fff))(s);
+    }
+  }
 }
 
 module Probability {
@@ -295,18 +312,31 @@ module RNGProbability {
         Unit(a)
   }
 
-  // // Equation (3.25)
-  // ghost function ProbWhile<A>(c: A -> bool, b: A -> Hurd<A>, a: A, s: rng, arb: (A, rng)): (A, rng) {
-  //   var xs: iset<nat> := iset n | !(c(ProbWhileCut(c, b, n, a)(s).0));
-  //   if xs != {} then
-  //     var n: nat :| n in xs && (forall m | m in xs :: n <= m);
-  //     ProbWhileCut(c, b, n, a)(s)
-  //   else
-  //     arb
-  // }
+  // Theorem 38
+  function ProbWhile<A>(c: A -> bool, b: A -> Hurd<A>, arb: (A, rng), a: A): Hurd<A> {
+    assume false;
+    if c(a) then
+      Bind(b(a), (a': A) => ProbWhile(c, b, arb, a'))
+    else
+      Unit(a)
+  }
 
   // Definition 44
-  function ProbUntil<A>(b: Hurd<A>, c: A -> bool): Hurd<A> 
+  function ProbUntil<A>(b: Hurd<A>, c: A -> bool, arb: (A, rng)): Hurd<A> {
+    var c' := (a: A) => !c(a);
+    var b' := (a: A) => b;
+    Bind(b, (a: A) => ProbWhile(c', b', arb, a))
+  }
+
+  // Theorem 45
+  lemma {:axiom} LemmaProbUntil<A>(b: Hurd<A>, c: A -> bool, arb: (A, rng), spec: A -> bool)
+    // requires ***
+    ensures 
+      var x := mu(iset s: rng | spec(ProbUntil(b, c, arb)(s).0));
+      var spec_and_c := (a: A) => spec(a) && c(a);
+      var y := mu(iset s: rng | spec_and_c(ProbUntil(b, c, arb)(s).0));
+      var z := mu(iset s: rng | c(ProbUntil(b, c, arb)(s).0));
+      z > 0.0 && x == y / z;
 
   // Definition 46
   ghost function Pseudo(A: nat, B: nat, N: nat, n: nat): rng {
@@ -350,10 +380,35 @@ module RNGProbability {
   }
 
   // Definition 49
-  function ProbUniform(n: nat): Hurd<nat> 
+  function ProbUniform(n: nat, arb: (nat, rng)): Hurd<nat> 
     requires n > 0
   {
-    ProbUntil(ProbUnif(n-1), (x: nat) => x < n)
+    ProbUntil(ProbUnif(n-1), (x: nat) => x < n, arb)
+  }
+
+  // Equation (4.12)
+  lemma LemmaProbUniform(n: nat, arb: (nat, rng), m: nat)
+    requires m < n 
+    ensures mu(iset s: rng | ProbUniform(n, arb)(s).0 == m) == 1.0/(n as real)
+  {
+    var b := ProbUnif(n-1);
+    var c := (x: nat) => x < n;
+    var spec := (x: nat) => x == m;
+    var spec_and_c := (x: nat) => spec(x) && c(x);
+    LemmaProbUntil(b, c, arb, spec);
+    forall s: rng ensures spec_and_c(ProbUntil(b, c, arb)(s).0) {
+      calc {
+        spec_and_c(ProbUntil(b, c, arb)(s).0);
+      <==>
+        spec(ProbUntil(b, c, arb)(s).0) && c(ProbUntil(b, c, arb)(s).0);
+      <==>
+        ProbUntil(b, c, arb)(s).0 == m && ProbUntil(b, c, arb)(s).0 < n;
+      <==>
+        m < n;
+      <==>
+        true;
+      }
+    }
   }
 
   // Definition 53
