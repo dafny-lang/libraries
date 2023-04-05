@@ -109,11 +109,10 @@ module HurdMonad {
       var (a, s') := f(s);
       g(a)(s')
   }
-
-  function Map<A,B>(F: A -> B, f: Hurd<A>): Hurd<B> {
-    (s: rng) => 
-      var (a, s') := f(s);
-      (F(a), s')
+  
+  // Definition 53
+  function Map<A,B>(f: A -> B, m: Hurd<A>): Hurd<B> {
+    Bind(m, (a: A) => Unit(f(a)))
   }
   
   function Join<A>(ff: Hurd<Hurd<A>>): Hurd<A> {
