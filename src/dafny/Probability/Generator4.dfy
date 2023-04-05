@@ -132,36 +132,6 @@ module {:options "-functionSyntax:4"} Generator {
   function CoinFlip<A>(a: Hurd<A>, b: Hurd<A>): Hurd<A> {
     Bind(Dest, (x: bool) => if x then a else b)
   }
-
-/*
-  // Definition 53
-  function ProbRepeat<A>(a: Hurd<Option<A>>): (Hurd<A>) {
-    var f := ProbUntil(a, IsSome);
-    (s: rbs) => 
-      var a' := f(s).0;
-      assert IsSome(a') by { LemmaInvariantProbUntil(a, IsSome, s); }
-      Unit(a'.value)
-  }
- 
-   // Definition 54
-  function Dice(): (f: Hurd<nat>)
-    ensures forall s: rbs :: 1 <= f(s).0 <= 6
-  {
-    CoinFlip<bat>(
-      ProbRepeat<nat>(
-        CoinFlip<Option<nat>>(
-          CoinFlip<Option<nat>>(Unit(None), Unit(Some(1))), 
-          Map(ToSome, CoinFlip<nat>(Unit(2), Unit(3)))
-        )
-      ),
-      CoinFlip<Option<nat>>(
-        Map(ToSome, CoinFlip(Unit(4), Unit(5))),
-        CoinFlip(Unit(Some(6)), Unit(None))
-      )
-    )
-  } */
-
-
 }
 
 method Main() {
