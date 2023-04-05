@@ -51,8 +51,7 @@ module {:options "-functionSyntax:4"} Generator {
   }
 
   // Theorem 38
-  function ProbWhile<A>(c: A -> bool, b: A -> Hurd<A>): A -> Hurd<A> 
-  {
+  function ProbWhile<A>(c: A -> bool, b: A -> Hurd<A>): A -> Hurd<A> {
     assume {:axiom} false;
     (a: A) =>
       if c(a) then
