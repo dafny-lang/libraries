@@ -135,26 +135,26 @@ module {:options "-functionSyntax:4"} Generator {
 }
 
 method Main() {
-  print "Initial random bit sequence:\n";
+  print "Prefix of length 100 of the countable-infinite initial random bit sequence:\n";
   var s := Generator.Pseudo(103, 95, 75, 94);
   for i := 0 to 100 {
     var b := if s(i) then "1" else "0";
     print b;
   }
-  print "\nUniform(6): \n";
+  print "\nSample of 30 Uniform(6)-distributed integers: \n";
   for i := 0 to 30 {
     var (n, t) := Generator.ProbUniform(6)(s);
     print n;
     s := t;
   }
   print "\n\n";
-  print "Initial random bit sequence:\n";
+  print "Prefix of length 100 of the countable-infinite initial random bit sequence:\n";
   s := Generator.Pseudo(103, 95, 75, 94);
   for i := 0 to 100 {
     var b := if s(i) then "1" else "0";
     print b;
   }
-  print "\nBernoulli(0.2): \n";
+  print "\nSample of 30 Bernoulli(0.2)-distributed bits: \n";
   for i := 0 to 30 {
     var (b, t) := Generator.ProbBernoulli(0.2)(s);
     var b' := if b then "1" else "0";
