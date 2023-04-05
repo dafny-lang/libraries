@@ -73,10 +73,10 @@ module {:options "-functionSyntax:4"} Generator {
     if n == 0 then
       Unit(0)
     else
-      var f: nat -> Hurd<nat> := 
-        (m: nat) => 
-          var g: bool -> Hurd<nat> := (b: bool) => Unit(if b then 2*m + 1 else 2*m);
-          Bind(Dest, g);
+      var f := (m: nat) => 
+        var g := (b: bool) => 
+          Unit(if b then 2*m + 1 else 2*m);
+        Bind(Dest, g);
       Bind(ProbUnif(n / 2), f)
   }
 
