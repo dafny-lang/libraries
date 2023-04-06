@@ -20,10 +20,10 @@
 // RUN: %diff "%S/data.txt" "%t_js/foo/bar/output_nested"
 // RUN: %diff "%S/data.txt" "%t_js/foo/output_up"
 
-include "../../src/FileIO/FileIO.dfy"
+include "../../src/dafny/FileIO/FileIO.dfy"
 
 module WriteBytesToFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;

@@ -5,6 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
+/** Various properties of mathematical Relations (see also BinaryOperations) */
 module {:options "-functionSyntax:4"} Dafny.Relations {
 
   ghost predicate Injective<X(!new), Y>(f: X-->Y)
@@ -12,6 +13,20 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
     requires forall x :: f.requires(x)
   {
     forall x1, x2 :: f(x1) == f(x2) ==> x1 == x2
+  }
+
+  ghost predicate Commutative<T(!new),U(!new)>(f: (T,T)->U)
+    reads f.reads
+    requires forall x,y :: f.requires(x,y) && f.requires(y,x)
+  {
+    forall x,y :: f(x,y) == f(y,x)
+  }
+
+  ghost predicate Associative<T(!new)>(f: (T,T)->T)
+    reads f.reads
+    requires forall x, y, z :: f.requires(x,y) && f.requires(y,z) && f.requires(x,z)
+  {
+    forall x, y, z: T :: f(x,f(y,z)) == f(f(x,y),z)
   }
 
   ghost predicate Reflexive<T(!new)>(R: (T, T) -> bool) {
@@ -24,6 +39,10 @@ module {:options "-functionSyntax:4"} Dafny.Relations {
 
   ghost predicate AntiSymmetric<T(!new)>(R: (T, T) -> bool) {
     forall x, y :: R(x, y) && R(y, x) ==> x == y
+  }
+
+  ghost predicate Asymmetric<T(!new)>(R: (T, T) -> bool) {
+    forall x, y :: R(x, y) ==> !R(y, x)
   }
 
   ghost predicate Symmetric<T(!new)>(R: (T, T) -> bool) {
