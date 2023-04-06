@@ -239,6 +239,23 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     LemmaFlattenMinimalWellFormedCodeUnitSubsequences(ms);
     Seq.Flatten(ms)
   }
+  by method {
+    // Optimize to to avoid allocating the intermediate unflattened sequence.
+    // We can't quite use Seq.FlatMap easily because we need to prove the result
+    // is not just a seq<CodeUnit> but a WellFormedCodeUnitSeq.
+    // TODO: We can be even more efficient by using a JSON.Utils.Vectors.Vector instead.
+    s := [];
+    ghost var unflattened: seq<MinimalWellFormedCodeUnitSeq> := [];
+    for i := |vs| downto 0 
+      invariant unflattened == Seq.Map(EncodeScalarValue, vs[i..])
+      invariant s == Seq.Flatten(unflattened)
+    {
+      var next: MinimalWellFormedCodeUnitSeq := EncodeScalarValue(vs[i]);
+      unflattened := [next] + unflattened;
+      LemmaPrependMinimalWellFormedCodeUnitSubsequence(next, s);
+      s := next + s;
+    }
+  }
 
   /**
     * Returns the scalar value sequence encoded by the given well-formed Unicode string.
