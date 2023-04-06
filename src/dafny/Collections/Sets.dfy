@@ -236,4 +236,87 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
     LemmaSubsetSize(x, range);
   }
 
+  /** In a pre-ordered set, a greatest element is necessarily maximal. */
+  lemma LemmaGreatestImpliesMaximal<T(!new)>(R: (T, T) -> bool, max: T, s: set<T>)
+    requires PreOrdering(R)
+    ensures IsGreatest(R, max, s) ==> IsMaximal(R, max, s)
+  {
+  }
+
+  /** In a pre-ordered set, a least element is necessarily minimal. */
+  lemma LemmaLeastImpliesMinimal<T(!new)>(R: (T, T) -> bool, min: T, s: set<T>)
+    requires PreOrdering(R)
+    ensures IsLeast(R, min, s) ==> IsMinimal(R, min, s)
+  {
+  }
+
+  /** In a totally-ordered set, an element is maximal if and only if it is a greatest element. */
+  lemma LemmaMaximalEquivalentGreatest<T(!new)>(R: (T, T) -> bool, max: T, s: set<T>)
+    requires TotalOrdering(R)
+    ensures IsGreatest(R, max, s) <==> IsMaximal(R, max, s)
+  {
+  }
+
+  /** In a totally-ordered set, an element is minimal if and only if it is a least element. */
+  lemma LemmaMinimalEquivalentLeast<T(!new)>(R: (T, T) -> bool, min: T, s: set<T>)
+    requires TotalOrdering(R)
+    ensures IsLeast(R, min, s) <==> IsMinimal(R, min, s)
+  {
+  }
+
+  /** In a partially-ordered set, there exists at most one least element. */
+  lemma LemmaLeastIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires PartialOrdering(R)
+    ensures forall min, min' | IsLeast(R, min, s) && IsLeast(R, min', s) :: min == min'
+  {}
+
+  /** In a partially-ordered set, there exists at most one greatest element. */
+  lemma LemmaGreatestIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires PartialOrdering(R)
+    ensures forall max, max' | IsGreatest(R, max, s) && IsGreatest(R, max', s) :: max == max'
+  {}
+
+  /** In a totally-ordered set, there exists at most one minimal element. */
+  lemma LemmaMinimalIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires TotalOrdering(R)
+    ensures forall min, min' | IsMinimal(R, min, s) && IsMinimal(R, min', s) :: min == min'
+  {}
+
+  /** In a totally-ordered set, there exists at most one maximal element. */
+  lemma LemmaMaximalIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires TotalOrdering(R)
+    ensures forall max, max' | IsMaximal(R, max, s) && IsMaximal(R, max', s) :: max == max'
+  {}
+
+  /** Any totally-ordered set contains a unique minimal (equivalently, least) element. */
+  lemma LemmaFindUniqueMinimal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (min: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMinimal(R, min, s) && (forall min': T | IsMinimal(R, min', s) :: min == min')
+  {
+    var x :| x in s;
+    if s == {x} {
+      min := x;
+    } else {
+      var min' := LemmaFindUniqueMinimal(R, s - {x});
+      if
+      case R(min', x) => min := min';
+      case R(x, min') => min := x;
+    }
+  }
+
+  /** Any totally ordered set contains a unique maximal (equivalently, greatest) element. */
+  lemma LemmaFindUniqueMaximal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMaximal(R, max, s) && (forall max': T | IsMaximal(R, max', s) :: max == max')
+  {
+    var x :| x in s;
+    if s == {x} {
+      max := x;
+    } else {
+      var max' := LemmaFindUniqueMaximal(R, s - {x});
+      if
+      case R(max', x) => max := x;
+      case R(x, max') => max := max';
+    }
+  }
 }
