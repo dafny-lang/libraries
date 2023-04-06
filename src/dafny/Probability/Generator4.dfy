@@ -37,8 +37,8 @@ module {:options "-functionSyntax:4"} Generator {
       Iter(h, t, t(x), n-1)
   }
   
-  // Definition 46
-  function Pseudo(A: nat, B: nat, N: nat, n: nat): rbs {
+  // Definition 46 (Should be implemented external with seeds chosen non-deterministically for each call)
+  function RandomBitSeq(A: nat := 103, B: nat := 95, N: nat := 75, n: nat := 94): rbs {
     var h := (x: nat) => (x as int) % 2 == 0;
     var t := (x: nat) => (((A*x + B) as int) % (2*N + 1)) as nat;
     (m: nat) => Iter(h, t, n, m)
@@ -102,14 +102,14 @@ module {:options "-functionSyntax:4"} Generator {
   }
 
   // Definition 49
-  function ProbUniform(n: nat): Hurd<nat> 
+  function Uniform(n: nat): Hurd<nat> 
     requires n > 0
   {
     ProbUntil(ProbUnif(n-1), (x: nat) => x < n)
   }
 
   // Equation (4.23)
-  function ProbBernoulli(p: real): Hurd<bool> 
+  function Bernoulli(p: real): Hurd<bool> 
     requires 0.0 <= p <= 1.0
   {
     assume {:axiom} false;
@@ -119,10 +119,10 @@ module {:options "-functionSyntax:4"} Generator {
           if p <= 0.5 then 
             Unit(false)
           else 
-            ProbBernoulli(2.0 * p - 1.0)
+            Bernoulli(2.0 * p - 1.0)
         else
           if p <= 0.5 then 
-            ProbBernoulli(2.0 * p)
+            Bernoulli(2.0 * p)
           else 
             Unit(true);
     Bind(Dest, f)
@@ -132,34 +132,114 @@ module {:options "-functionSyntax:4"} Generator {
   function CoinFlip<A>(a: Hurd<A>, b: Hurd<A>): Hurd<A> {
     Bind(Dest, (x: bool) => if x then a else b)
   }
+
+  function Factorial(k: nat): (r: nat)
+    ensures r > 0
+  {
+    if k <= 1 then 
+      1
+    else 
+      k * Factorial(k-1)
+  }
+
+  function Power(x: real, k: nat): real {
+    match k 
+      case 0 => 1.0
+      case 1 => x 
+      case _ => x * Power(x, k-1) 
+  }
+
+  function Exp(x: real, max: nat, k: nat := 0): (r: real)
+    requires k <= max
+    ensures x <= 1.0 ==> 0.0 <= r <= 1.0
+  {
+    assume {:axiom} false;
+    var y := Power(x, k) / (Factorial(k) as real);
+    if k == max then 
+      y 
+    else
+      y + Exp(x, max, k+1)
+  }
+
+  function LaPlaceLoop(max: nat, v: nat := 0): Hurd<nat> {
+    (s: rbs) => 
+      var (a, s') := Bernoulli(Exp(-1.0, max))(s);
+      if a then
+        (v, s') 
+      else
+        assume {:axiom} false;
+        LaPlaceLoop(max, v+1)(s')
+  }
+
+  // Algorithm 2 (Paper: The Discrete Gaussian for Differential Privacy)
+  function LaPlace(m: nat, n: nat, max: nat := 10): Hurd<nat>
+    requires m >= 1 && n >= 1
+  {
+    assume {:axiom} false;
+    (s: rbs) => 
+      var (u, s2) := Uniform(n-1)(s);
+      var (d, s3) := Bernoulli(Exp((-u as real)/(n as real), max))(s2);
+      if !d then
+        LaPlace(m, n, max)(RandomBitSeq())
+      else 
+        var (v, s4) := LaPlaceLoop(max)(s3);
+        var x := (u + n * v) as real;
+        var y := (x / (m as real)).Floor;
+        var (b, s5) := Bernoulli(0.5)(s4);
+        if b && y == 0 then 
+          LaPlace(m, n, max)(RandomBitSeq())
+        else
+          var z := if b then -y else y;
+          (z, s5)
+  }
+
 }
+
+import opened Generator
 
 method Main() {
   print "Prefix of length 100 of the countable-infinite initial random bit sequence:\n";
-  var s := Generator.Pseudo(103, 95, 75, 94);
+  var s := RandomBitSeq();
   for i := 0 to 100 {
     var b := if s(i) then "1" else "0";
     print b;
   }
-  print "\nSample of 30 Uniform(6)-distributed integers: \n";
-  for i := 0 to 30 {
-    var (n, t) := Generator.ProbUniform(6)(s);
-    print n;
+  print "\nSample of 15 Uniform(6)-distributed integers: \n";
+  for i := 0 to 15 {
+    var (n, t) := Uniform(6)(s);
+    print n,", ";
     s := t;
   }
   print "\n\n";
   print "Prefix of length 100 of the countable-infinite initial random bit sequence:\n";
-  s := Generator.Pseudo(103, 95, 75, 94);
+  s := RandomBitSeq();
   for i := 0 to 100 {
     var b := if s(i) then "1" else "0";
     print b;
   }
-  print "\nSample of 30 Bernoulli(0.2)-distributed bits: \n";
-  for i := 0 to 30 {
-    var (b, t) := Generator.ProbBernoulli(0.2)(s);
+  print "\nSample of 15 Bernoulli(0.2)-distributed bits: \n";
+  for i := 0 to 15 {
+    var (b, t) := Bernoulli(0.2)(s);
     var b' := if b then "1" else "0";
-    print b';
+    print b',", ";
     s := t;
   }
+  print "\n\n";
+  print "Prefix of length 100 of the countable-infinite initial random bit sequence:\n";
+  s := RandomBitSeq();
+  for i := 0 to 100 {
+    var b := if s(i) then "1" else "0";
+    print b;
+  }
+  print "\nSample of 5 LaPlace(5/3)-distributed integers: \n";
+  for i := 0 to 5 {
+    var (n, t) := LaPlace(3, 5)(s);
+    print n,", ";
+    s := t;
+  }
+
+  
+
+
 
 }
