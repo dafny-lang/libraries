@@ -1,18 +1,18 @@
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
-// RUN: %baredafny run --no-verify --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%S/data.txt" "System.ArgumentException:"
-// RUN: %baredafny run --no-verify --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%S/data.txt" "java.io.IOException:"
-// RUN: %baredafny run --no-verify --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%S/data.txt" "Error: ENOENT"
+// #RUN: %run --no-verify --unicode-char:false --target:cs "%s" --input "%S/../../src/FileIO/FileIO.cs" -- "%S/data.txt" "System.ArgumentException:"
+// #RUN: %run --no-verify --unicode-char:false --target:java "%s" --input "%S/../../src/FileIO/FileIO.java" -- "%S/data.txt" "java.io.IOException:"
+// #RUN: %run --no-verify --unicode-char:false --target:js "%s" --input "%S/../../src/FileIO/FileIO.js" -- "%S/data.txt" "Error: ENOENT"
 
-include "../../src/FileIO/FileIO.dfy"
+include "../../src/dafny/FileIO/FileIO.dfy"
 
 module ReadBytesFromFile {
-  import FileIO
+  import Dafny.FileIO
 
   method Main(args: seq<string>) {
     expect |args| > 0;
@@ -20,7 +20,7 @@ module ReadBytesFromFile {
     var dataPath := args[1];
     var expectedErrorPrefix := args[2];
 
-    // Happy path: read from the data file, and check that we see the expected content.
+      // Happy path: read from the data file, and check that we see the expected content.
     {
       var expectedStr := "Hello world\nGoodbye\n";
       // This conversion is safe only for ASCII values. For Unicode conversions, see the Unicode modules.
@@ -33,7 +33,7 @@ module ReadBytesFromFile {
       expect readBytes == expectedBytes, "read unexpected byte sequence";
     }
 
-    // Failure path: attempting to read from a blank file path should never work.
+      // Failure path: attempting to read from a blank file path should never work.
     {
       var res := FileIO.ReadBytesFromFile("");
       expect res.Failure?, "unexpected success";

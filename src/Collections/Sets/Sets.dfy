@@ -1,23 +1,25 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original Copyright under the following: 
-*  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
-*  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
-*  Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT 
-* 
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original Copyright under the following: 
+ *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+ *  ETH Zurich, and University of Washington
+ *  SPDX-License-Identifier: BSD-2-Clause 
+ * 
+ *  Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT 
+ * 
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../Functions.dfy"
+include "../../Relations.dfy"
 
 module {:options "-functionSyntax:4"} Sets {
 
   import opened Functions
+  import opened Relations
 
   /* If all elements in set x are in set y, x is a subset of y. */
   lemma LemmaSubset<T>(x: set<T>, y: set<T>)
@@ -76,8 +78,51 @@ module {:options "-functionSyntax:4"} Sets {
     }
   }
 
+  /* A singleton set has at least one element and any two elements are equal. */
+  ghost predicate IsSingleton<T>(s: set<T>) {
+    && (exists x :: x in s)
+    && (forall x, y | x in s && y in s :: x == y)
+  }
+
+  /* A set has exactly one element, if and only if, it has at least one element and any two elements are equal. */
+  lemma LemmaIsSingleton<T>(s: set<T>)
+    ensures |s| == 1 <==> IsSingleton(s)
+  {
+    if |s| == 1 {
+      forall x, y | x in s && y in s ensures x == y {
+        LemmaSingletonEquality(s, x, y);
+      }
+    }
+    if IsSingleton(s) {
+      var x :| x in s;
+      assert s == {x};
+      assert |s| == 1;
+    }
+  }
+
+  /* Non-deterministically extracts an element from a set that contains at least one element. */
+  ghost function ExtractFromNonEmptySet<T>(s: set<T>): (x: T)
+    requires |s| != 0
+    ensures x in s
+  {
+    var x :| x in s;
+    x
+  }
+
+  /* Deterministically extracts the unique element from a singleton set. In contrast to 
+     `ExtractFromNonEmptySet`, this implementation compiles, as the uniqueness of the element 
+     being picked can be proven. */
+  function ExtractFromSingleton<T>(s: set<T>): (x: T)
+    requires |s| == 1
+    ensures s == {x}
+  {
+    LemmaIsSingleton(s);
+    var x :| x in s;
+    x
+  }
+
   /* If an injective function is applied to each element of a set to construct
-  another set, the two sets have the same size.  */
+  another set, the two sets have the same size. */
   lemma LemmaMapSize<X(!new), Y>(xs: set<X>, ys: set<Y>, f: X-->Y)
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
     requires Injective(f)
@@ -193,4 +238,87 @@ module {:options "-functionSyntax:4"} Sets {
     LemmaSubsetSize(x, range);
   }
 
+  /** In a pre-ordered set, a greatest element is necessarily maximal. */
+  lemma LemmaGreatestImpliesMaximal<T(!new)>(R: (T, T) -> bool, max: T, s: set<T>)
+    requires PreOrdering(R)
+    ensures IsGreatest(R, max, s) ==> IsMaximal(R, max, s)
+  {
+  }
+
+  /** In a pre-ordered set, a least element is necessarily minimal. */
+  lemma LemmaLeastImpliesMinimal<T(!new)>(R: (T, T) -> bool, min: T, s: set<T>)
+    requires PreOrdering(R)
+    ensures IsLeast(R, min, s) ==> IsMinimal(R, min, s)
+  {
+  }
+
+  /** In a totally-ordered set, an element is maximal if and only if it is a greatest element. */
+  lemma LemmaMaximalEquivalentGreatest<T(!new)>(R: (T, T) -> bool, max: T, s: set<T>)
+    requires TotalOrdering(R)
+    ensures IsGreatest(R, max, s) <==> IsMaximal(R, max, s)
+  {
+  }
+
+  /** In a totally-ordered set, an element is minimal if and only if it is a least element. */
+  lemma LemmaMinimalEquivalentLeast<T(!new)>(R: (T, T) -> bool, min: T, s: set<T>)
+    requires TotalOrdering(R)
+    ensures IsLeast(R, min, s) <==> IsMinimal(R, min, s)
+  {
+  }
+
+  /** In a partially-ordered set, there exists at most one least element. */
+  lemma LemmaLeastIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires PartialOrdering(R)
+    ensures forall min, min' | IsLeast(R, min, s) && IsLeast(R, min', s) :: min == min'
+  {}
+
+  /** In a partially-ordered set, there exists at most one greatest element. */
+  lemma LemmaGreatestIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires PartialOrdering(R)
+    ensures forall max, max' | IsGreatest(R, max, s) && IsGreatest(R, max', s) :: max == max'
+  {}
+
+  /** In a totally-ordered set, there exists at most one minimal element. */
+  lemma LemmaMinimalIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires TotalOrdering(R)
+    ensures forall min, min' | IsMinimal(R, min, s) && IsMinimal(R, min', s) :: min == min'
+  {}
+
+  /** In a totally-ordered set, there exists at most one maximal element. */
+  lemma LemmaMaximalIsUnique<T(!new)>(R: (T, T) -> bool, s: set<T>)
+    requires TotalOrdering(R)
+    ensures forall max, max' | IsMaximal(R, max, s) && IsMaximal(R, max', s) :: max == max'
+  {}
+
+  /** Any totally-ordered set contains a unique minimal (equivalently, least) element. */
+  lemma LemmaFindUniqueMinimal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (min: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMinimal(R, min, s) && (forall min': T | IsMinimal(R, min', s) :: min == min')
+  {
+    var x :| x in s;
+    if s == {x} {
+      min := x;
+    } else {
+      var min' := LemmaFindUniqueMinimal(R, s - {x});
+      if
+      case R(min', x) => min := min';
+      case R(x, min') => min := x;
+    }
+  }
+
+  /** Any totally ordered set contains a unique maximal (equivalently, greatest) element. */
+  lemma LemmaFindUniqueMaximal<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (max: T)
+    requires |s| > 0 && TotalOrdering(R)
+    ensures IsMaximal(R, max, s) && (forall max': T | IsMaximal(R, max', s) :: max == max')
+  {
+    var x :| x in s;
+    if s == {x} {
+      max := x;
+    } else {
+      var max' := LemmaFindUniqueMaximal(R, s - {x});
+      if
+      case R(max', x) => max := x;
+      case R(x, max') => max := max';
+    }
+  }
 }

@@ -1,12 +1,12 @@
-// RUN: %dafny /compile:0 /noNLarith "%s"
+// RUN: %verify --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* Every lemma comes in 2 forms: 'LemmaProperty' and 'LemmaPropertyAuto'. The
 former takes arguments and may be more stable and less reliant on Z3
@@ -56,11 +56,11 @@ module {:options "-functionSyntax:4"} Power {
   {
     calc {
       Pow(b, 1);
-        { reveal Pow(); }
+      { reveal Pow(); }
       b * Pow(b, 0);
-        { LemmaPow0(b); }
+      { LemmaPow0(b); }
       b * 1;
-        { LemmaMulBasicsAuto(); }
+      { LemmaMulBasicsAuto(); }
       b;
     }
   }
@@ -148,7 +148,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowPositiveAuto()
     ensures forall b: int, e: nat {:trigger Pow(b, e)}
-      :: b > 0 ==> 0 < Pow(b, e)
+              :: b > 0 ==> 0 < Pow(b, e)
   {
     reveal Pow();
     forall b: int, e: nat {:trigger Pow(b, e)} | b > 0
@@ -166,22 +166,22 @@ module {:options "-functionSyntax:4"} Power {
     if e1 == 0 {
       calc {
         Pow(b, e1) * Pow(b, e2);
-          { LemmaPow0(b); }
+        { LemmaPow0(b); }
         1 * Pow(b, e2);
-          { LemmaMulBasicsAuto(); }
+        { LemmaMulBasicsAuto(); }
         Pow(b, 0 + e2);
       }
     }
     else {
       calc {
         Pow(b, e1) * Pow(b, e2);
-          { reveal Pow(); }
+        { reveal Pow(); }
         (b * Pow(b, e1 - 1)) * Pow(b, e2);
-          { LemmaMulIsAssociativeAuto(); }
+        { LemmaMulIsAssociativeAuto(); }
         b * (Pow(b, e1 - 1) * Pow(b, e2));
-          { LemmaPowAdds(b, e1 - 1, e2); }
+        { LemmaPowAdds(b, e1 - 1, e2); }
         b * Pow(b, e1 - 1 + e2);
-          { reveal Pow(); }
+        { reveal Pow(); }
         Pow(b, e1 + e2);
       }
     }
@@ -189,7 +189,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowAddsAuto()
     ensures forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 + e2)}
-      :: Pow(b, e1 + e2) == Pow(b, e1) * Pow(b, e2)
+              :: Pow(b, e1 + e2) == Pow(b, e1) * Pow(b, e2)
   {
     reveal Pow();
     forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 + e2)}
@@ -209,7 +209,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowSubAddCancelAuto()
     ensures forall b: int, e1: nat, e2: nat {:trigger Pow(b, e1 - e2)} | e1 >= e2
-      :: Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
+              :: Pow(b, e1 - e2) * Pow(b, e2) == Pow(b, e1)
   {
     reveal Pow();
     forall b: int, e1: nat, e2: nat | e1 >= e2
@@ -228,9 +228,9 @@ module {:options "-functionSyntax:4"} Power {
     LemmaPowPositiveAuto();
     calc {
       Pow(b, e2) / Pow(b, e1);
-        { LemmaPowSubAddCancel(b, e2, e1); }
+      { LemmaPowSubAddCancel(b, e2, e1); }
       Pow(b, e2 - e1) * Pow(b, e1) / Pow(b, e1);
-        { LemmaDivByMultiple(Pow(b, e2 - e1), Pow(b, e1)); }
+      { LemmaDivByMultiple(Pow(b, e2 - e1), Pow(b, e1)); }
       Pow(b, e2 - e1);
     }
   }
@@ -238,8 +238,8 @@ module {:options "-functionSyntax:4"} Power {
   lemma LemmaPowSubtractsAuto()
     ensures forall b: nat, e1: nat :: b > 0 ==> Pow(b, e1) > 0
     ensures forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e2 - e1)}
-      :: b > 0 && e1 <= e2 ==>
-         Pow(b, e2 - e1) == Pow(b, e2) / Pow(b, e1) > 0
+              :: b > 0 && e1 <= e2 ==>
+                   Pow(b, e2 - e1) == Pow(b, e2) / Pow(b, e1) > 0
   {
     reveal Pow();
     LemmaPowPositiveAuto();
@@ -262,18 +262,18 @@ module {:options "-functionSyntax:4"} Power {
       LemmaMulBasicsAuto();
       calc {
         Pow(a, b * c);
-          { LemmaPow0(a); }
+        { LemmaPow0(a); }
         1;
-          { LemmaPow0(Pow(a, b)); }
+        { LemmaPow0(Pow(a, b)); }
         Pow(Pow(a, b), c);
       }
     }
     else {
       calc {
         b * c - b;
-          { LemmaMulBasicsAuto(); }
+        { LemmaMulBasicsAuto(); }
         b * c - b * 1;
-          { LemmaMulIsDistributiveAuto(); }
+        { LemmaMulIsDistributiveAuto(); }
         b * (c - 1);
       }
       LemmaMulNonnegative(b, c - 1);
@@ -282,12 +282,12 @@ module {:options "-functionSyntax:4"} Power {
       calc {
         Pow(a, b * c);
         Pow(a, b + b * c - b);
-          { LemmaPowAdds(a, b, b * c - b); }
+        { LemmaPowAdds(a, b, b * c - b); }
         Pow(a, b) * Pow(a, b * c - b);
         Pow(a, b) * Pow(a, b * (c - 1));
-          { LemmaPowMultiplies(a, b, c - 1); }
+        { LemmaPowMultiplies(a, b, c - 1); }
         Pow(a, b) * Pow(Pow(a, b), c - 1);
-          { reveal Pow(); }
+        { reveal Pow(); }
         Pow(Pow(a, b), c);
       }
     }
@@ -296,7 +296,7 @@ module {:options "-functionSyntax:4"} Power {
   lemma LemmaPowMultipliesAuto()
     ensures forall b: nat, c: nat {:trigger b * c} :: 0 <= b * c
     ensures forall a: int, b: nat, c: nat {:trigger Pow(a, b * c)}
-      :: Pow(Pow(a, b), c) == Pow(a, b * c)
+              :: Pow(Pow(a, b), c) == Pow(a, b * c)
   {
     reveal Pow();
     LemmaMulNonnegativeAuto();
@@ -318,9 +318,9 @@ module {:options "-functionSyntax:4"} Power {
       calc {
         Pow(a * b, e);
         (a * b) * Pow(a * b, e - 1);
-          { LemmaPowDistributes(a, b, e - 1); }
+        { LemmaPowDistributes(a, b, e - 1); }
         (a * b) * (Pow(a, e - 1) * Pow(b, e - 1));
-          { LemmaMulIsAssociativeAuto(); LemmaMulIsCommutativeAuto(); }
+        { LemmaMulIsAssociativeAuto(); LemmaMulIsCommutativeAuto(); }
         (a * Pow(a, e - 1)) * (b * Pow(b, e - 1));
         Pow(a, e) * Pow(b, e);
       }
@@ -329,7 +329,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowDistributesAuto()
     ensures forall a: int, b: int, e: nat {:trigger Pow(a * b, e)}
-      :: Pow(a * b, e) == Pow(a, e) * Pow(b, e)
+              :: Pow(a * b, e) == Pow(a, e) * Pow(b, e)
   {
     reveal Pow();
     forall a: int, b: int, e: nat {:trigger Pow(a * b, e)}
@@ -379,13 +379,13 @@ module {:options "-functionSyntax:4"} Power {
     {
       calc {
         Pow(b, e1 + i);
-        <= { LemmaPowPositive(b, e1 + i);
-             LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
-          Pow(b, e1 + i) * b;
-        == { LemmaPow1(b); }
-          Pow(b, e1 + i) * Pow(b, 1);
-        == { LemmaPowAdds(b, e1 + i, 1); }
-          Pow(b, e1 + i + 1);
+      <= { LemmaPowPositive(b, e1 + i);
+           LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
+        Pow(b, e1 + i) * b;
+      == { LemmaPow1(b); }
+        Pow(b, e1 + i) * Pow(b, 1);
+      == { LemmaPowAdds(b, e1 + i, 1); }
+        Pow(b, e1 + i + 1);
       }
     }
     LemmaMulInductionAuto(e2 - e1, f);
@@ -393,7 +393,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowStrictlyIncreasesAuto()
     ensures forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1),
-      Pow(b, e2)} :: (1 < b && e1 < e2) ==> Pow(b, e1) < Pow(b, e2)
+              Pow(b, e2)} :: (1 < b && e1 < e2) ==> Pow(b, e1) < Pow(b, e2)
   {
     reveal Pow();
     forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
@@ -417,13 +417,13 @@ module {:options "-functionSyntax:4"} Power {
     {
       calc {
         Pow(b, e1 + i);
-        <= { LemmaPowPositive(b, e1 + i);
-             LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
-          Pow(b, e1 + i) * b;
-        == { LemmaPow1(b); }
-          Pow(b, e1 + i) * Pow(b, 1);
-        == { LemmaPowAdds(b, e1 + i, 1); }
-          Pow(b, e1 + i + 1);
+      <= { LemmaPowPositive(b, e1 + i);
+           LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
+        Pow(b, e1 + i) * b;
+      == { LemmaPow1(b); }
+        Pow(b, e1 + i) * Pow(b, 1);
+      == { LemmaPowAdds(b, e1 + i, 1); }
+        Pow(b, e1 + i + 1);
       }
     }
     LemmaMulInductionAuto(e2 - e1, f);
@@ -431,7 +431,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowIncreasesAuto()
     ensures forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1),
-      Pow(b, e2)} :: (1 < b && e1 <= e2) ==> Pow(b, e1) <= Pow(b, e2)
+              Pow(b, e2)} :: (1 < b && e1 <= e2) ==> Pow(b, e1) <= Pow(b, e2)
   {
     reveal Pow();
     forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
@@ -457,8 +457,8 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowStrictlyIncreasesConverseAuto()
     ensures forall b: nat, e1: nat, e2: nat
-      {:trigger Pow(b, e1), Pow(b, e2)}
-      :: b > 0 && Pow(b, e1) < Pow(b, e2) ==> e1 < e2
+              {:trigger Pow(b, e1), Pow(b, e2)}
+              :: b > 0 && Pow(b, e1) < Pow(b, e2) ==> e1 < e2
   {
     reveal Pow();
     forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
@@ -483,8 +483,8 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowIncreasesConverseAuto()
     ensures forall b: nat, e1: nat, e2: nat
-      {:trigger Pow(b, e1), Pow(b, e2)}
-      :: 1 < b && Pow(b, e1) <= Pow(b, e2) ==> e1 <= e2
+              {:trigger Pow(b, e1), Pow(b, e2)}
+              :: 1 < b && Pow(b, e1) <= Pow(b, e2) ==> e1 <= e2
   {
     reveal Pow();
     forall b: nat, e1: nat, e2: nat {:trigger Pow(b, e1), Pow(b, e2)}
@@ -507,9 +507,9 @@ module {:options "-functionSyntax:4"} Power {
     LemmaPowPositive(b, x);
     calc {
       Pow(Pow(b, x * y), z);
-        { LemmaPowMultiplies(b, x, y); }
+      { LemmaPowMultiplies(b, x, y); }
       Pow(Pow(Pow(b, x), y), z);
-        { LemmaPowMultiplies(Pow(b, x), y, z); }
+      { LemmaPowMultiplies(Pow(b, x), y, z); }
       Pow(Pow(b, x), y * z);
     }
   }
@@ -517,8 +517,8 @@ module {:options "-functionSyntax:4"} Power {
   lemma LemmaPullOutPowsAuto()
     ensures forall y: nat, z: nat {:trigger z * y} :: 0 <= z * y && 0 <= y * z
     ensures forall b: nat, x: nat, y: nat, z: nat
-      {:trigger Pow(Pow(b, x * y), z)}
-      :: b > 0 ==> Pow(Pow(b, x * y), z) == Pow(Pow(b, x), y * z)
+              {:trigger Pow(Pow(b, x * y), z)}
+              :: b > 0 ==> Pow(Pow(b, x * y), z) == Pow(Pow(b, x), y * z)
   {
     reveal Pow();
     LemmaMulNonnegativeAuto();
@@ -540,14 +540,14 @@ module {:options "-functionSyntax:4"} Power {
     LemmaPowPositiveAuto();
     calc ==> {
       x / Pow(b, e2) >= Pow(b, e1 - e2);
-        { LemmaMulInequality(Pow(b, e1 - e2), x / Pow(b, e2), Pow(b, e2)); }
+      { LemmaMulInequality(Pow(b, e1 - e2), x / Pow(b, e2), Pow(b, e2)); }
       x / Pow(b, e2) * Pow(b, e2) >= Pow(b, e1 - e2) * Pow(b, e2);
-        { LemmaFundamentalDivMod(x, Pow(b, e2));
-          LemmaMulIsCommutativeAuto(); }
+      { LemmaFundamentalDivMod(x, Pow(b, e2));
+        LemmaMulIsCommutativeAuto(); }
       x - x % Pow(b, e2) >= Pow(b, e1 - e2) * Pow(b, e2);
-        { LemmaPowAdds(b, e1 - e2, e2); }
+      { LemmaPowAdds(b, e1 - e2, e2); }
       x - x % Pow(b, e2) >= Pow(b, e1);
-        { LemmaModPropertiesAuto(); }
+      { LemmaModPropertiesAuto(); }
       x >= Pow(b, e1);
       false;
     }
@@ -556,9 +556,9 @@ module {:options "-functionSyntax:4"} Power {
   lemma LemmaPowDivisionInequalityAuto()
     ensures forall b: nat, e2: nat :: b > 0 ==> Pow(b, e2) > 0
     ensures forall x: nat, b: nat, e1: nat, e2: nat
-      {:trigger x / Pow(b, e2), Pow(b, e1 - e2)}
-      :: b > 0 && e2 <= e1 && x < Pow(b, e1) ==>
-         x / Pow(b, e2) < Pow(b, e1 - e2)
+              {:trigger x / Pow(b, e2), Pow(b, e1 - e2)}
+              :: b > 0 && e2 <= e1 && x < Pow(b, e1) ==>
+                   x / Pow(b, e2) < Pow(b, e1 - e2)
   {
     reveal Pow();
     LemmaPowPositiveAuto();
@@ -572,7 +572,7 @@ module {:options "-functionSyntax:4"} Power {
   }
 
   /* b^e % b = 0 */
-  lemma LemmaPowMod(b: nat, e: nat) 
+  lemma LemmaPowMod(b: nat, e: nat)
     requires b > 0 && e > 0
     ensures Pow(b, e) % b == 0;
   {
@@ -580,19 +580,19 @@ module {:options "-functionSyntax:4"} Power {
     calc {
       Pow(b, e) % b;
       (b * Pow(b, e - 1)) % b;
-        { LemmaMulIsAssociativeAuto(); }
+      { LemmaMulIsAssociativeAuto(); }
       (Pow(b, e - 1) * b) % b;
-        {
-          LemmaPowPositiveAuto();
-          LemmaModMultiplesBasic(Pow(b, e-1) , b);
-        }
+      {
+        LemmaPowPositiveAuto();
+        LemmaModMultiplesBasic(Pow(b, e-1) , b);
+      }
       0;
     }
   }
 
   lemma LemmaPowModAuto()
     ensures forall b: nat, e: nat {:trigger Pow(b, e)}
-      :: b > 0 && e > 0 ==> Pow(b, e) % b == 0
+              :: b > 0 && e > 0 ==> Pow(b, e) % b == 0
   {
     reveal Pow();
     forall b: nat, e: nat {:trigger Pow(b, e)} | b > 0 && e > 0
@@ -614,11 +614,11 @@ module {:options "-functionSyntax:4"} Power {
       calc {
         Pow(b % m, e) % m;
         ((b % m) * Pow(b % m, e - 1)) % m;
-          { LemmaMulModNoopGeneral(b, Pow(b % m, e - 1), m); }
+        { LemmaMulModNoopGeneral(b, Pow(b % m, e - 1), m); }
         ((b % m) * (Pow(b % m, e - 1) % m) % m) % m;
-          { LemmaPowModNoop(b, e - 1, m); }
+        { LemmaPowModNoop(b, e - 1, m); }
         ((b % m) * (Pow(b, e - 1) % m) % m) % m;
-          { LemmaMulModNoopGeneral(b, Pow(b, e - 1), m); }
+        { LemmaMulModNoopGeneral(b, Pow(b, e - 1), m); }
         (b * (Pow(b, e - 1)) % m) % m;
         (b * (Pow(b, e - 1))) % m;
         Pow(b, e) % m;
@@ -628,7 +628,7 @@ module {:options "-functionSyntax:4"} Power {
 
   lemma LemmaPowModNoopAuto()
     ensures forall b: nat, e: nat, m: nat {:trigger Pow(b % m, e)}
-      :: m > 0 ==> Pow(b % m, e) % m == Pow(b, e) % m
+              :: m > 0 ==> Pow(b % m, e) % m == Pow(b, e) % m
   {
     reveal Pow();
     forall b: nat, e: nat, m: nat {:trigger Pow(b % m, e)}
