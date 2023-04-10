@@ -603,8 +603,12 @@ module {:options "-functionSyntax:4"} Seq {
     ensures forall i {:trigger result[i]} :: 0 <= i < |xs| ==> result[i] == f(xs[i]);
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
-    if |xs| == 0 then []
-    else [f(xs[0])] + Map(f, xs[1..])
+    // This uses a sequence comprehension because it will usually be
+    // more efficient when compiled, allocating the storage for |xs| elements
+    // once instead of creating a chain of |xs| single element concatenations.
+    seq(|xs|, i requires 0 <= i < |xs| && f.requires(xs[i])
+                reads set i,o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o 
+                => f(xs[i]))
   }
 
   /* Applies a function to every element of a sequence, returning a Result value (which is a 
