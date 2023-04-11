@@ -13,7 +13,7 @@ include "UnicodeEncodingForm.dfy"
 
 /**
   * The Unicode encoding form that assigns each Unicode scalar value to an unsigned byte sequence of one to four bytes
-  * in length, as specified in Table 3-6 and Table 3-7.
+  * in length.
   */
 module {:options "-functionSyntax:4"} Dafny.Utf8EncodingForm refines UnicodeEncodingForm {
   type CodeUnit = bv8
