@@ -1,3 +1,5 @@
+// RUN: %verify "%s"
+
 module {:options "-functionSyntax:4"} JSON.Utils.Seq {
   lemma Neutral(l: seq)
     ensures l == l + []
