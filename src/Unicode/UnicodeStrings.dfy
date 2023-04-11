@@ -7,7 +7,7 @@ include "../Wrappers.dfy"
 include "Utf8EncodingForm.dfy"
 include "Utf16EncodingForm.dfy"
 
-abstract module AbstractStrings {
+abstract module AbstractUnicodeStrings {
 
   import opened Wrappers
   import opened BoundedInts

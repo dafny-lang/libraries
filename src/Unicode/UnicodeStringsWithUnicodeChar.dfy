@@ -1,10 +1,10 @@
 // RUN: %verify --unicode-char:true %s
 
-include "Strings.dfy"
+include "UnicodeStrings.dfy"
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
-module Strings refines AbstractStrings {
+module UnicodeStrings refines AbstractUnicodeStrings {
 
   import Unicode
   import Utf8EncodingForm
