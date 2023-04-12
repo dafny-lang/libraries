@@ -43,12 +43,14 @@ module {:options "-functionSyntax:4"} JSON.Errors {
     | OutOfMemory
     | IntTooLarge(i: int)
     | StringTooLong(s: string)
+    | InvalidUtf16
   {
     function ToString() : string {
       match this
       case OutOfMemory => "Out of memory"
       case IntTooLarge(i: int) => "Integer too large: " + Str.OfInt(i)
       case StringTooLong(s: string) => "String too long: " + s
+      case InvalidUtf16 => "Invalid UTF-16"
     }
   }
 

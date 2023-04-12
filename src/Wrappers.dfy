@@ -14,6 +14,12 @@ module {:options "-functionSyntax:4"} Wrappers {
       case None() => Failure("Option is None")
     }
 
+    function ToResult'<R>(error: R): Result<T, R> {
+      match this
+      case Some(v) => Success(v)
+      case None() => Failure(error)
+    }
+
     function UnwrapOr(default: T): T {
       match this
       case Some(v) => v

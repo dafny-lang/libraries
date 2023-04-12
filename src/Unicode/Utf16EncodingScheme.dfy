@@ -9,16 +9,16 @@ include "../Collections/Sequences/Seq.dfy"
 include "../BoundedInts.dfy"
 
 include "Unicode.dfy"
-include "Utf8EncodingForm.dfy"
+include "Utf16EncodingForm.dfy"
 
 /**
-  * The Unicode encoding scheme that serializes a UTF-8 code unit sequence in exactly the same order as the code unit
+  * The Unicode encoding scheme that serializes a UTF-16 code unit sequence in exactly the same order as the code unit
   * sequence itself.
   *
   * Because the UTF-8 encoding form deals in ordered byte sequences, the UTF-8 encoding scheme is trivial.
-  * The byte ordering is completely defined by the UTF-8 code unit sequence itself.
+  * The byte ordering is completely defined by the UTF-16 code unit sequence itself.
   * We implement the encoding scheme here for completeness of the Unicode character encoding model,
-  * and to perform the (trivial) conversion between `uint8`/`byte` and `bv8` values.
+  * and to perform the (trivial) conversion between `uint16` and `bv16` values.
   *
   * (Section 3.10 D95)
   *
@@ -28,52 +28,52 @@ include "Utf8EncodingForm.dfy"
   * Proving those lemmas are easier to write using `calc`,
   * but that runs into <https://github.com/dafny-lang/dafny/issues/1639>.
   */
-module {:options "-functionSyntax:4"} Utf8EncodingScheme {
+module {:options "-functionSyntax:4"} Utf16EncodingScheme {
   import opened Wrappers
 
   import BoundedInts
   import Seq
   import Unicode
-  import Utf8EncodingForm
+  import Utf16EncodingForm
 
-  type byte = BoundedInts.uint8
-  type utf8bytes = b: seq<byte> | Utf8EncodingForm.IsWellFormedCodeUnitSequence(Deserialize(b))
+  type uint16 = BoundedInts.uint16
+  type utf16bytes = b: seq<uint16> | Utf16EncodingForm.IsWellFormedCodeUnitSequence(Deserialize(b))
 
   /**
     * Returns the byte serialization of the given code unit sequence.
     */
-  function Serialize(s: Utf8EncodingForm.CodeUnitSeq): (b: seq<byte>)
+  function Serialize(s: Utf16EncodingForm.CodeUnitSeq): (b: seq<uint16>)
   {
-    Seq.Map(c => c as byte, s)
+    Seq.Map(c => c as uint16, s)
   }
 
   /**
     * Returns the code unit sequence that serializes to the given byte sequence.
     */
-  function Deserialize(b: seq<byte>): (s: Utf8EncodingForm.CodeUnitSeq)
+  function Deserialize(b: seq<uint16>): (s: Utf16EncodingForm.CodeUnitSeq)
   {
-    Seq.Map(b => b as Utf8EncodingForm.CodeUnit, b)
+    Seq.Map(b => b as Utf16EncodingForm.CodeUnit, b)
   }
 
   /**
     * Serializing a code unit sequence and then deserializing the result, yields the original code unit sequence.
     */
-  lemma LemmaSerializeDeserialize(s: Utf8EncodingForm.CodeUnitSeq)
+  lemma LemmaSerializeDeserialize(s: Utf16EncodingForm.CodeUnitSeq)
     ensures Deserialize(Serialize(s)) == s
   {}
 
   /**
     * Deserializing a byte sequence and then serializing the result, yields the original byte sequence.
     */
-  lemma LemmaDeserializeSerialize(b: seq<byte>)
+  lemma LemmaDeserializeSerialize(b: seq<uint16>)
     ensures Serialize(Deserialize(b)) == b
   {
     calc {
       Serialize(Deserialize(b));
     == // Definitions of Serialize, Deserialize
-      Seq.Map(c => c as byte, Seq.Map(b => b as Utf8EncodingForm.CodeUnit, b));
+      Seq.Map(c => c as uint16, Seq.Map(b => b as Utf16EncodingForm.CodeUnit, b));
     == // Compositionality of Map
-      Seq.Map(b => (b as Utf8EncodingForm.CodeUnit) as byte, b);
+      Seq.Map(b => (b as Utf16EncodingForm.CodeUnit) as uint16, b);
     == // Simplify map
       Seq.Map(b => b, b);
     == // Identity function

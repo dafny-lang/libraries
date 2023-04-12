@@ -4,15 +4,14 @@ include "UnicodeStrings.dfy"
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
-module UnicodeStrings refines AbstractUnicodeStrings {
+module {:options "-functionSyntax:4"} UnicodeStrings refines AbstractUnicodeStrings {
 
   import Unicode
   import Utf8EncodingForm
   import Utf16EncodingForm 
-  import Seq
 
   lemma CharIsUnicodeScalarValue(c: char)
-    ensures 
+    ensures
       && var asBits := c as bv24;
       && (0 <= asBits < Unicode.HIGH_SURROGATE_MIN || Unicode.LOW_SURROGATE_MAX < asBits <= 0x10FFFF)
   {
@@ -42,8 +41,8 @@ module UnicodeStrings refines AbstractUnicodeStrings {
     sv as int as char
   }
 
-  function ToUTF8(s: string): Option<seq<uint8>>
-    ensures ToUTF8(s).Some?
+  function ToUTF8Checked(s: string): Option<seq<uint8>>
+    ensures ToUTF8Checked(s).Some?
   {
     var asCodeUnits := Seq.Map(CharAsUnicodeScalarValue, s);
     var asUtf8CodeUnits := Utf8EncodingForm.EncodeScalarSequence(asCodeUnits);
@@ -51,9 +50,25 @@ module UnicodeStrings refines AbstractUnicodeStrings {
     Some(asBytes)
   }
 
-  function FromUTF8(bs: seq<uint8>): Option<string> {
+  function FromUTF8Checked(bs: seq<uint8>): Option<string> {
     var asCodeUnits := Seq.Map(c => c as Utf8EncodingForm.CodeUnit, bs);
     var utf32 :- Utf8EncodingForm.DecodeCodeUnitSequenceChecked(asCodeUnits);
+    var asChars := Seq.Map(CharFromUnicodeScalarValue, utf32);
+    Some(asChars)
+  }
+
+  function ToUTF16Checked(s: string): Option<seq<uint16>>
+    ensures ToUTF16Checked(s).Some?
+  {
+    var asCodeUnits := Seq.Map(CharAsUnicodeScalarValue, s);
+    var asUtf16CodeUnits := Utf16EncodingForm.EncodeScalarSequence(asCodeUnits);
+    var asBytes := Seq.Map(cu => cu as uint16, asUtf16CodeUnits);
+    Some(asBytes)
+  }
+
+  function FromUTF16Checked(bs: seq<uint16>): Option<string> {
+    var asCodeUnits := Seq.Map(c => c as Utf16EncodingForm.CodeUnit, bs);
+    var utf32 :- Utf16EncodingForm.DecodeCodeUnitSequenceChecked(asCodeUnits);
     var asChars := Seq.Map(CharFromUnicodeScalarValue, utf32);
     Some(asChars)
   }
