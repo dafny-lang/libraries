@@ -5,7 +5,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} BinaryOperations 
+module {:options "-functionSyntax:4"} BinaryOperations
   // Defines a number of (ghost) properties of binary operations
 {
 
