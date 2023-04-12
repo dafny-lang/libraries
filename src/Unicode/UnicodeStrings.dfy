@@ -6,7 +6,6 @@ include "../BoundedInts.dfy"
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
 include "Utf8EncodingForm.dfy"
-include "Utf8EncodingScheme.dfy"
 include "Utf16EncodingForm.dfy"
 
 abstract module {:options "-functionSyntax:4"} AbstractUnicodeStrings {
@@ -15,7 +14,6 @@ abstract module {:options "-functionSyntax:4"} AbstractUnicodeStrings {
 
   import opened Wrappers
   import opened BoundedInts
-  import opened Utf8EncodingScheme
 
   function ToUTF8Checked(s: string): Option<seq<uint8>>
 

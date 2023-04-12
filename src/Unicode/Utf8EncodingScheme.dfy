@@ -37,7 +37,6 @@ module {:options "-functionSyntax:4"} Utf8EncodingScheme {
   import Utf8EncodingForm
 
   type byte = BoundedInts.uint8
-  type utf8bytes = b: seq<byte> | Utf8EncodingForm.IsWellFormedCodeUnitSequence(Deserialize(b))
 
   /**
     * Returns the byte serialization of the given code unit sequence.
