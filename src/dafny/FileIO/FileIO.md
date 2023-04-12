@@ -37,6 +37,7 @@ These sample programs from the examples folder illustrate how to read and write 
 
 <!-- %check-resolve -->
 ```dafny
+include "../../FileIO/FileIO.dfy"
 module ReadBytesFromFile {
   import Dafny.FileIO
 
@@ -71,6 +72,7 @@ module ReadBytesFromFile {
 
 <!-- %check-resolve -->
 ```dafny
+include "../../FileIO/FileIO.dfy"
 module WriteBytesToFile {
   import Dafny.FileIO
 

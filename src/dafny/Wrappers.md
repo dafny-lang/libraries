@@ -20,7 +20,8 @@ These are common programming idioms. The main complication comes when they are m
 Consider this routine that looks for a value in a sequence, beginning at position `k`, returning its index:
 <!-- %check-verify %save tmp-find.dfy -->
 ```dafny
-import opened Dafny.Wrappers
+include "../Wrappers.dfy"
+import opened Wrappers
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
   ensures  r.Some? ==> 0 <= r.Extract() < |s| && s[r.Extract()] == value;
@@ -35,6 +36,8 @@ It could be used in a method like this
 
 <!-- %check-resolve %use tmp-find.dfy -->
 ```dafny
+include "../Wrappers.dfy"
+import opened Wrappers
 method m(s: seq<int>) returns (r: Option<int>) {
   var value: int;
   // do various calculations
@@ -104,7 +107,8 @@ convert to values of the other types. For example, we can rewrite the example ab
 
 <!-- %check-verify %save tmp-find.dfy -->
 ```dafny
-import opened Dafny.Wrappers
+include "../Wrappers.dfy"
+import opened Wrappers
 
 function Find<T(==)>(s: seq<T>, k: int, value: T): (r: Option<int>)
   requires 0 <= k <= |s|
@@ -156,7 +160,8 @@ The workaround, however, is straitforward: just capture the results using `:=` a
 
 <!-- %check-verify -->
 ```dafny
-import opened Dafny.Wrappers
+include "../Wrappers.dfy"
+import opened Wrappers
 
 method Find<T(==)>(s: seq<T>, k: int, value: T) returns (r: Option<int>, v: T)
   requires 0 <= k <= |s|
