@@ -9,6 +9,7 @@
 
 include "../BoundedInts.dfy"
 include "../NonlinearArithmetic/Logarithm.dfy"
+include "../Collections/Sequences/Seq.dfy"
 include "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 
 include "AST.dfy"
@@ -25,11 +26,15 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   import opened UnicodeStrings
   import opened Logarithm
 
+  import Seq
+
   type bytes = seq<uint8>
   type Result<+T> = SerializationResult<T>
 
   function EscapeUnicode(c: uint16): seq<uint16> {
-    var s := BMPToUTF16(Str.OfNat(c as nat, 16));
+    var sStr := Str.OfNat(c as nat, 16);
+    Seq.MembershipImpliesIndexing(c => 0 <= c as int < 128, sStr);
+    var s := ASCIIToUTF16(sStr);
     assert |s| <= 4 by {
       assert c as nat <= 0xFFFF;
       assert Log(16, c as nat) <= Log(16, 0xFFFF) by {
@@ -46,15 +51,15 @@ module {:options "-functionSyntax:4"} JSON.Spec {
     if start >= |str| then []
     else
       (match str[start]
-       case 0x22 => BMPToUTF16("\\\"") // quotation mark
-       case 0x5C => BMPToUTF16("\\\\")  // reverse solidus
-       case 0x08 => BMPToUTF16("\\b")  // backspace
-       case 0x0C => BMPToUTF16("\\f")  // form feed
-       case 0x0A => BMPToUTF16("\\n")  // line feed
-       case 0x0D => BMPToUTF16("\\r")  // carriage return
-       case 0x09 => BMPToUTF16("\\t")  // tab
+       case 0x22 => ASCIIToUTF16("\\\"") // quotation mark
+       case 0x5C => ASCIIToUTF16("\\\\")  // reverse solidus
+       case 0x08 => ASCIIToUTF16("\\b")  // backspace
+       case 0x0C => ASCIIToUTF16("\\f")  // form feed
+       case 0x0A => ASCIIToUTF16("\\n")  // line feed
+       case 0x0D => ASCIIToUTF16("\\r")  // carriage return
+       case 0x09 => ASCIIToUTF16("\\t")  // tab
        case c =>
-          if c < 0x001F then BMPToUTF16("\\u") + EscapeUnicode(c)
+          if c < 0x001F then ASCIIToUTF16("\\u") + EscapeUnicode(c)
           else [str[start]])
           + Escape(str, start + 1)
   }

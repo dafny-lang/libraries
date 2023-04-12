@@ -90,6 +90,26 @@ module {:options "-functionSyntax:4"} Seq {
    *
    ***********************************************************/
 
+  /* If a predicate is true at every index of a sequence,
+     it is true for every member of the sequence as a collection.
+     Useful for converting quantifiers between the two forms
+     to satisfy a precondition in the latter form. */
+  lemma IndexingImpliesMembership<T>(p: T -> bool, xs: seq<T>)
+    requires forall i | 0 <= i < |xs| :: p(xs[i])
+    ensures forall t | t in xs :: p(t)
+  {
+  }
+
+  /* If a predicate is true for every member of a sequence as a collection,
+     it is true at every index of the sequence.
+     Useful for converting quantifiers between the two forms
+     to satisfy a precondition in the latter form. */
+  lemma MembershipImpliesIndexing<T>(p: T -> bool, xs: seq<T>)
+    requires forall t | t in xs :: p(t)
+    ensures forall i | 0 <= i < |xs| :: p(xs[i])
+  {
+  }
+
   /* Is true if the sequence xs is a prefix of the sequence ys. */
   ghost predicate IsPrefix<T>(xs: seq<T>, ys: seq<T>)
     ensures IsPrefix(xs, ys) ==> (|xs| <= |ys| && xs == ys[..|xs|])

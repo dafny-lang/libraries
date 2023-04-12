@@ -8,7 +8,6 @@
 
 include "../Collections/Sequences/Seq.dfy"
 include "../BoundedInts.dfy"
-include "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
