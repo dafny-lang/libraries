@@ -10,6 +10,7 @@
 include "../BoundedInts.dfy"
 include "../NonlinearArithmetic/Logarithm.dfy"
 include "../Collections/Sequences/Seq.dfy"
+// TODO: Remove and follow one of the options documented in UnicodeStrings.dfy
 include "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 
 include "AST.dfy"
