@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Dafny.DivInternalsNonlinear 
+module {:options "-functionSyntax:4"} Dafny.DivInternalsNonlinear
   // Declares a few helper lemmas for internal use in non-linear arithmetic
 {
 

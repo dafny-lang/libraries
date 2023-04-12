@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Dafny.GeneralInternals 
+module {:options "-functionSyntax:4"} Dafny.GeneralInternals
   // Declares from helper lemmas and predicates for non-linear arithmetic
 {
 

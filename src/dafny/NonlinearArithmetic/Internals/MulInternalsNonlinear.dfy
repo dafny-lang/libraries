@@ -8,7 +8,7 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Dafny.MulInternalsNonlinear 
+module {:options "-functionSyntax:4"} Dafny.MulInternalsNonlinear
   // Declares some helper lemmas about multiply, for internal use
 {
 
