@@ -1,5 +1,11 @@
 // RUN: %verify --unicode-char:false %s
 
+///  Converting between strings and UTF-8/UTF-16
+/// =============================================
+///
+/// Implementation of `AbstractUnicodeStrings` for `--unicode-char:false`.
+/// See `UnicodeStrings.dfy` for details.
+
 include "UnicodeStrings.dfy"
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"

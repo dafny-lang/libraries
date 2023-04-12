@@ -1,5 +1,11 @@
 // RUN: %verify --unicode-char:true %s
 
+///  Converting between strings and UTF-8/UTF-16
+/// =============================================
+///
+/// Implementation of `AbstractUnicodeStrings` for `--unicode-char:true`.
+/// See `UnicodeStrings.dfy` for details.
+
 include "UnicodeStrings.dfy"
 include "../Wrappers.dfy"
 include "../Collections/Sequences/Seq.dfy"
@@ -10,14 +16,18 @@ module {:options "-functionSyntax:4"} UnicodeStrings refines AbstractUnicodeStri
   import Utf8EncodingForm
   import Utf16EncodingForm 
 
-  lemma CharIsUnicodeScalarValue(c: char)
+  lemma {:vcs_split_on_every_assert} CharIsUnicodeScalarValue(c: char)
     ensures
       && var asBits := c as bv24;
-      && (0 <= asBits < Unicode.HIGH_SURROGATE_MIN || Unicode.LOW_SURROGATE_MAX < asBits <= 0x10FFFF)
+      && asBits <= 0x10_FFFF
+      && (0 <= asBits < Unicode.HIGH_SURROGATE_MIN || Unicode.LOW_SURROGATE_MAX < asBits)
   {
-    var asBits := c as bv24;
-    assert (asBits < Unicode.HIGH_SURROGATE_MIN || asBits > Unicode.HIGH_SURROGATE_MAX);
-    assert (asBits < Unicode.LOW_SURROGATE_MIN || asBits > Unicode.LOW_SURROGATE_MAX);
+    assert c as int < 0x11_0000;
+    // TODO: Doesn't verify and not sure what else to try
+    assert c as int as bv24 < 0x11_0000 as bv24;
+    var asBits := c as int as bv24;
+    assert (asBits < Unicode.HIGH_SURROGATE_MIN || asBits > Unicode.LOW_SURROGATE_MAX);
+    assert asBits <= 0x10_FFFF;
   }
 
   lemma UnicodeScalarValueIsChar(sv: Unicode.ScalarValue)
