@@ -49,6 +49,17 @@ module {:options "-functionSyntax:4"} Relations {
     && Connected(R)
   }
 
+  ghost predicate PreOrdering<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Transitive(R)
+  }
+
+  ghost predicate PartialOrdering<T(!new)>(R: (T, T) -> bool) {
+    && Reflexive(R)
+    && Transitive(R)
+    && AntiSymmetric(R)
+  }
+
   ghost predicate EquivalenceRelation<T(!new)>(R: (T, T) -> bool) {
     && Reflexive(R)
     && Symmetric(R)
@@ -59,25 +70,26 @@ module {:options "-functionSyntax:4"} Relations {
     forall i, j | 0 <= i < j < |a| :: lessThan(a[i], a[j])
   }
 
-  /* An element in an ordered set is called minimal, if it is less than every element of the set. */
-  ghost predicate IsMinimum<T>(R: (T, T) -> bool, m: T, s: set<T>) {
-    m in s && forall y: T | y in s :: R(m, y)
+  /** An element in an ordered set is called a least element (or a minimum), if it is less than 
+      every other element of the set. */
+  ghost predicate IsLeast<T>(R: (T, T) -> bool, min: T, s: set<T>) {
+    min in s && forall x | x in s :: R(min, x)
   }
 
-  /* Any totally ordered set contains a unique minimal element. */
-  lemma LemmaUniqueMinimum<T(!new)>(R: (T, T) -> bool, s: set<T>) returns (m: T)
-    requires |s| > 0 && TotalOrdering(R)
-    ensures IsMinimum(R, m, s) && (forall n: T | IsMinimum(R, n, s) :: m == n)
-  {
-    var x :| x in s;
-    if s == {x} {
-      m := x;
-    } else {
-      var m' := LemmaUniqueMinimum(R, s - {x});
-      if
-      case R(m', x) => m := m';
-      case R(x, m') => m := x;
-    }
+  /** An element in an ordered set is called a minimal element, if no other element is less than it. */
+  ghost predicate IsMinimal<T>(R: (T, T) -> bool, min: T, s: set<T>) {
+    min in s && forall x | x in s && R(x, min) ::  R(min, x)
+  }
+
+  /** An element in an ordered set is called a greatest element (or a maximum), if it is greater than 
+      every other element of the set. */
+  ghost predicate IsGreatest<T>(R: (T, T) -> bool, max: T, s: set<T>) {
+    max in s && forall x | x in s :: R(x, max)
+  }
+
+  /** An element in an ordered set is called a maximal element, if no other element is greater than it. */
+  ghost predicate IsMaximal<T>(R: (T, T) -> bool, max: T, s: set<T>) {
+    max in s && forall x | x in s && R(max, x) :: R(x, max)
   }
 
   lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
