@@ -60,10 +60,10 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   }
 
   function EscapeToUTF8(str: string, start: nat := 0): Result<bytes> {
-    var utf16 :- ToUTF16Checked(str).ToResult'(InvalidUtf16);
+    var utf16 :- ToUTF16Checked(str).ToResult'(SerializationError.InvalidUnicode);
     var escaped := Escape(utf16);
-    var utf32 :- FromUTF16Checked(escaped).ToResult'(InvalidUtf16);
-    ToUTF8Checked(utf32).ToResult'(InvalidUtf16)
+    var utf32 :- FromUTF16Checked(escaped).ToResult'(SerializationError.InvalidUnicode);
+    ToUTF8Checked(utf32).ToResult'(SerializationError.InvalidUnicode)
   }
 
   // Can fail due to invalid UTF-16 sequences in a string when --unicode-char is off
