@@ -5,8 +5,8 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
+/** Defines a number of (ghost) properties of binary operations */
 module {:options "-functionSyntax:4"} BinaryOperations
-  // Defines a number of (ghost) properties of binary operations
 {
 
   ghost predicate IsAssociative<T(!new)>(bop: (T, T) -> T) {

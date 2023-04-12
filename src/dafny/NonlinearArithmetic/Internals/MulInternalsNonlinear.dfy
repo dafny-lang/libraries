@@ -8,8 +8,8 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
+/** Declares some helper lemmas about multiply, for internal use */
 module {:options "-functionSyntax:4"} Dafny.MulInternalsNonlinear
-  // Declares some helper lemmas about multiply, for internal use
 {
 
   /* WARNING: Think three times before adding to this file, as nonlinear

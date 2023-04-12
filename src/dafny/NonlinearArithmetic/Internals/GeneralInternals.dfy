@@ -8,8 +8,8 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
+/** Declares helper lemmas and predicates for non-linear arithmetic */
 module {:options "-functionSyntax:4"} Dafny.GeneralInternals
-  // Declares from helper lemmas and predicates for non-linear arithmetic
 {
 
   /* this predicate is primarily used as a trigger */
