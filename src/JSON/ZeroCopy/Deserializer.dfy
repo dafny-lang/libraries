@@ -1,5 +1,6 @@
 // RUN: %verify "%s"
 
+include "../Utils/Seq.dfy"
 include "../Errors.dfy"
 include "../Grammar.dfy"
 include "../ConcreteSyntax.Spec.dfy"
@@ -17,6 +18,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Utils.Parsers
     import opened Grammar
     import Errors
+    import opened Seq = Utils.Seq
+
 
     type JSONError = Errors.DeserializationError
     type Error = CursorError<JSONError>
@@ -92,7 +95,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     type TElement
 
-    ghost function ElementSpec(t: TElement) : bytes
+    ghost function ElementSpec(t: TElement): bytes
 
     function Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
@@ -120,7 +123,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type TBracketed = Bracketed<jopen, TElement, jcomma, jclose>
     type TSuffixedElement = Suffixed<TElement, jcomma>
 
-    ghost function SuffixedElementSpec(e: TSuffixedElement) : bytes {
+    ghost function SuffixedElementSpec(e: TSuffixedElement): bytes {
       ElementSpec(e.t) + Spec.CommaSuffix(e.suffix)
     }
 
@@ -160,13 +163,16 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures sp.StrictlySplitFrom?(cs, BracketedSpec)
     {
       var sp := SP(Grammar.Bracketed(open.t, elems.t, close.t), close.cs);
-      calc { // Dafny/Z3 has a lot of trouble with associativity, so do the steps one by one:
-        cs.Bytes();
-        Spec.Structural(open.t, SpecView) + open.cs.Bytes();
-        Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + elems.cs.Bytes();
-        Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + Spec.Structural(close.t, SpecView) + close.cs.Bytes();
-        Spec.Bracketed(sp.t, SuffixedElementSpec) + close.cs.Bytes();
+      assert cs.Bytes() == Spec.Bracketed(sp.t, SuffixedElementSpec) + close.cs.Bytes() by {
+        assert cs.Bytes() == Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + Spec.Structural(close.t, SpecView) + close.cs.Bytes() by {
+          assert cs.Bytes() == Spec.Structural(open.t, SpecView) + open.cs.Bytes();
+          assert open.cs.Bytes() == SuffixedElementsSpec(elems.t) + elems.cs.Bytes();
+          assert elems.cs.Bytes() == Spec.Structural(close.t, SpecView) + close.cs.Bytes();
+          Seq.Assoc'(Spec.Structural(open.t, SpecView), SuffixedElementsSpec(elems.t), elems.cs.Bytes());
+          Seq.Assoc'(Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t), Spec.Structural(close.t, SpecView), close.cs.Bytes());
+        }
       }
+      assert sp.StrictlySplitFrom?(cs, BracketedSpec);
       sp
     }
 
@@ -188,7 +194,28 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     {
       var suffixed := Suffixed(elem.t, NonEmpty(sep.t));
       var elems' := SP(elems.t + [suffixed], sep.cs); // DISCUSS: Moving this down doubles the verification time
-      SpecProperties.ConcatBytes_Linear(elems.t, [suffixed], SuffixedElementSpec);
+
+      assert cs0.Bytes() == SuffixedElementsSpec(elems'.t) + sep.cs.Bytes() by {
+        assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + (ElementSpec(suffixed.t) + Spec.CommaSuffix(suffixed.suffix)) + sep.cs.Bytes() by {
+          assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + ElementSpec(suffixed.t) + Spec.CommaSuffix(suffixed.suffix) + sep.cs.Bytes() by {
+            assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + elems.cs.Bytes();
+            assert elems.cs.Bytes() == ElementSpec(suffixed.t) + elem.cs.Bytes();
+            assert elem.cs.Bytes() == Spec.CommaSuffix(suffixed.suffix) + sep.cs.Bytes();
+            Seq.Assoc'(SuffixedElementsSpec(elems.t), ElementSpec(suffixed.t), elem.cs.Bytes());
+            Seq.Assoc'(SuffixedElementsSpec(elems.t) + ElementSpec(suffixed.t), Spec.CommaSuffix(suffixed.suffix), sep.cs.Bytes());
+          }
+          Seq.Assoc(SuffixedElementsSpec(elems.t), ElementSpec(suffixed.t), Spec.CommaSuffix(suffixed.suffix));
+        }
+        assert SuffixedElementsSpec(elems.t) + (ElementSpec(suffixed.t) + Spec.CommaSuffix(suffixed.suffix)) + sep.cs.Bytes() == SuffixedElementsSpec(elems'.t) + sep.cs.Bytes() by {
+          assert SuffixedElementsSpec(elems.t) + SuffixedElementSpec(suffixed) == SuffixedElementsSpec(elems.t + [suffixed]) by {
+            SpecProperties.ConcatBytes_Linear(elems.t, [suffixed], SuffixedElementSpec);
+            assert Spec.ConcatBytes(elems.t, SuffixedElementSpec) + Spec.ConcatBytes([suffixed], SuffixedElementSpec) ==  Spec.ConcatBytes(elems.t + [suffixed], SuffixedElementSpec);
+          }
+        }
+      }
+
+      assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
+      assert forall e | e in elems'.t :: e.suffix.NonEmpty?;
       elems'
     }
 
@@ -211,7 +238,20 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     {
       var suffixed := Suffixed(elem.t, Empty());
       var elems' := SP(elems.t + [suffixed], elem.cs);
-      SpecProperties.ConcatBytes_Linear(elems.t, [suffixed], SuffixedElementSpec);
+
+      assert cs0.Bytes() == SuffixedElementsSpec(elems'.t) + elem.cs.Bytes() by {
+        assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + ElementSpec(suffixed.t) + elem.cs.Bytes() by {
+          assert elem.t == suffixed.t;
+        }
+        assert SuffixedElementsSpec(elems.t) + ElementSpec(suffixed.t) + elem.cs.Bytes() == SuffixedElementsSpec(elems'.t) + elem.cs.Bytes() by {
+          assert SuffixedElementsSpec(elems.t) + SuffixedElementSpec(suffixed) == SuffixedElementsSpec(elems.t + [suffixed]) by {
+            SpecProperties.ConcatBytes_Linear(elems.t, [suffixed], SuffixedElementSpec);
+            assert Spec.ConcatBytes(elems.t, SuffixedElementSpec) + Spec.ConcatBytes([suffixed], SuffixedElementSpec) ==  Spec.ConcatBytes(elems.t + [suffixed], SuffixedElementSpec);
+          }
+        }
+      }
+
+      assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
       elems'
     }
 
@@ -235,13 +275,22 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var sep := Core.TryStructural(elem.cs);
       var s0 := sep.t.t.Peek();
       if s0 == SEPARATOR as opt_byte then
+        assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep);
         var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
         Elements(cs0, json, open, elems)
       else if s0 == CLOSE as opt_byte then
+        assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
+          assert sep.SplitFrom?(elem.cs, st => Spec.Structural(st, SpecView));
+          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
+        }
         var elems := AppendLast(open.cs, json, elems, elem, sep);
-        Success(BracketedFromParts(cs0, open, elems, sep))
+        assert BracketedFromParts.requires(cs0, open, elems, sep);
+        var bracketed := BracketedFromParts(cs0, open, elems, sep);
+        assert bracketed.StrictlySplitFrom?(cs0, BracketedSpec);
+        Success(bracketed)
       else
-        Failure(ExpectingAnyByte([CLOSE, SEPARATOR], s0))
+        var pr := Failure(ExpectingAnyByte([CLOSE, SEPARATOR], s0));
+        pr
     }
 
     function {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
@@ -307,7 +356,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures jsr.Success? ==> v.Bytes() == Spec.JSON(jsr.value)
     {
       var SP(text, cs) :- JSON(Cursors.Cursor.OfView(v));
+      assert Cursors.SP(text, cs).BytesSplitFrom?(Cursors.Cursor.OfView(v), Spec.JSON);
+      assert v.Bytes() == Spec.JSON(text) + cs.Bytes();
       :- Need(cs.EOF?, Errors.ExpectingEOF);
+      assert cs.Bytes() == [];
       Success(text)
     }
 
@@ -341,11 +393,23 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     {
       var c := cs.Peek();
       if c == '{' as opt_byte then
-        var SP(obj, cs) :- Objects.Object(cs, ValueParser(cs));
-        Success(SP(Grammar.Object(obj), cs))
+        var SP(obj, cs') :- Objects.Object(cs, ValueParser(cs));
+        var v := Grammar.Object(obj);
+        var sp := SP(v, cs');
+        assert sp.StrictlySplitFrom?(cs, Spec.Value) by {
+          assert SP(obj, cs').StrictlySplitFrom?(cs, Spec.Object);
+          Spec.UnfoldValueObject(v);
+        }
+        Success(sp)
       else if c == '[' as opt_byte then
-        var SP(arr, cs) :- Arrays.Array(cs, ValueParser(cs));
-        Success(SP(Grammar.Array(arr), cs))
+        var SP(arr, cs') :- Arrays.Array(cs, ValueParser(cs));
+        var v := Grammar.Array(arr);
+        var sp := SP(v, cs');
+        assert sp.StrictlySplitFrom?(cs, Spec.Value) by {
+          assert SP(arr, cs').StrictlySplitFrom?(cs, Spec.Array);
+          Spec.UnfoldValueArray(v);
+        }
+        Success(sp)
       else if c == '\"' as opt_byte then
         var SP(str, cs) :- Strings.String(cs);
         Success(SP(Grammar.String(str), cs))
@@ -359,8 +423,14 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         var SP(cst, cs) :- Constants.Constant(cs, NULL);
         Success(SP(Grammar.Null(cst), cs))
       else
-        var SP(num, cs) :- Numbers.Number(cs);
-        Success(SP(Grammar.Number(num), cs))
+        var SP(num, cs') :- Numbers.Number(cs);
+        var v := Grammar.Number(num);
+        var sp := SP(v, cs');
+        assert sp.StrictlySplitFrom?(cs, Spec.Value) by {
+          assert SP(num, cs').StrictlySplitFrom?(cs, Spec.Number);
+          Spec.UnfoldValueNumber(v);
+        }
+        Success(sp)
     }
 
     function {:opaque} ValueParser(cs: FreshCursor) : (p: ValueParser)
@@ -531,14 +601,21 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures sp.StrictlySplitFrom?(cs, Spec.Number)
     {
       var sp := SP(Grammar.JNumber(minus.t, num.t, frac.t, exp.t), exp.cs);
-      calc { // Dafny/Z3 has a lot of trouble with associativity, so do the steps one by one:
-        cs.Bytes();
-        Spec.View(minus.t) + minus.cs.Bytes();
-        Spec.View(minus.t) + Spec.View(num.t) + num.cs.Bytes();
-        Spec.View(minus.t) + Spec.View(num.t) + Spec.Maybe(frac.t, Spec.Frac) + frac.cs.Bytes();
-        Spec.View(minus.t) + Spec.View(num.t) + Spec.Maybe(frac.t, Spec.Frac) + Spec.Maybe(exp.t, Spec.Exp) + exp.cs.Bytes();
-        Spec.Number(sp.t) + exp.cs.Bytes();
+      assert cs.Bytes() == Spec.Number(sp.t) + exp.cs.Bytes() by {
+        assert cs.Bytes() == Spec.View(minus.t) + Spec.View(num.t) + Spec.Maybe(frac.t, Spec.Frac) + Spec.Maybe(exp.t, Spec.Exp) + exp.cs.Bytes() by {
+          assert cs.Bytes() == Spec.View(minus.t) + minus.cs.Bytes();
+          assert minus.cs.Bytes() == Spec.View(num.t) + num.cs.Bytes();
+          assert num.cs.Bytes() == Spec.Maybe(frac.t, Spec.Frac) + frac.cs.Bytes();
+          assert frac.cs.Bytes() == Spec.Maybe(exp.t, Spec.Exp) + exp.cs.Bytes();
+          Seq.Assoc'(Spec.View(minus.t), Spec.View(num.t), num.cs.Bytes());
+          Seq.Assoc'(Spec.View(minus.t) + Spec.View(num.t), Spec.Maybe(frac.t, Spec.Frac), frac.cs.Bytes());
+          Seq.Assoc'(Spec.View(minus.t) + Spec.View(num.t) + Spec.Maybe(frac.t, Spec.Frac), Spec.Maybe(exp.t, Spec.Exp), exp.cs.Bytes());
+        }
       }
+      assert sp.StrictlySplitFrom?(cs, Spec.Number);
+
+
+
       sp
     }
 
@@ -574,14 +651,29 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
   module Arrays refines Sequences {
     import opened Params = ArrayParams
 
-    function {:opaque} Array(cs: FreshCursor, json: ValueParser)
+    lemma BracketedToArray(arr: jarray)
+      ensures Spec.Bracketed(arr, SuffixedElementSpec) == Spec.Array(arr)
+    {
+      var rItem := (d: jitem) requires d < arr => Spec.Item(d);
+      assert Spec.Bracketed(arr, SuffixedElementSpec) == Spec.Bracketed(arr, rItem) by {
+        SpecProperties.Bracketed_Morphism(arr);
+        assert forall d | d < arr :: SuffixedElementSpec(d) == rItem(d);
+      }
+      calc {
+        Spec.Bracketed(arr, SuffixedElementSpec);
+        Spec.Bracketed(arr, rItem);
+        Spec.Array(arr);
+      }
+    }
+
+    function {:opaque}  Array(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jarray>)
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Array)
     {
       var sp :- Bracketed(cs, json);
-      SpecProperties.Bracketed_Morphism(sp.t);
-      assert Spec.Bracketed(sp.t, SuffixedElementSpec) == Spec.Array(sp.t);
+      assert sp.StrictlySplitFrom?(cs, BracketedSpec);
+      BracketedToArray(sp.t);
       Success(sp)
     }
   }
@@ -608,16 +700,19 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       requires k.StrictlySplitFrom?(cs, Spec.String)
       requires colon.StrictlySplitFrom?(k.cs, c => Spec.Structural(c, SpecView))
       requires v.StrictlySplitFrom?(colon.cs, Spec.Value)
-      ensures sp.StrictlySplitFrom?(cs, Spec.KeyValue)
+      ensures sp.StrictlySplitFrom?(cs, ElementSpec)
     {
       var sp := SP(Grammar.KeyValue(k.t, colon.t, v.t), v.cs);
-      calc { // Dafny/Z3 has a lot of trouble with associativity, so do the steps one by one:
-        cs.Bytes();
-        Spec.String(k.t) + k.cs.Bytes();
-        Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + colon.cs.Bytes();
-        Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + Spec.Value(v.t) + v.cs.Bytes();
-        Spec.KeyValue(sp.t) + v.cs.Bytes();
+      assert cs.Bytes() == Spec.KeyValue(sp.t) + v.cs.Bytes() by {
+        assert cs.Bytes() == Spec.String(k.t) + Spec.Structural(colon.t, SpecView) + Spec.Value(v.t) + v.cs.Bytes() by {
+          assert cs.Bytes() == Spec.String(k.t) + k.cs.Bytes();
+          assert k.cs.Bytes() == Spec.Structural(colon.t, SpecView) + colon.cs.Bytes();
+          assert colon.cs.Bytes() == Spec.Value(v.t) + v.cs.Bytes();
+          Seq.Assoc'(Spec.String(k.t), Spec.Structural(colon.t, SpecView), colon.cs.Bytes());
+          Seq.Assoc'(Spec.String(k.t) + Spec.Structural(colon.t, SpecView), Spec.Value(v.t), v.cs.Bytes());
+        }
       }
+      assert sp.StrictlySplitFrom?(cs, ElementSpec);
       sp
     }
 
@@ -628,14 +723,37 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       : (pr: ParseResult<TElement>)
     {
       var k :- Strings.String(cs);
-      var colon :- Core.Structural(k.cs, Parsers.Parser(Colon, SpecView));
+      assert k.cs.StrictlySplitFrom?(json.cs);
+
+      var p := Parsers.Parser(Colon, SpecView);
+      assert p.Valid?();
+      var colon :- Core.Structural(k.cs, p);
+      assert colon.StrictlySplitFrom?(k.cs, st => Spec.Structural(st, p.spec));
+      assert colon.cs.StrictlySplitFrom?(json.cs);
+
       var v :- json.fn(colon.cs);
-      Success(KeyValueFromParts(cs, k, colon, v))
+      var kv := KeyValueFromParts(cs, k, colon, v);
+      Success(kv)
     }
   }
 
   module Objects refines Sequences {
     import opened Params = ObjectParams
+
+    lemma {:vcs_split_on_every_assert} BracketedToObject(obj: jobject)
+      ensures Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Object(obj)
+    {
+      var rMember := (d: jmember) requires d < obj => Spec.Member(d);
+      assert Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Bracketed(obj, rMember) by {
+        SpecProperties.Bracketed_Morphism(obj);
+        assert forall d | d < obj :: SuffixedElementSpec(d) == rMember(d);
+      }
+      calc {
+        Spec.Bracketed(obj, SuffixedElementSpec);
+        Spec.Bracketed(obj, rMember);
+        Spec.Object(obj);
+      }
+    }
 
     function {:opaque} Object(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jobject>)
@@ -643,8 +761,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Object)
     {
       var sp :- Bracketed(cs, json);
-      SpecProperties.Bracketed_Morphism(sp.t);
-      assert Spec.Bracketed(sp.t, SuffixedElementSpec) == Spec.Object(sp.t); // DISCUSS
+      assert sp.StrictlySplitFrom?(cs, BracketedSpec);
+      BracketedToObject(sp.t);
       Success(sp)
     }
   }
