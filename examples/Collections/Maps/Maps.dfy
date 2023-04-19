@@ -14,11 +14,11 @@ module {:options "--function-syntax:4"} MapsExamples {
 
   function ByteKeyMapToIntKeys<Y>(m: map<bv8, Y>): (m': map<int, Y>)
   {
-    Maps.MapKeys(m, b => b as int)
+    Maps.MapKeys(b => b as int, m)
   }
 
   function ByteValueMapToIntValues<X>(m: map<X, bv8>): (m': map<X, int>)
   {
-    Maps.MapValues(m, b => b as int)
+    Maps.MapValues(b => b as int, m)
   }
 }
