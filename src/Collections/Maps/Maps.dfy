@@ -1,12 +1,12 @@
 // RUN: %verify "%s"
 
 /*******************************************************************************
- * Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+ * Original: Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University,
  * ETH Zurich, and University of Washington
- * SPDX-License-Identifier: BSD-2-Clause 
+ * SPDX-License-Identifier: BSD-2-Clause
  *
  * Modifications and Extensions: Copyright by the contributors to the Dafny Project
- * SPDX-License-Identifier: MIT 
+ * SPDX-License-Identifier: MIT
  ******************************************************************************/
 
 include "../../Wrappers.dfy"
@@ -97,6 +97,39 @@ module {:options "-functionSyntax:4"} Maps {
     forall x, x' {:trigger m[x], m[x']} :: x != x' && x in m && x' in m ==> m[x] != m[x']
   }
 
+  ghost predicate {:opaque} Contains<X, Y>(big: map<X, Y>, small: map<X, Y>)
+  {
+    && small.Keys <= big.Keys
+    && forall x <- small :: small[x] == big[x]
+  }
+
+  lemma LemmaContainsPreservesInjectivity<X, Y>(big: map<X, Y>, small: map<X, Y>)
+    requires Contains(big, small)
+    requires Injective(big)
+    ensures Injective(small)
+  {
+    reveal Contains();
+    reveal Injective();
+  }
+
+  lemma LemmaInjectiveImpliesUniqueValues<X(!new), Y>(m: map<X, Y>)
+    requires Injective(m)
+    ensures |m.Keys| == |m.Values|
+  {
+    if |m| > 0 {
+      var x: X :| x in m;
+      var y := m[x];
+      var m' := Remove(m, x);
+      reveal Contains();
+      assert Contains(m, m');
+
+      reveal Injective();
+      assert m'.Values == m.Values - {y};
+      LemmaContainsPreservesInjectivity(m, m');
+      LemmaInjectiveImpliesUniqueValues(m');
+    }
+  }
+
   /* Swaps map keys and values. Values are not required to be unique; no
   promises on which key is chosen on the intersection. */
   ghost function {:opaque} Invert<X, Y>(m: map<X, Y>): map<Y, X>
@@ -142,6 +175,22 @@ module {:options "-functionSyntax:4"} Maps {
   {
     var m' := map k <- m :: f(k) := m[k];
     Sets.LemmaMapSize(m.Keys, m'.Keys, f);
+    m'
+  }
+
+  /* Maps a function over the values of a map, retaining the keys. */
+  function {:opaque} MapValues<X, Y(!new), Y'>(m: map<X, Y>, f: Y --> Y'): (m': map<X, Y'>)
+    reads f.reads
+    requires forall y {:trigger f.requires(y)} :: f.requires(y)
+    ensures |m'| == |m|
+    ensures m'.Keys == m.Keys
+    ensures forall x | x in m :: m'[x] == f(m[x])
+  {
+    var m' := map x <- m :: x := f(m[x]);
+    assert |m'| == |m| by {
+      assert m'.Keys == m.Keys;
+      assert |m'.Keys| == |m.Keys|;
+    }
     m'
   }
 }
