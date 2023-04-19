@@ -68,7 +68,7 @@ module {:options "-functionSyntax:4"} Maps {
   ghost predicate IsSubset<X, Y>(m: map<X, Y>, m': map<X, Y>)
   {
     && m.Keys <= m'.Keys
-    && forall x {:trigger EqualOnKey(m, m', x)}{:trigger x in m} :: x in m ==> EqualOnKey(m, m', x)
+    && forall x <- m :: m[x] == m'[x]
   }
 
   /* Union of two maps. Does not require disjoint domains; on the intersection,
@@ -97,18 +97,11 @@ module {:options "-functionSyntax:4"} Maps {
     forall x, x' {:trigger m[x], m[x']} :: x != x' && x in m && x' in m ==> m[x] != m[x']
   }
 
-  ghost predicate {:opaque} Contains<X, Y>(big: map<X, Y>, small: map<X, Y>)
-  {
-    && small.Keys <= big.Keys
-    && forall x <- small :: small[x] == big[x]
-  }
-
-  lemma LemmaContainsPreservesInjectivity<X, Y>(big: map<X, Y>, small: map<X, Y>)
-    requires Contains(big, small)
+  lemma LemmaSubsetIsInjective<X, Y>(small: map<X, Y>, big: map<X, Y>)
+    requires IsSubset(small, big)
     requires Injective(big)
     ensures Injective(small)
   {
-    reveal Contains();
     reveal Injective();
   }
 
@@ -117,15 +110,15 @@ module {:options "-functionSyntax:4"} Maps {
     ensures |m.Keys| == |m.Values|
   {
     if |m| > 0 {
+      reveal Injective();
+
       var x: X :| x in m;
       var y := m[x];
       var m' := Remove(m, x);
-      reveal Contains();
-      assert Contains(m, m');
+      assert IsSubset(m', m);
 
-      reveal Injective();
       assert m'.Values == m.Values - {y};
-      LemmaContainsPreservesInjectivity(m, m');
+      LemmaSubsetIsInjective(m', m);
       LemmaInjectiveImpliesUniqueValues(m');
     }
   }
