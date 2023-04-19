@@ -14,7 +14,7 @@ module {:options "-functionSyntax:4"} UnicodeStrings refines AbstractUnicodeStri
 
   import Unicode
   import Utf8EncodingForm
-  import Utf16EncodingForm 
+  import Utf16EncodingForm
 
   lemma {:vcs_split_on_every_assert} CharIsUnicodeScalarValue(c: char)
     ensures
@@ -31,7 +31,7 @@ module {:options "-functionSyntax:4"} UnicodeStrings refines AbstractUnicodeStri
   }
 
   lemma UnicodeScalarValueIsChar(sv: Unicode.ScalarValue)
-    ensures 
+    ensures
       && var asInt := sv as int;
       && (0 <= asInt < 0xD800 || 0xE000 <= asInt < 0x11_0000)
   {

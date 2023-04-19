@@ -10,7 +10,7 @@
 include "../BoundedInts.dfy"
 include "../NonlinearArithmetic/Logarithm.dfy"
 include "../Collections/Sequences/Seq.dfy"
-// TODO: Remove and follow one of the options documented in UnicodeStrings.dfy
+  // TODO: Remove and follow one of the options documented in UnicodeStrings.dfy
 include "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 
 include "AST.dfy"
@@ -60,9 +60,9 @@ module {:options "-functionSyntax:4"} JSON.Spec {
        case 0x0D => ASCIIToUTF16("\\r")  // carriage return
        case 0x09 => ASCIIToUTF16("\\t")  // tab
        case c =>
-          if c < 0x001F then ASCIIToUTF16("\\u") + EscapeUnicode(c)
-          else [str[start]])
-          + Escape(str, start + 1)
+      if c < 0x001F then ASCIIToUTF16("\\u") + EscapeUnicode(c)
+      else [str[start]])
+      + Escape(str, start + 1)
   }
 
   function EscapeToUTF8(str: string, start: nat := 0): Result<bytes> {
@@ -79,7 +79,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   }
 
   lemma OfIntOnlyASCII(n: int)
-    ensures 
+    ensures
       && var s := Str.OfInt(n);
       && forall i | 0 <= i < |s| :: 0 <= s[i] as int < 128
   {
@@ -102,8 +102,8 @@ module {:options "-functionSyntax:4"} JSON.Spec {
 
   function Number(dec: Decimal): Result<bytes> {
     Success(IntToBytes(dec.n) +
-    (if dec.e10 == 0 then []
-    else ASCIIToUTF8("e") + IntToBytes(dec.e10)))
+            (if dec.e10 == 0 then []
+            else ASCIIToUTF8("e") + IntToBytes(dec.e10)))
   }
 
   function KeyValue(kv: (string, JSON)): Result<bytes> {
@@ -113,13 +113,13 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   }
 
   function Join(sep: bytes, items: seq<Result<bytes>>): Result<bytes> {
-    if |items| == 0 then 
+    if |items| == 0 then
       Success([])
-    else 
+    else
       var first :- items[0];
-      if |items| == 1 then 
+      if |items| == 1 then
         Success(first)
-      else 
+      else
         var rest :- Join(sep, items[1..]);
         Success(first + sep + rest)
   }

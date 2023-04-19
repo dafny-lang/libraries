@@ -14,12 +14,12 @@ module {:options "-functionSyntax:4"} UnicodeStrings refines AbstractUnicodeStri
 
   import Unicode
   import Utf8EncodingForm
-  import Utf16EncodingForm 
-  
+  import Utf16EncodingForm
+
   predicate IsWellFormedString(s: string)
-    ensures |s| == 0 ==> IsWellFormedString(s) 
+    ensures |s| == 0 ==> IsWellFormedString(s)
   {
-    Utf16EncodingForm.IsWellFormedCodeUnitSequence(Seq.Map(c => c as Utf16EncodingForm.CodeUnit, s)) 
+    Utf16EncodingForm.IsWellFormedCodeUnitSequence(Seq.Map(c => c as Utf16EncodingForm.CodeUnit, s))
   }
 
   function ToUTF8Checked(s: string): Option<seq<uint8>> {

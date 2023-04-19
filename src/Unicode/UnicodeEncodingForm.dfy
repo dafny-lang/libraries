@@ -246,7 +246,7 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     // TODO: We can be even more efficient by using a JSON.Utils.Vectors.Vector instead.
     s := [];
     ghost var unflattened: seq<MinimalWellFormedCodeUnitSeq> := [];
-    for i := |vs| downto 0 
+    for i := |vs| downto 0
       invariant unflattened == Seq.Map(EncodeScalarValue, vs[i..])
       invariant s == Seq.Flatten(unflattened)
     {

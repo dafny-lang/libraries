@@ -25,7 +25,7 @@
 ///    so that references to `UnicodeStrings` can be resolved.
 ///
 /// Option 2. avoids needing to write boilerplate refining modules,
-/// but is less IDE-friendly until we have better project configuration support. 
+/// but is less IDE-friendly until we have better project configuration support.
 
 include "../BoundedInts.dfy"
 include "../Wrappers.dfy"
@@ -42,7 +42,7 @@ abstract module {:options "-functionSyntax:4"} AbstractUnicodeStrings {
 
   function ToUTF8Checked(s: string): Option<seq<uint8>>
 
-  function ASCIIToUTF8(s: string): seq<uint8> 
+  function ASCIIToUTF8(s: string): seq<uint8>
     requires forall i | 0 <= i < |s| :: 0 <= s[i] as int < 128
   {
     Seq.Map(c requires 0 <= c as int < 128 => c as uint8, s)
@@ -52,7 +52,7 @@ abstract module {:options "-functionSyntax:4"} AbstractUnicodeStrings {
 
   function ToUTF16Checked(s: string): Option<seq<uint16>>
 
-  function ASCIIToUTF16(s: string): seq<uint16> 
+  function ASCIIToUTF16(s: string): seq<uint16>
     requires forall i | 0 <= i < |s| :: 0 <= s[i] as int < 128
   {
     Seq.Map(c requires 0 <= c as int < 128 => c as uint16, s)

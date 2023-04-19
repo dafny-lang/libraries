@@ -627,8 +627,8 @@ module {:options "-functionSyntax:4"} Seq {
     // more efficient when compiled, allocating the storage for |xs| elements
     // once instead of creating a chain of |xs| single element concatenations.
     seq(|xs|, i requires 0 <= i < |xs| && f.requires(xs[i])
-                reads set i,o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o 
-                => f(xs[i]))
+                reads set i,o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
+    => f(xs[i]))
   }
 
   /* Applies a function to every element of a sequence, returning a Result value (which is a 
@@ -838,7 +838,7 @@ module {:options "-functionSyntax:4"} Seq {
   by method {
     result := [];
     ghost var unflattened: seq<seq<R>> := [];
-    for i := |xs| downto 0 
+    for i := |xs| downto 0
       invariant unflattened == Map(f, xs[i..])
       invariant result == Flatten(unflattened)
     {
