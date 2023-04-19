@@ -1,6 +1,5 @@
 // RUN: %run "%s"
 
-include "Utils/Unicode.dfy"
 include "Errors.dfy"
 include "API.dfy"
 include "ZeroCopy/API.dfy"
@@ -8,9 +7,8 @@ include "../Collections/Sequences/Seq.dfy"
 
 abstract module JSON.Tests.Wrapper {
   import Utils.Str
-  import Utils.Unicode
   import opened BoundedInts
-
+  import opened UnicodeStrings
   import opened Errors
 
   type JSON
@@ -23,15 +21,15 @@ abstract module JSON.Tests.Wrapper {
     var js  :- expect Deserialize(bs);
     // print indent, "=> ", js, "\n";
     var bs'  :- expect Serialize(js);
-    print indent, "=> " + Unicode.Transcode8To16(bs') + "\n";
+    print indent, "=> ", FromUTF8Checked(bs'), "\n";
     var sbs' :- expect SpecSerialize(js);
-    print indent, "=> " + Unicode.Transcode8To16(sbs') + "\n";
+    print indent, "=> ", FromUTF8Checked(sbs'), "\n";
     var js'  :- expect Deserialize(bs');
     Check(bs, js, bs', sbs', js');
   }
 
   method TestString(str: string, indent: string) {
-    var bs := Unicode.Transcode16To8(str);
+    var bs :- expect ToUTF8Checked(str);
     TestBytestring(bs, indent);
   }
 
@@ -92,7 +90,7 @@ module JSON.Tests.AbstractSyntaxWrapper refines Wrapper {
   }
 
   method SpecSerialize(js: JSON) returns (bs: SerializationResult<bytes>) {
-    bs := Success(Spec.JSON(js));
+    bs := Spec.JSON(js);
   }
 
   method Check(bs: bytes, js: JSON, bs': bytes, sbs': bytes, js': JSON) {

@@ -90,6 +90,26 @@ module {:options "-functionSyntax:4"} Seq {
    *
    ***********************************************************/
 
+  /* If a predicate is true at every index of a sequence,
+     it is true for every member of the sequence as a collection.
+     Useful for converting quantifiers between the two forms
+     to satisfy a precondition in the latter form. */
+  lemma IndexingImpliesMembership<T>(p: T -> bool, xs: seq<T>)
+    requires forall i | 0 <= i < |xs| :: p(xs[i])
+    ensures forall t | t in xs :: p(t)
+  {
+  }
+
+  /* If a predicate is true for every member of a sequence as a collection,
+     it is true at every index of the sequence.
+     Useful for converting quantifiers between the two forms
+     to satisfy a precondition in the latter form. */
+  lemma MembershipImpliesIndexing<T>(p: T -> bool, xs: seq<T>)
+    requires forall t | t in xs :: p(t)
+    ensures forall i | 0 <= i < |xs| :: p(xs[i])
+  {
+  }
+
   /* Is true if the sequence xs is a prefix of the sequence ys. */
   ghost predicate IsPrefix<T>(xs: seq<T>, ys: seq<T>)
     ensures IsPrefix(xs, ys) ==> (|xs| <= |ys| && xs == ys[..|xs|])
@@ -603,8 +623,12 @@ module {:options "-functionSyntax:4"} Seq {
     ensures forall i {:trigger result[i]} :: 0 <= i < |xs| ==> result[i] == f(xs[i]);
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
-    if |xs| == 0 then []
-    else [f(xs[0])] + Map(f, xs[1..])
+    // This uses a sequence comprehension because it will usually be
+    // more efficient when compiled, allocating the storage for |xs| elements
+    // once instead of creating a chain of |xs| single element concatenations.
+    seq(|xs|, i requires 0 <= i < |xs| && f.requires(xs[i])
+                reads set i,o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o 
+                => f(xs[i]))
   }
 
   /* Applies a function to every element of a sequence, returning a Result value (which is a 
@@ -803,6 +827,26 @@ module {:options "-functionSyntax:4"} Seq {
     }
   }
 
+  /* Optimized implementation of Flatten(Map(f, xs)). */
+  function {:opaque} FlatMap<T,R>(f: (T ~> seq<R>), xs: seq<T>): (result: seq<R>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    ensures result == Flatten(Map(f, xs));
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
+  {
+    Flatten(Map(f, xs))
+  }
+  by method {
+    result := [];
+    ghost var unflattened: seq<seq<R>> := [];
+    for i := |xs| downto 0 
+      invariant unflattened == Map(f, xs[i..])
+      invariant result == Flatten(unflattened)
+    {
+      var next := f(xs[i]);
+      unflattened := [next] + unflattened;
+      result := next + result;
+    }
+  }
 
   /**********************************************************
    *

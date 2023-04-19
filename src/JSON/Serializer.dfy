@@ -12,7 +12,6 @@ include "../Math.dfy"
 
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
-include "Utils/Unicode.dfy"
 include "Errors.dfy"
 include "AST.dfy"
 include "Grammar.dfy"
@@ -24,7 +23,6 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
   import opened Wrappers
   import opened BoundedInts
   import opened Utils.Str
-  import Utils.Unicode
 
   import AST
   import Spec
@@ -43,37 +41,12 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
     View.OfBytes(if b then TRUE else FALSE)
   }
 
-  function Transcode16To8Escaped(str: string, start: uint32 := 0): bytes {
-    Unicode.Transcode16To8(Spec.Escape(str))
-  } // FIXME speed up using a `by method`
-  // by method {
-  //   var len := |str| as uint32;
-  //   if len == 0 {
-  //     return [];
-  //   }
-  //   var st := new Vectors.Vector(0, len);
-  //   var c0: uint16 := 0;
-  //   var c1: uint16 := str[0] as uint16;
-  //   var idx: uint32 := 0;
-  //   while idx < len {
-  //     var c0 := c1;
-  //     var c1 := str[idx + 1] as uint16;
-  //     if c0 < 0xD800 || c0 > 0xDBFF {
-  //       Utf8Encode(st, Unicode.Utf16Decode1(c0));
-  //       idx := idx +1;
-  //     } else {
-  //       Utf8Encode(st, Unicode.Utf16Decode2(c0, c1));
-  //       idx := idx + 2;
-  //     }
-  //   }
-  // }
-
   function CheckLength<T>(s: seq<T>, err: SerializationError): Outcome<SerializationError> {
     Need(|s| < TWO_TO_THE_32, err)
   }
 
   function String(str: string): Result<jstring> {
-    var bs := Transcode16To8Escaped(str);
+    var bs :- Spec.EscapeToUTF8(str);
     :- CheckLength(bs, StringTooLong(str));
     Success(Grammar.JString(Grammar.DOUBLEQUOTE, View.OfBytes(bs), Grammar.DOUBLEQUOTE))
   }
