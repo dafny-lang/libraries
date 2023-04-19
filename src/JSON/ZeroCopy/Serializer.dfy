@@ -58,13 +58,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     .Append(js.after)
   }
 
-  lemma UnfoldValueNumber(v: Value)
-    requires v.Number?
-    ensures Spec.Value(v) == Spec.Number(v.num)
-  {
-    assert Spec.Value(v) == match v { case Number(num) => Spec.Number(num) case _ => []};
-  }
-
   function {:opaque} {:vcs_split_on_every_assert} Value(v: Value, writer: Writer) : (wr: Writer)
     decreases v, 4
     ensures wr.Bytes() == writer.Bytes() + Spec.Value(v)
@@ -73,7 +66,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     case Null(n) => writer.Append(n)
     case Bool(b) => var wr := writer.Append(b); wr
     case String(str) => var wr := String(str, writer); wr
-    case Number(num) => assert Grammar.Number(num) == v by { UnfoldValueNumber(v); }  var wr := Number(num, writer); wr
+    case Number(num) => assert Grammar.Number(num) == v by { Spec.UnfoldValueNumber(v); }  var wr := Number(num, writer); wr
     case Object(obj) => assert Grammar.Object(obj) == v; assert Spec.Value(v) == Spec.Object(obj); var wr := Object(obj, writer); wr
     case Array(arr) => assert Grammar.Array(arr) == v; assert Spec.Value(v) == Spec.Array(arr); var wr := Array(arr, writer); assert wr.Bytes() == writer.Bytes() + Spec.Value(v); wr
   }

@@ -94,6 +94,27 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.Spec {
     }
   }
 
+  lemma UnfoldValueNumber(v: Value)
+    requires v.Number?
+    ensures Value(v) == Number(v.num)
+  {
+    assert Value(v) == match v { case Number(num) => Number(num) case _ => []};
+  }
+
+  lemma UnfoldValueObject(v: Value)
+    requires v.Object?
+    ensures Value(v) == Object(v.obj)
+  {
+    assert Value(v) == match v { case Object(obj) => Object(obj) case _ => []};
+  }
+
+  lemma UnfoldValueArray(v: Value)
+    requires v.Array?
+    ensures Value(v) == Array(v.arr)
+  {
+    assert Value(v) == match v { case Array(arr) => Array(arr) case _ => []};
+  }
+
   function JSON(js: JSON) : bytes {
     Structural(js, Value)
   }
