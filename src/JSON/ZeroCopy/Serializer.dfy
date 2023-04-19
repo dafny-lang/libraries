@@ -1,5 +1,6 @@
 // RUN: %verify "%s"
 
+include "../Utils/Seq.dfy"
 include "../Errors.dfy"
 include "../ConcreteSyntax.Spec.dfy"
 include "../ConcreteSyntax.SpecProperties.dfy"
@@ -9,6 +10,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   import opened BoundedInts
   import opened Wrappers
 
+  import opened Seq = Utils.Seq
   import opened Errors
   import ConcreteSyntax.Spec
   import ConcreteSyntax.SpecProperties
@@ -49,23 +51,31 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   function {:opaque} JSON(js: JSON, writer: Writer := Writer.Empty) : (wr: Writer)
     ensures wr.Bytes() == writer.Bytes() + Spec.JSON(js)
   {
+    Seq.Assoc2(writer.Bytes(),js.before.Bytes(), Spec.Value(js.t), js.after.Bytes());
     writer
     .Append(js.before)
     .Then(wr => Value(js.t, wr))
     .Append(js.after)
   }
 
-  function {:opaque} Value(v: Value, writer: Writer) : (wr: Writer)
+  lemma UnfoldValueNumber(v: Value)
+    requires v.Number?
+    ensures Spec.Value(v) == Spec.Number(v.num)
+  {
+    assert Spec.Value(v) == match v { case Number(num) => Spec.Number(num) case _ => []};
+  }
+
+  function {:opaque} {:vcs_split_on_every_assert} Value(v: Value, writer: Writer) : (wr: Writer)
     decreases v, 4
     ensures wr.Bytes() == writer.Bytes() + Spec.Value(v)
   {
     match v
     case Null(n) => writer.Append(n)
-    case Bool(b) => writer.Append(b)
-    case String(str) => String(str, writer)
-    case Number(num) => Number(num, writer)
-    case Object(obj) => Object(obj, writer)
-    case Array(arr) => Array(arr, writer)
+    case Bool(b) => var wr := writer.Append(b); wr
+    case String(str) => var wr := String(str, writer); wr
+    case Number(num) => assert Grammar.Number(num) == v by { UnfoldValueNumber(v); }  var wr := Number(num, writer); wr
+    case Object(obj) => assert Grammar.Object(obj) == v; assert Spec.Value(v) == Spec.Object(obj); var wr := Object(obj, writer); wr
+    case Array(arr) => assert Grammar.Array(arr) == v; assert Spec.Value(v) == Spec.Array(arr); var wr := Array(arr, writer); assert wr.Bytes() == writer.Bytes() + Spec.Value(v); wr
   }
 
   function {:opaque} String(str: jstring, writer: Writer) : (wr: Writer)
@@ -82,14 +92,25 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     decreases num, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.Number(num)
   {
-    var writer := writer.Append(num.minus).Append(num.num);
-    var writer := if num.frac.NonEmpty? then
-                    writer.Append(num.frac.t.period).Append(num.frac.t.num)
-                  else writer;
-    var writer := if num.exp.NonEmpty? then
-                    writer.Append(num.exp.t.e).Append(num.exp.t.sign).Append(num.exp.t.num)
-                  else writer;
-    writer
+    var wr := writer.Append(num.minus).Append(num.num);
+
+    var wr := if num.frac.NonEmpty? then
+                wr.Append(num.frac.t.period).Append(num.frac.t.num)
+              else wr;
+    assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac) by {
+      assert num.frac.Empty? ==> wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + [];
+    }
+
+    var wr := if num.exp.NonEmpty? then
+                wr.Append(num.exp.t.e).Append(num.exp.t.sign).Append(num.exp.t.num)
+              else wr;
+    assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac) + Spec.Maybe(num.exp, Spec.Exp) by {
+      if num.exp.NonEmpty? {} else {
+        assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac);
+        assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac) + [];
+      }
+    }
+    wr
   }
 
   // DISCUSS: Can't be opaque, due to the lambda
@@ -99,40 +120,73 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     writer.Append(st.before).Append(st.t).Append(st.after)
   }
 
+  lemma StructuralViewEns(st: Structural<View>, writer: Writer)
+    ensures StructuralView(st, writer).Bytes() == writer.Bytes() + Spec.Structural(st, Spec.View)
+  {}
+
   lemma {:axiom} Assume(b: bool) ensures b
 
   // FIXME refactor below to merge
+
+  lemma BracketedToObject(obj: jobject)
+    ensures Spec.Bracketed(obj, Spec.Member) == Spec.Object(obj)
+  {
+    var rMember := (d: jmember) requires d < obj => Spec.Member(d);
+    assert Spec.Bracketed(obj, Spec.Member) == Spec.Bracketed(obj, rMember) by {
+      // We call ``ConcatBytes`` with ``Spec.Member``, whereas the spec calls it
+      // with ``(d: jmember) requires d in obj.data => Spec.Member(d)``.  That's
+      // why we need an explicit cast, which is performed by the lemma below.
+      SpecProperties.Bracketed_Morphism(obj);
+      assert forall d | d < obj :: Spec.Member(d) == rMember(d);
+    }
+    calc {
+      Spec.Bracketed(obj, Spec.Member);
+      Spec.Bracketed(obj, rMember);
+      Spec.Object(obj);
+    }
+  }
 
   function {:opaque} Object(obj: jobject, writer: Writer) : (wr: Writer)
     decreases obj, 3
     ensures wr.Bytes() == writer.Bytes() + Spec.Object(obj)
   {
-    var writer := StructuralView(obj.l, writer);
-    var writer := Members(obj, writer);
-    var writer := StructuralView(obj.r, writer);
+    var wr := StructuralView(obj.l, writer);
+    StructuralViewEns(obj.l, writer);
+    var wr := Members(obj, wr);
+    var wr := StructuralView(obj.r, wr);
+    Seq.Assoc2(writer.Bytes(), Spec.Structural<View>(obj.l, Spec.View), Spec.ConcatBytes(obj.data, Spec.Member), Spec.Structural<View>(obj.r, Spec.View));
+    assert wr.Bytes() == writer.Bytes() + Spec.Bracketed(obj, Spec.Member);
+    assert Spec.Bracketed(obj, Spec.Member) == Spec.Object(obj) by { BracketedToObject(obj); }
+    wr
+  }
 
-    // We call ``ConcatBytes`` with ``Spec.Member``, whereas the spec calls it
-    // with ``(d: jmember) requires d in obj.data => Spec.Member(d)``.  That's
-    // why we need an explicit cast, which is performed by the lemma below.
-    SpecProperties.Bracketed_Morphism(obj);
-    assert Spec.Object(obj) == Spec.Bracketed(obj, Spec.Member);
-    writer
+  lemma BracketedToArray(arr: jarray)
+    ensures Spec.Bracketed(arr, Spec.Item) == Spec.Array(arr)
+  {
+    var rItem := (d: jitem) requires d < arr => Spec.Item(d);
+    assert Spec.Bracketed(arr, Spec.Item) == Spec.Bracketed(arr, rItem) by {
+      SpecProperties.Bracketed_Morphism(arr);
+      assert forall d | d < arr :: Spec.Item(d) == rItem(d);
+    }
+    calc {
+      Spec.Bracketed(arr, Spec.Item);
+      Spec.Bracketed(arr, rItem);
+      Spec.Array(arr);
+    }
   }
 
   function {:opaque} Array(arr: jarray, writer: Writer) : (wr: Writer)
     decreases arr, 3
     ensures wr.Bytes() == writer.Bytes() + Spec.Array(arr)
   {
-    var writer := StructuralView(arr.l, writer);
-    var writer := Items(arr, writer);
-    var writer := StructuralView(arr.r, writer);
-
-    // We call ``ConcatBytes`` with ``Spec.Item``, whereas the spec calls it
-    // with ``(d: jitem) requires d in arr.data => Spec.Item(d)``.  That's
-    // why we need an explicit cast, which is performed by the lemma below.
-    SpecProperties.Bracketed_Morphism(arr); // DISCUSS
-    assert Spec.Array(arr) == Spec.Bracketed(arr, Spec.Item);
-    writer
+    var wr := StructuralView(arr.l, writer);
+    StructuralViewEns(arr.l, writer);
+    var wr := Items(arr, wr);
+    var wr := StructuralView(arr.r, wr);
+    Seq.Assoc2(writer.Bytes(), Spec.Structural<View>(arr.l, Spec.View), Spec.ConcatBytes(arr.data, Spec.Item), Spec.Structural<View>(arr.r, Spec.View));
+    assert wr.Bytes() == writer.Bytes() + Spec.Bracketed(arr, Spec.Item);
+    assert Spec.Bracketed(arr, Spec.Item) == Spec.Array(arr) by { BracketedToArray(arr); }
+    wr
   }
 
   function {:opaque} Members(obj: jobject, writer: Writer) : (wr: Writer)
@@ -163,10 +217,15 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     // function is only used as a spec for Members.
     if members == [] then writer
     else
-      var writer := MembersSpec(obj, members[..|members|-1], writer);
-      assert members == members[..|members|-1] + [members[|members|-1]];
-      SpecProperties.ConcatBytes_Linear(members[..|members|-1], [members[|members|-1]], Spec.Member);
-      Member(obj, members[|members|-1], writer)
+      var butLast, last := members[..|members|-1], members[|members|-1];
+      assert members == butLast + [last];
+      var wr := MembersSpec(obj, butLast, writer);
+      var wr := Member(obj, last, wr);
+      assert wr.Bytes() == writer.Bytes() + (Spec.ConcatBytes(butLast, Spec.Member) + Spec.ConcatBytes([last], Spec.Member)) by {
+        Seq.Assoc(writer.Bytes(), Spec.ConcatBytes(butLast, Spec.Member), Spec.ConcatBytes([last], Spec.Member));
+      }
+      SpecProperties.ConcatBytes_Linear(butLast, [last], Spec.Member);
+      wr
   } // No by method block here, because the loop invariant in the method version
     // needs to call MembersSpec and the termination checker gets confused by
     // that.  Instead, see Members above. // DISCUSS
@@ -203,10 +262,15 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     // function is only used as a spec for Items.
     if items == [] then writer
     else
-      var writer := ItemsSpec(arr, items[..|items|-1], writer);
-      assert items == items[..|items|-1] + [items[|items|-1]];
-      SpecProperties.ConcatBytes_Linear(items[..|items|-1], [items[|items|-1]], Spec.Item);
-      Item(arr, items[|items|-1], writer)
+      var butLast, last := items[..|items|-1], items[|items|-1];
+      assert items == butLast + [last];
+      var wr := ItemsSpec(arr, butLast, writer);
+      var wr := Item(arr, last, wr);
+      assert wr.Bytes() == writer.Bytes() + (Spec.ConcatBytes(butLast, Spec.Item) + Spec.ConcatBytes([last], Spec.Item)) by {
+        Seq.Assoc(writer.Bytes(), Spec.ConcatBytes(butLast, Spec.Item), Spec.ConcatBytes([last], Spec.Item));
+      }
+      SpecProperties.ConcatBytes_Linear(butLast, [last], Spec.Item);
+      wr
   } // No by method block here, because the loop invariant in the method version
     // needs to call ItemsSpec and the termination checker gets confused by
     // that.  Instead, see Items above. // DISCUSS
@@ -225,6 +289,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
       wr := Member(obj, members[i], wr);
     }
     assert members[..|members|] == members;
+    assert wr == MembersSpec(obj, members, writer);
   }
 
   method ItemsImpl(arr: jarray, writer: Writer) returns (wr: Writer)
@@ -248,10 +313,26 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     decreases obj, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.Member(m)
   {
-    var writer := String(m.t.k, writer);
-    var writer := StructuralView(m.t.colon, writer);
-    var writer := Value(m.t.v, writer);
-    if m.suffix.Empty? then writer else StructuralView(m.suffix.t, writer)
+    var wr := String(m.t.k, writer);
+    var wr := StructuralView(m.t.colon, wr);
+    var wr := Value(m.t.v, wr);
+    assert wr.Bytes() == writer.Bytes() + (Spec.String(m.t.k) + Spec.Structural<View>(m.t.colon, Spec.View) + Spec.Value(m.t.v)) by {
+      Seq.Assoc2( writer.Bytes(), Spec.String(m.t.k), Spec.Structural<View>(m.t.colon, Spec.View), Spec.Value(m.t.v));
+    }
+    var wr := if m.suffix.Empty? then wr else StructuralView(m.suffix.t, wr);
+    assert wr.Bytes() == writer.Bytes() + Spec.KeyValue(m.t) + Spec.CommaSuffix(m.suffix) by {
+      if m.suffix.Empty? {
+        Neutral(Spec.KeyValue(m.t));
+        Seq.Assoc'(writer.Bytes(), Spec.KeyValue(m.t), []);
+      }
+      else {
+        assert Spec.StructuralView(m.suffix.t) == Spec.CommaSuffix(m.suffix);
+      }
+    }
+    assert wr.Bytes() == writer.Bytes() + (Spec.KeyValue(m.t) + Spec.CommaSuffix(m.suffix)) by {
+      Seq.Assoc(writer.Bytes(), Spec.KeyValue(m.t), Spec.CommaSuffix(m.suffix));
+    }
+    wr
   }
 
   function {:opaque} Item(ghost arr: jarray, m: jitem, writer: Writer) : (wr: Writer)
@@ -259,7 +340,11 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     decreases arr, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.Item(m)
   {
-    var writer := Value(m.t, writer);
-    if m.suffix.Empty? then writer else StructuralView(m.suffix.t, writer)
+    var wr := Value(m.t, writer);
+    var wr := if m.suffix.Empty? then wr else StructuralView(m.suffix.t, wr);
+    assert wr.Bytes() == writer.Bytes() + (Spec.Value(m.t) + Spec.CommaSuffix(m.suffix)) by {
+      Seq.Assoc(writer.Bytes(), Spec.Value(m.t), Spec.CommaSuffix(m.suffix));
+    }
+    wr
   }
 }

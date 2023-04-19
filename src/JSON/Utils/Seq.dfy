@@ -1,0 +1,20 @@
+// RUN: %verify "%s"
+
+module {:options "-functionSyntax:4"} JSON.Utils.Seq {
+  lemma Neutral(l: seq)
+    ensures l == l + []
+  {}
+
+  lemma Assoc(a: seq, b: seq, c: seq)
+    ensures a + b + c == a + (b + c)
+  {}
+
+
+  lemma Assoc'(a: seq, b: seq, c: seq)
+    ensures a + (b + c) == a + b + c
+  {}
+
+  lemma Assoc2(a: seq, b: seq, c: seq, d: seq)
+    ensures a + b + c + d == a + (b + c + d)
+  {}
+}
