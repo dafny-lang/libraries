@@ -8,7 +8,9 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Dafny.GeneralInternals {
+/** Declares helper lemmas and predicates for non-linear arithmetic */
+module {:options "-functionSyntax:4"} Dafny.GeneralInternals
+{
 
   /* this predicate is primarily used as a trigger */
   ghost predicate IsLe(x: int, y: int)
