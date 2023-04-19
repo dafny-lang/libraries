@@ -158,7 +158,7 @@ module {:options "-functionSyntax:4"} Maps {
   }
 
   /* Maps an injective function over the keys of a map, retaining the values. */
-  function {:opaque} MapKeys<X(!new), Y, X'>(m: map<X, Y>, f: X --> X'): (m': map<X', Y>)
+  function {:opaque} MapKeys<X(!new), Y, X'>(f: X --> X', m: map<X, Y>): (m': map<X', Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
     requires Functions.Injective(f)
@@ -172,7 +172,7 @@ module {:options "-functionSyntax:4"} Maps {
   }
 
   /* Maps a function over the values of a map, retaining the keys. */
-  function {:opaque} MapValues<X, Y(!new), Y'>(m: map<X, Y>, f: Y --> Y'): (m': map<X, Y'>)
+  function {:opaque} MapValues<X, Y(!new), Y'>(f: Y --> Y', m: map<X, Y>): (m': map<X, Y'>)
     reads f.reads
     requires forall y {:trigger f.requires(y)} :: f.requires(y)
     ensures |m'| == |m|
