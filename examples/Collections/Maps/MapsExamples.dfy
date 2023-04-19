@@ -1,3 +1,10 @@
+// RUN: %verify "%s"
+
+/*******************************************************************************
+ * Copyright by the contributors to the Dafny Project
+ * SPDX-License-Identifier: MIT
+ *******************************************************************************/
+
 include "../../../src/Functions.dfy"
 include "../../../src/Collections/Maps/Maps.dfy"
 
