@@ -24,8 +24,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type JSONError = Errors.DeserializationError
     type Error = CursorError<JSONError>
     type ParseResult<+T> = SplitResult<T, JSONError>
-    type Parser<!T> = Parsers.Parser<T, JSONError>
-    type SubParser<!T> = Parsers.SubParser<T, JSONError>
+    type Parser_<!T> = Parsers.Parser_<T, JSONError>
+    type SubParser_<!T> = Parsers.SubParser_<T, JSONError>
 
     // BUG(https://github.com/dafny-lang/dafny/issues/2179)
     const SpecView := (v: Vs.View) => Spec.View(v);
@@ -54,8 +54,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Cursor(cs.s, cs.beg, point', cs.end).Split();
     }
 
-    function {:opaque} Structural<T>(cs: FreshCursor, parser: Parser<T>)
+    function {:opaque} Structural<T>(cs: FreshCursor, parser: Parser_<T>)
       : (pr: ParseResult<Structural<T>>)
+      requires parser.Valid?()
       requires forall cs :: parser.fn.requires(cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, st => Spec.Structural(st, parser.spec))
     {
@@ -77,8 +78,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       SP(Grammar.Structural(before, val, after), cs)
     }
 
-    type ValueParser = sp: SubParser<Value> |
-        forall t :: sp.spec(t) == Spec.Value(t)
+    type ValueParser = sp: SubParser_<Value> |
+        sp.Valid?() && forall t :: sp.spec(t) == Spec.Value(t)
       witness *
   }
   type Error = Core.Error
@@ -151,7 +152,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       Success(cs.Split())
     }
 
-    function {:opaque} BracketedFromParts(ghost cs: Cursor,
+    function {:opaque} {:vcs_split_on_every_assertion} BracketedFromParts(ghost cs: Cursor,
                                           open: Split<Structural<jopen>>,
                                           elems: Split<seq<TSuffixedElement>>,
                                           close: Split<Structural<jclose>>)
