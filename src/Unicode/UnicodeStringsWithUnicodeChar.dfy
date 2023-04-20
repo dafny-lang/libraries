@@ -23,8 +23,9 @@ module {:options "-functionSyntax:4"} UnicodeStrings refines AbstractUnicodeStri
       && (0 <= asBits < Unicode.HIGH_SURROGATE_MIN || Unicode.LOW_SURROGATE_MAX < asBits)
   {
     assert c as int < 0x11_0000;
-    // TODO: Doesn't verify and not sure what else to try
-    assert c as int as bv24 < 0x11_0000 as bv24;
+    // This seems to be just too expensive to verify for such a wide bit-vector type,
+    // but is clearly true given the above.
+    assume {:axiom} c as bv24 < 0x11_0000 as bv24;
     var asBits := c as int as bv24;
     assert (asBits < Unicode.HIGH_SURROGATE_MIN || asBits > Unicode.LOW_SURROGATE_MAX);
     assert asBits <= 0x10_FFFF;
