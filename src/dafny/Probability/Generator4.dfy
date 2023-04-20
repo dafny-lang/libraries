@@ -6,6 +6,8 @@ module {:options "-functionSyntax:4"} Generator {
 
   datatype Option<+A> = None | Some(value: A)
 
+
+
   function IsSome<A>(o: Option<A>): bool {
     o.Some?
   }
@@ -56,13 +58,13 @@ module {:options "-functionSyntax:4"} Generator {
   }
 
   // Definition 29
-  function Unit<A>(a: A): Hurd<A> {
+  function Return<A>(a: A): Hurd<A> {
     (s: rbs) => (a, s)
   }
 
   // Definition 53
   function Map<A,B>(f: A -> B, m: Hurd<A>): Hurd<B> {
-    Bind(m, (a: A) => Unit(f(a)))
+    Bind(m, (a: A) => Return(f(a)))
   }
 
   // Theorem 38
@@ -73,7 +75,7 @@ module {:options "-functionSyntax:4"} Generator {
     if c(a) then
       Bind(b(a), (a': A) => ProbWhile(c, b, a'))
     else
-      Unit(a)
+      Return(a)
   }
 
   // Definition 44
@@ -92,11 +94,11 @@ module {:options "-functionSyntax:4"} Generator {
   // Definition 48
   function ProbUnif(n: nat): Hurd<nat> {
     if n == 0 then
-      Unit(0)
+      Return(0)
     else
       var f := (m: nat) => 
         var g := (b: bool) => 
-          Unit(if b then 2*m + 1 else 2*m);
+          Return(if b then 2*m + 1 else 2*m);
         Bind(Dest, g);
       Bind(ProbUnif(n / 2), f)
   }
@@ -117,14 +119,14 @@ module {:options "-functionSyntax:4"} Generator {
       (b: bool) =>
         if b then
           if p <= 0.5 then 
-            Unit(false)
+            Return(false)
           else 
             Bernoulli(2.0 * p - 1.0)
         else
           if p <= 0.5 then 
             Bernoulli(2.0 * p)
           else 
-            Unit(true);
+            Return(true);
     Bind(Dest, f)
   }
 
@@ -193,6 +195,69 @@ module {:options "-functionSyntax:4"} Generator {
           (z, s5)
   }
 
+  ghost predicate IsSigmaAlgebra<T(!new)>(event_space: iset<iset<T>>, sample_space: iset<T>) { 
+      && (forall e | e in event_space :: e <= sample_space)
+      && (iset x: T | false) in event_space
+      && (forall e | e in event_space :: (sample_space - e) in event_space)
+  }
+
+  ghost predicate IsMeasure<T(!new)>(event_space: iset<iset<T>>, sample_space: iset<T>, mu: iset<T> -> real) {
+      && mu(iset x: T | false) == 0.0
+      && forall e | e in event_space :: 0.0 <= mu(e)
+  }
+
+
+
+  ghost const sample_space: iset<rbs> := iset s: rbs | true
+  ghost const event_space: iset<iset<rbs>>
+  ghost const mu: iset<rbs> -> real
+
+  lemma {:axiom} RNGHasMeasure()
+    ensures IsMeasure(event_space, sample_space, mu)
+
+  lemma {:axiom} RandomBits(m: nat, n: nat, a: bool, b: bool)
+      ensures 
+          var e := iset p: rbs | p(m) == a && p(n) == b;
+          && e in event_space 
+          && mu(e) == if m == n then (if a == b then 0.5 else 0.0) else 0.25 
+          
+  function FairDoubleFlip(): (h: Hurd<(bool, bool)>)
+    ensures forall p: rbs :: h(p).0 == (p(0), p(1))
+  {
+    var f := (b1: bool) => 
+      var g := (b2: bool) => Return((b1, b2));
+      Bind(Dest, g);
+    Bind(Dest, f)
+  }
+
+  function UnfairDoubleFlip(): (h: Hurd<(bool, bool)>)
+    ensures forall s: rbs :: h(s).0.0 || h(s).0.1
+  {
+    ProbUntil(FairDoubleFlip(), (x: (bool, bool)) => x.0 || x.1)
+  }
+
+
+  lemma LemmaFairDoubleFlip(a: bool, b: bool)
+    ensures mu(iset p: rbs | FairDoubleFlip()(p).0 == (a, b)) == 0.25
+  {
+    assert (iset p: rbs | FairDoubleFlip()(p).0 == (a, b)) == (iset p: rbs | p(0) == a && p(1) == b);
+    RandomBits(0, 1, a, b);
+  }
+
+  lemma LemmaUnfairDoubleFlip()
+    ensures mu(iset p: rbs | UnfairDoubleFlip()(p).0 == (false, false)) == 0.0
+  {
+    assert (iset p: rbs | UnfairDoubleFlip()(p).0 == (false, false)) == (iset p: rbs | false);
+    RNGHasMeasure();
+  }
+
+
+
+
+
+
+
+
 }
 
 import opened Generator
@@ -202,7 +267,7 @@ method Main() {
   var s := RandomBitSeq();
   for i := 0 to 100 {
     var b := if s(i) then "1" else "0";
-    print b;
+    print b,", ";
   }
   print "\nSample of 15 Uniform(6)-distributed integers: \n";
   for i := 0 to 15 {
@@ -215,7 +280,7 @@ method Main() {
   s := RandomBitSeq();
   for i := 0 to 100 {
     var b := if s(i) then "1" else "0";
-    print b;
+    print b,", ";
   }
   print "\nSample of 15 Bernoulli(0.2)-distributed bits: \n";
   for i := 0 to 15 {

@@ -235,7 +235,7 @@ module Probability {
     ensures IsAdditive(ms, mu)
   
   // Definition 6
-  datatype MeasureSpaceStructure<!T(!new)> = Pair(ms: MeasurableSpace, mu: iset<T> -> real) 
+  datatype MeasureSpaceStructure<!T(!new)> = Pair(ms: MeasurableSpace, mu : iset<T> -> real) 
   type MeasureSpace<!T(!new)> = pair: MeasureSpaceStructure | IsPositive(pair.ms, pair.mu) && IsCountablyAdditive(pair.ms, pair.mu) witness *
 
   ghost function PreImageOf<S(!new),T>(f: S -> T, domain: iset<S>, b: iset<T>): (a: iset<S>)
