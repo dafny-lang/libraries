@@ -19,12 +19,12 @@ The tutorial in [`Tutorial.dfy`](Tutorial.dfy) shows how to import the library, 
 include "src/JSON/API.dfy"
 
 import JSON.API
-import JSON.Utils.Unicode
+import opened UnicodeStrings
 import opened JSON.AST
 import opened Wrappers
 
 method Test(){
-  var CITY_JS := Unicode.Transcode16To8(@"{""Cities"": [{
+  var CITY_JS :- expect ToUTF8Checked(@"{""Cities"": [{
     ""Name"": ""Boston"",
     ""Founded"": 1630,
     ""Population"": 689386,
@@ -39,9 +39,11 @@ method Test(){
 
   expect API.Deserialize(CITY_JS) == Success(CITY_AST);
 
-  expect API.Serialize(CITY_AST) == Success(Unicode.Transcode16To8(
+  var EXPECTED :- expect ToUTF8Checked(
     @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
-  ));
+  );
+
+  expect API.Serialize(CITY_AST) == Success(EXPECTED);
 }
 ```
 

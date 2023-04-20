@@ -12,9 +12,9 @@ include "ZeroCopy/API.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
   import API
-  import Utils.Unicode
   import opened AST
   import opened Wrappers
+  import opened UnicodeStrings
 
 /// The high-level API works with fairly simple ASTs that contain native Dafny
 /// strings:
@@ -28,14 +28,14 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 /// have syntax for byte strings; in a real application, we would be reading and
 /// writing raw bytes directly from disk or from the network instead).
 
-    var SIMPLE_JS := Unicode.Transcode16To8("[true]");
+    var SIMPLE_JS :- expect ToUTF8Checked("[true]");
     var SIMPLE_AST := Array([Bool(true)]);
     expect API.Deserialize(SIMPLE_JS) == Success(SIMPLE_AST);
 
 /// Here is a larger object, written using a verbatim string (with `@"`).  In
 /// verbatim strings `""` represents a single double-quote character):
 
-    var CITIES_JS := Unicode.Transcode16To8(@"{
+    var CITIES_JS :- expect ToUTF8Checked(@"{
         ""Cities"": [
           {
             ""Name"": ""Boston"",
@@ -87,7 +87,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 
 /// For more complex object, the generated layout may not be exactly the same; note in particular how the representation of numbers and the whitespace have changed.
 
-    var EXPECTED := Unicode.Transcode16To8(
+    var EXPECTED :- expect ToUTF8Checked(
       @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1},{""Name"":""Rome"",""Founded"":-753,""Population"":2873e3,""Area (km2)"":1285},{""Name"":""Paris"",""Founded"":null,""Population"":2161e3,""Area (km2)"":23835e-1}]}"
     );
 
@@ -97,7 +97,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 /// existing buffer or into an array.  Below is the smaller example from the
 /// README, as a sanity check:
 
-    var CITY_JS := Unicode.Transcode16To8(@"{""Cities"": [{
+    var CITY_JS :- expect ToUTF8Checked(@"{""Cities"": [{
       ""Name"": ""Boston"",
       ""Founded"": 1630,
       ""Population"": 689386,
@@ -113,7 +113,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 
     expect API.Deserialize(CITY_JS) == Success(CITY_AST);
 
-    var EXPECTED' := Unicode.Transcode16To8(
+    var EXPECTED' :- expect ToUTF8Checked(
       @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
     );
 
@@ -128,7 +128,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 
 module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
   import ZeroCopy.API
-  import Utils.Unicode
+  import opened UnicodeStrings
   import opened Grammar
   import opened Wrappers
 
@@ -145,7 +145,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
 /// all formatting information, re-serializing an object produces the original
 /// value:
 
-    var CITIES := Unicode.Transcode16To8(@"{
+    var CITIES :- expect ToUTF8Checked(@"{
         ""Cities"": [
           {
             ""Name"": ""Boston"",
@@ -176,8 +176,8 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
 /// First, we construct a JSON value for the string `"Unknown"`; this could be
 /// done by hand using `View.OfBytes()`, but using `API.Deserialize` is even
 /// simpler:
-
-    var UNKNOWN :- expect API.Deserialize(Unicode.Transcode16To8(@"""Unknown"""));
+    var UNKNOWN_JS :- expect ToUTF8Checked(@"""Unknown""");
+    var UNKNOWN :- expect API.Deserialize(UNKNOWN_JS);
 
 /// `UNKNOWN` is of type `Grammar.JSON`, which contains optional whitespace and
 /// a `Grammar.Value` under the name `UNKNOWN.t`, which we can use in the
@@ -188,7 +188,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
 /// Then, if we reserialize, we see that all formatting (and, in fact, all of
 /// the serialization work) has been reused:
 
-    expect API.Serialize(without_null) == Success(Unicode.Transcode16To8(@"{
+    var expected_js :- expect ToUTF8Checked(@"{
         ""Cities"": [
           {
             ""Name"": ""Boston"",
@@ -207,7 +207,9 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
             ""Area (km2)"": 2383.5
           }
         ]
-      }"));
+      }");
+    var actual_js :- expect API.Serialize(without_null);
+    expect actual_js == expected_js;
   }
 
 /// All that remains is to write the recursive traversal:

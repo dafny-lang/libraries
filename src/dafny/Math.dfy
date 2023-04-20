@@ -5,7 +5,10 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
+/** Defines various integer-math functions */
 module {:options "-functionSyntax:4"} Dafny.Math {
+
+  /** Minimum of two integers  */
   function Min(a: int, b: int): int
   {
     if a < b
@@ -13,6 +16,13 @@ module {:options "-functionSyntax:4"} Dafny.Math {
     else b
   }
 
+  /** Minimum of three integers  */
+  function Min3(a: int, b: int, c: int): int
+  {
+    Min(a, Min(b, c))
+  }
+
+  /** Maximum of two integers  */
   function Max(a: int, b: int): int
   {
     if a < b
@@ -20,6 +30,13 @@ module {:options "-functionSyntax:4"} Dafny.Math {
     else a
   }
 
+  /** Maximum of three integers  */
+  function Max3(a: int, b: int, c: int): int
+  {
+    Max(a, Max(b, c))
+  }
+
+  /** Integer absolute value */
   function Abs(a: int): int
   {
     if a < 0

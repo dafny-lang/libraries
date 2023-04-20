@@ -19,6 +19,7 @@ module {:options "-functionSyntax:4"} JSON.Errors {
     | ReachedEOF
     | ExpectingByte(expected: byte, b: opt_byte)
     | ExpectingAnyByte(expected_sq: seq<byte>, b: opt_byte)
+    | InvalidUnicode
   {
     function ToString() : string {
       match this
@@ -36,6 +37,7 @@ module {:options "-functionSyntax:4"} JSON.Errors {
         var c := if b > 0 then "'" + [b as char] + "'" else "EOF";
         var c0s := seq(|bs0|, idx requires 0 <= idx < |bs0| => bs0[idx] as char);
         "Expecting one of '" + c0s + "', read " + c
+      case InvalidUnicode => "Invalid Unicode sequence"
     }
   }
 
@@ -43,12 +45,14 @@ module {:options "-functionSyntax:4"} JSON.Errors {
     | OutOfMemory
     | IntTooLarge(i: int)
     | StringTooLong(s: string)
+    | InvalidUnicode
   {
     function ToString() : string {
       match this
       case OutOfMemory => "Out of memory"
       case IntTooLarge(i: int) => "Integer too large: " + Str.OfInt(i)
       case StringTooLong(s: string) => "String too long: " + s
+      case InvalidUnicode => "Invalid Unicode sequence"
     }
   }
 

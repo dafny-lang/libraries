@@ -11,7 +11,6 @@ include "../BoundedInts.dfy"
 
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
-include "Utils/Unicode.dfy"
 include "Errors.dfy"
 include "AST.dfy"
 include "Grammar.dfy"
@@ -25,7 +24,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   import opened Logarithm
   import opened Power
   import opened Utils.Str
-  import Utils.Unicode
+  import opened UnicodeStrings
 
   import AST
   import Spec
@@ -39,60 +38,81 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     js.At(0) == 't' as byte
   }
 
+  function UnsupportedEscape16(code: seq<uint16>): DeserializationError {
+    UnsupportedEscape(FromUTF16Checked(code).UnwrapOr("Couldn't decode UTF-16"))
+  }
+
+  module Uint16StrConversion refines Str.ParametricConversion {
+    import opened BoundedInts
+
+    type Char = uint16
+  }
+
+  const HEX_TABLE_16: map<Uint16StrConversion.Char, nat> :=
+    map[
+      '0' as uint16 := 0, '1' as uint16 := 1, '2' as uint16 := 2, '3' as uint16 := 3, '4' as uint16 := 4,
+      '5' as uint16 := 5, '6' as uint16 := 6, '7' as uint16 := 7, '8' as uint16 := 8, '9' as uint16 := 9,
+      'a' as uint16 := 0xA, 'b' as uint16 := 0xB, 'c' as uint16 := 0xC, 'd' as uint16 := 0xD, 'e' as uint16 := 0xE, 'f' as uint16 := 0xF,
+      'A' as uint16 := 0xA, 'B' as uint16 := 0xB, 'C' as uint16 := 0xC, 'D' as uint16 := 0xD, 'E' as uint16 := 0xE, 'F' as uint16 := 0xF
+    ]
+
+  function ToNat16(str: Uint16StrConversion.String): uint16
+    requires |str| <= 4
+    requires forall c | c in str :: c in HEX_TABLE_16
+  {
+    Uint16StrConversion.ToNat_bound(str, 16, HEX_TABLE_16);
+    var hd := Uint16StrConversion.ToNat_any(str, 16, HEX_TABLE_16);
+    assert hd < 0x1_0000 by { reveal Pow(); }
+    hd as uint16
+  }
+
   // TODO: Verify this function
-  function Unescape(str: string, start: nat := 0): DeserializationResult<string>
+  function Unescape(str: seq<uint16>, start: nat := 0): DeserializationResult<seq<uint16>>
     decreases |str| - start
   { // Assumes UTF-16 strings
     if start >= |str| then Success([])
-    else if str[start] == '\\' then
+    else if str[start] == '\\' as uint16 then
       if |str| == start + 1 then
         Failure(EscapeAtEOS)
       else
         var c := str[start + 1];
-        if c == 'u' then
+        if c == 'u' as uint16 then
           if |str| <= start + 6 then
             Failure(EscapeAtEOS)
           else
             var code := str[start + 2..start + 6];
-            if exists c | c in code :: c !in Str.HEX_TABLE then
-              Failure(UnsupportedEscape(code))
+            if exists c | c in code :: c !in HEX_TABLE_16 then
+              Failure(UnsupportedEscape16(code))
             else
               var tl :- Unescape(str, start + 6);
-              var hd := Str.ToNat(code, 16);
-              assert hd < 0x10000 by { reveal Pow(); }
-              if 0xD7FF < hd then
-                Failure(UnsupportedEscape(code))
-              else
-                Success([hd as char])
-
+              var hd := ToNat16(code);
+              Success([hd])
         else
           var unescaped: uint16 := match c
-            case '\"' => 0x22 as uint16 // quotation mark
-            case '\\' => 0x5C as uint16 // reverse solidus
-            case 'b'  => 0x08 as uint16 // backspace
-            case 'f'  => 0x0C as uint16 // form feed
-            case 'n'  => 0x0A as uint16 // line feed
-            case 'r'  => 0x0D as uint16 // carriage return
-            case 't'  => 0x09 as uint16 // tab
+            case 0x22 => 0x22 as uint16 // \" => quotation mark
+            case 0x5C => 0x5C as uint16 // \\ => reverse solidus
+            case 0x62 => 0x08 as uint16 // \b => backspace
+            case 0x66 => 0x0C as uint16 // \f => form feed
+            case 0x6E => 0x0A as uint16 // \n => line feed
+            case 0x72 => 0x0D as uint16 // \r => carriage return
+            case 0x74 => 0x09 as uint16 // \t => tab
             case _    => 0 as uint16;
-          if unescaped == 0 as uint16 then
-            Failure(UnsupportedEscape(str[start..start+2]))
+          if unescaped as int == 0 then
+            Failure(UnsupportedEscape16(str[start..start+2]))
           else
             var tl :- Unescape(str, start + 2);
-            Success([unescaped as char] + tl)
+            Success([unescaped] + tl)
     else
       var tl :- Unescape(str, start + 1);
       Success([str[start]] + tl)
   }
 
-  function Transcode8To16Unescaped(str: seq<byte>): DeserializationResult<string>
-    // TODO Optimize with a function by method
-  {
-    Unescape(Unicode.Transcode8To16(str))
-  }
-
   function String(js: Grammar.jstring): DeserializationResult<string> {
-    Transcode8To16Unescaped(js.contents.Bytes())
+    // TODO Optimize with a function by method
+    var asUtf32 :- FromUTF8Checked(js.contents.Bytes()).ToResult'(DeserializationError.InvalidUnicode);
+    var asUint16 :- ToUTF16Checked(asUtf32).ToResult'(DeserializationError.InvalidUnicode);
+    var unescaped :- Unescape(asUint16);
+    FromUTF16Checked(unescaped).ToResult'(DeserializationError.InvalidUnicode)
   }
 
   module ByteStrConversion refines Str.ParametricConversion {

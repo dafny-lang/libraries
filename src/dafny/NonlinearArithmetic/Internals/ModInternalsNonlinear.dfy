@@ -8,7 +8,9 @@
  *  SPDX-License-Identifier: MIT 
  *******************************************************************************/
 
-module {:options "-functionSyntax:4"} Dafny.ModInternalsNonlinear {
+/** Declares helper lemmas about the mod operation */
+module {:options "-functionSyntax:4"} Dafny.ModInternalsNonlinear
+{
 
   /* WARNING: Think three times before adding to this file, as nonlinear
   verification is highly unstable! */
