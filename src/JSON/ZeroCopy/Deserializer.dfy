@@ -196,7 +196,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var elems' := SP(elems.t + [suffixed], sep.cs); // DISCUSS: Moving this down doubles the verification time
 
       assert cs0.Bytes() == SuffixedElementsSpec(elems'.t) + sep.cs.Bytes() by {
-        assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + (ElementSpec(suffixed.t) + Spec.CommaSuffix(suffixed.suffix)) + sep.cs.Bytes() by {
+        assert {:focus} cs0.Bytes() == SuffixedElementsSpec(elems.t) + (ElementSpec(suffixed.t) + Spec.CommaSuffix(suffixed.suffix)) + sep.cs.Bytes() by {
           assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + ElementSpec(suffixed.t) + Spec.CommaSuffix(suffixed.suffix) + sep.cs.Bytes() by {
             assert cs0.Bytes() == SuffixedElementsSpec(elems.t) + elems.cs.Bytes();
             assert elems.cs.Bytes() == ElementSpec(suffixed.t) + elem.cs.Bytes();
@@ -213,9 +213,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           }
         }
       }
-
       assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
-      assert forall e | e in elems'.t :: e.suffix.NonEmpty?;
+      assert forall e | e in elems'.t :: e.suffix.NonEmpty? by { assert elems'.t == elems.t + [suffixed]; }
+      assert {:split_here} elems'.cs.Length() < elems.cs.Length();
       elems'
     }
 
@@ -275,21 +275,33 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var sep := Core.TryStructural(elem.cs);
       var s0 := sep.t.t.Peek();
       if s0 == SEPARATOR as opt_byte then
-        assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep);
+        assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep) by {
+          assert {:focus} elems.cs.StrictlySplitFrom?(json.cs);
+          assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+          assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
+          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
+          assert forall e | e in elems.t :: e.suffix.NonEmpty?;
+          assert {:split_here} true;
+        }
         var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
         Elements(cs0, json, open, elems)
       else if s0 == CLOSE as opt_byte then
         assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
-          assert sep.SplitFrom?(elem.cs, st => Spec.Structural(st, SpecView));
           assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
+          assert elems.cs.StrictlySplitFrom?(json.cs);
+          assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+          assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
         }
-        var elems := AppendLast(open.cs, json, elems, elem, sep);
-        assert BracketedFromParts.requires(cs0, open, elems, sep);
-        var bracketed := BracketedFromParts(cs0, open, elems, sep);
+        var elems' := AppendLast(open.cs, json, elems, elem, sep);
+        assert elems'.SplitFrom?(open.cs, SuffixedElementsSpec) by {
+          assert elems'.StrictlySplitFrom?(open.cs, SuffixedElementsSpec);
+        }
+        var bracketed := BracketedFromParts(cs0, open, elems', sep);
         assert bracketed.StrictlySplitFrom?(cs0, BracketedSpec);
         Success(bracketed)
       else
-        var pr := Failure(ExpectingAnyByte([CLOSE, SEPARATOR], s0));
+        var separator := SEPARATOR;
+        var pr := Failure(ExpectingAnyByte([CLOSE, separator], s0));
         pr
     }
 
@@ -430,6 +442,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           assert SP(num, cs').StrictlySplitFrom?(cs, Spec.Number);
           Spec.UnfoldValueNumber(v);
         }
+        assert sp.StrictlySplitFrom?(cs, Spec.Value);
         Success(sp)
     }
 
