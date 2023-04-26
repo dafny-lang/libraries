@@ -70,7 +70,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   function {:tailrecursion} {:vcs_split_on_every_assert} Unescape(str: seq<uint16>, start: nat := 0, prefix: seq<uint16> := []): DeserializationResult<seq<uint16>>
     decreases |str| - start
   { // Assumes UTF-16 strings
-    if start >= |str| then Success([])
+    if start >= |str| then Success(prefix)
     else if str[start] == '\\' as uint16 then
       if |str| == start + 1 then
         Failure(EscapeAtEOS)
