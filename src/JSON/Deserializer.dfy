@@ -67,11 +67,14 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   }
 
   // TODO: Verify this function
-  function Unescape(str: seq<uint16>, start: nat := 0): DeserializationResult<seq<uint16>>
+  function {:vcs_split_on_every_assert} UnescapeOne(str: seq<uint16>, start: nat := 0): (res: DeserializationResult<(uint16, nat)>)
+    requires start < |str|
     decreases |str| - start
+    ensures res.Success? ==> 
+      var (_, next) := res.value;
+      start < next <= |str|
   { // Assumes UTF-16 strings
-    if start >= |str| then Success([])
-    else if str[start] == '\\' as uint16 then
+    if str[start] == '\\' as uint16 then
       if |str| == start + 1 then
         Failure(EscapeAtEOS)
       else
@@ -84,9 +87,8 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
             if exists c | c in code :: c !in HEX_TABLE_16 then
               Failure(UnsupportedEscape16(code))
             else
-              var tl :- Unescape(str, start + 6);
               var hd := ToNat16(code);
-              Success([hd])
+              Success((hd, start + 6))
         else
           var unescaped: uint16 := match c
             case 0x22 => 0x22 as uint16 // \" => quotation mark
@@ -100,11 +102,34 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
           if unescaped as int == 0 then
             Failure(UnsupportedEscape16(str[start..start+2]))
           else
-            var tl :- Unescape(str, start + 2);
-            Success([unescaped] + tl)
+            Success((unescaped, start + 2))
     else
-      var tl :- Unescape(str, start + 1);
-      Success([str[start]] + tl)
+      Success((str[start], start + 1))
+  }
+
+  function {:vcs_split_on_every_assert} Unescape(str: seq<uint16>, start: nat := 0): (res: DeserializationResult<seq<uint16>>) 
+    decreases |str| - start
+  {
+    if start >= |str| then
+      Success([])
+    else
+      var (hd, next) :- UnescapeOne(str, start);
+      var tl :- Unescape(str, next);
+      Success([hd] + tl)
+  }
+  by method {
+    var result := [];
+    var next := start;
+    while next < |str|
+      decreases |str| - next
+    {
+      var nextPair :- UnescapeOne(str, next);
+      var (chunk, newNext) := nextPair;
+
+      result := result + [chunk];
+      next := newNext;
+    }
+    return Success(result);
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {
