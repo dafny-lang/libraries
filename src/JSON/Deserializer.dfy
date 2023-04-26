@@ -67,7 +67,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   }
 
   // TODO: Verify this function
-  function Unescape(str: seq<uint16>, start: nat := 0): DeserializationResult<seq<uint16>>
+  function {:tailrecursion} {:vcs_split_on_every_assert} Unescape(str: seq<uint16>, start: nat := 0, prefix: seq<uint16> := []): DeserializationResult<seq<uint16>>
     decreases |str| - start
   { // Assumes UTF-16 strings
     if start >= |str| then Success([])
@@ -84,9 +84,8 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
             if exists c | c in code :: c !in HEX_TABLE_16 then
               Failure(UnsupportedEscape16(code))
             else
-              var tl :- Unescape(str, start + 6);
               var hd := ToNat16(code);
-              Success([hd])
+              Unescape(str, start + 6, prefix + [hd])
         else
           var unescaped: uint16 := match c
             case 0x22 => 0x22 as uint16 // \" => quotation mark
@@ -100,11 +99,9 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
           if unescaped as int == 0 then
             Failure(UnsupportedEscape16(str[start..start+2]))
           else
-            var tl :- Unescape(str, start + 2);
-            Success([unescaped] + tl)
+            Unescape(str, start + 2, prefix + [unescaped])
     else
-      var tl :- Unescape(str, start + 1);
-      Success([str[start]] + tl)
+      Unescape(str, start + 1, prefix + [str[start]])
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {
