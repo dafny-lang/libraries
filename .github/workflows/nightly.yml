@@ -15,7 +15,9 @@ jobs:
     strategy:
       matrix:
         version: [ nightly-latest ]
+        unicode-char: [ true, false ]
 
     uses: ./.github/workflows/reusable-tests.yml
     with:
       dafny-version: ${{ matrix.version }}
+      unicode-char: ${{ matrix.unicode-char }}
