@@ -1,4 +1,6 @@
-// RUN: %test "%s"
+// RUN: %run "%s" --unicode-char:false --input ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
+// RUN: %run "%s" --unicode-char:true --input ../Unicode/UnicodeStringsWithUnicodeChar.dfy
+
 /// # Using the JSON library
 
 include "API.dfy"

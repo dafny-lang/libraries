@@ -1,4 +1,5 @@
-// RUN: %run "%s"
+// RUN: %run "%s" --unicode-char:false --input ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
+// RUN: %run "%s" --unicode-char:true --input ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
 include "Errors.dfy"
 include "API.dfy"

@@ -1,4 +1,5 @@
-// RUN: %verify "%s"
+// RUN: %verify "%s" --unicode-char:false ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
+// RUN: %verify "%s" --unicode-char:true ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
 /// =============================================
 ///  Serialization from AST.JSON to bytes (Spec)
@@ -10,8 +11,9 @@
 include "../BoundedInts.dfy"
 include "../NonlinearArithmetic/Logarithm.dfy"
 include "../Collections/Sequences/Seq.dfy"
-  // TODO: Remove and follow one of the options documented in UnicodeStrings.dfy
-include "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
+// include one of these two files externally as well:
+// "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
+// "../Unicode/UnicodeStringsWithUnicodeChar.dfy"
 
 include "AST.dfy"
 include "Errors.dfy"

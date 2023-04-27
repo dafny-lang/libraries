@@ -1,4 +1,5 @@
-// RUN: %verify "%s"
+// RUN: %verify "%s" --unicode-char:false ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
+// RUN: %verify "%s" --unicode-char:true ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
 include "Serializer.dfy"
 include "Deserializer.dfy"
