@@ -7,9 +7,6 @@ on:
       dafny-version:
         required: true
         type: string
-      unicode-char:
-        required: true
-        type: boolean
 
 jobs:
   reusable_verification:
@@ -42,15 +39,9 @@ jobs:
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
-      - name: Verify Code and Examples (--unicode-char:false)
-        if: ${{ !inputs.dafny-version }}
+      - name: Verify Code and Examples
         run: |
-          lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv --unicode-char:true ${{ github.workspace }}/src/Unicode/UnicodeStringsWithoutUnicodeChar.dfy' .
-
-      - name: Verify Code and Examples (--unicode-char:false)
-        if: ${{ inputs.dafny-version }}
-        run: |
-          lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv --unicode-char:true ${{ github.workspace }}/src/Unicode/UnicodeStringsWithUnicodeChar.dfy' .
+          lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-resource-count 40000000
