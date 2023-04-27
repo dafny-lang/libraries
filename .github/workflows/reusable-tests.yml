@@ -44,7 +44,7 @@ jobs:
           lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Generate Report
-        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-resource-count 40000000
 
       - uses: actions/upload-artifact@v2  # upload test results
         with:
