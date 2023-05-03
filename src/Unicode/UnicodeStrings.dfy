@@ -19,10 +19,10 @@
 /// 1. Implement your logic in an abstract module as well that
 ///    imports this one, and define two different refining modules
 ///    that import the appropriate UnicodeStrings module.
-///    See (TODO example) for an example.
 /// 2. Do not `include` any of these three files in your source code,
 ///    instead passing the appropriate file to Dafny when verifying and building,
 ///    so that references to `UnicodeStrings` can be resolved.
+///    See the JSON modules as an example.
 ///
 /// Option 2. avoids needing to write boilerplate refining modules,
 /// but is less IDE-friendly until we have better project configuration support.
