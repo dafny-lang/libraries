@@ -1,5 +1,4 @@
-// RUN: %verify "%s" --unicode-char:false ../../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
-// RUN: %verify "%s" --unicode-char:true ../../Unicode/UnicodeStringsWithUnicodeChar.dfy
+// RUN: %verify "%s"
 
 include "../Utils/Seq.dfy"
 include "../Errors.dfy"
