@@ -11,9 +11,9 @@
 include "../BoundedInts.dfy"
 include "../NonlinearArithmetic/Logarithm.dfy"
 include "../Collections/Sequences/Seq.dfy"
-// include one of these two files externally as well:
-// "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
-// "../Unicode/UnicodeStringsWithUnicodeChar.dfy"
+/// include one of these two files externally as well:
+/// "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
+/// "../Unicode/UnicodeStringsWithUnicodeChar.dfy"
 
 include "AST.dfy"
 include "Errors.dfy"
