@@ -1,23 +1,24 @@
-# This workflow performs static analysis checks.
-name: tests
+name: Dafny Core verification
 
-on: ["pull_request", "push"]
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verification:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+    strategy:
+      matrix:
+        # nightly-latest to catch anything that breaks these tests in current development
+        # 2/18/2023 version is the first that supports logging, but it is not supported by dafny-setup-action 1.6.1
+        # 3.11.0 supports new CLI but does not support logging
+        # setup-dafny-action does not yet support 3.13.1 or recent nightly-latest
+        version: [ 3.11.0, 3.12.0, 3.13.1, 4.0.0 ]
 
-      - name: Install Dafny
-        uses: tchajed/setup-dafny-action@v1
-        with:
-          dafny-version: "3.2.0"
-
-      - uses: actions/setup-python@v1
-
-      - name: Install lit 
-        run: pip install lit OutputCheck
-
-      - name: Verify/Test Dafny code
-        run: lit --time-tests -v .
+    uses: ./.github/workflows/reusable-tests.yml
+    with:
+      dafny-version: ${{ matrix.version }}

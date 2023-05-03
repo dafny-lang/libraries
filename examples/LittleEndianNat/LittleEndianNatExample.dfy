@@ -1,10 +1,9 @@
-// RUN: %dafny /compile:3 /noNLarith "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %run --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../src/Collections/Sequences/LittleEndianNatConversions.dfy"
 

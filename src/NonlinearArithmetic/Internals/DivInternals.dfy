@@ -1,13 +1,12 @@
-// RUN: %dafny /compile:0 /noNLarith "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %verify --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* lemmas and functions in this file are used in the proofs in DivMod.dfy 
 
@@ -22,7 +21,7 @@ Note this is consistent: -3 * -1 + 2 == 5 */
 include "GeneralInternals.dfy"
 include "ModInternals.dfy"
 
-module DivInternals {
+module {:options "-functionSyntax:4"} DivInternals {
 
   import opened GeneralInternals
   import opened ModInternals
@@ -31,7 +30,7 @@ module DivInternals {
   import opened MulInternals
 
   /* Performs division recursively with positive denominator. */
-  function method {:opaque} DivPos(x: int, d: int): int
+  function {:opaque} DivPos(x: int, d: int): int
     requires d > 0
     decreases if x < 0 then (d - x) else x
   {
@@ -44,7 +43,7 @@ module DivInternals {
   }
 
   /* Performs division recursively. */
-  function method {:opaque} DivRecursive(x: int, d: int): int
+  function {:opaque} DivRecursive(x: int, d: int): int
     requires d != 0
   {
     reveal DivPos();
@@ -76,7 +75,7 @@ module DivInternals {
   /* Automates the division operator process. Contains the identity property, a
   fact about when quotients are zero, and facts about adding and subtracting
   integers over a common denominator. */
-  predicate DivAuto(n: int)
+  ghost predicate DivAuto(n: int)
     requires n > 0
   {
     && ModAuto(n)
@@ -84,12 +83,12 @@ module DivInternals {
     && (forall x: int {:trigger x / n} :: 0 <= x < n <==> x / n == 0)
     && (forall x: int, y: int {:trigger (x + y) / n} ::
           (var z := (x % n) + (y % n);
-                    ((0 <= z < n && (x + y) / n == x / n + y / n) ||
-                    (n <= z < n + n && (x + y) / n == x / n + y / n + 1))))
+           ((0 <= z < n && (x + y) / n == x / n + y / n) ||
+            (n <= z < n + n && (x + y) / n == x / n + y / n + 1))))
     && (forall x: int, y: int {:trigger (x - y) / n} ::
           (var z := (x % n) - (y % n);
-                    ((0 <= z < n && (x - y) / n == x / n - y / n) ||
-                    (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))))
+           ((0 <= z < n && (x - y) / n == x / n - y / n) ||
+            (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))))
   }
 
   /* Ensures that DivAuto is true */
@@ -103,13 +102,13 @@ module DivInternals {
     assert (0 - n) / n == -1;
     forall x:int, y:int {:trigger (x + y) / n}
       ensures  var z := (x % n) + (y % n);
-                      (|| (0 <= z < n && (x + y) / n == x / n + y / n)
-                        || (n <= z < 2 * n && (x + y) / n == x / n + y / n + 1))
+               (|| (0 <= z < n && (x + y) / n == x / n + y / n)
+                || (n <= z < 2 * n && (x + y) / n == x / n + y / n + 1))
     {
       var f := (xx:int, yy:int) =>
-                  (var z := (xx % n) + (yy % n);
-                      (   (0 <= z < n && (xx + yy) / n == xx / n + yy / n)
-                        || (n <= z < 2 * n && (xx + yy) / n == xx / n + yy / n + 1)));
+          (var z := (xx % n) + (yy % n);
+           (   (0 <= z < n && (xx + yy) / n == xx / n + yy / n)
+               || (n <= z < 2 * n && (xx + yy) / n == xx / n + yy / n + 1)));
       forall i, j
         ensures j >= 0 && f(i, j) ==> f(i, j + n)
         ensures i < n  && f(i, j) ==> f(i - n, j)
@@ -134,13 +133,13 @@ module DivInternals {
     }
     forall x:int, y:int {:trigger (x - y) / n}
       ensures  var z := (x % n) - (y % n);
-                      (|| (0 <= z < n && (x - y) / n == x / n - y / n)
-                        || (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))
+               (|| (0 <= z < n && (x - y) / n == x / n - y / n)
+                || (-n <= z < 0 && (x - y) / n == x / n - y / n - 1))
     {
       var f := (xx:int, yy:int) =>
-                  (var z := (xx % n) - (yy % n);
-                      (   (0 <= z < n && (xx - yy) / n == xx / n - yy / n)
-                      || (-n <= z < 0 && (xx - yy) / n == xx / n - yy / n - 1)));
+          (var z := (xx % n) - (yy % n);
+           (   (0 <= z < n && (xx - yy) / n == xx / n - yy / n)
+               || (-n <= z < 0 && (xx - yy) / n == xx / n - yy / n - 1)));
       forall i, j
         ensures j >= 0 && f(i, j) ==> f(i, j + n)
         ensures i < n  && f(i, j) ==> f(i - n, j)
@@ -169,8 +168,8 @@ module DivInternals {
   lemma LemmaDivInductionAuto(n: int, x: int, f: int->bool)
     requires n > 0
     requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                            && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
     ensures  DivAuto(n)
     ensures  f(x)
   {
@@ -186,8 +185,8 @@ module DivInternals {
   lemma LemmaDivInductionAutoForall(n:int, f:int->bool)
     requires n > 0
     requires DivAuto(n) ==> && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && i < n ==> f(i))
-                          && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
-                          && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
+                            && (forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + n))
+                            && (forall i {:trigger IsLe(i + 1, n)} :: IsLe(i + 1, n) && f(i) ==> f(i - n))
     ensures  DivAuto(n)
     ensures  forall i {:trigger f(i)} :: f(i)
   {

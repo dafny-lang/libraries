@@ -1,15 +1,14 @@
-// RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
-module MulInternalsNonlinear {
+module {:options "-functionSyntax:4"} MulInternalsNonlinear {
 
   /* WARNING: Think three times before adding to this file, as nonlinear
   verification is highly unstable! */
@@ -34,7 +33,7 @@ module MulInternalsNonlinear {
     ensures x * (y + z) == x * y + x * z
   {}
 
-  /* the product of two integers is greater than the value of each individual integer */ 
+  /* the product of two integers is greater than the value of each individual integer */
   lemma LemmaMulOrdering(x: int, y: int)
     requires x != 0
     requires y != 0

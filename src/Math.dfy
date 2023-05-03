@@ -1,24 +1,23 @@
-// RUN: %dafny /compile:0 "%s" > "%t"
-// RUN: %diff "%s.expect" "%t"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
-module Math {
-  function method Min(a: int, b: int): int
+module {:options "-functionSyntax:4"} Math {
+  function Min(a: int, b: int): int
   {
     if a < b
-      then a
+    then a
     else
       b
   }
 
-  function method Max(a: int, b: int): int
+  function Max(a: int, b: int): int
   {
     if a < b
-      then b
+    then b
     else
       a
   }
