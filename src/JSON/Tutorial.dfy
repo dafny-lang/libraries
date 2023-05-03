@@ -16,6 +16,11 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
   import API
   import opened AST
   import opened Wrappers
+
+/// Note that you will need to include one of the two files that defines UnicodeStrings
+/// according to whether you are using --unicode-char:false or --unicode-char:true.
+/// See ../../Unicode/UnicodeStrings.dfy for more details.
+
   import opened UnicodeStrings
 
 /// The high-level API works with fairly simple ASTs that contain native Dafny
