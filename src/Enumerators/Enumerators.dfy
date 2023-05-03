@@ -37,7 +37,7 @@ module Enumerators {
     
     var next: nat
     
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       decreases Repr, 0
@@ -93,6 +93,7 @@ module Enumerators {
     // Would be better as an arbitrary termination clause somehow instead,
     // but we don't have language-level access to the built-in well-founded
     // ordering. See https://github.com/dafny-lang/dafny/issues/762.
+    // TODO: Rename since this isn't 1:1 with decreases clauses, possibly "Remaining"
     function Decreases(): nat
       reads Repr
       decreases Repr, 1
@@ -143,28 +144,28 @@ module Enumerators {
   // (which can't even share implementation by extending SizedEnumerator<T>)
 
   // TODO: Don't use "Size", implies sizeof() semantics
-  predicate Sized<T>(e: Enumerator<T>, count: nat) 
+  ghost predicate Sized<T>(e: Enumerator<T>, count: nat) 
     reads e.Repr
     requires e.Valid()
   {
     e.Decreases() == 0 ==> |e.enumerated| == count
   }
 
-  predicate EnumeratesMultiset<T>(e: Enumerator<T>, enumerated: multiset<T>) 
+  ghost predicate EnumeratesMultiset<T>(e: Enumerator<T>, enumerated: multiset<T>) 
     reads e.Repr
     requires e.Valid()
   {
     e.Decreases() == 0 ==> multiset(e.enumerated) == enumerated
   }
 
-  predicate EnumeratesSet<T>(e: Enumerator<T>, enumerated: set<T>) 
+  ghost predicate EnumeratesSet<T>(e: Enumerator<T>, enumerated: set<T>) 
     reads e.Repr
     requires e.Valid()
   {
     e.Decreases() == 0 ==> multiset(e.enumerated) == multiset(enumerated)
   }
 
-  predicate EnumeratesSeq<T>(e: Enumerator<T>, enumerated: seq<T>) 
+  ghost predicate EnumeratesSeq<T>(e: Enumerator<T>, enumerated: seq<T>) 
     reads e.Repr
     requires e.Valid()
   {
@@ -198,7 +199,7 @@ module Enumerators {
       Repr := {this};
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       decreases Repr, 0
@@ -270,7 +271,7 @@ module Enumerators {
       Repr := {this};
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -340,7 +341,7 @@ module Enumerators {
       enumerated := [];
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -417,7 +418,7 @@ module Enumerators {
       Repr := {this} + first.Repr + second.Repr;
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -508,7 +509,7 @@ module Enumerators {
       Repr := {this} + first.Repr + second.Repr;
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -579,7 +580,7 @@ module Enumerators {
       enumerated := [];
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -647,7 +648,7 @@ module Enumerators {
       enumerated := [];
     }
 
-    predicate Valid()
+    ghost predicate Valid()
       reads this, Repr
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -743,7 +744,7 @@ module Enumerators {
       enumerated := [];
     }
 
-    predicate Valid() 
+    ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
       decreases Repr, 0
@@ -886,7 +887,7 @@ module Enumerators {
   class SeqEnumerable<T> extends Enumerable<T> {
     const s: seq<T>
 
-    predicate Valid()
+    ghost predicate Valid()
       reads this, Repr
       ensures Valid() ==> this in Repr
       decreases Repr, 0

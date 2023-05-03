@@ -11,14 +11,14 @@ module Frames {
     // methods need to read.
     ghost var Repr: set<object>
 
-    predicate Valid()
+    ghost predicate Valid()
       reads this, Repr
       ensures Valid() ==> this in Repr
       decreases Repr, 0
 
     // Convenience predicate for when your object's validity depends on one
     // or more other objects.
-    predicate ValidComponent(component: Validatable)
+    ghost predicate ValidComponent(component: Validatable)
       reads this, Repr 
     {
       && component in Repr
