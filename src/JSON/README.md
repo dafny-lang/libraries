@@ -17,7 +17,8 @@ The tutorial in [`Tutorial.dfy`](Tutorial.dfy) shows how to import the library, 
 <!-- %check-verify %save tmp-json.dfy -->
 ```dafny
 include "src/JSON/API.dfy"
-include "src/Unicode/UnicodeStringsWithUnicodeChar.dfy"
+// Or "..WithUnicodeChar.dfy" if you are using --unicode-char:true
+include "src/Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 
 import JSON.API
 import opened UnicodeStrings
