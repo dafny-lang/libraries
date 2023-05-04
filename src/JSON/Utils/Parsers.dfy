@@ -14,9 +14,9 @@ module {:options "-functionSyntax:4"} JSON.Utils.Parsers {
   type SplitResult<+T, +R> = Result<Split<T>, CursorError<R>>
 
   // BUG(https://github.com/dafny-lang/dafny/issues/3883)
-  // type Parser<!T, +R> = p: Parser_<T, R> | p.Valid?()
-  //     // BUG(https://github.com/dafny-lang/dafny/issues/2103)
-  //   witness ParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
+  type Parser<!T, +R> = p: Parser_<T, R> | p.Valid?()
+      // BUG(https://github.com/dafny-lang/dafny/issues/2103)
+    witness ParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
   datatype Parser_<!T, +R> = Parser(fn: FreshCursor -> SplitResult<T, R>,
                                     ghost spec: T -> bytes) {
     ghost predicate Valid?() {
@@ -50,8 +50,8 @@ module {:options "-functionSyntax:4"} JSON.Utils.Parsers {
     }
   }
   // BUG(https://github.com/dafny-lang/dafny/issues/3883)
-  // type SubParser<!T, +R> = p: SubParser_<T, R> | p.Valid?()
-  //   witness SubParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
+  type SubParser<!T, +R> = p: SubParser_<T, R> | p.Valid?()
+    witness SubParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
 
   function {:opaque} SubParserWitness<T, R>(): (subp: SubParser_<T, R>)
     ensures subp.Valid?()
