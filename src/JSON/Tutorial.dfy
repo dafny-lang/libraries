@@ -6,15 +6,15 @@
 include "API.dfy"
 include "ZeroCopy/API.dfy"
 
-/// This library offers two APIs: a high-level one (giving abstract syntax trees
+/// This library offers two APIs: a high-level one (giving abstract value trees
 /// with no concrete syntactic details) and a low-level one (including all
 /// information about blanks, separator positions, character escapes, etc.).
 ///
-/// ## High-level API (Abstract syntax)
+/// ## High-level API (JSON values)
 
 module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
   import API
-  import opened AST
+  import opened Values
   import opened Wrappers
 
 /// Note that you will need to include one of the two files that defines UnicodeStrings
@@ -23,7 +23,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 
   import opened UnicodeStrings
 
-/// The high-level API works with fairly simple ASTs that contain native Dafny
+/// The high-level API works with fairly simple datatype values that contain native Dafny
 /// strings:
 
   method {:test} Test() {
@@ -36,8 +36,8 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
 /// writing raw bytes directly from disk or from the network instead).
 
     var SIMPLE_JS :- expect ToUTF8Checked("[true]");
-    var SIMPLE_AST := Array([Bool(true)]);
-    expect API.Deserialize(SIMPLE_JS) == Success(SIMPLE_AST);
+    var SIMPLE_VALUE := Array([Bool(true)]);
+    expect API.Deserialize(SIMPLE_JS) == Success(SIMPLE_VALUE);
 
 /// Here is a larger object, written using a verbatim string (with `@"`).  In
 /// verbatim strings `""` represents a single double-quote character):
@@ -62,7 +62,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
           }
         ]
       }");
-    var CITIES_AST :=
+    var CITIES_VALUE :=
       Object([
                ("Cities", Array([
                 Object([
@@ -85,12 +85,12 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
                 ])
                 ]))
              ]);
-    expect API.Deserialize(CITIES_JS) == Success(CITIES_AST);
+    expect API.Deserialize(CITIES_JS) == Success(CITIES_VALUE);
 
 /// Serialization works similarly, with `API.Serialize`.  For this first example
 /// the generated string matches what we started with exactly:
 
-    expect API.Serialize(SIMPLE_AST) == Success(SIMPLE_JS);
+    expect API.Serialize(SIMPLE_VALUE) == Success(SIMPLE_JS);
 
 /// For more complex object, the generated layout may not be exactly the same; note in particular how the representation of numbers and the whitespace have changed.
 
@@ -98,7 +98,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
       @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1},{""Name"":""Rome"",""Founded"":-753,""Population"":2873e3,""Area (km2)"":1285},{""Name"":""Paris"",""Founded"":null,""Population"":2161e3,""Area (km2)"":23835e-1}]}"
     );
 
-    expect API.Serialize(CITIES_AST) == Success(EXPECTED);
+    expect API.Serialize(CITIES_VALUE) == Success(EXPECTED);
 
 /// Additional methods are defined in `API.dfy` to serialize an object into an
 /// existing buffer or into an array.  Below is the smaller example from the
@@ -110,7 +110,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
       ""Population"": 689386,
       ""Area (km2)"": 4584.2}]}");
 
-    var CITY_AST :=
+    var CITY_VALUE :=
       Object([("Cities", Array([
                Object([
                ("Name", String("Boston")),
@@ -118,13 +118,13 @@ module {:options "-functionSyntax:4"} JSON.Examples.AbstractSyntax {
                ("Population", Number(Int(689386))),
                ("Area (km2)", Number(Decimal(45842, -1)))])]))]);
 
-    expect API.Deserialize(CITY_JS) == Success(CITY_AST);
+    expect API.Deserialize(CITY_JS) == Success(CITY_VALUE);
 
     var EXPECTED' :- expect ToUTF8Checked(
       @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
     );
 
-    expect API.Serialize(CITY_AST) == Success(EXPECTED');
+    expect API.Serialize(CITY_VALUE) == Success(EXPECTED');
   }
 }
 
@@ -148,7 +148,7 @@ module {:options "-functionSyntax:4"} JSON.Examples.ConcreteSyntax {
 /// The low-level API exposes the same functions and methods as the high-level
 /// one, but the type that they consume and produce is `Grammar.JSON` (defined
 /// in `Grammar.dfy` as a `Grammar.Value` surrounded by optional whitespace)
-/// instead of `AST.JSON` (defined in `AST.dfy`).  Since `Grammar.JSON` contains
+/// instead of `Values.JSON` (defined in `Values.dfy`).  Since `Grammar.JSON` contains
 /// all formatting information, re-serializing an object produces the original
 /// value:
 

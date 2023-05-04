@@ -1,9 +1,9 @@
 // RUN: %verify "%s" --unicode-char:false ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
 // RUN: %verify "%s" --unicode-char:true ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
-/// =============================================
-///  Serialization from AST.JSON to bytes (Spec)
-/// =============================================
+/// ================================================
+///  Serialization from Values.JSON to bytes (Spec)
+/// ================================================
 ///
 /// This is the high-level spec.  For the implementation, see
 /// ``JSON.Serializer.dfy``.
@@ -15,7 +15,7 @@ include "../Collections/Sequences/Seq.dfy"
 /// "../Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 /// "../Unicode/UnicodeStringsWithUnicodeChar.dfy"
 
-include "AST.dfy"
+include "Values.dfy"
 include "Errors.dfy"
 include "Utils/Str.dfy"
 
@@ -23,7 +23,7 @@ module {:options "-functionSyntax:4"} JSON.Spec {
   import opened BoundedInts
 
   import opened Utils.Str
-  import opened AST
+  import opened Values
   import opened Wrappers
   import opened Errors
   import opened UnicodeStrings

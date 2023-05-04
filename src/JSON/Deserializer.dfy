@@ -1,9 +1,9 @@
 // RUN: %verify "%s" --unicode-char:false ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
 // RUN: %verify "%s" --unicode-char:true ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
-/// ===============================================
-///  Deserialization from JSON.Grammar to JSON.AST
-/// ===============================================
+/// ==================================================
+///  Deserialization from JSON.Grammar to JSON.Values
+/// ==================================================
 ///
 /// For the spec, see ``JSON.Spec.dfy``.
 
@@ -13,7 +13,7 @@ include "../BoundedInts.dfy"
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
 include "Errors.dfy"
-include "AST.dfy"
+include "Values.dfy"
 include "Grammar.dfy"
 include "Spec.dfy"
 
@@ -27,7 +27,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   import opened Utils.Str
   import opened UnicodeStrings
 
-  import AST
+  import Values
   import Spec
   import opened Errors
   import opened Utils.Vectors
@@ -135,7 +135,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     Success(if sign.Char?('-') then -n else n)
   }
 
-  function Number(js: Grammar.jnumber): DeserializationResult<AST.Decimal> {
+  function Number(js: Grammar.jnumber): DeserializationResult<Values.Decimal> {
     var JNumber(minus, num, frac, exp) := js;
     var n :-
       ToInt(minus, num);
@@ -143,38 +143,38 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
       case Empty => Success(0)
       case NonEmpty(JExp(_, sign, num)) => ToInt(sign, num);
     match frac
-    case Empty => Success(AST.Decimal(n, e10))
+    case Empty => Success(Values.Decimal(n, e10))
     case NonEmpty(JFrac(_, num)) =>
       var pow10 := num.Length() as int;
       var frac :- ToInt(minus, num);
-      Success(AST.Decimal(n * Pow(10, pow10) + frac, e10 - pow10))
+      Success(Values.Decimal(n * Pow(10, pow10) + frac, e10 - pow10))
   }
 
-  function KeyValue(js: Grammar.jKeyValue): DeserializationResult<(string, AST.JSON)> {
+  function KeyValue(js: Grammar.jKeyValue): DeserializationResult<(string, Values.JSON)> {
     var k :- String(js.k);
     var v :- Value(js.v);
     Success((k, v))
   }
 
-  function Object(js: Grammar.jobject): DeserializationResult<seq<(string, AST.JSON)>> {
+  function Object(js: Grammar.jobject): DeserializationResult<seq<(string, Values.JSON)>> {
     Seq.MapWithResult(d requires d in js.data => KeyValue(d.t), js.data)
   }
 
-  function Array(js: Grammar.jarray): DeserializationResult<seq<AST.JSON>> {
+  function Array(js: Grammar.jarray): DeserializationResult<seq<Values.JSON>> {
     Seq.MapWithResult(d requires d in js.data => Value(d.t), js.data)
   }
 
-  function Value(js: Grammar.Value): DeserializationResult<AST.JSON> {
+  function Value(js: Grammar.Value): DeserializationResult<Values.JSON> {
     match js
-    case Null(_) => Success(AST.Null())
-    case Bool(b) => Success(AST.Bool(Bool(b)))
-    case String(str) => var s :- String(str); Success(AST.String(s))
-    case Number(dec) => var n :- Number(dec); Success(AST.Number(n))
-    case Object(obj) => var o :- Object(obj); Success(AST.Object(o))
-    case Array(arr) => var a :- Array(arr); Success(AST.Array(a))
+    case Null(_) => Success(Values.Null())
+    case Bool(b) => Success(Values.Bool(Bool(b)))
+    case String(str) => var s :- String(str); Success(Values.String(s))
+    case Number(dec) => var n :- Number(dec); Success(Values.Number(n))
+    case Object(obj) => var o :- Object(obj); Success(Values.Object(o))
+    case Array(arr) => var a :- Array(arr); Success(Values.Array(a))
   }
 
-  function JSON(js: Grammar.JSON): DeserializationResult<AST.JSON> {
+  function JSON(js: Grammar.JSON): DeserializationResult<Values.JSON> {
     Value(js.t)
   }
 }

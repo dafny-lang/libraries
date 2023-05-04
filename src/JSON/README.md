@@ -6,13 +6,15 @@ This library provides two APIs:
 
 - A low-level (zero-copy) API that is efficient, verified (see [What is verified?](#what-is-verified) below for details) and allows incremental changes (re-serialization is much faster for unchanged objects), but is more cumbersome to use.  This API operates on concrete syntax trees that capture details of punctuation and blanks and represent strings using unescaped, undecoded utf-8 byte sequences.
 
-- A high-level API built on top of the previous one.  This API is more convenient to use, but it is unverified and less efficient. It produces abstract syntax trees that represent strings using Dafny's built-in `string` type.
+- A high-level API built on top of the previous one.  This API is more convenient to use, but it is unverified and less efficient. It produces abstract datatype value trees that represent strings using Dafny's built-in `string` type.
 
-Both APIs provides functions for serialization (utf-8 bytes to AST) and deserialization (AST to utf-8 bytes).  Unverified transcoding functions are provided in `Utils/Unicode.dfy` if you need to read or produce JSON text in other encodings.
+Both APIs provides functions for serialization (JSON values to utf-8 bytes) and deserialization (utf-8 bytes to JSON values).
+See the Unicode module in `../Unicode` if you need to read or produce JSON text in other encodings.
+
 
 ## Library usage
 
-The tutorial in [`Tutorial.dfy`](Tutorial.dfy) shows how to import the library, call the high-level API, and use the low-level API to make localized modifications to a partial parse of a JSON AST.  The main entry points are `API.Serialize` (to go from utf-8 bytes to a JSON AST), and `API.Deserialize` (for the reverse operation):
+The tutorial in [`Tutorial.dfy`](Tutorial.dfy) shows how to import the library, call the high-level API, and use the low-level API to make localized modifications to a partial parse of a JSON AST.  The main entry points are `API.Serialize` (to go from a JSON value to utf-8 bytes), and `API.Deserialize` (for the reverse operation):
 
 <!-- %check-verify %save tmp-json.dfy -->
 ```dafny
@@ -22,7 +24,7 @@ include "src/Unicode/UnicodeStringsWithoutUnicodeChar.dfy"
 
 import JSON.API
 import opened UnicodeStrings
-import opened JSON.AST
+import opened JSON.Values
 import opened Wrappers
 
 method Test(){
@@ -32,20 +34,20 @@ method Test(){
     ""Population"": 689386,
     ""Area (km2)"": 4584.2}]}");
 
-  var CITY_AST := Object([("Cities", Array([
+  var CITY_VALUE := Object([("Cities", Array([
     Object([
       ("Name", String("Boston")),
       ("Founded", Number(Int(1630))),
       ("Population", Number(Int(689386))),
       ("Area (km2)", Number(Decimal(45842, -1)))])]))]);
 
-  expect API.Deserialize(CITY_JS) == Success(CITY_AST);
+  expect API.Deserialize(CITY_JS) == Success(CITY_VALUE);
 
   var EXPECTED :- expect ToUTF8Checked(
     @"{""Cities"":[{""Name"":""Boston"",""Founded"":1630,""Population"":689386,""Area (km2)"":45842e-1}]}"
   );
 
-  expect API.Serialize(CITY_AST) == Success(EXPECTED);
+  expect API.Serialize(CITY_VALUE) == Success(EXPECTED);
 }
 ```
 

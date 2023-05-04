@@ -4,7 +4,7 @@
 ///  Low-level JSON grammar (Concrete syntax)
 /// ==========================================
 ///
-/// See ``JSON.AST`` for the high-level interface.
+/// See ``JSON.Values`` for the high-level interface.
 
 include "../BoundedInts.dfy"
 include "Utils/Views.dfy"

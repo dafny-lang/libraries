@@ -77,10 +77,10 @@ module JSON.Tests.AbstractSyntaxWrapper refines Wrapper {
   import opened Wrappers
   import Grammar
   import API
-  import AST
+  import Values
   import Spec
 
-  type JSON = AST.JSON
+  type JSON = Values.JSON
 
   method Deserialize(bs: bytes) returns (js: DeserializationResult<JSON>) {
     js := API.Deserialize(bs);

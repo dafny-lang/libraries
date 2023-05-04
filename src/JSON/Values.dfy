@@ -1,6 +1,6 @@
 // RUN: %verify "%s"
 
-module {:options "-functionSyntax:4"} JSON.AST {
+module {:options "-functionSyntax:4"} JSON.Values {
   datatype Decimal =
     Decimal(n: int, e10: int) // (n) * 10^(e10)
 

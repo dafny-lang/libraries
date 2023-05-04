@@ -1,9 +1,9 @@
 // RUN: %verify "%s" --unicode-char:false ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
 // RUN: %verify "%s" --unicode-char:true ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
-/// =============================================
-///  Serialization from JSON.AST to JSON.Grammar
-/// =============================================
+/// ================================================
+///  Serialization from JSON.Values to JSON.Grammar
+/// ================================================
 ///
 /// For the spec, see ``JSON.Spec.dfy``.
 
@@ -14,7 +14,7 @@ include "../Math.dfy"
 include "Utils/Views.dfy"
 include "Utils/Vectors.dfy"
 include "Errors.dfy"
-include "AST.dfy"
+include "Values.dfy"
 include "Grammar.dfy"
 include "Spec.dfy"
 
@@ -25,7 +25,7 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
   import opened BoundedInts
   import opened Utils.Str
 
-  import AST
+  import Values
   import Spec
   import opened Errors
   import opened Utils.Vectors
@@ -81,7 +81,7 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
     Success(View.OfBytes(bs))
   }
 
-  function Number(dec: AST.Decimal): Result<jnumber> {
+  function Number(dec: Values.Decimal): Result<jnumber> {
     var minus: jminus := Sign(dec.n);
     var num: jnum :- Int(Math.Abs(dec.n));
     var frac: Maybe<jfrac> := Empty();
@@ -103,7 +103,7 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
   const COLON: Structural<jcolon> :=
     MkStructural(Grammar.COLON)
 
-  function KeyValue(kv: (string, AST.JSON)): Result<jKeyValue> {
+  function KeyValue(kv: (string, Values.JSON)): Result<jKeyValue> {
     var k :- String(kv.0);
     var v :- Value(kv.1);
     Success(Grammar.KeyValue(k, COLON, v))
@@ -121,7 +121,7 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
   const COMMA: Structural<jcomma> :=
     MkStructural(Grammar.COMMA)
 
-  function Object(obj: seq<(string, AST.JSON)>): Result<jobject> {
+  function Object(obj: seq<(string, Values.JSON)>): Result<jobject> {
     var items :- Seq.MapWithResult(v requires v in obj => KeyValue(v), obj);
     Success(Bracketed(MkStructural(LBRACE),
                       MkSuffixedSequence(items, COMMA),
@@ -129,14 +129,14 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
   }
 
 
-  function Array(arr: seq<AST.JSON>): Result<jarray> {
+  function Array(arr: seq<Values.JSON>): Result<jarray> {
     var items :- Seq.MapWithResult(v requires v in arr => Value(v), arr);
     Success(Bracketed(MkStructural(LBRACKET),
                       MkSuffixedSequence(items, COMMA),
                       MkStructural(RBRACKET)))
   }
 
-  function Value(js: AST.JSON): Result<Grammar.Value> {
+  function Value(js: Values.JSON): Result<Grammar.Value> {
     match js
     case Null => Success(Grammar.Null(View.OfBytes(NULL)))
     case Bool(b) => Success(Grammar.Bool(Bool(b)))
@@ -146,7 +146,7 @@ module {:options "-functionSyntax:4"} JSON.Serializer {
     case Array(arr) => var a :- Array(arr); Success(Grammar.Array(a))
   }
 
-  function JSON(js: AST.JSON): Result<Grammar.JSON> {
+  function JSON(js: Values.JSON): Result<Grammar.JSON> {
     var val :- Value(js);
     Success(MkStructural(val))
   }
