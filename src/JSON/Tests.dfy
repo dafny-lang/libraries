@@ -1,4 +1,5 @@
 // RUN: %run "%s"
+// RUN: %run -t:java "%s"
 
 include "Errors.dfy"
 include "API.dfy"

@@ -13,6 +13,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Parsers {
 
   type SplitResult<+T, +R> = Result<Split<T>, CursorError<R>>
 
+  // BUG(https://github.com/dafny-lang/dafny/issues/3883)
   // type Parser<!T, +R> = p: Parser_<T, R> | p.Valid?()
   //     // BUG(https://github.com/dafny-lang/dafny/issues/2103)
   //   witness ParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
@@ -48,6 +49,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Parsers {
       && (forall cs': FreshCursor | pre(cs') :: fn(cs').Success? ==> fn(cs').value.StrictlySplitFrom?(cs', spec))
     }
   }
+  // BUG(https://github.com/dafny-lang/dafny/issues/3883)
   // type SubParser<!T, +R> = p: SubParser_<T, R> | p.Valid?()
   //   witness SubParserWitness<T, R>() // BUG(https://github.com/dafny-lang/dafny/issues/2175)
 
