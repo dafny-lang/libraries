@@ -152,9 +152,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:opaque} BracketedFromParts(ghost cs: Cursor,
-                                                                          open: Split<Structural<jopen>>,
-                                                                          elems: Split<seq<TSuffixedElement>>,
-                                                                          close: Split<Structural<jclose>>)
+                                          open: Split<Structural<jopen>>,
+                                          elems: Split<seq<TSuffixedElement>>,
+                                          close: Split<Structural<jclose>>)
       : (sp: Split<TBracketed>)
       requires Grammar.NoTrailingSuffix(elems.t)
       requires open.StrictlySplitFrom?(cs, c => Spec.Structural(c, SpecView))
