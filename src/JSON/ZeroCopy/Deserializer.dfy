@@ -258,7 +258,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:opaque} {:tailrecursion} {:vcs_split_on_every_assert} Elements(
+    function {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -280,7 +280,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           assert {:focus} elems.cs.StrictlySplitFrom?(json.cs);
           assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
           assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-          assert json.Valid?();
           assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
           assert forall e | e in elems.t :: e.suffix.NonEmpty?;
           assert {:split_here} true;
@@ -289,7 +288,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         Elements(cs0, json, open, elems)
       else if s0 == CLOSE as opt_byte then
         assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
-          assert json.Valid?();
           assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
           assert elems.cs.StrictlySplitFrom?(json.cs);
           assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
@@ -361,7 +359,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       case OtherError(err) => err
     }
 
-    function {:opaque} {:vcs_split_on_every_assert} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
+    function {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
     {
       Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value)).MapFailure(LiftCursorError)
@@ -402,7 +400,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import ConcreteSyntax.SpecProperties
 
-    function {:opaque} {:vcs_split_on_every_assert} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
+    function {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Value)
     {
@@ -735,7 +733,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.KeyValue(t)
     }
-    function {:opaque} {:vcs_split_on_every_assert} Element(cs: FreshCursor, json: ValueParser)
+    function {:opaque} Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
       var k :- Strings.String(cs);
@@ -747,7 +745,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       assert colon.StrictlySplitFrom?(k.cs, st => Spec.Structural(st, p.spec));
       assert colon.cs.StrictlySplitFrom?(json.cs);
 
-      assert json.Valid?();
       var v :- json.fn(colon.cs);
       var kv := KeyValueFromParts(cs, k, colon, v);
       Success(kv)
