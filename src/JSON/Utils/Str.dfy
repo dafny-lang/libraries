@@ -87,12 +87,6 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
       else [minus] + OfNat_any(-n, chars)
     }
 
-    function DigitsTable(digits: seq<Char>): map<Char, nat>
-      requires forall i, j | 0 <= i < j < |digits| :: digits[i] != digits[j]
-    {
-      map i: nat | 0 <= i < |digits| :: digits[i] := i
-    }
-
     function ToNat_any(str: String, base: nat, digits: map<Char, nat>) : (n: nat)
       requires base > 0
       requires forall c | c in str :: c in digits
