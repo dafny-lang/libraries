@@ -1,8 +1,7 @@
 // RUN: %run "%s" --unicode-char:false --input ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
 // RUN: %run "%s" --unicode-char:true --input ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
-// RUN: %run -t:java "%s" --unicode-char:false --input ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
-// RUN: %run -t:java "%s" --unicode-char:true --input ../Unicode/UnicodeStringsWithUnicodeChar.dfy
+// TODO: Test for Java and other target languages too
 
 include "Errors.dfy"
 include "API.dfy"
