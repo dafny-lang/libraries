@@ -13,11 +13,7 @@ jobs:
   verification:
     strategy:
       matrix:
-        # nightly-latest to catch anything that breaks these tests in current development
-        # 2/18/2023 version is the first that supports logging, but it is not supported by dafny-setup-action 1.6.1
-        # 3.11.0 supports new CLI but does not support logging
-        # setup-dafny-action does not yet support 3.13.1 or recent nightly-latest
-        version: [ 3.11.0, 3.12.0, 3.13.1, 4.0.0 ]
+        version: [ 3.13.1, 4.0.0 ]
 
     uses: ./.github/workflows/reusable-tests.yml
     with:
