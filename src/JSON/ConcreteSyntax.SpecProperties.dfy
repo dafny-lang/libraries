@@ -4,7 +4,7 @@
 include "ConcreteSyntax.Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
-  // Some useful properties about the functions used in `ConcreteSyntax.Spec`.
+// Some useful properties about the functions used in `ConcreteSyntax.Spec`.
 {
   import opened BoundedInts
 
