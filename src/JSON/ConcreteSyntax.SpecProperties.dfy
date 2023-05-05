@@ -21,8 +21,8 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
   {
     forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
       | && (forall d | d < bracketed :: pd0.requires(d))
-      && (forall d | d < bracketed :: pd1.requires(d))
-      && (forall d | d < bracketed :: pd0(d) == pd1(d))
+        && (forall d | d < bracketed :: pd1.requires(d))
+        && (forall d | d < bracketed :: pd0(d) == pd1(d))
     {
       calc {
         Spec.Bracketed(bracketed, pd0);

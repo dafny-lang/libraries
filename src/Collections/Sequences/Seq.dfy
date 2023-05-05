@@ -828,9 +828,8 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Optimized implementation of Flatten(Map(f, xs)). */
-  function {:opaque} FlatMap<T,R>(f: (T ~> seq<R>), xs: seq<T>): (result: seq<R>)
+  function FlatMap<T,R>(f: (T ~> seq<R>), xs: seq<T>): (result: seq<R>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
-    ensures result == Flatten(Map(f, xs));
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     Flatten(Map(f, xs))
