@@ -67,7 +67,6 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
     hd as uint16
   }
 
-  // TODO: Verify this function
   function {:tailrecursion} {:vcs_split_on_every_assert} Unescape(str: seq<uint16>, start: nat := 0, prefix: seq<uint16> := []): DeserializationResult<seq<uint16>>
     decreases |str| - start
   { // Assumes UTF-16 strings
@@ -106,7 +105,6 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
   }
 
   function String(js: Grammar.jstring): DeserializationResult<string> {
-    // TODO Optimize with a function by method
     var asUtf32 :- FromUTF8Checked(js.contents.Bytes()).ToResult'(DeserializationError.InvalidUnicode);
     var asUint16 :- ToUTF16Checked(asUtf32).ToResult'(DeserializationError.InvalidUnicode);
     var unescaped :- Unescape(asUint16);
