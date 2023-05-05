@@ -163,14 +163,18 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures sp.StrictlySplitFrom?(cs, BracketedSpec)
     {
       var sp := SP(Grammar.Bracketed(open.t, elems.t, close.t), close.cs);
-      assert cs.Bytes() == Spec.Bracketed(sp.t, SuffixedElementSpec) + close.cs.Bytes() by {
-        assert cs.Bytes() == Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + Spec.Structural(close.t, SpecView) + close.cs.Bytes() by {
-          assert cs.Bytes() == Spec.Structural(open.t, SpecView) + open.cs.Bytes();
-          assert open.cs.Bytes() == SuffixedElementsSpec(elems.t) + elems.cs.Bytes();
-          assert elems.cs.Bytes() == Spec.Structural(close.t, SpecView) + close.cs.Bytes();
-          Seq.Assoc'(Spec.Structural(open.t, SpecView), SuffixedElementsSpec(elems.t), elems.cs.Bytes());
-          Seq.Assoc'(Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t), Spec.Structural(close.t, SpecView), close.cs.Bytes());
-        }
+      calc {
+        cs.Bytes();
+        Spec.Structural(open.t, SpecView) + open.cs.Bytes();
+        { assert open.cs.Bytes() == SuffixedElementsSpec(elems.t) + elems.cs.Bytes(); }
+        Spec.Structural(open.t, SpecView) + (SuffixedElementsSpec(elems.t) + elems.cs.Bytes());
+        { Seq.Assoc'(Spec.Structural(open.t, SpecView), SuffixedElementsSpec(elems.t), elems.cs.Bytes()); }
+        Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + elems.cs.Bytes();
+        { assert elems.cs.Bytes() == Spec.Structural(close.t, SpecView) + close.cs.Bytes(); }
+        Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + (Spec.Structural(close.t, SpecView) + close.cs.Bytes());
+        { Seq.Assoc'(Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t), Spec.Structural(close.t, SpecView), close.cs.Bytes()); }
+        Spec.Structural(open.t, SpecView) + SuffixedElementsSpec(elems.t) + Spec.Structural(close.t, SpecView) + close.cs.Bytes();
+        Spec.Bracketed(sp.t, SuffixedElementSpec) + close.cs.Bytes();
       }
       assert sp.StrictlySplitFrom?(cs, BracketedSpec);
       sp
