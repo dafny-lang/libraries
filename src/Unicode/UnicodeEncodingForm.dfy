@@ -113,23 +113,19 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     * Returns the unique partition of the given code unit sequence into minimal well-formed code unit subsequences,
     * or None if no such partition exists.
     */
-  function PartitionCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
-    ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == s
+  function {:tailrecursion} PartitionCodeUnitSequenceChecked(s: CodeUnitSeq, resultPrefix: seq<MinimalWellFormedCodeUnitSeq> := [], ghost sPrefix: CodeUnitSeq := []): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
+    requires Seq.Flatten(resultPrefix) == sPrefix
+    ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == sPrefix + s
     decreases |s|
   {
-    if s == [] then Some([])
+    if s == [] then Some(resultPrefix)
     else
-      var maybePrefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
-      if maybePrefix.None? then None
-      else
-        var prefix := maybePrefix.Extract();
-        // Recursing on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
-        // This definition (and others in the Unicode modules) emphasizes clarify and correctness,
-        // but should be supplemented with a by-method for improved performance,
-        // so long as Dafny runtimes' lack optimizations for subsequence recursion.
-        var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
-        if restParts.Some? then Some([prefix] + restParts.Extract())
-        else None
+      var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
+      // Recursing on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
+      // This definition (and others in the Unicode modules) emphasizes clarity and correctness,
+      // but should be supplemented with a by-method for improved performance,
+      // so long as Dafny runtimes' lack optimizations for subsequence recursion.
+      PartitionCodeUnitSequenceChecked(s[|prefix|..], resultPrefix + [prefix], sPrefix + prefix)
   }
 
   /**
