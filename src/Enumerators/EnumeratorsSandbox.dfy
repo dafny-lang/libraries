@@ -14,13 +14,16 @@ module Enumerators {
   // Used to express possibly incomplete knowledge about the enumerator's behavior,
   // without needing to know the concrete class of the enumerator
   // or read any of its fields.
-  type EnumerationInvariant<!T> = (seq<T>, Option<T>) -> bool
+  // type EnumerationInvariant<!T> = (seq<T>, Option<T>) -> bool
 
   trait {:termination false} Enumerator<T> extends Validatable {
     
     ghost var enumerated: seq<T>
 
-    ghost const inv: EnumerationInvariant<T>
+    ghost predicate Invariant(sofar: seq<T>, next: Option<T>)
+      reads Repr
+      requires Valid()
+      decreases Repr, 1
 
     ghost method Enumerated(element: Option<T>)
       modifies this`enumerated
@@ -58,7 +61,6 @@ module Enumerators {
       // FilteredEnumerator below which needs to make a recursive call to
       // Next() inside a loop. 
       ensures Repr <= old(Repr)
-      ensures inv(old(enumerated), element)
       ensures element.Some? ==> (
         && Decreases() < old(Decreases())
         && enumerated == old(enumerated) + [element.value]
@@ -85,11 +87,6 @@ module Enumerators {
       
       enumerated := [];
       Repr := {this};
-      inv := (sofar, next: Option<T>) => (
-        match next
-        case Some(x) => sofar + [x] <= s
-        case None => sofar == s
-      );
     }
 
     ghost predicate Valid() 
@@ -100,11 +97,14 @@ module Enumerators {
       && this in Repr
       && 0 <= index <= |elements|
       && enumerated == elements[0..index]
-      && inv == (sofar, next: Option<T>) => (
-        match next
-        case Some(x) => sofar + [x] <= elements
-        case None => sofar == elements
-      )
+    }
+
+    ghost predicate Invariant(sofar: seq<T>, next: Option<T>) 
+      decreases Repr, 1
+    {
+      match next
+      case Some(x) => sofar + [x] <= elements
+      case None => sofar == elements
     }
 
     function Decreases(): nat
@@ -121,7 +121,6 @@ module Enumerators {
       decreases Repr
       ensures Valid()
       ensures Repr <= old(Repr)
-      ensures inv(old(enumerated), element)
       ensures element.Some? ==> (
         && Decreases() < old(Decreases())
         && enumerated == old(enumerated) + [element.value]
@@ -159,13 +158,6 @@ module Enumerators {
       this.f := f;
       Repr := {this} + wrapped.Repr;
       enumerated := [];
-      inv := (sofar, next: Option<R>) => (
-        && exists wrappedSofar :: 
-          && sofar == Seq.Map(f, wrappedSofar)
-          && match next
-             case Some(r) => exists t :: r == f(t) && wrapped.inv(wrappedSofar, Some(t))
-             case None => wrapped.inv(wrappedSofar, None)
-      );
     }
 
     ghost predicate Valid() 
@@ -176,13 +168,18 @@ module Enumerators {
       && this in Repr
       && ValidComponent(wrapped)
       && enumerated == Seq.Map(f, wrapped.enumerated)
-      && inv == (sofar, next: Option<R>) => (
-        && exists wrappedSofar :: 
+    }
+
+    ghost predicate Invariant(sofar: seq<R>, next: Option<R>)
+      reads Repr
+      requires Valid()
+      decreases Repr, 1
+    {
+      exists wrappedSofar :: 
           && sofar == Seq.Map(f, wrappedSofar)
           && match next
-             case Some(r) => exists t :: r == f(t) && wrapped.inv(wrappedSofar, Some(t))
-             case None => wrapped.inv(wrappedSofar, None)
-      )
+             case Some(r) => exists t :: r == f(t) && wrapped.Invariant(wrappedSofar, Some(t))
+             case None => wrapped.Invariant(wrappedSofar, None)
     }
 
     method Next() returns (element: Option<R>)
@@ -191,7 +188,7 @@ module Enumerators {
       decreases Repr
       ensures Valid()
       ensures Repr <= old(Repr)
-      ensures inv(old(enumerated), element)
+      ensures Invariant(old(enumerated), element)
       ensures element.Some? ==> (
         && Decreases() < old(Decreases())
         && enumerated == old(enumerated) + [element.value]
@@ -222,23 +219,59 @@ module Enumerators {
     }
   }
 
-  ghost predicate EnumeratesThisMany<T(!new)>(e: Enumerator<T>, n: nat) {
-    forall sofar :: e.inv(sofar, None) ==> |sofar| == n
+  ghost predicate EnumeratesThisMany<T(!new)>(e: Enumerator<T>, n: nat) 
+    reads e.Repr
+    requires e.Valid()
+  {
+    forall sofar :: e.Invariant(sofar, None) ==> |sofar| == n
   }
 
-  ghost predicate Enumerates<T(!new)>(e: Enumerator<T>, s: seq<T>) {
-    forall sofar :: e.inv(sofar, None) ==> sofar == s
+  ghost predicate Enumerates<T(!new)>(e: Enumerator<T>, s: seq<T>)
+    reads e.Repr
+    requires e.Valid()
+  {
+    forall sofar :: e.Invariant(sofar, None) ==> sofar == s
+  }
+
+  method Enumerate<T>(e: Enumerator<T>) returns (s: seq<T>)
+    requires e.Valid()
+    requires e.enumerated == []
+    modifies e.Repr
+    ensures e.Valid()
+    ensures s == e.enumerated
+    ensures e.Invariant(s, None)
+  {
+    s := [];
+    while true 
+      invariant e.Valid()
+      invariant e.Repr <= old(e.Repr)
+      invariant s == e.enumerated
+      decreases e.Decreases()
+      modifies e.Repr
+    {
+      var next := e.Next();
+      match next {
+        case Some(x) => {
+          s := s + [x];
+        }
+        case None => {
+          assert e.Invariant(e.enumerated, None);
+          return;
+        }
+      }
+    }
   }
 
   method MapEnumerator<T(!new), R>(f: T -> R, e: Enumerator<T>) returns (e': Enumerator<R>) 
     requires e.Valid()
     requires e.enumerated == []
-    ensures (e'.inv == (sofar: seq<R>, next: Option<R>) => (
+    ensures e'.Valid()
+    ensures forall sofar, next :: e'.Invariant(sofar, next) <==> (
         && exists wrappedSofar :: 
           && sofar == Seq.Map(f, wrappedSofar)
           && match next
-             case Some(r) => exists t :: r == f(t) && e.inv(wrappedSofar, Some(t))
-             case None => e.inv(wrappedSofar, None)))
+             case Some(r) => exists t :: r == f(t) && e.Invariant(wrappedSofar, Some(t))
+             case None => e.Invariant(wrappedSofar, None))
   {
     e' := new MappingEnumerator(f, e);
   }
