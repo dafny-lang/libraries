@@ -1,7 +1,8 @@
 // RUN: %run "%s" --unicode-char:false --input ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
 // RUN: %run "%s" --unicode-char:true --input ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
-// TODO: Test for Java and other target languages too
+// RUN: %run "%s" -t:java --unicode-char:false --input ../Unicode/UnicodeStringsWithoutUnicodeChar.dfy
+// RUN: %run "%s" -t:java --unicode-char:true --input ../Unicode/UnicodeStringsWithUnicodeChar.dfy
 
 include "Errors.dfy"
 include "API.dfy"
@@ -103,6 +104,9 @@ module JSON.Tests.AbstractSyntaxWrapper refines Wrapper {
 }
 
 module JSON.Tests {
+
+  import opened Seq
+  
   const VECTORS := [
     "true",
     "false",
@@ -126,7 +130,11 @@ module JSON.Tests {
     "\"∀ABC // \\u2200ABC\"", // ∀
     "\"🇫🇷 // \\u1f1eb\\u1f1EBABC\"", // 🇫🇷
 
-    "[true, false , null, { \"some\" : \"string\", \"and\": [ \"a number\", -123.456e-18 ] } ]  "
+    "[true, false , null, { \"some\" : \"string\", \"and\": [ \"a number\", -123.456e-18 ] } ]  ",
+
+    // Stress test - this used to cause stack overflow errors because of non-tail-recursive functions.
+    // We should have these kinds of tests direclty in the Unicode module too.
+    "\"" + Seq.Repeat('a', 10_000) + "\""
   ];
 
   method Main() {

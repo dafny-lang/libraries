@@ -113,33 +113,19 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     * Returns the unique partition of the given code unit sequence into minimal well-formed code unit subsequences,
     * or None if no such partition exists.
     */
-  function {:tailrecursion} PartitionCodeUnitSequenceCheckedTailRec(s: CodeUnitSeq, resultPrefix: seq<MinimalWellFormedCodeUnitSeq> := [], ghost sPrefix: CodeUnitSeq := []): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
-    requires Seq.Flatten(resultPrefix) == sPrefix
-    ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == sPrefix + s
-    decreases |s|
-  {
-    if s == [] then Some(resultPrefix)
-    else
-      var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
-      // Recursing on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
-      // This definition (and others in the Unicode modules) emphasizes clarity and correctness,
-      // but should be supplemented with a by-method for improved performance,
-      // so long as Dafny runtimes' lack optimizations for subsequence recursion.
-      Seq.LemmaFlattenConcat(resultPrefix, [prefix]);
-      PartitionCodeUnitSequenceCheckedTailRec(s[|prefix|..], resultPrefix + [prefix], sPrefix + prefix)
-  }
-
-  /**
-    * Returns the unique partition of the given code unit sequence into minimal well-formed code unit subsequences,
-    * or None if no such partition exists.
-    */
   function PartitionCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
-    ensures maybeParts.Some? ==> && Seq.Flatten(maybeParts.Extract()) == s
+    ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == s
     decreases |s|
   {
     if s == [] then Some([])
     else
       var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
+      // Recursing/iterating on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
+      // This definition (and others in the Unicode modules) emphasizes clarity and correctness,
+      // and while the by-method implementation avoids stack overflows due to non-tail-recursive recursion,
+      // it doesn't yet avoid the subsequences.
+      // The best solution would be to ensure all Dafny runtimes implement subsequences as an O(1)
+      // operation, so this implementation would become linear.
       var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
       if restParts.Some? then Some([prefix] + restParts.Extract()) else None
   } by method {
@@ -147,21 +133,21 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
       return Some([]);
     }
     var result: seq<MinimalWellFormedCodeUnitSeq> := [];
-    var sTmp := s;
-    while |sTmp| > 0
+    var rest := s;
+    while |rest| > 0
       invariant PartitionCodeUnitSequenceChecked(s).Some?
-           <==> PartitionCodeUnitSequenceChecked(sTmp).Some?
+           <==> PartitionCodeUnitSequenceChecked(rest).Some?
       invariant
         PartitionCodeUnitSequenceChecked(s).Some? ==>
           && PartitionCodeUnitSequenceChecked(s).value
-             == result + PartitionCodeUnitSequenceChecked(sTmp).value
+             == result + PartitionCodeUnitSequenceChecked(rest).value
     {
-      var prefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(sTmp);
+      var prefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(rest);
       if prefix.None? {
         return None;
       }
       result := result + [prefix.value];
-      sTmp := sTmp[|prefix.value|..];
+      rest := rest[|prefix.value|..];
     }
     assert result + [] == result;
     return Some(result);
