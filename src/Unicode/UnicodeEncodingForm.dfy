@@ -125,6 +125,7 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
       // This definition (and others in the Unicode modules) emphasizes clarity and correctness,
       // but should be supplemented with a by-method for improved performance,
       // so long as Dafny runtimes' lack optimizations for subsequence recursion.
+      Seq.LemmaFlattenConcat(resultPrefix, [prefix]);
       PartitionCodeUnitSequenceChecked(s[|prefix|..], resultPrefix + [prefix], sPrefix + prefix)
   }
 
