@@ -113,7 +113,7 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     * Returns the unique partition of the given code unit sequence into minimal well-formed code unit subsequences,
     * or None if no such partition exists.
     */
-  function {:tailrecursion} PartitionCodeUnitSequenceChecked(s: CodeUnitSeq, resultPrefix: seq<MinimalWellFormedCodeUnitSeq> := [], ghost sPrefix: CodeUnitSeq := []): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
+  function {:tailrecursion} PartitionCodeUnitSequenceCheckedTailRec(s: CodeUnitSeq, resultPrefix: seq<MinimalWellFormedCodeUnitSeq> := [], ghost sPrefix: CodeUnitSeq := []): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
     requires Seq.Flatten(resultPrefix) == sPrefix
     ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == sPrefix + s
     decreases |s|
@@ -126,7 +126,42 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
       // but should be supplemented with a by-method for improved performance,
       // so long as Dafny runtimes' lack optimizations for subsequence recursion.
       Seq.LemmaFlattenConcat(resultPrefix, [prefix]);
-      PartitionCodeUnitSequenceChecked(s[|prefix|..], resultPrefix + [prefix], sPrefix + prefix)
+      PartitionCodeUnitSequenceCheckedTailRec(s[|prefix|..], resultPrefix + [prefix], sPrefix + prefix)
+  }
+
+  /**
+    * Returns the unique partition of the given code unit sequence into minimal well-formed code unit subsequences,
+    * or None if no such partition exists.
+    */
+  function PartitionCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
+    ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == s
+    decreases |s|
+  {
+    if s == [] then Some([])
+    else
+      var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
+      var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
+      if restParts.Some? then Some([prefix] + restParts.Extract()) else None
+  } by method {
+    var index := 0;
+    var result: seq<MinimalWellFormedCodeUnitSeq> := [];
+    while index < |s|
+      invariant index <= |s|
+      invariant Seq.Flatten(result) == s[..index]
+      invariant Some(result) == PartitionCodeUnitSequenceChecked(s[..index])
+    {
+      var maybePrefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(s[index..]);
+      if maybePrefix.None? {
+        return None;
+      }
+      var prefix := maybePrefix.Extract();
+      Seq.LemmaFlattenConcat(result, [prefix]);
+      result := result + [prefix];
+      index := index + |prefix|;
+      assert s == s[..index] + s[index..];
+    }
+    assert index == |s|;
+    return Some(result);
   }
 
   /**
