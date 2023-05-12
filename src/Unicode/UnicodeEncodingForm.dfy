@@ -134,7 +134,7 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     * or None if no such partition exists.
     */
   function PartitionCodeUnitSequenceChecked(s: CodeUnitSeq): (maybeParts: Option<seq<MinimalWellFormedCodeUnitSeq>>)
-    ensures maybeParts.Some? ==> Seq.Flatten(maybeParts.Extract()) == s
+    ensures maybeParts.Some? ==> && Seq.Flatten(maybeParts.Extract()) == s
     decreases |s|
   {
     if s == [] then Some([])
@@ -143,24 +143,27 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
       var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
       if restParts.Some? then Some([prefix] + restParts.Extract()) else None
   } by method {
-    var index := 0;
+    if s == [] {
+      return Some([]);
+    }
     var result: seq<MinimalWellFormedCodeUnitSeq> := [];
-    while index < |s|
-      invariant index <= |s|
-      invariant Seq.Flatten(result) == s[..index]
-      invariant Some(result) == PartitionCodeUnitSequenceChecked(s[..index])
+    var sTmp := s;
+    while |sTmp| > 0
+      invariant PartitionCodeUnitSequenceChecked(s).Some?
+           <==> PartitionCodeUnitSequenceChecked(sTmp).Some?
+      invariant 
+        PartitionCodeUnitSequenceChecked(s).Some? ==>
+          && PartitionCodeUnitSequenceChecked(s).value
+             == result + PartitionCodeUnitSequenceChecked(sTmp).value
     {
-      var maybePrefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(s[index..]);
-      if maybePrefix.None? {
+      var prefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(sTmp);
+      if prefix.None? {
         return None;
       }
-      var prefix := maybePrefix.Extract();
-      Seq.LemmaFlattenConcat(result, [prefix]);
-      result := result + [prefix];
-      index := index + |prefix|;
-      assert s == s[..index] + s[index..];
+      result := result + [prefix.value];
+      sTmp := sTmp[|prefix.value|..];
     }
-    assert index == |s|;
+    assert result + [] == result;
     return Some(result);
   }
 
