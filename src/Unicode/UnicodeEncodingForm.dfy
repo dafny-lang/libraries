@@ -126,8 +126,8 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
       // it doesn't yet avoid the subsequences.
       // The best solution would be to ensure all Dafny runtimes implement subsequences as an O(1)
       // operation, so this implementation would become linear.
-      var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
-      if restParts.Some? then Some([prefix] + restParts.Extract()) else None
+      var restParts :- PartitionCodeUnitSequenceChecked(s[|prefix|..]);
+      Some([prefix] + restParts)
   } by method {
     if s == [] {
       return Some([]);
@@ -142,12 +142,9 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
           && PartitionCodeUnitSequenceChecked(s).value
              == result + PartitionCodeUnitSequenceChecked(rest).value
     {
-      var prefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(rest);
-      if prefix.None? {
-        return None;
-      }
-      result := result + [prefix.value];
-      rest := rest[|prefix.value|..];
+      var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(rest);
+      result := result + [prefix];
+      rest := rest[|prefix|..];
     }
     assert result + [] == result;
     return Some(result);
