@@ -151,7 +151,7 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     while |sTmp| > 0
       invariant PartitionCodeUnitSequenceChecked(s).Some?
            <==> PartitionCodeUnitSequenceChecked(sTmp).Some?
-      invariant 
+      invariant
         PartitionCodeUnitSequenceChecked(s).Some? ==>
           && PartitionCodeUnitSequenceChecked(s).value
              == result + PartitionCodeUnitSequenceChecked(sTmp).value
