@@ -103,6 +103,9 @@ module JSON.Tests.AbstractSyntaxWrapper refines Wrapper {
 }
 
 module JSON.Tests {
+
+  import opened Seq
+
   const VECTORS := [
     "true",
     "false",
@@ -126,7 +129,11 @@ module JSON.Tests {
     "\"∀ABC // \\u2200ABC\"", // ∀
     "\"🇫🇷 // \\u1f1eb\\u1f1EBABC\"", // 🇫🇷
 
-    "[true, false , null, { \"some\" : \"string\", \"and\": [ \"a number\", -123.456e-18 ] } ]  "
+    "[true, false , null, { \"some\" : \"string\", \"and\": [ \"a number\", -123.456e-18 ] } ]  ",
+
+    // Stress test - this used to cause stack overflow errors because of non-tail-recursive functions.
+    // We should have these kinds of tests direclty in the Unicode module too.
+    "\"" + Seq.Repeat('a', 100_000) + "\""
   ];
 
   method Main() {
