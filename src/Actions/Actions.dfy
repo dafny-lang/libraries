@@ -22,7 +22,6 @@ module Actions {
       ensures Valid() ==> 
         && CanProduce(consumed, produced)
       decreases Repr, 0
-
     
     ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, nextIn: T)
       requires CanProduce(consumed, produced)
@@ -43,6 +42,10 @@ module Actions {
       requires CanConsume(consumed, produced, t)
       modifies Repr
       ensures Valid()
+      // TODO: Might be too limiting, could have a similar predicate for valid Repr changes.
+      // At least this is necessary most of the time if you want to invoke an action multiple times,
+      // But won't be true in general (e.g. an aggregator that has to allocate more storage).
+      ensures Repr <= old(Repr)
       ensures consumed == old(consumed) + [t]
       ensures produced == old(produced) + [r]
       ensures CanProduce(consumed, produced)
@@ -108,6 +111,7 @@ module Actions {
       requires CanConsume(consumed, produced, t)
       modifies Repr
       ensures Valid()
+      ensures Repr <= old(Repr)
       ensures consumed == old(consumed) + [t]
       ensures produced == old(produced) + [r]
       ensures CanProduce(consumed, produced)
@@ -119,7 +123,21 @@ module Actions {
     }
   }
 
-  // TODO: Not strong enough, could still be infinite
+  method Main() {
+    var e: Action<(), int> := new SeqIEnumerator([1, 2, 3, 4, 5]);
+    var x := e.Invoke(());
+    assert e.produced == [1];
+    x := e.Invoke(());
+    assert e.produced == [1, 2];
+    x := e.Invoke(());
+    assert e.produced == [1, 2, 3];
+    x := e.Invoke(());
+    assert e.produced == [1, 2, 3, 4];
+    x := e.Invoke(());
+    assert e.produced == [1, 2, 3, 4, 5];
+  }
+
+  // TODO: Not strong enough, could still be infinite. exists n | terminated beyond n?
   // TODO: How to provide decreases clause for loops etc?
   type Enumerator<T(!new)> = a: Action<(), Option<T>> | ProducesTerminatedBy(a, None) witness *
 
