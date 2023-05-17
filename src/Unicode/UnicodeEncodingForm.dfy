@@ -119,17 +119,35 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
   {
     if s == [] then Some([])
     else
-      var maybePrefix := SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
-      if maybePrefix.None? then None
-      else
-        var prefix := maybePrefix.Extract();
-        // Recursing on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
-        // This definition (and others in the Unicode modules) emphasizes clarify and correctness,
-        // but should be supplemented with a by-method for improved performance,
-        // so long as Dafny runtimes' lack optimizations for subsequence recursion.
-        var restParts := PartitionCodeUnitSequenceChecked(s[|prefix|..]);
-        if restParts.Some? then Some([prefix] + restParts.Extract())
-        else None
+      var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(s);
+      // Recursing/iterating on subsequences leads to quadratic running time in most/all Dafny runtimes as of this writing.
+      // This definition (and others in the Unicode modules) emphasizes clarity and correctness,
+      // and while the by-method implementation avoids stack overflows due to non-tail-recursive recursion,
+      // it doesn't yet avoid the subsequences.
+      // The best solution would be to ensure all Dafny runtimes implement subsequences as an O(1)
+      // operation, so this implementation would become linear.
+      var restParts :- PartitionCodeUnitSequenceChecked(s[|prefix|..]);
+      Some([prefix] + restParts)
+  } by method {
+    if s == [] {
+      return Some([]);
+    }
+    var result: seq<MinimalWellFormedCodeUnitSeq> := [];
+    var rest := s;
+    while |rest| > 0
+      invariant PartitionCodeUnitSequenceChecked(s).Some?
+           <==> PartitionCodeUnitSequenceChecked(rest).Some?
+      invariant
+        PartitionCodeUnitSequenceChecked(s).Some? ==>
+          && PartitionCodeUnitSequenceChecked(s).value
+             == result + PartitionCodeUnitSequenceChecked(rest).value
+    {
+      var prefix :- SplitPrefixMinimalWellFormedCodeUnitSubsequence(rest);
+      result := result + [prefix];
+      rest := rest[|prefix|..];
+    }
+    assert result + [] == result;
+    return Some(result);
   }
 
   /**
@@ -238,6 +256,23 @@ abstract module {:options "-functionSyntax:4"} UnicodeEncodingForm {
     var ms := Seq.Map(EncodeScalarValue, vs);
     LemmaFlattenMinimalWellFormedCodeUnitSubsequences(ms);
     Seq.Flatten(ms)
+  }
+  by method {
+    // Optimize to to avoid allocating the intermediate unflattened sequence.
+    // We can't quite use Seq.FlatMap easily because we need to prove the result
+    // is not just a seq<CodeUnit> but a WellFormedCodeUnitSeq.
+    // TODO: We can be even more efficient by using a JSON.Utils.Vectors.Vector instead.
+    s := [];
+    ghost var unflattened: seq<MinimalWellFormedCodeUnitSeq> := [];
+    for i := |vs| downto 0
+      invariant unflattened == Seq.Map(EncodeScalarValue, vs[i..])
+      invariant s == Seq.Flatten(unflattened)
+    {
+      var next: MinimalWellFormedCodeUnitSeq := EncodeScalarValue(vs[i]);
+      unflattened := [next] + unflattened;
+      LemmaPrependMinimalWellFormedCodeUnitSubsequence(next, s);
+      s := next + s;
+    }
   }
 
   /**

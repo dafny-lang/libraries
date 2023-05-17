@@ -39,23 +39,14 @@ jobs:
       - name: Set up JS dependencies
         run: npm install bignumber.js
 
-      - name: Verify Code and Examples without logging
-        id: nolog
-        if: inputs.dafny-version == '3.11.0'
-        run: lit --time-tests -v .
-
       - name: Verify Code and Examples
-        id: withlog
-        if: steps.nolog.conclusion == 'skipped'
         run: |
           lit --time-tests -v --param 'dafny_params=--log-format trx --log-format csv' .
 
       - name: Generate Report
-        if: always() && steps.withlog.conclusion != 'skipped'
-        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-resource-count 40000000
 
       - uses: actions/upload-artifact@v2  # upload test results
-        if: always() && steps.withlog.conclusion != 'skipped'
         with:
           name: verification-results
           path: '**/TestResults/*.trx'

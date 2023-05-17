@@ -22,4 +22,9 @@ module {:options "-functionSyntax:4"} Math {
       a
   }
 
+  function Abs(a: int): (a': int)
+    ensures a' >= 0
+  {
+    if a >= 0 then a else -a
+  }
 }
