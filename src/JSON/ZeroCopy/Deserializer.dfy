@@ -416,6 +416,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           Spec.UnfoldValueObject(v);
           assert SP(obj, cs').StrictlySplitFrom?(cs, Spec.Object);
         }
+        Spec.UnfoldValueObject(v);
         Success(sp)
       else if c == '[' as opt_byte then
         var SP(arr, cs') :- Arrays.Array(cs, ValueParser(cs));
