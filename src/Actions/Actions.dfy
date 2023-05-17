@@ -123,6 +123,78 @@ module Actions {
   // Potentially infinite enumerator
   type IEnumerator<T> = Action<(), T> 
 
+  class SeqEnumerator<T> extends Action<(), Option<T>> {
+
+    const elements: seq<T>
+    // TODO: size_t? It's a hell of a lot easier to prove correct
+    // if this can increase unbounded to stay at |consumed|,
+    // but it's not ghost so we care about bounding it.
+    var index: nat
+
+    ghost predicate Valid() 
+      reads this, Repr 
+      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> 
+        && CanProduce(consumed, produced)
+      decreases Repr, 0
+    {
+      && this in Repr
+      && index == |consumed|
+      && CanProduce(consumed, produced)
+    }
+
+    constructor(s: seq<T>) 
+      ensures Valid()
+      ensures fresh(Repr - {this})
+      ensures produced == []
+      ensures elements == s
+    {
+      elements := s;
+      index := 0;
+      
+      consumed := [];
+      produced := [];
+      Repr := {this};
+    }
+
+    ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<T>>, next: ()) {
+      true
+    }
+    ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<T>>) {
+      var index := |consumed|;
+      var values := Math.Min(index, |elements|);
+      var nones := index - values;
+      produced == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones)
+    }
+
+    method Invoke(t: ()) returns (r: Option<T>) 
+      requires Valid()
+      requires CanConsume(consumed, produced, t)
+      modifies Repr
+      decreases Repr
+      ensures Valid()
+      ensures Repr <= old(Repr)
+      ensures consumed == old(consumed) + [t]
+      ensures produced == old(produced) + [r]
+      ensures CanProduce(consumed, produced)
+    {
+      if index < |elements| {
+        r := Some(elements[index]);
+      } else {
+        r := None;
+      }
+
+      index := index + 1;
+      Update((), r);
+    }
+  }
+
+  lemma SeqEnumeratorIsEnumerator<T(!new)>(e: SeqEnumerator<T>) 
+    ensures IsEnumerator(e)
+  {
+    assert ProducesTerminatedBy(e, None, |e.elements|);
+  }
+
   class SeqIEnumerator<T> extends Action<(), T> {
 
     const elements: seq<T>
@@ -458,6 +530,7 @@ module Actions {
     assert e.produced == [1, 2, 3, 4];
     x := e.Invoke(());
     assert e.produced == [1, 2, 3, 4, 5];
+
 
     var a := new ArrayAggregator();
     var _ := a.Invoke(1);
