@@ -413,9 +413,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         var v := Grammar.Object(obj);
         var sp := SP(v, cs');
         assert sp.StrictlySplitFrom?(cs, Spec.Value) by {
-          assert SP(obj, cs').StrictlySplitFrom?(cs, Spec.Object);
           Spec.UnfoldValueObject(v);
+          assert SP(obj, cs').StrictlySplitFrom?(cs, Spec.Object);
         }
+        Spec.UnfoldValueObject(v);
         Success(sp)
       else if c == '[' as opt_byte then
         var SP(arr, cs') :- Arrays.Array(cs, ValueParser(cs));
@@ -668,7 +669,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
   module Arrays refines Sequences {
     import opened Params = ArrayParams
 
-    lemma BracketedToArray(arr: jarray)
+    lemma {:vcs_split_on_every_assert} BracketedToArray(arr: jarray)
       ensures Spec.Bracketed(arr, SuffixedElementSpec) == Spec.Array(arr)
     {
       var rItem := (d: jitem) requires d < arr => Spec.Item(d);
