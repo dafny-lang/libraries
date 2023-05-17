@@ -99,7 +99,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
               else wr;
     assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac) + Spec.Maybe(num.exp, Spec.Exp) by {
       if num.exp.NonEmpty? {} else {
-        assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac);
         assert wr.Bytes() == writer.Bytes() + Spec.View(num.minus) + Spec.View(num.num) + Spec.Maybe(num.frac, Spec.Frac) + [];
       }
     }
