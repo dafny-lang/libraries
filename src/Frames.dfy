@@ -10,11 +10,12 @@ module Frames {
     // Ghost state tracking the common set of objects most
     // methods need to read.
     ghost var Repr: set<object>
+    ghost const height: nat
 
     ghost predicate Valid()
       reads this, Repr
       ensures Valid() ==> this in Repr
-      decreases Repr, 0
+      decreases height, 0
 
     // Convenience predicate for when your object's validity depends on one
     // or more other objects.
@@ -25,6 +26,7 @@ module Frames {
       && component.Repr <= Repr
       && this !in component.Repr
       && component.Valid()
+      && component.height < height
     }
 
     // Convenience predicate, since you often want to assert that 
