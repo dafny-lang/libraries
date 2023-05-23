@@ -188,13 +188,6 @@ module Enumerators {
   lemma SeqEnumeratorIsEnumerator<T(!new)>(e: SeqEnumerator<T>) 
     ensures IsEnumerator(e)
   {
-    assert ConsumesAnything(e);
-    forall consumed, produced | e.CanProduce(consumed, produced) 
-    {
-      assert Terminated(produced, None, |e.elements|);
-      TerminatedLimitBoundsEnumerated(produced, |e.elements|);
-      assert |Enumerated(produced)| <= |e.elements|;
-    }
     assert ProducesTerminatedBy(e, None, |e.elements|);
   }
 

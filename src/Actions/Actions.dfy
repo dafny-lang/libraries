@@ -62,9 +62,9 @@ module Actions {
     forall i | 0 <= i < |s| :: n <= i <==> s[i] == c
   }
 
-  ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {
+  ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, n: nat) {
     forall consumed: seq<T>, produced: seq<R> ::
-      i.CanProduce(consumed, produced) ==> exists n: nat | n <= limit :: Terminated(produced, c, n)
+      i.CanProduce(consumed, produced) ==> Terminated(produced, c, n)
   }
 
   // class Compose<T, V(!new), R> extends Action<T, R> {
