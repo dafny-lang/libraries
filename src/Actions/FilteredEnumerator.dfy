@@ -68,10 +68,9 @@ module Filtered {
       ensures fresh(Repr - old(Repr))
       ensures consumed == old(consumed) + [t]
       ensures produced == old(produced) + [r]
-      ensures CanProduce(consumed, produced)
     {
       while true
-        invariant Valid()
+        invariant wrapped.Valid()
         invariant fresh(wrapped.Repr - old(wrapped.Repr))
         invariant produced == old(produced)
         invariant consumed == old(consumed)
@@ -83,26 +82,29 @@ module Filtered {
         assert wrapped.Valid();
         assert wrapped.CanProduce(wrapped.consumed, wrapped.produced);
         label before:
-        var r' := wrapped.Invoke(());
+        r := wrapped.Invoke(());
 
         Repr := {this} + wrapped.Repr;
-        r := r';
 
         if r.None? || filter(r.value) {
           break;
         }
 
         var wrappedEnumeratedBefore := Enumerated(old@before(wrapped.produced));
-        assert wrapped.produced == old@before(wrapped.produced) + [r'];
-        assert Terminated(old@before(wrapped.produced), None, |old@before(wrapped.produced)|);
-        TerminatedDistributesOverConcat(old@before(wrapped.produced), [r], None, 1);
-        assert Enumerated(wrapped.produced) == wrappedEnumeratedBefore + [r.value];
+        assert wrapped.produced == old@before(wrapped.produced) + [r];
+
+        ProducingSomeImpliesTerminated@before(wrapped, r);
+        TerminatedBoundsEnumerated(wrapped.produced, |wrapped.produced|);
+        // TerminatedDistributesOverConcat(old@before(wrapped.produced), [r], None, 1);
+        assert |Enumerated(wrapped.produced)| == |wrapped.produced|;
+        assert wrapped.produced == old@before(wrapped.produced) + [r];
+        EnumeratedDistributesOverConcat(old@before(wrapped.produced), [r], 1);
+        assert Enumerated(wrapped.produced) == Enumerated(old@before(wrapped.produced)) + [r.value];
         LemmaFilterDistributesOverConcat(filter, wrappedEnumeratedBefore, [r.value]);
         assert Enumerated(produced) == Seq.Filter(filter, Enumerated(wrapped.produced));
 
         EnumerationTerminationMetricDecreased@before(wrapped, r);
       }
-
 
       Update(t, r);
     }

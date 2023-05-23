@@ -15,21 +15,9 @@ module Enumerators {
       [produced[0].value] + Enumerated(produced[1..])
   }
 
-  lemma TerminatedLimitBoundsEnumerated<T>(s: seq<Option<T>>, limit: nat) 
-    requires exists n: nat | n <= limit :: Terminated(s, None, n)
-    ensures |Enumerated(s)| <= limit
-  {
-    if |s| == 0 || s[0].None? {
-    } else {
-      var n: nat :| n <= limit && Terminated(s, None, n);
-      assert Terminated(s[1..], None, n - 1);
-      TerminatedLimitBoundsEnumerated(s[1..], limit - 1);
-    }
-  }
-
   lemma TerminatedBoundsEnumerated<T>(s: seq<Option<T>>, n: nat) 
     requires Terminated(s, None, n)
-    ensures Math.Min(|s|, n) <= |Enumerated(s)|
+    ensures Math.Min(|s|, n) <= |Enumerated(s)| <= n
   {
     if n == 0 || |s| == 0 {
     } else {
@@ -46,6 +34,26 @@ module Enumerators {
     requires Terminated(right, c, n)
     ensures Terminated(left + right, c, |left| + n)
   {}
+
+  lemma EnumeratedDistributesOverConcat<T>(left: seq<Option<T>>, right: seq<Option<T>>, n: nat)
+    requires Terminated(left, None, |left|)
+    requires Terminated(right, None, n)
+    ensures Enumerated(left + right) == Enumerated(left) + Enumerated(right)
+    decreases |left| + |right|
+  {
+    TerminatedDistributesOverConcat(left, right, None, n);
+    if |left| == 0 {
+      assert left + right == right;
+    } else if |right| == 0 {
+      assert left + right == left;
+    } else {
+      assert Terminated(left[1..], None, |left[1..]|);
+      EnumeratedDistributesOverConcat(left[1..], right, n);
+      assert left == [left[0]] + left[1..];
+      EnumeratedDistributesOverConcat([left[0]], left[1..], |left| - 1);
+      assert ([left[0]] + left[1..]) + right == [left[0]] + (left[1..] + right);
+    }
+  }
 
   ghost function ProducedForEnumerator<T>(s: seq<T>, n: nat): seq<Option<T>> {
     var before := Math.Min(|s|, n);
@@ -79,8 +87,31 @@ module Enumerators {
     requires IsEnumerator(a)
   {
     var limit := EnumerationLimit(a);
-    TerminatedLimitBoundsEnumerated(a.produced, limit);
+    TerminatedBoundsEnumerated(a.produced, limit);
     limit - |Enumerated(a.produced)|
+  }
+
+  twostate lemma ProducingSomeImpliesTerminated<T(!new)>(a: Action<(), Option<T>>, nextProduced: Option<T>)
+    requires old(a.Valid())
+    requires old(a.CanProduce(a.consumed, a.produced))
+    requires a.Valid()
+    requires a.CanProduce(a.consumed, a.produced)
+    requires IsEnumerator(a)
+    requires a.produced == old(a.produced) + [nextProduced];
+    requires nextProduced.Some?
+    ensures Terminated(a.produced, None, |a.produced|)
+  {
+    var before := old(a.produced);
+    var n: nat :| n <= |before| && Terminated(before, None, n);
+    var m: nat :| Terminated(a.produced, None, m);
+    if n < |before| {
+      assert before[|before| - 1] == None;
+      assert a.produced[|a.produced| - 1] != None;
+      assert |a.produced| <= m;
+      assert a.produced[|before| - 1] != None;
+      assert false;
+    }
+    assert |before| <= n;
   }
 
   twostate lemma EnumerationTerminationMetricDecreased<T(!new)>(a: Action<(), Option<T>>, nextProduced: Option<T>)
@@ -104,12 +135,12 @@ module Enumerators {
       assert false;
     }
     assert |before| <= n;
-    TerminatedLimitBoundsEnumerated(before, n);
+    
+    TerminatedBoundsEnumerated(before, n);
     assert |Enumerated(before)| <= n;
     TerminatedDistributesOverConcat(before, [nextProduced], None, 1);
     assert Terminated(a.produced, None, |a.produced|);
     TerminatedBoundsEnumerated(a.produced, |a.produced|);
-    assert |Enumerated(a.produced)| >= |a.produced|;
   }
 
   // Potentially infinite enumerator
