@@ -44,8 +44,6 @@ module Filtered {
       Repr := {this} + wrapped.Repr;
       height := wrapped.height + 1;
       wrappedCanProduce := wrapped.CanProduce;
-      new;
-      assert Enumerated(produced) == Seq.Filter(filter, Enumerated(wrapped.produced));
     }
 
     ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<T>>, next: ())

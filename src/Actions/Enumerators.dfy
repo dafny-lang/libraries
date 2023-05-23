@@ -33,10 +33,11 @@ module Enumerators {
   {
     if n == 0 || |s| == 0 {
     } else {
-      assert Terminated(s, None, n);
-      assert s[0] != None;
-      assert Terminated(s[1..], None, n - 1);
-      TerminatedLimitBoundsEnumerated(s[1..], n - 1);
+      if s[0] == None {
+      } else {
+        assert 1 <= |Enumerated(s)|;
+        TerminatedBoundsEnumerated(s[1..], n - 1);
+      }
     }
   }
 
@@ -187,6 +188,13 @@ module Enumerators {
   lemma SeqEnumeratorIsEnumerator<T(!new)>(e: SeqEnumerator<T>) 
     ensures IsEnumerator(e)
   {
+    assert ConsumesAnything(e);
+    forall consumed, produced | e.CanProduce(consumed, produced) 
+    {
+      assert Terminated(produced, None, |e.elements|);
+      TerminatedLimitBoundsEnumerated(produced, |e.elements|);
+      assert |Enumerated(produced)| <= |e.elements|;
+    }
     assert ProducesTerminatedBy(e, None, |e.elements|);
   }
 
