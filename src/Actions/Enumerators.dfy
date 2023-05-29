@@ -87,11 +87,12 @@ module Enumerators {
   }
 
   ghost predicate IsEnumerator<T(!new)>(a: Action<(), Option<T>>) {
-    ConsumesAnything(a) && exists n :: ProducesTerminatedBy(a, None, n)
+    ConsumesAnything(a) && exists limit :: ProducesTerminatedBy(a, None, limit)
   }
 
-  ghost function EnumerationLimit<T(!new)>(a: Action<(), Option<T>>): nat 
+  ghost function EnumerationLimit<T(!new)>(a: Action<(), Option<T>>): (limit: nat)
     requires IsEnumerator(a)
+    ensures ProducesTerminatedBy(a, None, limit)
   {
     var limit: nat :| ProducesTerminatedBy(a, None, limit);
     limit
@@ -103,7 +104,8 @@ module Enumerators {
     requires IsEnumerator(a)
   {
     var limit := EnumerationLimit(a);
-    TerminatedDefinesEnumerated(a.produced, limit);
+    var n :| Terminated(a.produced, None, n);
+    TerminatedDefinesEnumerated(a.produced, n);
     limit - |Enumerated(a.produced)|
   }
 

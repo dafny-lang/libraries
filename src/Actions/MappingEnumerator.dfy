@@ -44,6 +44,8 @@ module Mapped {
       Repr := {this} + wrapped.Repr;
       height := wrapped.height + 1;
       wrappedCanProduce := wrapped.CanProduce;
+      new;
+      assert ValidWrappedProduced(produced, wrapped.produced);
     }
 
     ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<R>>, next: ())
@@ -82,9 +84,31 @@ module Mapped {
       }
       Repr := {this} + wrapped.Repr;
       Update(t, r);
-      assert wrapped.produced == old(wrapped.produced) + [x];
+      EnumeratedDistributes(wrapped, x);
       assert Enumerated(wrapped.produced) == Enumerated(old(wrapped.produced)) + Enumerated([x]);
       Seq.LemmaMapDistributesOverConcat(f, Enumerated(old(wrapped.produced)), Enumerated([x]));
+      assert Enumerated(old(produced)) == Seq.Map(f, Enumerated(old(wrapped.produced)));
+      ThisIsEnumerator();
+      calc {
+        Enumerated(produced);
+        { EnumeratedDistributes(this, r); }
+        Enumerated(old(produced)) + Enumerated([r]);
+      }
+      assert ValidWrappedProduced(produced, wrapped.produced);
+    }
+
+    lemma ThisIsEnumerator()
+      requires Valid()
+      ensures IsEnumerator(this)
+    {
+      assert IsEnumerator(wrapped);
+      var limit := EnumerationLimit(wrapped);
+      forall consumed, produced, next | CanProduce(consumed, produced) {
+        assert CanConsume(consumed, produced, next);
+
+        var producedByWrapped: seq<Option<T>> :| ValidWrappedProduced(produced, producedByWrapped);
+        assert |Enumerated(producedByWrapped)| <= limit;
+      }
     }
   }
 }

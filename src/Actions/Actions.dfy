@@ -70,13 +70,13 @@ module Actions {
 
   }
 
-  ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, n: nat) {
+  ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {
     forall consumed: seq<T>, produced: seq<R> ::
-      i.CanProduce(consumed, produced) ==> Terminated(produced, c, n)
+      i.CanProduce(consumed, produced) ==> exists n: nat | n <= limit :: Terminated(produced, c, n)
   }
 
   type IAggregator<T> = Action<T, ()>
-  type Aggregator<T(!new)> = a: Action<T, bool> | exists n :: ProducesTerminatedBy(a, false, n) witness *
+  type Aggregator<T(!new)> = a: Action<T, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
 
   class ArrayAggregator<T(0)> extends Action<T, ()> {
 
