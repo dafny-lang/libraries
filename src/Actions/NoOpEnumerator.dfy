@@ -27,7 +27,6 @@ module NoOp {
       && consumed == wrapped.consumed
       && produced == wrapped.produced
       && wrappedCanProduce == wrapped.CanProduce
-      && ValidWrappedProduced(consumed, produced, wrapped.produced)
     }
 
     constructor(wrapped: Action<(), Option<T>>) 

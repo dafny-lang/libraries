@@ -27,7 +27,9 @@ module Mapped {
       && ValidComponent(wrapped)
       && IsEnumerator(wrapped)
       && CanProduce(consumed, produced)
-      && Enumerated(produced) == Seq.Map(f, Enumerated(wrapped.produced))
+      && consumed == wrapped.consumed
+      && produced == Seq.Map(maybeF, wrapped.produced)
+      && wrappedCanProduce == wrapped.CanProduce
     }
 
     constructor(f: T -> R, wrapped: Action<(), Option<T>>) 
@@ -35,6 +37,9 @@ module Mapped {
       requires IsEnumerator(wrapped)
       requires wrapped.consumed == [] && wrapped.produced == []
       ensures Valid()
+      ensures fresh(Repr - (wrapped.Repr))
+      ensures this.wrapped == wrapped;
+      ensures this.f == f;
     { 
       this.f := f;
       this.wrapped := wrapped;
@@ -45,7 +50,7 @@ module Mapped {
       height := wrapped.height + 1;
       wrappedCanProduce := wrapped.CanProduce;
       new;
-      assert ValidWrappedProduced(produced, wrapped.produced);
+      assert ValidWrappedProduced(consumed, produced, wrapped.produced);
     }
 
     ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<R>>, next: ())
@@ -56,12 +61,12 @@ module Mapped {
     ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<R>>)
       decreases height
     {
-      exists producedByWrapped: seq<Option<T>> :: ValidWrappedProduced(produced, producedByWrapped)
+      exists producedByWrapped: seq<Option<T>> :: ValidWrappedProduced(consumed, produced, producedByWrapped)
     }
 
-    ghost predicate ValidWrappedProduced(produced: seq<Option<R>>, producedByWrapped: seq<Option<T>>) {
-      && wrappedCanProduce(Seq.Repeat((), |producedByWrapped|), producedByWrapped)
-      && Enumerated(produced) == Seq.Map(f, Enumerated(producedByWrapped))
+    ghost predicate ValidWrappedProduced(consumed: seq<()>, produced: seq<Option<R>>, producedByWrapped: seq<Option<T>>) {
+      && wrappedCanProduce(consumed, producedByWrapped)
+      && produced == Seq.Map(maybeF, producedByWrapped)
     }
 
     method Invoke(t: ()) returns (r: Option<R>) 
@@ -74,9 +79,7 @@ module Mapped {
       ensures consumed == old(consumed) + [t]
       ensures produced == old(produced) + [r]
     {
-      assert ConsumesAnything(wrapped);
       assert wrapped.Valid();
-      assert wrapped.CanProduce(wrapped.consumed, wrapped.produced);
       var x := wrapped.Invoke(());
       match x {
         case Some(v) => r := Some(f(v));
@@ -84,31 +87,41 @@ module Mapped {
       }
       Repr := {this} + wrapped.Repr;
       Update(t, r);
-      EnumeratedDistributes(wrapped, x);
-      assert Enumerated(wrapped.produced) == Enumerated(old(wrapped.produced)) + Enumerated([x]);
-      Seq.LemmaMapDistributesOverConcat(f, Enumerated(old(wrapped.produced)), Enumerated([x]));
-      assert Enumerated(old(produced)) == Seq.Map(f, Enumerated(old(wrapped.produced)));
-      ThisIsEnumerator();
-      calc {
-        Enumerated(produced);
-        { EnumeratedDistributes(this, r); }
-        Enumerated(old(produced)) + Enumerated([r]);
-      }
-      assert ValidWrappedProduced(produced, wrapped.produced);
+
+      Seq.LemmaMapDistributesOverConcat(maybeF, old(wrapped.produced), [x]);
+      assert ValidWrappedProduced(consumed, produced, wrapped.produced);
+    }
+
+    function maybeF(t: Option<T>): Option<R> {
+      match t
+      case Some(v) => Some(f(v))
+      case None => None
     }
 
     lemma ThisIsEnumerator()
       requires Valid()
       ensures IsEnumerator(this)
     {
-      assert IsEnumerator(wrapped);
       var limit := EnumerationBound(wrapped);
-      forall consumed, produced, next | CanProduce(consumed, produced) {
-        assert CanConsume(consumed, produced, next);
-
-        var producedByWrapped: seq<Option<T>> :| ValidWrappedProduced(produced, producedByWrapped);
-        assert |Enumerated(producedByWrapped)| <= limit;
+      forall consumed, produced | CanProduce(consumed, produced) 
+        ensures exists n: nat | n <= limit :: Terminated(produced, None, n)
+      {
+        var producedByWrapped :| ValidWrappedProduced(consumed, produced, producedByWrapped);
+        var n :| n <= limit && Terminated(producedByWrapped, None, n);
+        assert Terminated(produced, None, n);
       }
+      assert EnumerationBoundedBy(this, limit);
     }
+  }
+
+  method Example() {
+    var e: SeqEnumerator<int> := new SeqEnumerator([1, 2, 3, 4, 5]);
+    SeqEnumeratorIsEnumerator(e);
+    var f: Map<int, int> := new Map(x => x * 2, e);
+    
+    var x := f.Invoke(());
+    assert f.produced == [Some(2)];
+    assert [x] == [Some(2)];
+    assert x == Some(2);
   }
 }

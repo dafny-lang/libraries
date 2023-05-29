@@ -71,6 +71,16 @@ module Enumerators {
     }
   }
 
+  lemma EnumeratedDistributesOverConcat2<T>(left: seq<Option<T>>, right: seq<Option<T>>, n: nat)
+    requires Terminated(left + right, None, n)
+    ensures Enumerated(left + right) == Enumerated(left) + Enumerated(right)
+  {
+    TerminatedUndistributes(left, right, None, n);
+    TerminatedDefinesEnumerated(left + right, n);
+    
+  }
+  
+
   ghost function ProducedForEnumerator<T>(s: seq<T>, n: nat): seq<Option<T>> {
     var before := Math.Min(|s|, n);
     var after := Math.Max(|s|, n);

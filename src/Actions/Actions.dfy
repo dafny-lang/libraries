@@ -58,9 +58,17 @@ module Actions {
       i.CanProduce(consumed, toProduce) <==> forall x <- toProduce :: x == c
   }
 
-  ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) 
-  {
+  ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) {
     forall i | 0 <= i < |s| :: n <= i <==> s[i] == c
+  }
+
+  lemma TerminatedUndistributes<T>(left: seq<T>, right: seq<T>, c: T, n: nat)
+    requires Terminated(left + right, c, n)
+    ensures Terminated(left, c, n)
+    ensures Terminated(right, c, Math.Max(0, n - |left|))
+  {
+    assert forall i | 0 <= i < |left| :: left[i] == (left + right)[i];
+    assert forall i | 0 <= i < |right| :: right[i] == (left + right)[i + |left|];
   }
 
   ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {
