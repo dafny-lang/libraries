@@ -160,25 +160,6 @@ module Enumerators {
     TerminatedDefinesEnumerated(a.produced, |a.produced|);
   }
 
-  twostate lemma EnumeratedDistributes<T(!new)>(a: Action<(), Option<T>>, nextProduced: Option<T>)
-    requires old(a.Valid())
-    requires a.Valid()
-    requires IsEnumerator(a)
-    requires a.produced == old(a.produced) + [nextProduced];
-    ensures Enumerated(a.produced) == Enumerated(old(a.produced)) + Enumerated([nextProduced])
-  {
-    var before := old(a.produced);
-    var n: nat :| n <= |before| && Terminated(before, None, n);
-    EnumeratedDistributesOverConcat(before, [nextProduced], n);
-
-    var m: nat :| m <= |a.produced| && Terminated(a.produced, None, m);
-    if n < |before| {
-      assert a.produced[|before| - 1] == None;
-      assert a.produced[|a.produced| - 1] == nextProduced;
-    }
-  }
-
-
   // Potentially infinite enumerator
   type IEnumerator<T> = Action<(), T> 
 
