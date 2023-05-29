@@ -77,9 +77,9 @@ module Enumerators {
     Seq.Map(x => Some(x), s[..before]) + Seq.Repeat(None, after - before)
   }
 
-  ghost predicate EnumeratesAtMost<T(!new)>(e: Action<(), Option<T>>, n: nat) {
-    forall consumed: seq<()>, toProduce: seq<Option<T>> ::
-      e.CanProduce(consumed, toProduce) ==> |Enumerated(toProduce)| <= n
+  ghost predicate EnumerationBoundedBy<T(!new)>(e: Action<(), Option<T>>, limit: nat) {
+    forall consumed: seq<()>, produced: seq<Option<T>> ::
+      e.CanProduce(consumed, produced) ==> exists n: nat | n <= limit :: Terminated(produced, None, n)
   }
 
   ghost predicate ConsumesAnything<T(!new)>(a: Action<(), Option<T>>) {
@@ -87,14 +87,15 @@ module Enumerators {
   }
 
   ghost predicate IsEnumerator<T(!new)>(a: Action<(), Option<T>>) {
-    ConsumesAnything(a) && exists limit :: ProducesTerminatedBy(a, None, limit)
+    && ConsumesAnything(a)
+    && exists limit :: EnumerationBoundedBy(a, limit)
   }
 
-  ghost function EnumerationLimit<T(!new)>(a: Action<(), Option<T>>): (limit: nat)
+  ghost function EnumerationBound<T(!new)>(a: Action<(), Option<T>>): (limit: nat)
     requires IsEnumerator(a)
-    ensures ProducesTerminatedBy(a, None, limit)
+    ensures EnumerationBoundedBy(a, limit)
   {
-    var limit: nat :| ProducesTerminatedBy(a, None, limit);
+    var limit: nat :| EnumerationBoundedBy(a, limit);
     limit
   }
 
@@ -103,8 +104,8 @@ module Enumerators {
     reads a.Repr
     requires IsEnumerator(a)
   {
-    var limit := EnumerationLimit(a);
-    var n :| Terminated(a.produced, None, n);
+    var limit := EnumerationBound(a);
+    var n: nat :| n <= limit && Terminated(a.produced, None, n);
     TerminatedDefinesEnumerated(a.produced, n);
     limit - |Enumerated(a.produced)|
   }
@@ -170,14 +171,10 @@ module Enumerators {
     var n: nat :| n <= |before| && Terminated(before, None, n);
     EnumeratedDistributesOverConcat(before, [nextProduced], n);
 
-    var m: nat :| Terminated(a.produced, None, m);
+    var m: nat :| m <= |a.produced| && Terminated(a.produced, None, m);
     if n < |before| {
-      TerminatedMinConcat(before, [nextProduced], None, n, m); 
-      assert nextProduced == a.produced[|a.produced| - 1];
-      assert before[|before| - 1] == None;
-      assert nextProduced == None;
-      assert Terminated(a.produced, None, n);
-      assert Enumerated(a.produced) == Enumerated(old(a.produced));
+      assert a.produced[|before| - 1] == None;
+      assert a.produced[|a.produced| - 1] == nextProduced;
     }
   }
 
@@ -258,7 +255,11 @@ module Enumerators {
   lemma SeqEnumeratorIsEnumerator<T(!new)>(e: SeqEnumerator<T>) 
     ensures IsEnumerator(e)
   {
-    assert ProducesTerminatedBy(e, None, |e.elements|);
+    forall consumed, produced | e.CanProduce(consumed, produced)
+      ensures Terminated(produced, None, |e.elements|)
+    {
+    }
+    assert EnumerationBoundedBy(e, |e.elements|);
   }
 
   class SeqIEnumerator<T> extends Action<(), T> {

@@ -58,16 +58,9 @@ module Actions {
       i.CanProduce(consumed, toProduce) <==> forall x <- toProduce :: x == c
   }
 
-  ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) {
-    forall i | 0 <= i < |s| :: n <= i <==> s[i] == c
-  }
-
-  lemma TerminatedMinConcat<T>(left: seq<T>, right: seq<T>, c: T, n: nat, m: nat) 
-    requires Terminated(left, c, n)
-    requires Terminated(left + right, c, m)
-    ensures n < m
+  ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) 
   {
-
+    forall i | 0 <= i < |s| :: n <= i <==> s[i] == c
   }
 
   ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {

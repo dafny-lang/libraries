@@ -102,7 +102,7 @@ module Mapped {
       ensures IsEnumerator(this)
     {
       assert IsEnumerator(wrapped);
-      var limit := EnumerationLimit(wrapped);
+      var limit := EnumerationBound(wrapped);
       forall consumed, produced, next | CanProduce(consumed, produced) {
         assert CanConsume(consumed, produced, next);
 
