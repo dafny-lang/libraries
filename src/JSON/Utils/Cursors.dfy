@@ -305,7 +305,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       : (pr: CursorResult<R>)
       requires Valid?
       decreases SuffixLength()
-      ensures pr.Success? ==> (pr.value.AdvancedFrom?(this))
+      ensures pr.Success? ==> pr.value.AdvancedFrom?(this)
     {
       match step(st, Peek())
       case Accept => Success(this)

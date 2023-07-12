@@ -39,9 +39,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} WS(cs: FreshCursor): (sp: Split<jblanks>)
       ensures sp.SplitFrom?(cs, SpecView)
-      ensures sp.cs.beg >= cs.beg
-      ensures sp.cs.end == cs.end
-      ensures sp.cs.s == cs.s
+      ensures sp.cs.SuffixOf?(cs)
     {
       cs.SkipWhile(Blank?).Split()
     } by method {
@@ -426,7 +424,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import ConcreteSyntax.SpecProperties
 
-    function {:rlimit 1000} {:vcs_split_on_every_assert} {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
+    function {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Value)
     {
