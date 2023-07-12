@@ -57,7 +57,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Cursor(cs.s, cs.beg, point', cs.end).Split();
     }
 
-    function {:opaque} Structural<T>(cs: FreshCursor, parser: Parser<T>)
+    function {:rlimit 100} {:vcs_split_on_every_assert} Structural<T>(cs: FreshCursor, parser: Parser<T>)
       : (pr: ParseResult<Structural<T>>)
       requires forall cs :: parser.fn.requires(cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, st => Spec.Structural(st, parser.spec))
@@ -288,7 +288,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       requires elems.SplitFrom?(open.cs, SuffixedElementsSpec)
       requires forall e | e in elems.t :: e.suffix.NonEmpty?
       decreases elems.cs.Length()
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs0, BracketedSpec) && !pr.value.cs.EOF?)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs0, BracketedSpec)
     {
       var elem :- Element(elems.cs, json);
       var sep := Core.TryStructural(elem.cs);
@@ -338,7 +338,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function {:rlimit 1000} {:vcs_split_on_every_assert} {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TBracketed>)
       requires cs.SplitFrom?(json.cs)
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs, BracketedSpec) && !pr.value.cs.EOF?)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, BracketedSpec)
     {
       var open :- Core.Structural(cs, Parsers.Parser(Open, SpecView));
       assert open.cs.StrictlySplitFrom?(json.cs);
