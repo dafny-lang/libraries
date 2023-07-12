@@ -276,7 +276,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:rlimit 10000} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
+    function {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -536,7 +536,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Failure(EOF);
     }
 
-    function {:rlimit 1000} {:vcs_split_on_every_assert} Quote(cs: FreshCursor) : (pr: ParseResult<jquote>)
+    function Quote(cs: FreshCursor) : (pr: ParseResult<jquote>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
       var cs :- cs.AssertChar('\"');
@@ -781,7 +781,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
   module Objects refines Sequences {
     import opened Params = ObjectParams
 
-    lemma BracketedToObject(obj: jobject)
+    lemma {:vcs_split_on_every_assert} BracketedToObject(obj: jobject)
       ensures Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Object(obj)
     {
       var rMember := (d: jmember) requires d < obj => Spec.Member(d);
