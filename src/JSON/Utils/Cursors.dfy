@@ -244,7 +244,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       requires offset <= |bs| as uint32
       requires forall b | b in bs :: b as int < 256
       decreases SuffixLength()
-      ensures pr.Success? ==> pr.value.AdvancedFrom?(this) 
+      ensures pr.Success? ==> pr.value.AdvancedFrom?(this)
       ensures pr.Success? && offset < |bs| as uint32 ==> pr.value.StrictlyAdvancedFrom?(this)
       ensures pr.Success? ==> s[point..pr.value.point] == bs[offset..]
     {
