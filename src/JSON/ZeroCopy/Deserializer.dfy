@@ -238,7 +238,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
-    function {:rlimit 1000} {:vcs_split_on_every_assert} {:opaque} AppendLast(ghost cs0: FreshCursor,
+    function {:rlimit 100} {:vcs_split_on_every_assert} {:opaque} AppendLast(ghost cs0: FreshCursor,
                                   ghost json: ValueParser,
                                   elems: Split<seq<TSuffixedElement>>,
                                   elem: Split<TElement>,
