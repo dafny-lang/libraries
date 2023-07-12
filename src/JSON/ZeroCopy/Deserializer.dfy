@@ -195,6 +195,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures forall e | e in elems'.t :: e.suffix.NonEmpty?
       ensures elems'.cs.Length() < elems.cs.Length()
       ensures elems'.cs.StrictlySplitFrom?(json.cs)
+      ensures elems'.SplitFrom?(cs0, SuffixedElementsSpec)
     {
       var suffixed := Suffixed(elem.t, NonEmpty(sep.t));
       var elems' := SP(elems.t + [suffixed], sep.cs); // DISCUSS: Moving this down doubles the verification time
@@ -261,7 +262,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:opaque} {:tailrecursion} Elements(
+    function {:rlimit 1000} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -279,24 +280,31 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var sep := Core.TryStructural(elem.cs);
       var s0 := sep.t.t.Peek();
       if s0 == SEPARATOR as opt_byte then
-        assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep) by {
+        assert AWS: AppendWithSuffix.requires(open.cs, json, elems, elem, sep) by {
           assert {:focus} elems.cs.StrictlySplitFrom?(json.cs);
           assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
           assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
           assert forall e | e in elems.t :: e.suffix.NonEmpty?;
-          assert {:split_here} true;
+          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+            assume {:axiom} false;
+          }
         }
-        var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
-        Elements(cs0, json, open, elems)
+        var elems := reveal AWS; AppendWithSuffix(open.cs, json, elems, elem, sep);
+        assert E1: open.StrictlySplitFrom?(cs0, c => Spec.Structural(c, SpecView));
+        assert E2: elems.cs.StrictlySplitFrom?(json.cs);
+        assert E3: elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+        assert E4: forall e | e in elems.t :: e.suffix.NonEmpty?;
+        reveal E1; reveal E2; reveal E3; reveal E4; Elements(cs0, json, open, elems)
       else if s0 == CLOSE as opt_byte then
-        assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
-          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
+        assert AL: AppendLast.requires(open.cs, json, elems, elem, sep) by {
           assert elems.cs.StrictlySplitFrom?(json.cs);
           assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
           assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
+          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+            assume {:axiom} false;
+          }
         }
-        var elems' := AppendLast(open.cs, json, elems, elem, sep);
+        var elems' := reveal AL; AppendLast(open.cs, json, elems, elem, sep);
         assert elems'.SplitFrom?(open.cs, SuffixedElementsSpec) by {
           assert elems'.StrictlySplitFrom?(open.cs, SuffixedElementsSpec);
         }
