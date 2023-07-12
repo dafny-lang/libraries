@@ -302,8 +302,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     assert items[..|items|] == items;
   }
 
-  lemma AboutList<T>(xs: seq<T>, i: nat, j: nat) 
-    requires i < j <= |xs| 
+  lemma AboutList<T>(xs: seq<T>, i: nat, j: nat)
+    requires i < j <= |xs|
     ensures xs[..j][..i] == xs[..i]
   {}
 
