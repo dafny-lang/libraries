@@ -307,7 +307,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         assert elems.cs.StrictlySplitFrom?(json.cs);
         assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
         assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-        assert forall e | e in elems.t :: e.suffix.NonEmpty?; 
+        assert forall e | e in elems.t :: e.suffix.NonEmpty?;
         var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
         assert open.StrictlySplitFrom?(cs0, c => Spec.Structural(c, SpecView));
         assert elems.cs.StrictlySplitFrom?(json.cs);
