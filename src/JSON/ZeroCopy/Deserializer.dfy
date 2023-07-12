@@ -31,10 +31,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     const SpecView := (v: Vs.View) => Spec.View(v);
 
     function {:opaque} Get(cs: FreshCursor, err: JSONError): (pr: ParseResult<jchar>)
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs, SpecView) && (cs.point + 1 != cs.end ==> !pr.value.cs.EOF?))
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
-      var cs' :- cs.Get(err);
-      Success(cs'.Split())
+      var cs :- cs.Get(err);
+      Success(cs.Split())
     }
 
     function {:opaque} WS(cs: FreshCursor): (sp: Split<jblanks>)
@@ -141,7 +141,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} Open(cs: FreshCursor)
       : (pr: ParseResult<jopen>)
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs, _ => [OPEN]) && (cs.point + 1 != cs.end ==> !pr.value.cs.EOF?))
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, _ => [OPEN])
     {
       var cs :- cs.AssertByte(OPEN);
       Success(cs.Split())
@@ -149,7 +149,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} Close(cs: FreshCursor)
       : (pr: ParseResult<jclose>)
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs, _ => [CLOSE]) && (cs.point + 1 != cs.end ==> !pr.value.cs.EOF?))
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, _ => [CLOSE])
     {
       var cs :- cs.AssertByte(CLOSE);
       Success(cs.Split())
@@ -537,7 +537,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:rlimit 1000} {:vcs_split_on_every_assert} Quote(cs: FreshCursor) : (pr: ParseResult<jquote>)
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs, SpecView) && (cs.point + 1 != cs.end ==> !pr.value.cs.EOF?))
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
     {
       var cs :- cs.AssertChar('\"');
       Success(cs.Split())

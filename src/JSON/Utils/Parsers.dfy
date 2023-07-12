@@ -45,7 +45,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Parsers {
     ghost predicate Valid?() {
       && (forall cs': FreshCursor | pre(cs') :: fn.requires(cs'))
       && (forall cs': FreshCursor | cs'.StrictlySplitFrom?(cs) :: pre(cs'))
-      && (forall cs': FreshCursor | pre(cs') :: fn(cs').Success? ==> (fn(cs').value.StrictlySplitFrom?(cs', spec) && !fn(cs').value.cs.EOF?))
+      && (forall cs': FreshCursor | pre(cs') :: fn(cs').Success? ==> fn(cs').value.StrictlySplitFrom?(cs', spec))
     }
   }
 
