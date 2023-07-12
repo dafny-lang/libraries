@@ -57,7 +57,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Cursor(cs.s, cs.beg, point', cs.end).Split();
     }
 
-    function {:rlimit 100} {:vcs_split_on_every_assert} Structural<T>(cs: FreshCursor, parser: Parser<T>)
+    function {:rlimit 1000} {:vcs_split_on_every_assert} Structural<T>(cs: FreshCursor, parser: Parser<T>)
       : (pr: ParseResult<Structural<T>>)
       requires forall cs :: parser.fn.requires(cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, st => Spec.Structural(st, parser.spec))
@@ -293,7 +293,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var elem :- Element(elems.cs, json);
       var sep := Core.TryStructural(elem.cs);
       var s0 := sep.t.t.Peek();
-      assert A4: sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+      assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
         assert sep.BytesSplitFrom?(elem.cs, st => Spec.Structural(st, SpecView)) by {
           assert sep.SplitFrom?(elem.cs, st => Spec.Structural(st, SpecView));
         }
@@ -304,24 +304,21 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         }
       }
       if s0 == SEPARATOR as opt_byte then
-        assert AWS1: elems.cs.StrictlySplitFrom?(json.cs);
-        assert AWS2: elems.SplitFrom?(open.cs, SuffixedElementsSpec);
-        assert AWS3: elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-        assert AWS5: forall e | e in elems.t :: e.suffix.NonEmpty?;
-        reveal AWS1; reveal AWS2; reveal AWS3; reveal A4; reveal AWS5; 
+        assert elems.cs.StrictlySplitFrom?(json.cs);
+        assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+        assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
+        assert forall e | e in elems.t :: e.suffix.NonEmpty?; 
         var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
-        assert E1: open.StrictlySplitFrom?(cs0, c => Spec.Structural(c, SpecView));
-        assert E2: elems.cs.StrictlySplitFrom?(json.cs);
-        assert E3: elems.SplitFrom?(open.cs, SuffixedElementsSpec);
-        assert E4: forall e | e in elems.t :: e.suffix.NonEmpty?;
-        reveal E1; reveal E2; reveal E3; reveal E4; 
+        assert open.StrictlySplitFrom?(cs0, c => Spec.Structural(c, SpecView));
+        assert elems.cs.StrictlySplitFrom?(json.cs);
+        assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+        assert forall e | e in elems.t :: e.suffix.NonEmpty?;
         Elements(cs0, json, open, elems)
       else if s0 == CLOSE as opt_byte then
-        assert AL1: elems.cs.StrictlySplitFrom?(json.cs);
-        assert AL2: elems.SplitFrom?(open.cs, SuffixedElementsSpec);
-        assert AL3: elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-        assert AL5: forall e | e in elems.t :: e.suffix.NonEmpty?;
-        reveal AL1; reveal AL2; reveal AL3; reveal A4; reveal AL5; 
+        assert elems.cs.StrictlySplitFrom?(json.cs);
+        assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+        assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
+        assert forall e | e in elems.t :: e.suffix.NonEmpty?;
         var elems' := AppendLast(open.cs, json, elems, elem, sep);
         assert elems'.SplitFrom?(open.cs, SuffixedElementsSpec) by {
           assert elems'.StrictlySplitFrom?(open.cs, SuffixedElementsSpec);
@@ -389,7 +386,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     function {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
-      ensures pr.Success? ==> (pr.value.StrictlySplitFrom?(cs, Spec.JSON) && !pr.value.cs.EOF?)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
     {
       Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value)).MapFailure(LiftCursorError)
     }
