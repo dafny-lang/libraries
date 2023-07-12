@@ -142,6 +142,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
     function Split() : (sp: Split<View>) requires Valid?
       ensures sp.SplitFrom?(this, (v: View) => v.Bytes())
       ensures beg != point ==> sp.StrictlySplitFrom?(this, (v: View) => v.Bytes())
+      ensures !this.EOF? ==> !sp.cs.EOF?
     {
       SP(this.Prefix(), this.Suffix())
     }
@@ -206,6 +207,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       requires point as int + n as int <= end as int
       ensures n == 0 ==> ps == this
       ensures n > 0 ==> ps.StrictlyAdvancedFrom?(this)
+      ensures this.point + n != this.end ==> !ps.EOF?
     {
       this.(point := point + n)
     }
@@ -219,7 +221,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
 
     function Get<R>(err: R): (ppr: CursorResult<R>)
       requires Valid?
-      ensures ppr.Success? ==> ppr.value.StrictlyAdvancedFrom?(this)
+      ensures ppr.Success? ==> (ppr.value.StrictlyAdvancedFrom?(this) && (this.point + 1 != this.end ==> !ppr.value.EOF?))
     {
       if EOF? then Failure(OtherError(err))
       else Success(Skip(1))
@@ -227,7 +229,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
 
     function AssertByte<R>(b: byte): (pr: CursorResult<R>)
       requires Valid?
-      ensures pr.Success? ==> !EOF?
+      ensures pr.Success? ==> !EOF? && (this.point + 1 != this.end ==> !pr.value.EOF?)
       ensures pr.Success? ==> s[point] == b
       ensures pr.Success? ==> pr.value.StrictlyAdvancedFrom?(this)
     {
@@ -242,7 +244,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       requires offset <= |bs| as uint32
       requires forall b | b in bs :: b as int < 256
       decreases SuffixLength()
-      ensures pr.Success? ==> pr.value.AdvancedFrom?(this)
+      ensures pr.Success? ==> pr.value.AdvancedFrom?(this) 
       ensures pr.Success? && offset < |bs| as uint32 ==> pr.value.StrictlyAdvancedFrom?(this)
       ensures pr.Success? ==> s[point..pr.value.point] == bs[offset..]
     {
@@ -255,7 +257,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
     function AssertChar<R>(c0: char): (pr: CursorResult<R>)
       requires Valid?
       requires c0 as int < 256
-      ensures pr.Success? ==> pr.value.StrictlyAdvancedFrom?(this)
+      ensures pr.Success? ==> (pr.value.StrictlyAdvancedFrom?(this) && (this.point + 1 != this.end ==> !pr.value.EOF?))
     {
       AssertByte(c0 as byte)
     }
@@ -264,7 +266,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       requires Valid?
       decreases SuffixLength()
       ensures ps.AdvancedFrom?(this)
-      ensures !EOF? ==> ps.StrictlyAdvancedFrom?(this)
+      ensures !EOF? ==> (ps.StrictlyAdvancedFrom?(this) && (this.point + 1 != this.end ==> !ps.EOF?))
     {
       if EOF? then this
       else Skip(1)
@@ -274,7 +276,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       requires Valid?
       decreases SuffixLength()
       ensures ps.AdvancedFrom?(this)
-      ensures !EOF? && p(SuffixAt(0)) ==> ps.StrictlyAdvancedFrom?(this)
+      ensures !EOF? && p(SuffixAt(0)) ==> (ps.StrictlyAdvancedFrom?(this) && (this.point + 1 != this.end ==> !ps.EOF?))
     {
       if EOF? || !p(SuffixAt(0)) then this
       else Skip(1)
@@ -304,7 +306,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       : (pr: CursorResult<R>)
       requires Valid?
       decreases SuffixLength()
-      ensures pr.Success? ==> pr.value.AdvancedFrom?(this)
+      ensures pr.Success? ==> (pr.value.AdvancedFrom?(this))
     {
       match step(st, Peek())
       case Accept => Success(this)
