@@ -42,10 +42,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures sp.cs.SuffixOf?(cs)
       ensures !cs.BOF? ==> sp.cs.StrictSuffixOf?(cs)
       ensures cs.EOF? ==> sp.cs.SuffixOf?(cs.Suffix())
- /*      ensures sp.cs.end == cs.end
-      ensures sp.cs.s == cs.s
-      ensures cs.point == cs.end ==> (sp.cs.beg == sp.cs.point == cs.point)
-      ensures cs.point != cs.end ==> (sp.cs.beg == sp.cs.point > cs.point) */
+      /*      ensures sp.cs.end == cs.end
+           ensures sp.cs.s == cs.s
+           ensures cs.point == cs.end ==> (sp.cs.beg == sp.cs.point == cs.point)
+           ensures cs.point != cs.end ==> (sp.cs.beg == sp.cs.point > cs.point) */
     {
       cs.SkipWhile(Blank?).Split()
     } by method {
@@ -281,7 +281,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:opaque} {:tailrecursion} Elements(
+    function {:rlimit 100000} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -295,9 +295,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       decreases elems.cs.Length()
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs0, BracketedSpec)
     {
-      if elems.cs.Length() == 0 then 
+      if elems.cs.Length() == 0 then
         Failure(EOF)
-      else 
+      else
         assert elems.cs.Length() != 0;
         var elem :- Element(elems.cs, json);
         var sep := Core.TryStructural(elem.cs);
@@ -309,18 +309,19 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           }
           assert sep.cs.StrictlySplitFrom?(elem.cs) by {
             assert sep.cs.BOF?;
-            assert !elems.cs.EOF? by {
-              assert elems.cs.BOF?;
-              assert elems.cs.point == elems.cs.beg;
-              if elems.cs.EOF? {
-                assert elems.cs.point == elems.cs.end;
-                assert elems.cs.beg == elems.cs.end;
-                assert elems.cs.Length() == 0;
-                assert elems.cs.Length() != 0;
-                assert false;
+            assert sep.cs.StrictSuffixOf?(elem.cs) by {
+              assert !elems.cs.EOF? by {
+                assert elems.cs.BOF?;
+                assert elems.cs.point == elems.cs.beg;
+                if elems.cs.EOF? {
+                  assert elems.cs.point == elems.cs.end;
+                  assert elems.cs.beg == elems.cs.end;
+                  assert elems.cs.Length() == 0;
+                  assert elems.cs.Length() != 0;
+                  assert false;
+                }
               }
             }
-            assert sep.cs.StrictSuffixOf?(elem.cs);
           }
         }
         if s0 == SEPARATOR as opt_byte then
