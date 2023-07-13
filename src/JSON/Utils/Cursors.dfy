@@ -141,8 +141,15 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
 
     function Split() : (sp: Split<View>) requires Valid?
       ensures sp.SplitFrom?(this, (v: View) => v.Bytes())
-      ensures beg != point ==> sp.StrictlySplitFrom?(this, (v: View) => v.Bytes())
-      ensures !this.EOF? ==> !sp.cs.EOF?
+      ensures !BOF? ==> (sp.StrictlySplitFrom?(this, (v: View) => v.Bytes()) && sp.cs.StrictSuffixOf?(this))
+      ensures sp.cs.SuffixOf?(this)
+      ensures sp.cs.BOF?
+      ensures !EOF? ==> !sp.cs.EOF?
+      ensures EOF? ==> sp.cs.EOF?
+      ensures sp.cs.s == this.s
+      ensures sp.cs.end == this.end
+      ensures sp.cs.beg == this.point
+      ensures sp.cs.point == this.point
     {
       SP(this.Prefix(), this.Suffix())
     }
@@ -266,6 +273,11 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       decreases SuffixLength()
       ensures ps.AdvancedFrom?(this)
       ensures !EOF? ==> ps.StrictlyAdvancedFrom?(this)
+      ensures ps.s == this.s
+      ensures ps.beg == this.beg
+      ensures ps.end == this.end
+      ensures EOF? ==> ps.point == this.point
+      ensures !EOF? ==> ps.point == this.point + 1
     {
       if EOF? then this
       else Skip(1)
