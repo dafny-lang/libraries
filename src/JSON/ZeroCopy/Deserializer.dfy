@@ -288,7 +288,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
+    function {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -367,11 +367,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           var pr := Failure(ExpectingAnyByte([CLOSE, separator], s0));
           pr
       }
-/* 
-    lemma {:axiom} AboutStructuralOpen(cs: FreshCursor)
-      ensures
-        var open :- Core.Structural(cs, Parsers.Parser(Open, SpecView));
-        open.StrictlySplitFrom?(cs, st => Spec.Structural(st, SpecView)); */
 
       lemma {:axiom} AboutCloseParser()
         ensures Parsers.Parser(Close, SpecViewClose).Valid?()
@@ -386,7 +381,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             }
           } */
 
-      function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
+      function {:vcs_split_on_every_assert} {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
         : (pr: ParseResult<TBracketed>)
         requires cs.SplitFrom?(json.cs)
         ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, BracketedSpec)
@@ -443,7 +438,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       case OtherError(err) => err
     }
 
-    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
+    function {:vcs_split_on_every_assert} {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
     {
       Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value)).MapFailure(LiftCursorError)
@@ -484,7 +479,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import ConcreteSyntax.SpecProperties
 
-    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
+    function {:vcs_split_on_every_assert} {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Value)
     {
