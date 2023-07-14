@@ -151,7 +151,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} Close(cs: FreshCursor)
       : (pr: ParseResult<jclose>)
-      ensures 
+      ensures
         pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewClose)
     {
       var cs :- cs.AssertByte(CLOSE);
@@ -237,7 +237,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
           }
         }
-      }      
+      }
       elems'
     }
 
@@ -277,8 +277,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
-    lemma {:axiom} AboutTryStructural(cs: FreshCursor) 
-      ensures 
+    lemma {:axiom} AboutTryStructural(cs: FreshCursor)
+      ensures
         var sp := Core.TryStructural(cs);
         var s0 := sp.t.t.Peek();
         && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
@@ -288,7 +288,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -303,9 +303,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs0, BracketedSpec)
     {
       var elem :- Element(elems.cs, json);
-      if elem.cs.EOF? then 
+      if elem.cs.EOF? then
         Failure(EOF)
-      else 
+      else
         var sep := Core.TryStructural(elem.cs);
         var s0 := sep.t.t.Peek();
         if s0 == SEPARATOR as opt_byte then
@@ -366,38 +366,39 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           var separator := SEPARATOR;
           var pr := Failure(ExpectingAnyByte([CLOSE, separator], s0));
           pr
-      }
+    }
 
-      lemma {:axiom} AboutCloseParser()
-        ensures Parsers.Parser(Close, SpecViewClose).Valid?()
-      
-/*                 assert Parsers.Parser(Close, SpecViewClose).Valid?() by {
-            forall cs': FreshCursor ensures Close(cs').Success? ==> Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose) {
-              if Close(cs').Success? {
-                assert Close(cs').value.StrictlySplitFrom?(cs, SpecViewClose) by {
-                  assert Close(cs').Success? ==> Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose);
-                }
-              }
+    lemma AboutCloseParser()
+      ensures Parsers.Parser(Close, SpecViewClose).Valid?()
+    {
+      assert Parsers.Parser(Close, SpecViewClose).Valid?() by {
+        forall cs': FreshCursor ensures Close(cs').Success? ==> Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose) {
+          if Close(cs').Success? {
+            assert Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose) by {
+              assert Close(cs').Success? ==> Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose);
             }
-          } */
-
-      function {:vcs_split_on_every_assert} {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
-        : (pr: ParseResult<TBracketed>)
-        requires cs.SplitFrom?(json.cs)
-        ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, BracketedSpec)
-      {
-        var open :- Core.Structural<jopen>(cs, Parsers.Parser(Open, SpecViewOpen));
-        assert open.cs.StrictlySplitFrom?(json.cs);
-        var elems := SP([], open.cs);
-        if open.cs.Peek() == CLOSE as opt_byte then
-          var p := Parsers.Parser(Close, SpecViewClose);
-          assert p.Valid?() by {
-            AboutCloseParser();
           }
-          var close :- Core.Structural<jclose>(open.cs, p);
-          Success(BracketedFromParts(cs, open, elems, close))
-        else
-          Elements(cs, json, open, elems)
+        }
+      }
+    }
+
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
+      : (pr: ParseResult<TBracketed>)
+      requires cs.SplitFrom?(json.cs)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, BracketedSpec)
+    {
+      var open :- Core.Structural<jopen>(cs, Parsers.Parser(Open, SpecViewOpen));
+      assert open.cs.StrictlySplitFrom?(json.cs);
+      var elems := SP([], open.cs);
+      if open.cs.Peek() == CLOSE as opt_byte then
+        var p := Parsers.Parser(Close, SpecViewClose);
+        assert p.Valid?() by {
+          AboutCloseParser();
+        }
+        var close :- Core.Structural<jclose>(open.cs, p);
+        Success(BracketedFromParts(cs, open, elems, close))
+      else
+        Elements(cs, json, open, elems)
     }
 
     lemma Valid(x: TBracketed)
@@ -438,7 +439,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       case OtherError(err) => err
     }
 
-    function {:vcs_split_on_every_assert} {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
     {
       Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value)).MapFailure(LiftCursorError)
@@ -479,7 +480,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import ConcreteSyntax.SpecProperties
 
-    function {:vcs_split_on_every_assert} {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Value)
     {
@@ -844,9 +845,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         assert v.BytesSplitFrom?(colon.cs, Spec.Value) by {
           calc {
             colon.cs.Bytes();
-          { assert v.BytesSplitFrom?(colon.cs, json.spec) by { assert json.Valid?(); } }
+            { assert v.BytesSplitFrom?(colon.cs, json.spec) by { assert json.Valid?(); } }
             json.spec(v.t) + v.cs.Bytes();
-          { assert json.spec(v.t) == Spec.Value(v.t) by { assert forall t :: json.spec(t) == Spec.Value(t); } }
+            { assert json.spec(v.t) == Spec.Value(v.t) by { assert forall t :: json.spec(t) == Spec.Value(t); } }
             Spec.Value(v.t) + v.cs.Bytes();
           }
         }
