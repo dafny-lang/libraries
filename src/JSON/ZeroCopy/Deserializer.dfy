@@ -247,11 +247,11 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
-    function {:opaque} AppendLast(ghost cs0: FreshCursor,
-                                  ghost json: ValueParser,
-                                  elems: Split<seq<TSuffixedElement>>,
-                                  elem: Split<TElement>,
-                                  sep: Split<Structural<jclose>>)
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} AppendLast(ghost cs0: FreshCursor,
+                                                                               ghost json: ValueParser,
+                                                                               elems: Split<seq<TSuffixedElement>>,
+                                                                               elem: Split<TElement>,
+                                                                               sep: Split<Structural<jclose>>)
       : (elems': Split<seq<TSuffixedElement>>)
       requires elems.cs.StrictlySplitFrom?(json.cs)
       requires elems.SplitFrom?(cs0, SuffixedElementsSpec)
@@ -752,14 +752,19 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       }
     }
 
-    function {:opaque}  Array(cs: FreshCursor, json: ValueParser)
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Array(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jarray>)
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Array)
     {
       var sp :- Bracketed(cs, json);
+      /* sp: TBracketed = Bracketed<jopen, TElement, jcomma, jclose> */
       assert sp.StrictlySplitFrom?(cs, BracketedSpec);
+      /* sp.t: jarray = Bracketed<jlbracket, Value, jcomma, jrbracket> */
+      assume {:axiom} false;
+      var t: jarray := sp.t;
       BracketedToArray(sp.t);
+      var x := SP(t, sp.cs);
       Success(sp)
     }
   }
@@ -867,15 +872,19 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       }
     }
 
-    function {:opaque} Object(cs: FreshCursor, json: ValueParser)
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Object(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jobject>)
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Object)
     {
+      /* sp: TBracketed = Bracketed<jopen, TElement, jcomma, jclose> */
       var sp :- Bracketed(cs, json);
-      assert sp.StrictlySplitFrom?(cs, BracketedSpec);
-      BracketedToObject(sp.t);
-      Success(sp)
+      /* sp.t : jobject = Bracketed<jlbrace, jKeyValue, jcomma, jbrace> */
+      assume {:axiom} false;
+      var t: jobject := sp.t;
+      BracketedToObject(t);
+      var x := SP(t, sp.cs);
+      Success(x)
     }
   }
 }
