@@ -79,7 +79,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function {:opaque} TryStructural(cs: FreshCursor)
       : (sp: Split<Structural<jopt>>)
       ensures sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView))
-      ensures 
+      ensures
         var s0 := sp.t.t.Peek();
         && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
         && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
@@ -92,9 +92,11 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       SP(Grammar.Structural(before, val, after), cs)
     }
 
-    type ValueParser = sp: SubParser<Value> |
-        forall t :: sp.spec(t) == Spec.Value(t)
-      witness *
+    ghost predicate ValueParserValid(sp: SubParser<Value>) {
+      forall t :: sp.spec(t) == Spec.Value(t)
+    }
+
+    type ValueParser = sp: SubParser<Value> | ValueParserValid(sp) witness *
   }
   type Error = Core.Error
 
@@ -280,16 +282,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
       elems'
     }
-
-/*     lemma AboutTryStructural(cs: FreshCursor)
-      ensures
-        var sp := Core.TryStructural(cs);
-        var s0 := sp.t.t.Peek();
-        && ((!cs.BOF? || !cs.EOF?) && (s0 == Core.SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
-        && ((s0 == Core.SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
-        && ((!cs.BOF? || !cs.EOF?) && (s0 == Core.CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
-        && ((s0 == Core.CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
-    {} */
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
@@ -813,6 +805,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.KeyValue(t)
     }
+
     function {:vcs_split_on_every_assert} {:opaque} Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
@@ -846,7 +839,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             colon.cs.Bytes();
             { assert v.BytesSplitFrom?(colon.cs, json.spec) by { assert json.Valid?(); } }
             json.spec(v.t) + v.cs.Bytes();
-            { assert json.spec(v.t) == Spec.Value(v.t) by { assert forall t :: json.spec(t) == Spec.Value(t); } }
+            { assert json.spec(v.t) == Spec.Value(v.t) by { assert ValueParserValid(json); } }
             Spec.Value(v.t) + v.cs.Bytes();
           }
         }
