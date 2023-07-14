@@ -818,19 +818,44 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.KeyValue(t)
     }
-    function {:opaque} Element(cs: FreshCursor, json: ValueParser)
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
       var k :- Strings.String(cs);
       assert k.cs.StrictlySplitFrom?(json.cs);
-
+      assert k.StrictlySplitFrom?(cs, Spec.String);
       var p := Parsers.Parser(Colon, SpecView);
       assert p.Valid?();
       var colon :- Core.Structural(k.cs, p);
-      assert colon.StrictlySplitFrom?(k.cs, st => Spec.Structural(st, p.spec));
+      assert colon.StrictlySplitFrom?(k.cs, st => Spec.Structural(st, SpecView));
       assert colon.cs.StrictlySplitFrom?(json.cs);
 
+      assert json.fn.requires(colon.cs) by {
+        assert json.pre(colon.cs) by {
+          assert colon.cs.StrictlySplitFrom?(json.cs);
+          assert json.Valid?();
+        }
+        assert json.Valid?();
+      }
+
       var v :- json.fn(colon.cs);
+
+      assert v.StrictlySplitFrom?(colon.cs, Spec.Value) by {
+        assert v.cs.StrictlySplitFrom?(colon.cs) by {
+          assert v.StrictlySplitFrom?(colon.cs, json.spec) by {
+            assert json.Valid?();
+          }
+        }
+        assert v.BytesSplitFrom?(colon.cs, Spec.Value) by {
+          calc {
+            colon.cs.Bytes();
+          { assert v.BytesSplitFrom?(colon.cs, json.spec) by { assert json.Valid?(); } }
+            json.spec(v.t) + v.cs.Bytes();
+          { assert forall t :: json.spec(t) == Spec.Value(t); }
+            Spec.Value(v.t) + v.cs.Bytes();
+          }
+        }
+      }
       var kv := KeyValueFromParts(cs, k, colon, v);
       Success(kv)
     }
