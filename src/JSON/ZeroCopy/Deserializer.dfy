@@ -70,9 +70,15 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     type jopt = v: Vs.View | v.Length() <= 1 witness Vs.View.OfBytes([])
 
-    function {:opaque} TryStructural(cs: FreshCursor)
+    function TryStructural(cs: FreshCursor)
       : (sp: Split<Structural<jopt>>)
       ensures sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView))
+/*       ensures 
+        var s0 := sp.t.t.Peek();
+        && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
+        && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
+        && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
+        && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView))) */
     {
       var SP(before, cs) := WS(cs);
       var SP(val, cs) := cs.SkipByte().Split();
@@ -276,7 +282,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
-    lemma {:axiom} AboutTryStructural(cs: FreshCursor)
+    lemma AboutTryStructural(cs: FreshCursor)
       ensures
         var sp := Core.TryStructural(cs);
         var s0 := sp.t.t.Peek();
@@ -284,6 +290,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
         && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
         && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
+    {}
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
