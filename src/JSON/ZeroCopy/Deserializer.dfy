@@ -151,8 +151,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} Close(cs: FreshCursor)
       : (pr: ParseResult<jclose>)
-      ensures
-        pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewClose)
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewClose)
     {
       var cs :- cs.AssertByte(CLOSE);
       Success(cs.Split())

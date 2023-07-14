@@ -284,7 +284,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     assert wr == MembersSpec(obj, members, writer);
   }
 
-  method ItemsImpl(arr: jarray, writer: Writer) returns (wr: Writer)
+  method {:vcs_split_on_every_assert} ItemsImpl(arr: jarray, writer: Writer) returns (wr: Writer)
     decreases arr, 1
     ensures wr == ItemsSpec(arr, arr.data, writer);
   {
@@ -294,11 +294,18 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     for i := 0 to |items| // FIXME uint32
       invariant wr == ItemsSpec(arr, items[..i], writer)
     {
-      assert items[..i+1][..i] == items[..i];
+      assert items[..i+1][..i] == items[..i] by {
+        AboutList(items, i, i+1);
+      }
       wr := Item(arr, items[i], wr);
     }
     assert items[..|items|] == items;
   }
+
+  lemma AboutList<T>(xs: seq<T>, i: nat, j: nat)
+    requires i < j <= |xs|
+    ensures xs[..j][..i] == xs[..i]
+  {}
 
   function {:opaque} Member(ghost obj: jobject, m: jmember, writer: Writer) : (wr: Writer)
     requires m < obj
