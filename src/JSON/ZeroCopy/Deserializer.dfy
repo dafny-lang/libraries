@@ -818,7 +818,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.KeyValue(t)
     }
-    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Element(cs: FreshCursor, json: ValueParser)
+    function {:vcs_split_on_every_assert} {:opaque} Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
       var k :- Strings.String(cs);
@@ -851,7 +851,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             colon.cs.Bytes();
           { assert v.BytesSplitFrom?(colon.cs, json.spec) by { assert json.Valid?(); } }
             json.spec(v.t) + v.cs.Bytes();
-          { assert forall t :: json.spec(t) == Spec.Value(t); }
+          { assert json.spec(v.t) == Spec.Value(v.t) by { assert forall t :: json.spec(t) == Spec.Value(t); } }
             Spec.Value(v.t) + v.cs.Bytes();
           }
         }
