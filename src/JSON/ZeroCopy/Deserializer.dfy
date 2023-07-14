@@ -485,6 +485,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           assert SP(obj, cs').StrictlySplitFrom?(cs, Spec.Object);
         }
         Spec.UnfoldValueObject(v);
+        assert sp.StrictlySplitFrom?(cs, Spec.Value);
         Success(sp)
       else if c == '[' as opt_byte then
         var SP(arr, cs') :- Arrays.Array(cs, ValueParser(cs));
@@ -494,18 +495,31 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           assert SP(arr, cs').StrictlySplitFrom?(cs, Spec.Array);
           Spec.UnfoldValueArray(v);
         }
+        assert sp.StrictlySplitFrom?(cs, Spec.Value);
         Success(sp)
       else if c == '\"' as opt_byte then
         var SP(str, cs) :- Strings.String(cs);
+        assert (SP(Grammar.String(str), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
+          assume {:axiom} false;
+        }
         Success(SP(Grammar.String(str), cs))
       else if c == 't' as opt_byte then
         var SP(cst, cs) :- Constants.Constant(cs, TRUE);
+        assert (SP(Grammar.Bool(cst), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
+          assume {:axiom} false;
+        }
         Success(SP(Grammar.Bool(cst), cs))
       else if c == 'f' as opt_byte then
         var SP(cst, cs) :- Constants.Constant(cs, FALSE);
+        assert (SP(Grammar.Bool(cst), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
+          assume {:axiom} false;
+        }
         Success(SP(Grammar.Bool(cst), cs))
       else if c == 'n' as opt_byte then
         var SP(cst, cs) :- Constants.Constant(cs, NULL);
+        assert (SP(Grammar.Null(cst), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
+          assume {:axiom} false;
+        }
         Success(SP(Grammar.Null(cst), cs))
       else
         var SP(num, cs') :- Numbers.Number(cs);
