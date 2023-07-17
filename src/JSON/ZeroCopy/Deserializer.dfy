@@ -308,6 +308,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       if elem.cs.EOF? then
         Failure(EOF)
       else
+        AboutTryStructural(elem.cs);
         var sep := Core.TryStructural(elem.cs);
         var s0 := sep.t.t.Peek();
         if s0 == SEPARATOR as opt_byte then
@@ -333,7 +334,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
                 assert sep.cs.BOF?;
                 assert sep.cs.StrictSuffixOf?(elem.cs) by {
                   assert !elem.cs.EOF?;
-                  AboutTryStructural(elem.cs);
                 }
               }
             }
@@ -363,7 +363,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
                 assert sep.cs.BOF?;
                 assert sep.cs.StrictSuffixOf?(elem.cs) by {
                   assert !elem.cs.EOF?;
-                  AboutTryStructural(elem.cs);
                 }
               }
             }
