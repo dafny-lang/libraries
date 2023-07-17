@@ -128,8 +128,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
       // We call ``ConcatBytes`` with ``Spec.Member``, whereas the spec calls it
       // with ``(d: jmember) requires d in obj.data => Spec.Member(d)``.  That's
       // why we need an explicit cast, which is performed by the lemma below.
-      SpecProperties.Bracketed_Morphism(obj);
-      assert forall d | d < obj :: Spec.Member(d) == rMember(d);
+      assert SpecProperties.Bracketed_Morphism_Requires(obj, Spec.Member, rMember);
+      SpecProperties.Bracketed_Morphism(obj, Spec.Member, rMember);
     }
     calc {
       Spec.Bracketed(obj, Spec.Member);
@@ -157,8 +157,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   {
     var rItem := (d: jitem) requires d < arr => Spec.Item(d);
     assert Spec.Bracketed(arr, Spec.Item) == Spec.Bracketed(arr, rItem) by {
-      SpecProperties.Bracketed_Morphism(arr);
-      assert forall d | d < arr :: Spec.Item(d) == rItem(d);
+      assert SpecProperties.Bracketed_Morphism_Requires(arr, Spec.Item, rItem);
+      SpecProperties.Bracketed_Morphism(arr, Spec.Item, rItem);
     }
     calc {
       Spec.Bracketed(arr, Spec.Item);
