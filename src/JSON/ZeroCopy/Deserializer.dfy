@@ -27,12 +27,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type Parser<!T> = Parsers.Parser<T, JSONError>
     type SubParser<!T> = Parsers.SubParser<T, JSONError>
 
-    const SEPARATOR: byte := ',' as byte
-    const OPEN: byte
-    const CLOSE: byte
-    type jopen = v: Vs.View | v.Byte?(OPEN) witness Vs.View.OfBytes([OPEN])
-    type jclose = v: Vs.View | v.Byte?(CLOSE) witness Vs.View.OfBytes([CLOSE])
-
     // BUG(https://github.com/dafny-lang/dafny/issues/2179)
     const SpecView := (v: Vs.View) => Spec.View(v);
 
@@ -76,15 +70,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     type jopt = v: Vs.View | v.Length() <= 1 witness Vs.View.OfBytes([])
 
-    function {:opaque} TryStructural(cs: FreshCursor)
+    function TryStructural(cs: FreshCursor)
       : (sp: Split<Structural<jopt>>)
       ensures sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView))
-      ensures
-        var s0 := sp.t.t.Peek();
-        && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
-        && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
-        && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
-        && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
     {
       var SP(before, cs) := WS(cs);
       var SP(val, cs) := cs.SkipByte().Split();
@@ -106,6 +94,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import opened Grammar
     import opened Utils.Cursors
     import opened Core
+
+    const OPEN: byte
+    const CLOSE: byte
 
     type TElement
 
@@ -130,6 +121,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     import Utils.Parsers
     import opened Core
 
+    const SEPARATOR: byte := ',' as byte
+
+    type jopen = v: Vs.View | v.Byte?(OPEN) witness Vs.View.OfBytes([OPEN])
+    type jclose = v: Vs.View | v.Byte?(CLOSE) witness Vs.View.OfBytes([CLOSE])
     type TBracketed = Bracketed<jopen, TElement, jcomma, jclose>
     type TSuffixedElement = Suffixed<TElement, jcomma>
 
@@ -152,7 +147,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       : (pr: ParseResult<jopen>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewOpen)
     {
-      var cs :- cs.AssertByte(Core.OPEN);
+      var cs :- cs.AssertByte(OPEN);
       Success(cs.Split())
     }
 
@@ -160,7 +155,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       : (pr: ParseResult<jclose>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewClose)
     {
-      var cs :- cs.AssertByte(Core.CLOSE);
+      var cs :- cs.AssertByte(CLOSE);
       Success(cs.Split())
     }
 
@@ -283,6 +278,16 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
+    lemma AboutTryStructural(cs: FreshCursor)
+      ensures 
+        var sp := TryStructural(cs);
+        var s0 := sp.t.t.Peek();       
+        && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
+        && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
+        && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
+        && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
+    {}
+
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
     function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
@@ -327,7 +332,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           }
           var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
           Elements(cs0, json, open, elems)
-        else if s0 == Core.CLOSE as opt_byte then
+        else if s0 == CLOSE as opt_byte then
           var sep: Split<Structural<jclose>> := sep;
           assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
             assert elems.cs.StrictlySplitFrom?(json.cs);
@@ -355,7 +360,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           Success(bracketed)
         else
           var separator := SEPARATOR;
-          var pr := Failure(ExpectingAnyByte([Core.CLOSE, separator], s0));
+          var pr := Failure(ExpectingAnyByte([CLOSE, separator], s0));
           pr
     }
 
@@ -381,7 +386,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       var open :- Core.Structural<jopen>(cs, Parsers.Parser(Open, SpecViewOpen));
       assert open.cs.StrictlySplitFrom?(json.cs);
       var elems := SP([], open.cs);
-      if open.cs.Peek() == Core.CLOSE as opt_byte then
+      if open.cs.Peek() == CLOSE as opt_byte then
         var p := Parsers.Parser(Close, SpecViewClose);
         assert p.Valid?() by {
           AboutCloseParser();
@@ -393,8 +398,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     }
 
     lemma Valid(x: TBracketed)
-      ensures x.l.t.Byte?(Core.OPEN)
-      ensures x.r.t.Byte?(Core.CLOSE)
+      ensures x.l.t.Byte?(OPEN)
+      ensures x.r.t.Byte?(CLOSE)
       ensures NoTrailingSuffix(x.data)
       ensures forall pf | pf in x.data ::
                 pf.suffix.NonEmpty? ==> pf.suffix.t.t.Byte?(SEPARATOR)
@@ -819,16 +824,12 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Array(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jarray>)
       requires cs.SplitFrom?(json.cs)
+      requires cs.Peek() == '[' as opt_byte
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Array)
     {
       var sp :- Bracketed(cs, json);
-      /* sp: TBracketed = Bracketed<jopen, TElement, jcomma, jclose> */
       assert sp.StrictlySplitFrom?(cs, BracketedSpec);
-      /* sp.t: jarray = Bracketed<jlbracket, Value, jcomma, jrbracket> */
-      assume {:axiom} false;
-      var t: jarray := sp.t;
       BracketedToArray(sp.t);
-      var x := SP(t, sp.cs);
       Success(sp)
     }
   }
@@ -941,14 +942,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Object)
     {
-      /* sp: TBracketed = Bracketed<jopen, TElement, jcomma, jclose> */
       var sp :- Bracketed(cs, json);
-      /* sp.t : jobject = Bracketed<jlbrace, jKeyValue, jcomma, jbrace> */
-      assume {:axiom} false;
-      var t: jobject := sp.t;
-      BracketedToObject(t);
-      var x := SP(t, sp.cs);
-      Success(x)
+      assert sp.StrictlySplitFrom?(cs, BracketedSpec);
+      BracketedToObject(sp.t);
+      Success(sp)
     }
   }
 }
