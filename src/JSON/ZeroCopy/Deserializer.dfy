@@ -498,29 +498,79 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         assert sp.StrictlySplitFrom?(cs, Spec.Value);
         Success(sp)
       else if c == '\"' as opt_byte then
-        var SP(str, cs) :- Strings.String(cs);
-        assert (SP(Grammar.String(str), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
-          assume {:axiom} false;
+        var SP(str, cs') :- Strings.String(cs);
+        assert (SP(Grammar.String(str), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          calc {
+            (SP(Grammar.String(str), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.String(str), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.String(str)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.String(str) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && SP(str, cs').BytesSplitFrom?(cs, Spec.String);
+            SP(str, cs').StrictlySplitFrom?(cs, Spec.String);
+            true;
+          }
         }
-        Success(SP(Grammar.String(str), cs))
+        Success(SP(Grammar.String(str), cs'))
       else if c == 't' as opt_byte then
-        var SP(cst, cs) :- Constants.Constant(cs, TRUE);
-        assert (SP(Grammar.Bool(cst), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
-          assume {:axiom} false;
+        var SP(cst, cs') :- Constants.Constant(cs, TRUE);
+        assert (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          var f := _ => TRUE;
+          calc {
+            (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.View(cst) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == cst.Bytes() + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == TRUE + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == f(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            { assert cs'.StrictlySplitFrom?(cs) <==> cs'.SplitFrom?(cs) by { assert cs' != cs; } }
+            cs'.SplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            (SP(Grammar.Bool(cst), cs')).SplitFrom?(cs, f);
+            true;
+          }
         }
-        Success(SP(Grammar.Bool(cst), cs))
+        Success(SP(Grammar.Bool(cst), cs'))
       else if c == 'f' as opt_byte then
-        var SP(cst, cs) :- Constants.Constant(cs, FALSE);
-        assert (SP(Grammar.Bool(cst), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
-          assume {:axiom} false;
+        var SP(cst, cs') :- Constants.Constant(cs, FALSE);
+        assert (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          var f := _ => FALSE;
+          calc {
+            (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.View(cst) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == cst.Bytes() + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == FALSE + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == f(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            { assert cs'.StrictlySplitFrom?(cs) <==> cs'.SplitFrom?(cs) by { assert cs' != cs; } }
+            cs'.SplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            (SP(Grammar.Bool(cst), cs')).SplitFrom?(cs, f);
+            true;
+          }
         }
-        Success(SP(Grammar.Bool(cst), cs))
+        Success(SP(Grammar.Bool(cst), cs'))
       else if c == 'n' as opt_byte then
-        var SP(cst, cs) :- Constants.Constant(cs, NULL);
-        assert (SP(Grammar.Null(cst), cs)).StrictlySplitFrom?(cs, Spec.Value) by {
-          assume {:axiom} false;
+        var SP(cst, cs') :- Constants.Constant(cs, NULL);
+        assert (SP(Grammar.Null(cst), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          var f := _ => NULL;
+          calc {
+            (SP(Grammar.Null(cst), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Null(cst), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.Null(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.View(cst) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == cst.Bytes() + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == NULL + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == f(Grammar.Null(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Null(cst), cs')).BytesSplitFrom?(cs, f);
+            { assert cs'.StrictlySplitFrom?(cs) <==> cs'.SplitFrom?(cs) by { assert cs' != cs; } }
+            cs'.SplitFrom?(cs) && (SP(Grammar.Null(cst), cs')).BytesSplitFrom?(cs, f);
+            (SP(Grammar.Null(cst), cs')).SplitFrom?(cs, f);
+            true;
+          }
         }
-        Success(SP(Grammar.Null(cst), cs))
+        Success(SP(Grammar.Null(cst), cs'))
       else
         var SP(num, cs') :- Numbers.Number(cs);
         var v := Grammar.Number(num);
