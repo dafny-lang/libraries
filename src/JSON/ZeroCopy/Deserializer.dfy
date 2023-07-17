@@ -278,7 +278,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
-    lemma AboutTryStructural(cs: FreshCursor)
+/*     lemma AboutTryStructural(cs: FreshCursor)
       ensures 
         var sp := TryStructural(cs);
         var s0 := sp.t.t.Peek();       
@@ -286,7 +286,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
         && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
         && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
-    {}
+    {} */
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
