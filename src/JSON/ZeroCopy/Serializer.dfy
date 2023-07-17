@@ -81,7 +81,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     .Append(str.rq)
   }
 
-  function {:opaque} Number(num: jnumber, writer: Writer) : (wr: Writer)
+  function {:opaque} {:vcs_split_on_every_assert} Number(num: jnumber, writer: Writer) : (wr: Writer)
     decreases num, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.Number(num)
   {
