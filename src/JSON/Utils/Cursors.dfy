@@ -267,11 +267,6 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       decreases SuffixLength()
       ensures ps.AdvancedFrom?(this)
       ensures !EOF? ==> ps.StrictlyAdvancedFrom?(this)
-      ensures ps.s == this.s
-      ensures ps.beg == this.beg
-      ensures ps.end == this.end
-      ensures EOF? ==> ps.point == this.point
-      ensures !EOF? ==> ps.point == this.point + 1
     {
       if EOF? then this
       else Skip(1)
