@@ -828,8 +828,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     {
       var rItem := (d: jitem) requires d < arr => Spec.Item(d);
       assert Spec.Bracketed(arr, SuffixedElementSpec) == Spec.Bracketed(arr, rItem) by {
-        SpecProperties.Bracketed_Morphism(arr);
-        assert forall d | d < arr :: SuffixedElementSpec(d) == rItem(d);
+        assert SpecProperties.Bracketed_Morphism_Requires(arr, SuffixedElementSpec, rItem);
+        SpecProperties.Bracketed_Morphism(arr, SuffixedElementSpec, rItem);
       }
       calc {
         Spec.Bracketed(arr, SuffixedElementSpec);
@@ -939,13 +939,15 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
   module Objects refines Sequences {
     import opened Params = ObjectParams
 
-    lemma {:vcs_split_on_every_assert} BracketedToObject(obj: jobject)
+    lemma {:timeLimit 30} {:vcs_split_on_every_assert} BracketedToObject(obj: jobject)
       ensures Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Object(obj)
     {
       var rMember := (d: jmember) requires d < obj => Spec.Member(d);
       assert Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Bracketed(obj, rMember) by {
-        SpecProperties.Bracketed_Morphism(obj);
-        assert forall d | d < obj :: SuffixedElementSpec(d) == rMember(d);
+        assert Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Bracketed(obj, rMember) by {
+          assert SpecProperties.Bracketed_Morphism_Requires(obj, SuffixedElementSpec, rMember);
+          SpecProperties.Bracketed_Morphism(obj, SuffixedElementSpec, rMember);
+        }
       }
       calc {
         Spec.Bracketed(obj, SuffixedElementSpec);
