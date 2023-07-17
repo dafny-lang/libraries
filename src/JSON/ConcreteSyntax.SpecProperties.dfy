@@ -4,7 +4,7 @@
 include "ConcreteSyntax.Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
-// Some useful properties about the functions used in `ConcreteSyntax.Spec`.
+  // Some useful properties about the functions used in `ConcreteSyntax.Spec`.
 {
   import opened BoundedInts
 
@@ -19,7 +19,7 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
   }
 
   lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>, pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes)
-    requires Bracketed_Morphism_Requires(bracketed, pd0, pd1) 
+    requires Bracketed_Morphism_Requires(bracketed, pd0, pd1)
     ensures Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
   {
     calc {
