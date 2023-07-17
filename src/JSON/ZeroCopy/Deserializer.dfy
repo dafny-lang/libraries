@@ -814,6 +814,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.Value(t)
     }
+    
     function {:opaque} Element(cs: FreshCursor, json: ValueParser) : (pr: ParseResult<TElement>)
     {
       json.fn(cs)
@@ -841,7 +842,6 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} Array(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jarray>)
       requires cs.SplitFrom?(json.cs)
-      requires cs.Peek() == '[' as opt_byte
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Array)
     {
       var sp :- Bracketed(cs, json);
