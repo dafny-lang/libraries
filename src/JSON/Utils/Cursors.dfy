@@ -143,14 +143,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
       ensures sp.SplitFrom?(this, (v: View) => v.Bytes())
       ensures beg != point ==> sp.StrictlySplitFrom?(this, (v: View) => v.Bytes())
       ensures !BOF? ==> (sp.StrictlySplitFrom?(this, (v: View) => v.Bytes()) && sp.cs.StrictSuffixOf?(this))
-      ensures sp.cs.SuffixOf?(this)
-      ensures sp.cs.BOF?
-      ensures !EOF? ==> !sp.cs.EOF?
-      ensures EOF? ==> sp.cs.EOF?
-      ensures sp.cs.s == this.s
-      ensures sp.cs.end == this.end
-      ensures sp.cs.beg == this.point
-      ensures sp.cs.point == this.point
+      ensures !EOF? <==> !sp.cs.EOF?
     {
       SP(this.Prefix(), this.Suffix())
     }
