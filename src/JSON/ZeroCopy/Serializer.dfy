@@ -81,7 +81,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     .Append(str.rq)
   }
 
-  function {:opaque} Number(num: jnumber, writer: Writer) : (wr: Writer)
+  function {:opaque} {:vcs_split_on_every_assert} Number(num: jnumber, writer: Writer) : (wr: Writer)
     decreases num, 0
     ensures wr.Bytes() == writer.Bytes() + Spec.Number(num)
   {
@@ -128,8 +128,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
       // We call ``ConcatBytes`` with ``Spec.Member``, whereas the spec calls it
       // with ``(d: jmember) requires d in obj.data => Spec.Member(d)``.  That's
       // why we need an explicit cast, which is performed by the lemma below.
-      SpecProperties.Bracketed_Morphism(obj);
-      assert forall d | d < obj :: Spec.Member(d) == rMember(d);
+      assert SpecProperties.Bracketed_Morphism_Requires(obj, Spec.Member, rMember);
+      SpecProperties.Bracketed_Morphism(obj, Spec.Member, rMember);
     }
     calc {
       Spec.Bracketed(obj, Spec.Member);
@@ -157,8 +157,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
   {
     var rItem := (d: jitem) requires d < arr => Spec.Item(d);
     assert Spec.Bracketed(arr, Spec.Item) == Spec.Bracketed(arr, rItem) by {
-      SpecProperties.Bracketed_Morphism(arr);
-      assert forall d | d < arr :: Spec.Item(d) == rItem(d);
+      assert SpecProperties.Bracketed_Morphism_Requires(arr, Spec.Item, rItem);
+      SpecProperties.Bracketed_Morphism(arr, Spec.Item, rItem);
     }
     calc {
       Spec.Bracketed(arr, Spec.Item);
@@ -284,7 +284,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     assert wr == MembersSpec(obj, members, writer);
   }
 
-  method ItemsImpl(arr: jarray, writer: Writer) returns (wr: Writer)
+  method {:vcs_split_on_every_assert} ItemsImpl(arr: jarray, writer: Writer) returns (wr: Writer)
     decreases arr, 1
     ensures wr == ItemsSpec(arr, arr.data, writer);
   {
@@ -294,11 +294,18 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     for i := 0 to |items| // FIXME uint32
       invariant wr == ItemsSpec(arr, items[..i], writer)
     {
-      assert items[..i+1][..i] == items[..i];
+      assert items[..i+1][..i] == items[..i] by {
+        AboutList(items, i, i+1);
+      }
       wr := Item(arr, items[i], wr);
     }
     assert items[..|items|] == items;
   }
+
+  lemma AboutList<T>(xs: seq<T>, i: nat, j: nat)
+    requires i < j <= |xs|
+    ensures xs[..j][..i] == xs[..i]
+  {}
 
   function {:opaque} Member(ghost obj: jobject, m: jmember, writer: Writer) : (wr: Writer)
     requires m < obj
