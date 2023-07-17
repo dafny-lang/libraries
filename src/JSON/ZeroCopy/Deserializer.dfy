@@ -278,15 +278,15 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
-/*     lemma AboutTryStructural(cs: FreshCursor)
+    lemma AboutTryStructural(cs: FreshCursor)
       ensures 
-        var sp := TryStructural(cs);
+        var sp := Core.TryStructural(cs);
         var s0 := sp.t.t.Peek();       
         && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
         && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
         && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
         && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
-    {} */
+    {}
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
@@ -308,9 +308,19 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       if elem.cs.EOF? then
         Failure(EOF)
       else
+        AboutTryStructural(elem.cs);
         var sep := Core.TryStructural(elem.cs);
         var s0 := sep.t.t.Peek();
         if s0 == SEPARATOR as opt_byte then
+          assert sep.t.t.Char?(',') by {
+            calc {
+              sep.t.t.Char?(',');
+              sep.t.t.Byte?(',' as byte);
+              sep.t.t.Byte?(SEPARATOR);
+              (s0 == SEPARATOR as opt_byte);
+              true;
+            } 
+          }
           var sep: Split<Structural<jcomma>> := sep;
           assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep) by {
             assert {:focus} elems.cs.StrictlySplitFrom?(json.cs);
