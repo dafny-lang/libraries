@@ -87,7 +87,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Str {
       else [minus] + OfNat_any(-n, chars)
     }
 
-    function ToNat_any(str: String, base: nat, digits: map<Char, nat>) : (n: nat)
+    function {:vcs_split_on_every_assert} ToNat_any(str: String, base: nat, digits: map<Char, nat>) : (n: nat)
       requires base > 0
       requires forall c | c in str :: c in digits
     {
