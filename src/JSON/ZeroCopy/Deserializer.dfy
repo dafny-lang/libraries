@@ -288,9 +288,14 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
     {}
 
+    lemma {:timeLimit 30} {:vcs_split_on_every_assert} AboutLists<T>(xs: seq<T>, i: uint32)
+      requires 0 <= (i as int) < |xs|
+      ensures xs[(i as int)..(i as int)+1] == [xs[i as int]]
+    {}
+
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
+    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -321,7 +326,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
               sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [SEPARATOR];
               { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
               sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [SEPARATOR];
-              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]]; }
+              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]] by { AboutLists(sep.t.t.s, sep.t.t.beg); } }
               [sep.t.t.s[sep.t.t.beg as int]] == [SEPARATOR];
               sep.t.t.s[sep.t.t.beg as int] as opt_byte == SEPARATOR as opt_byte;
               sep.t.t.At(0) as opt_byte == SEPARATOR as opt_byte;
@@ -358,7 +363,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
               sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [CLOSE];
               { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
               sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [CLOSE];
-              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]]; }
+              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]] by { AboutLists(sep.t.t.s, sep.t.t.beg); } }
               [sep.t.t.s[sep.t.t.beg as int]] == [CLOSE];
               sep.t.t.s[sep.t.t.beg as int] as opt_byte == CLOSE as opt_byte;
               sep.t.t.At(0) as opt_byte == CLOSE as opt_byte;
