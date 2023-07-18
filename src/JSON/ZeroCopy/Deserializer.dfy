@@ -316,11 +316,14 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             calc {
               sep.t.t.Char?(',');
               sep.t.t.Byte?(',' as byte);
-              sep.t.t.Byte?(SEPARATOR);
+              sep.t.t.Byte?(SEPARATOR);              
               sep.t.t.Bytes() == [SEPARATOR];
-              sep.t.t.s[sep.t.t.beg..sep.t.t.end] == [SEPARATOR];
-              { assert sep.t.t.beg + 1 == sep.t.t.end by { assert sep.t.t.Length() == 1; } }
-              sep.t.t.s[sep.t.t.beg] as opt_byte == SEPARATOR as opt_byte;
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [SEPARATOR];
+              { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [SEPARATOR];
+              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]]; }
+              [sep.t.t.s[sep.t.t.beg as int]] == [SEPARATOR];
+              sep.t.t.s[sep.t.t.beg as int] as opt_byte == SEPARATOR as opt_byte;
               sep.t.t.At(0) as opt_byte == SEPARATOR as opt_byte;
               (s0 == SEPARATOR as opt_byte);
               true;
@@ -352,9 +355,12 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             calc {
               sep.t.t.Byte?(CLOSE);
               sep.t.t.Bytes() == [CLOSE];
-              sep.t.t.s[sep.t.t.beg..sep.t.t.end] == [CLOSE];
-              { assert sep.t.t.beg + 1 == sep.t.t.end by { assert sep.t.t.Length() == 1; } }
-              sep.t.t.s[sep.t.t.beg] as opt_byte == CLOSE as opt_byte;
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [CLOSE];
+              { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [CLOSE];
+              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]]; }
+              [sep.t.t.s[sep.t.t.beg as int]] == [CLOSE];
+              sep.t.t.s[sep.t.t.beg as int] as opt_byte == CLOSE as opt_byte;
               sep.t.t.At(0) as opt_byte == CLOSE as opt_byte;
               (s0 == CLOSE as opt_byte);
               true;
