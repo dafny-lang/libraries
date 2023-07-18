@@ -67,7 +67,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
     case Bool(b) => var wr := writer.Append(b); wr
     case String(str) => var wr := String(str, writer); wr
     case Number(num) => assert Grammar.Number(num) == v by { Spec.UnfoldValueNumber(v); }  var wr := Number(num, writer); wr
-    case Object(obj) => assert Grammar.Object(obj) == v; assert Spec.Value(v) == Spec.Object(obj); var wr := Object(obj, writer); wr
+    case Object(obj) => assert Grammar.Object(obj) == v; assert Spec.Value(v) == Spec.Value(Grammar.Object(obj)) == Spec.Object(obj); var wr := Object(obj, writer); wr
     case Array(arr) => assert Grammar.Array(arr) == v; assert Spec.Value(v) == Spec.Array(arr); var wr := Array(arr, writer); assert wr.Bytes() == writer.Bytes() + Spec.Value(v); wr
   }
 
