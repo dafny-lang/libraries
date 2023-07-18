@@ -316,7 +316,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
             calc {
               sep.t.t.Char?(',');
               sep.t.t.Byte?(',' as byte);
-              sep.t.t.Byte?(SEPARATOR);              
+              sep.t.t.Byte?(SEPARATOR);
               sep.t.t.Bytes() == [SEPARATOR];
               sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [SEPARATOR];
               { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
