@@ -57,7 +57,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Cursor(cs.s, cs.beg, point', cs.end).Split();
     }
 
-    function {:opaque} Structural<T>(cs: FreshCursor, parser: Parser<T>)
+    function {:opaque} {:vcs_split_on_every_assert} Structural<T>(cs: FreshCursor, parser: Parser<T>)
       : (pr: ParseResult<Structural<T>>)
       requires forall cs :: parser.fn.requires(cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, st => Spec.Structural(st, parser.spec))
