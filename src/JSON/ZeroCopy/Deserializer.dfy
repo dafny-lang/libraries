@@ -288,14 +288,14 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
         && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
     {}
 
-    lemma {:timeLimit 30} {:vcs_split_on_every_assert} AboutLists<T>(xs: seq<T>, i: uint32)
+    lemma {:vcs_split_on_every_assert} AboutLists<T>(xs: seq<T>, i: uint32)
       requires 0 <= (i as int) < |xs|
       ensures xs[(i as int)..(i as int)+1] == [xs[i as int]]
     {}
 
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:timeLimit 30} {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
+    function {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
