@@ -95,7 +95,7 @@ module {:options "-functionSyntax:4"} Maps {
 
   /* Swaps map keys and values. Values are not required to be unique; no
   promises on which key is chosen on the intersection. */
-  ghost function {:opaque} Invert<X, Y>(m: map<X, Y>): map<Y, X>
+  ghost function {:opaque} Invert<X, Y(==)>(m: map<X, Y>): map<Y, X>
   {
     map y | y in m.Values :: var x :| x in m.Keys && m[x] == y; x
   }
