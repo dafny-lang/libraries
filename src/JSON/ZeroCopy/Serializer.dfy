@@ -269,7 +269,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
 
   method MembersImpl(obj: jobject, writer: Writer) returns (wr: Writer)
     decreases obj, 1
-    ensures wr == MembersSpec(obj, obj.data, writer);
+    ensures wr == MembersSpec(obj, obj.data, writer)
   {
     wr := writer;
     var members := obj.data;
@@ -286,7 +286,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Serializer {
 
   method {:vcs_split_on_every_assert} ItemsImpl(arr: jarray, writer: Writer) returns (wr: Writer)
     decreases arr, 1
-    ensures wr == ItemsSpec(arr, arr.data, writer);
+    ensures wr == ItemsSpec(arr, arr.data, writer)
   {
     wr := writer;
     var items := arr.data;

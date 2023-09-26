@@ -8,7 +8,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Core {
   type View = v: View_ | v.Valid? witness View([], 0, 0)
   datatype View_ = View(s: bytes, beg: uint32, end: uint32) {
     ghost const Valid?: bool :=
-      0 <= beg as int <= end as int <= |s| < TWO_TO_THE_32;
+      0 <= beg as int <= end as int <= |s| < TWO_TO_THE_32
 
     static const Empty: View :=
       View([], 0, 0)

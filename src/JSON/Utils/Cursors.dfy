@@ -55,7 +55,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Cursors {
 
   datatype Cursor_ = Cursor(s: bytes, beg: uint32, point: uint32, end: uint32) {
     ghost const Valid?: bool :=
-      0 <= beg as int <= point as int <= end as int <= |s| < TWO_TO_THE_32;
+      0 <= beg as int <= point as int <= end as int <= |s| < TWO_TO_THE_32
 
     const BOF? :=
       point == beg
