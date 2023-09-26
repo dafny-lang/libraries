@@ -28,7 +28,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type SubParser<!T> = Parsers.SubParser<T, JSONError>
 
     // BUG(https://github.com/dafny-lang/dafny/issues/2179)
-    const SpecView := (v: Vs.View) => Spec.View(v);
+    const SpecView := (v: Vs.View) => Spec.View(v)
 
     function {:opaque} Get(cs: FreshCursor, err: JSONError): (pr: ParseResult<jchar>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
@@ -128,8 +128,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type TBracketed = Bracketed<jopen, TElement, jcomma, jclose>
     type TSuffixedElement = Suffixed<TElement, jcomma>
 
-    const SpecViewClose: jclose -> bytes := SpecView;
-    const SpecViewOpen: jopen -> bytes := SpecView;
+    const SpecViewClose: jclose -> bytes := SpecView
+    const SpecViewOpen: jopen -> bytes := SpecView
 
     ghost function SuffixedElementSpec(e: TSuffixedElement): bytes {
       ElementSpec(e.t) + Spec.CommaSuffix(e.suffix)
