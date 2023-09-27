@@ -679,10 +679,83 @@ module {:options "-functionSyntax:4"} Seq {
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     ensures |result| <= |xs|
     ensures forall i: nat :: i < |result| && f.requires(result[i]) ==> f(result[i])
+    ensures forall x <- result :: x in xs
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then []
     else (if f(xs[0]) then [xs[0]] else []) + Filter(f, xs[1..])
+  }
+
+  /* Returns the number of elements of a sequence that satisfy a given predicate. */
+  function {:opaque} Count<T>(f: (T ~> bool), xs: seq<T>): (result: nat)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    ensures result <= |xs|
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
+  {
+    if |xs| == 0 then 0
+    else (if f(xs[0]) then 1 else 0) + Count(f, xs[1..])
+  }
+
+  /* Is this predicate true for at least one element */
+  predicate {:opaque} SomeMatch<T>(f: (T ~> bool), xs: seq<T>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
+  {
+    if |xs| == 0 then false
+    else if f(xs[0]) then true
+    else SomeMatch(f, xs[1..])
+  }
+
+  lemma FilterDoesNotInventElements<T>(f: T ~> bool, xs: seq<T>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    ensures var result := Filter(f, xs);
+            forall i :: 0 <= i < |result| ==> result[i] in xs
+  {
+    reveal Filter();
+  }
+
+  lemma HasNoDuplicatesAppend(a: seq, b: seq)
+    requires HasNoDuplicates(a)
+    requires HasNoDuplicates(b)
+    requires forall i, j :: 0 <= i < |a| && 0 <= j < |b| ==> a[i] != b[j]
+    ensures HasNoDuplicates(a + b)
+  {
+    reveal HasNoDuplicates();
+  }
+
+  lemma FilterPreservesHasNoDuplicates<T>(f: T ~> bool, xs: seq<T>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires HasNoDuplicates(xs)
+    ensures HasNoDuplicates(Filter(f, xs))
+  {
+    reveal Filter(), HasNoDuplicates();
+    if |xs| == 0 {
+    } else {
+      var a := if f(xs[0]) then [xs[0]] else [];
+      var b := Filter(f, xs[1..]);
+
+      calc {
+        HasNoDuplicates(Filter(f, xs));
+      ==  { assert Filter(f, xs) == a + b; }
+        HasNoDuplicates(a + b);
+      <==  { HasNoDuplicatesAppend(a, b); }
+        HasNoDuplicates(a) && HasNoDuplicates(b) &&
+        (forall i, j :: 0 <= i < |a| && 0 <= j < |b| ==> a[i] != b[j]);
+      ==  { assert HasNoDuplicates(a); }
+        HasNoDuplicates(b) &&
+        (forall i, j :: 0 <= i < |a| && 0 <= j < |b| ==> a[i] != b[j]);
+      ==  { FilterPreservesHasNoDuplicates(f, xs[1..]); }
+        (forall i, j :: 0 <= i < |a| && 0 <= j < |b| ==> a[i] != b[j]);
+      }
+
+      forall i, j | 0 <= i < |a| && 0 <= j < |b|
+        ensures a[i] != b[j]
+      {
+        assert b[j] in Filter(f, xs[1..]);
+        FilterDoesNotInventElements(f, xs[1..]);
+      }
+
+    }
   }
 
   /* Filtering a sequence is distributive over concatenation. That is, concatenating two sequences 
