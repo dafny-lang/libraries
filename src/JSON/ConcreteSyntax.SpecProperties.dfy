@@ -12,23 +12,20 @@ module {:options "-functionSyntax:4"} JSON.ConcreteSyntax.SpecProperties
   import opened Grammar
   import Spec
 
-  lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>)
-    ensures forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
-              | && (forall d | d < bracketed :: pd0.requires(d))
-                && (forall d | d < bracketed :: pd1.requires(d))
-                && (forall d | d < bracketed :: pd0(d) == pd1(d))
-              :: Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
+  ghost predicate Bracketed_Morphism_Requires<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>, pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes) {
+    && (forall d | d < bracketed :: pd0.requires(d))
+    && (forall d | d < bracketed :: pd1.requires(d))
+    && (forall d | d < bracketed :: pd0(d) == pd1(d))
+  }
+
+  lemma Bracketed_Morphism<D, S>(bracketed: Bracketed<Vs.View, D, S, Vs.View>, pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes)
+    requires Bracketed_Morphism_Requires(bracketed, pd0, pd1)
+    ensures Spec.Bracketed(bracketed, pd0) == Spec.Bracketed(bracketed, pd1)
   {
-    forall pd0: Suffixed<D, S> --> bytes, pd1: Suffixed<D, S> --> bytes
-      | && (forall d | d < bracketed :: pd0.requires(d))
-      && (forall d | d < bracketed :: pd1.requires(d))
-      && (forall d | d < bracketed :: pd0(d) == pd1(d))
-    {
-      calc {
-        Spec.Bracketed(bracketed, pd0);
-        { ConcatBytes_Morphism(bracketed.data, pd0, pd1); }
-        Spec.Bracketed(bracketed, pd1);
-      }
+    calc {
+      Spec.Bracketed(bracketed, pd0);
+      { ConcatBytes_Morphism(bracketed.data, pd0, pd1); }
+      Spec.Bracketed(bracketed, pd1);
     }
   }
 

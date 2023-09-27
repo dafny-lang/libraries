@@ -199,7 +199,7 @@ module {:options "-functionSyntax:4"} ModInternals {
 
   /* automates the modulus operator process */
   ghost predicate ModAuto(n: int)
-    requires n > 0;
+    requires n > 0
   {
     && (n % n == (-n) % n == 0)
     && (forall x: int {:trigger (x % n) % n} :: (x % n) % n == x % n)

@@ -22,7 +22,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Lexers {
     import opened BoundedInts
 
     type StringBodyLexerState = /* escaped: */ bool
-    const StringBodyLexerStart: StringBodyLexerState := false;
+    const StringBodyLexerStart: StringBodyLexerState := false
 
     function StringBody<R>(escaped: StringBodyLexerState, byte: opt_byte)
       : LexerResult<StringBodyLexerState, R>
@@ -33,7 +33,7 @@ module {:options "-functionSyntax:4"} JSON.Utils.Lexers {
     }
 
     datatype StringLexerState = Start | Body(escaped: bool) | End
-    const StringLexerStart: StringLexerState := Start;
+    const StringLexerStart: StringLexerState := Start
 
     function String(st: StringLexerState, byte: opt_byte)
       : LexerResult<StringLexerState, string>

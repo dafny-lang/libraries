@@ -574,7 +574,7 @@ module {:options "-functionSyntax:4"} Power {
   /* b^e % b = 0 */
   lemma LemmaPowMod(b: nat, e: nat)
     requires b > 0 && e > 0
-    ensures Pow(b, e) % b == 0;
+    ensures Pow(b, e) % b == 0
   {
     reveal Pow();
     calc {

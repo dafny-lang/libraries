@@ -28,7 +28,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type SubParser<!T> = Parsers.SubParser<T, JSONError>
 
     // BUG(https://github.com/dafny-lang/dafny/issues/2179)
-    const SpecView := (v: Vs.View) => Spec.View(v);
+    const SpecView := (v: Vs.View) => Spec.View(v)
 
     function {:opaque} Get(cs: FreshCursor, err: JSONError): (pr: ParseResult<jchar>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecView)
@@ -39,6 +39,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} WS(cs: FreshCursor): (sp: Split<jblanks>)
       ensures sp.SplitFrom?(cs, SpecView)
+      ensures sp.cs.SuffixOf?(cs)
+      ensures !cs.BOF? ==> sp.cs.StrictSuffixOf?(cs)
+      ensures cs.EOF? ==> sp.cs.SuffixOf?(cs.Suffix())
     {
       cs.SkipWhile(Blank?).Split()
     } by method {
@@ -54,7 +57,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       return Cursor(cs.s, cs.beg, point', cs.end).Split();
     }
 
-    function {:opaque} Structural<T>(cs: FreshCursor, parser: Parser<T>)
+    function {:opaque} {:vcs_split_on_every_assert} Structural<T>(cs: FreshCursor, parser: Parser<T>)
       : (pr: ParseResult<Structural<T>>)
       requires forall cs :: parser.fn.requires(cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, st => Spec.Structural(st, parser.spec))
@@ -67,7 +70,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     type jopt = v: Vs.View | v.Length() <= 1 witness Vs.View.OfBytes([])
 
-    function {:opaque} TryStructural(cs: FreshCursor)
+    function TryStructural(cs: FreshCursor)
       : (sp: Split<Structural<jopt>>)
       ensures sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView))
     {
@@ -77,9 +80,11 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       SP(Grammar.Structural(before, val, after), cs)
     }
 
-    type ValueParser = sp: SubParser<Value> |
-        forall t :: sp.spec(t) == Spec.Value(t)
-      witness *
+    ghost predicate ValueParserValid(sp: SubParser<Value>) {
+      forall t :: sp.spec(t) == Spec.Value(t)
+    }
+
+    type ValueParser = sp: SubParser<Value> | ValueParserValid(sp) witness *
   }
   type Error = Core.Error
 
@@ -123,6 +128,9 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     type TBracketed = Bracketed<jopen, TElement, jcomma, jclose>
     type TSuffixedElement = Suffixed<TElement, jcomma>
 
+    const SpecViewClose: jclose -> bytes := SpecView
+    const SpecViewOpen: jopen -> bytes := SpecView
+
     ghost function SuffixedElementSpec(e: TSuffixedElement): bytes {
       ElementSpec(e.t) + Spec.CommaSuffix(e.suffix)
     }
@@ -137,7 +145,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} Open(cs: FreshCursor)
       : (pr: ParseResult<jopen>)
-      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, _ => [OPEN])
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewOpen)
     {
       var cs :- cs.AssertByte(OPEN);
       Success(cs.Split())
@@ -145,7 +153,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     function {:opaque} Close(cs: FreshCursor)
       : (pr: ParseResult<jclose>)
-      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, _ => [CLOSE])
+      ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, SpecViewClose)
     {
       var cs :- cs.AssertByte(CLOSE);
       Success(cs.Split())
@@ -195,6 +203,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures forall e | e in elems'.t :: e.suffix.NonEmpty?
       ensures elems'.cs.Length() < elems.cs.Length()
       ensures elems'.cs.StrictlySplitFrom?(json.cs)
+      ensures elems'.SplitFrom?(cs0, SuffixedElementsSpec)
     {
       var suffixed := Suffixed(elem.t, NonEmpty(sep.t));
       var elems' := SP(elems.t + [suffixed], sep.cs); // DISCUSS: Moving this down doubles the verification time
@@ -220,14 +229,24 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
       assert forall e | e in elems'.t :: e.suffix.NonEmpty? by { assert elems'.t == elems.t + [suffixed]; }
       assert {:split_here} elems'.cs.Length() < elems.cs.Length();
+      assert elems'.SplitFrom?(cs0, SuffixedElementsSpec) by {
+        assert elems'.BytesSplitFrom?(cs0, SuffixedElementsSpec) by {
+          assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
+        }
+        assert elems'.cs.SplitFrom?(cs0) by {
+          assert elems'.cs.StrictlySplitFrom?(cs0) by {
+            assert elems'.StrictlySplitFrom?(cs0, SuffixedElementsSpec);
+          }
+        }
+      }
       elems'
     }
 
-    function {:opaque} AppendLast(ghost cs0: FreshCursor,
-                                  ghost json: ValueParser,
-                                  elems: Split<seq<TSuffixedElement>>,
-                                  elem: Split<TElement>,
-                                  sep: Split<Structural<jclose>>)
+    function {:vcs_split_on_every_assert} {:opaque} AppendLast(ghost cs0: FreshCursor,
+                                                               ghost json: ValueParser,
+                                                               elems: Split<seq<TSuffixedElement>>,
+                                                               elem: Split<TElement>,
+                                                               sep: Split<Structural<jclose>>)
       : (elems': Split<seq<TSuffixedElement>>)
       requires elems.cs.StrictlySplitFrom?(json.cs)
       requires elems.SplitFrom?(cs0, SuffixedElementsSpec)
@@ -259,9 +278,24 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       elems'
     }
 
+    lemma AboutTryStructural(cs: FreshCursor)
+      ensures
+        var sp := Core.TryStructural(cs);
+        var s0 := sp.t.t.Peek();
+        && ((!cs.BOF? || !cs.EOF?) && (s0 == SEPARATOR as opt_byte) ==> (var sp: Split<Structural<jcomma>> := sp; sp.cs.StrictSuffixOf?(cs)))
+        && ((s0 == SEPARATOR as opt_byte) ==> var sp: Split<Structural<jcomma>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
+        && ((!cs.BOF? || !cs.EOF?) && (s0 == CLOSE as opt_byte) ==> (var sp: Split<Structural<jclose>> := sp; sp.cs.StrictSuffixOf?(cs)))
+        && ((s0 == CLOSE as opt_byte) ==> var sp: Split<Structural<jclose>> := sp; sp.SplitFrom?(cs, st => Spec.Structural(st, SpecView)))
+    {}
+
+    lemma {:vcs_split_on_every_assert} AboutLists<T>(xs: seq<T>, i: uint32)
+      requires 0 <= (i as int) < |xs|
+      ensures xs[(i as int)..(i as int)+1] == [xs[i as int]]
+    {}
+
     // The implementation and proof of this function is more painful than
     // expected due to the tail recursion.
-    function {:opaque} {:tailrecursion} Elements(
+    function {:vcs_split_on_every_assert} {:opaque} {:tailrecursion} Elements(
       ghost cs0: FreshCursor,
       json: ValueParser,
       open: Split<Structural<jopen>>,
@@ -276,49 +310,126 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs0, BracketedSpec)
     {
       var elem :- Element(elems.cs, json);
-      var sep := Core.TryStructural(elem.cs);
-      var s0 := sep.t.t.Peek();
-      if s0 == SEPARATOR as opt_byte then
-        assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep) by {
-          assert {:focus} elems.cs.StrictlySplitFrom?(json.cs);
-          assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
-          assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
-          assert forall e | e in elems.t :: e.suffix.NonEmpty?;
-          assert {:split_here} true;
-        }
-        var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
-        Elements(cs0, json, open, elems)
-      else if s0 == CLOSE as opt_byte then
-        assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
-          assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
-          assert elems.cs.StrictlySplitFrom?(json.cs);
-          assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
-          assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
-        }
-        var elems' := AppendLast(open.cs, json, elems, elem, sep);
-        assert elems'.SplitFrom?(open.cs, SuffixedElementsSpec) by {
-          assert elems'.StrictlySplitFrom?(open.cs, SuffixedElementsSpec);
-        }
-        var bracketed := BracketedFromParts(cs0, open, elems', sep);
-        assert bracketed.StrictlySplitFrom?(cs0, BracketedSpec);
-        Success(bracketed)
+      if elem.cs.EOF? then
+        Failure(EOF)
       else
-        var separator := SEPARATOR;
-        var pr := Failure(ExpectingAnyByte([CLOSE, separator], s0));
-        pr
+        AboutTryStructural(elem.cs);
+        var sep := Core.TryStructural(elem.cs);
+        var s0 := sep.t.t.Peek();
+        if s0 == SEPARATOR as opt_byte && sep.t.t.Length() == 1 then
+          assert sep.t.t.Char?(',') by {
+            calc {
+              sep.t.t.Char?(',');
+              sep.t.t.Byte?(',' as byte);
+              sep.t.t.Byte?(SEPARATOR);
+              sep.t.t.Bytes() == [SEPARATOR];
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [SEPARATOR];
+              { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [SEPARATOR];
+              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]] by { AboutLists(sep.t.t.s, sep.t.t.beg); } }
+              [sep.t.t.s[sep.t.t.beg as int]] == [SEPARATOR];
+              sep.t.t.s[sep.t.t.beg as int] as opt_byte == SEPARATOR as opt_byte;
+              sep.t.t.At(0) as opt_byte == SEPARATOR as opt_byte;
+              (s0 == SEPARATOR as opt_byte);
+              true;
+            }
+          }
+          var sep: Split<Structural<jcomma>> := sep;
+          assert AppendWithSuffix.requires(open.cs, json, elems, elem, sep) by {
+            assert {:focus} elems.cs.StrictlySplitFrom?(json.cs);
+            assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+            assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
+            assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+              assert sep.BytesSplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+                assert sep.SplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
+              }
+              assert sep.cs.StrictlySplitFrom?(elem.cs) by {
+                assert sep.cs.BOF?;
+                assert sep.cs.StrictSuffixOf?(elem.cs) by {
+                  assert !elem.cs.EOF?;
+                }
+              }
+            }
+            assert forall e | e in elems.t :: e.suffix.NonEmpty?;
+            assert {:split_here} true;
+          }
+          var elems := AppendWithSuffix(open.cs, json, elems, elem, sep);
+          Elements(cs0, json, open, elems)
+        else if s0 == CLOSE as opt_byte && sep.t.t.Length() == 1 then
+          assert sep.t.t.Byte?(CLOSE) by {
+            calc {
+              sep.t.t.Byte?(CLOSE);
+              sep.t.t.Bytes() == [CLOSE];
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.end as int)] == [CLOSE];
+              { assert (sep.t.t.beg as int) + 1 == (sep.t.t.end as int) by { assert sep.t.t.Length() == 1; } }
+              sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [CLOSE];
+              { assert sep.t.t.s[(sep.t.t.beg as int)..(sep.t.t.beg as int) + 1] == [sep.t.t.s[sep.t.t.beg as int]] by { AboutLists(sep.t.t.s, sep.t.t.beg); } }
+              [sep.t.t.s[sep.t.t.beg as int]] == [CLOSE];
+              sep.t.t.s[sep.t.t.beg as int] as opt_byte == CLOSE as opt_byte;
+              sep.t.t.At(0) as opt_byte == CLOSE as opt_byte;
+              (s0 == CLOSE as opt_byte);
+              true;
+            }
+          }
+          var sep: Split<Structural<jclose>> := sep;
+          assert AppendLast.requires(open.cs, json, elems, elem, sep) by {
+            assert elems.cs.StrictlySplitFrom?(json.cs);
+            assert elems.SplitFrom?(open.cs, SuffixedElementsSpec);
+            assert elem.StrictlySplitFrom?(elems.cs, ElementSpec);
+            assert sep.StrictlySplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+              assert sep.BytesSplitFrom?(elem.cs, c => Spec.Structural(c, SpecView)) by {
+                assert sep.SplitFrom?(elem.cs, c => Spec.Structural(c, SpecView));
+              }
+              assert sep.cs.StrictlySplitFrom?(elem.cs) by {
+                assert sep.cs.BOF?;
+                assert sep.cs.StrictSuffixOf?(elem.cs) by {
+                  assert !elem.cs.EOF?;
+                }
+              }
+            }
+            assert forall e | e in elems.t :: e.suffix.NonEmpty?;
+          }
+          var elems' := AppendLast(open.cs, json, elems, elem, sep);
+          assert elems'.SplitFrom?(open.cs, SuffixedElementsSpec) by {
+            assert elems'.StrictlySplitFrom?(open.cs, SuffixedElementsSpec);
+          }
+          var bracketed := BracketedFromParts(cs0, open, elems', sep);
+          assert bracketed.StrictlySplitFrom?(cs0, BracketedSpec);
+          Success(bracketed)
+        else
+          var separator := SEPARATOR;
+          var pr := Failure(ExpectingAnyByte([CLOSE, separator], s0));
+          pr
     }
 
-    function {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
+    lemma AboutCloseParser()
+      ensures Parsers.Parser(Close, SpecViewClose).Valid?()
+    {
+      assert Parsers.Parser(Close, SpecViewClose).Valid?() by {
+        forall cs': FreshCursor ensures Close(cs').Success? ==> Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose) {
+          if Close(cs').Success? {
+            assert Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose) by {
+              assert Close(cs').Success? ==> Close(cs').value.StrictlySplitFrom?(cs', SpecViewClose);
+            }
+          }
+        }
+      }
+    }
+
+    function {:vcs_split_on_every_assert} {:opaque} Bracketed(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TBracketed>)
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, BracketedSpec)
     {
-      var open :- Core.Structural(cs, Parsers.Parser(Open, SpecView));
+      var open :- Core.Structural<jopen>(cs, Parsers.Parser(Open, SpecViewOpen));
       assert open.cs.StrictlySplitFrom?(json.cs);
       var elems := SP([], open.cs);
       if open.cs.Peek() == CLOSE as opt_byte then
-        var close :- Core.Structural(open.cs, Parsers.Parser(Close, SpecView));
+        var p := Parsers.Parser(Close, SpecViewClose);
+        assert p.Valid?() by {
+          AboutCloseParser();
+        }
+        var close :- Core.Structural<jclose>(open.cs, p);
         Success(BracketedFromParts(cs, open, elems, close))
       else
         Elements(cs, json, open, elems)
@@ -362,7 +473,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       case OtherError(err) => err
     }
 
-    function {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
+    function {:vcs_split_on_every_assert} {:opaque} JSON(cs: Cursors.FreshCursor) : (pr: DeserializationResult<Cursors.Split<JSON>>)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.JSON)
     {
       Core.Structural(cs, Parsers.Parser(Values.Value, Spec.Value)).MapFailure(LiftCursorError)
@@ -403,7 +514,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
 
     import ConcreteSyntax.SpecProperties
 
-    function {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
+    function {:vcs_split_on_every_assert} {:opaque} Value(cs: FreshCursor) : (pr: ParseResult<Value>)
       decreases cs.Length(), 1
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Value)
     {
@@ -417,6 +528,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           assert SP(obj, cs').StrictlySplitFrom?(cs, Spec.Object);
         }
         Spec.UnfoldValueObject(v);
+        assert sp.StrictlySplitFrom?(cs, Spec.Value);
         Success(sp)
       else if c == '[' as opt_byte then
         var SP(arr, cs') :- Arrays.Array(cs, ValueParser(cs));
@@ -426,19 +538,82 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
           assert SP(arr, cs').StrictlySplitFrom?(cs, Spec.Array);
           Spec.UnfoldValueArray(v);
         }
+        assert sp.StrictlySplitFrom?(cs, Spec.Value);
         Success(sp)
       else if c == '\"' as opt_byte then
-        var SP(str, cs) :- Strings.String(cs);
-        Success(SP(Grammar.String(str), cs))
+        var SP(str, cs') :- Strings.String(cs);
+        assert (SP(Grammar.String(str), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          calc {
+            (SP(Grammar.String(str), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.String(str), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.String(str)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.String(str) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && SP(str, cs').BytesSplitFrom?(cs, Spec.String);
+            SP(str, cs').StrictlySplitFrom?(cs, Spec.String);
+            true;
+          }
+        }
+        Success(SP(Grammar.String(str), cs'))
       else if c == 't' as opt_byte then
-        var SP(cst, cs) :- Constants.Constant(cs, TRUE);
-        Success(SP(Grammar.Bool(cst), cs))
+        var SP(cst, cs') :- Constants.Constant(cs, TRUE);
+        assert (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          var f := _ => TRUE;
+          calc {
+            (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.View(cst) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == cst.Bytes() + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == TRUE + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == f(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            { assert cs'.StrictlySplitFrom?(cs) <==> cs'.SplitFrom?(cs) by { assert cs' != cs; } }
+            cs'.SplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            (SP(Grammar.Bool(cst), cs')).SplitFrom?(cs, f);
+            true;
+          }
+        }
+        Success(SP(Grammar.Bool(cst), cs'))
       else if c == 'f' as opt_byte then
-        var SP(cst, cs) :- Constants.Constant(cs, FALSE);
-        Success(SP(Grammar.Bool(cst), cs))
+        var SP(cst, cs') :- Constants.Constant(cs, FALSE);
+        assert (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          var f := _ => FALSE;
+          calc {
+            (SP(Grammar.Bool(cst), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.View(cst) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == cst.Bytes() + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == FALSE + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == f(Grammar.Bool(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            { assert cs'.StrictlySplitFrom?(cs) <==> cs'.SplitFrom?(cs) by { assert cs' != cs; } }
+            cs'.SplitFrom?(cs) && (SP(Grammar.Bool(cst), cs')).BytesSplitFrom?(cs, f);
+            (SP(Grammar.Bool(cst), cs')).SplitFrom?(cs, f);
+            true;
+          }
+        }
+        Success(SP(Grammar.Bool(cst), cs'))
       else if c == 'n' as opt_byte then
-        var SP(cst, cs) :- Constants.Constant(cs, NULL);
-        Success(SP(Grammar.Null(cst), cs))
+        var SP(cst, cs') :- Constants.Constant(cs, NULL);
+        assert (SP(Grammar.Null(cst), cs')).StrictlySplitFrom?(cs, Spec.Value) by {
+          var f := _ => NULL;
+          calc {
+            (SP(Grammar.Null(cst), cs')).StrictlySplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Null(cst), cs')).BytesSplitFrom?(cs, Spec.Value);
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.Value(Grammar.Null(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == Spec.View(cst) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == cst.Bytes() + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == NULL + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (cs.Bytes() == f(Grammar.Null(cst)) + cs'.Bytes());
+            cs'.StrictlySplitFrom?(cs) && (SP(Grammar.Null(cst), cs')).BytesSplitFrom?(cs, f);
+            { assert cs'.StrictlySplitFrom?(cs) <==> cs'.SplitFrom?(cs) by { assert cs' != cs; } }
+            cs'.SplitFrom?(cs) && (SP(Grammar.Null(cst), cs')).BytesSplitFrom?(cs, f);
+            (SP(Grammar.Null(cst), cs')).SplitFrom?(cs, f);
+            true;
+          }
+        }
+        Success(SP(Grammar.Null(cst), cs'))
       else
         var SP(num, cs') :- Numbers.Number(cs);
         var v := Grammar.Number(num);
@@ -660,6 +835,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.Value(t)
     }
+
     function {:opaque} Element(cs: FreshCursor, json: ValueParser) : (pr: ParseResult<TElement>)
     {
       json.fn(cs)
@@ -674,8 +850,8 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     {
       var rItem := (d: jitem) requires d < arr => Spec.Item(d);
       assert Spec.Bracketed(arr, SuffixedElementSpec) == Spec.Bracketed(arr, rItem) by {
-        SpecProperties.Bracketed_Morphism(arr);
-        assert forall d | d < arr :: SuffixedElementSpec(d) == rItem(d);
+        assert SpecProperties.Bracketed_Morphism_Requires(arr, SuffixedElementSpec, rItem);
+        SpecProperties.Bracketed_Morphism(arr, SuffixedElementSpec, rItem);
       }
       calc {
         Spec.Bracketed(arr, SuffixedElementSpec);
@@ -684,7 +860,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       }
     }
 
-    function {:opaque}  Array(cs: FreshCursor, json: ValueParser)
+    function {:vcs_split_on_every_assert} {:opaque} Array(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jarray>)
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Array)
@@ -737,19 +913,45 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     function ElementSpec(t: TElement) : bytes {
       Spec.KeyValue(t)
     }
-    function {:opaque} Element(cs: FreshCursor, json: ValueParser)
+
+    function {:vcs_split_on_every_assert} {:opaque} Element(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<TElement>)
     {
       var k :- Strings.String(cs);
       assert k.cs.StrictlySplitFrom?(json.cs);
-
+      assert k.StrictlySplitFrom?(cs, Spec.String);
       var p := Parsers.Parser(Colon, SpecView);
       assert p.Valid?();
       var colon :- Core.Structural(k.cs, p);
-      assert colon.StrictlySplitFrom?(k.cs, st => Spec.Structural(st, p.spec));
+      assert colon.StrictlySplitFrom?(k.cs, st => Spec.Structural(st, SpecView));
       assert colon.cs.StrictlySplitFrom?(json.cs);
 
+      assert json.fn.requires(colon.cs) by {
+        assert json.pre(colon.cs) by {
+          assert colon.cs.StrictlySplitFrom?(json.cs);
+          assert json.Valid?();
+        }
+        assert json.Valid?();
+      }
+
       var v :- json.fn(colon.cs);
+
+      assert v.StrictlySplitFrom?(colon.cs, Spec.Value) by {
+        assert v.cs.StrictlySplitFrom?(colon.cs) by {
+          assert v.StrictlySplitFrom?(colon.cs, json.spec) by {
+            assert json.Valid?();
+          }
+        }
+        assert v.BytesSplitFrom?(colon.cs, Spec.Value) by {
+          calc {
+            colon.cs.Bytes();
+            { assert v.BytesSplitFrom?(colon.cs, json.spec) by { assert json.Valid?(); } }
+            json.spec(v.t) + v.cs.Bytes();
+            { assert json.spec(v.t) == Spec.Value(v.t) by { assert ValueParserValid(json); } }
+            Spec.Value(v.t) + v.cs.Bytes();
+          }
+        }
+      }
       var kv := KeyValueFromParts(cs, k, colon, v);
       Success(kv)
     }
@@ -763,8 +965,10 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
     {
       var rMember := (d: jmember) requires d < obj => Spec.Member(d);
       assert Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Bracketed(obj, rMember) by {
-        SpecProperties.Bracketed_Morphism(obj);
-        assert forall d | d < obj :: SuffixedElementSpec(d) == rMember(d);
+        assert Spec.Bracketed(obj, SuffixedElementSpec) == Spec.Bracketed(obj, rMember) by {
+          assert SpecProperties.Bracketed_Morphism_Requires(obj, SuffixedElementSpec, rMember);
+          SpecProperties.Bracketed_Morphism(obj, SuffixedElementSpec, rMember);
+        }
       }
       calc {
         Spec.Bracketed(obj, SuffixedElementSpec);
@@ -773,7 +977,7 @@ module {:options "-functionSyntax:4"} JSON.ZeroCopy.Deserializer {
       }
     }
 
-    function {:opaque} Object(cs: FreshCursor, json: ValueParser)
+    function {:vcs_split_on_every_assert} {:opaque} Object(cs: FreshCursor, json: ValueParser)
       : (pr: ParseResult<jobject>)
       requires cs.SplitFrom?(json.cs)
       ensures pr.Success? ==> pr.value.StrictlySplitFrom?(cs, Spec.Object)
