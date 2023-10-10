@@ -20,7 +20,7 @@ include "Spec.dfy"
 
 module {:options "-functionSyntax:4"} JSON.Serializer {
   import Seq
-  import Math
+  import Dafny.Math
   import opened Wrappers
   import opened BoundedInts
   import opened Utils.Str
