@@ -143,6 +143,7 @@ module {:options "-functionSyntax:4"} Dafny.Power {
     ensures 0 < Pow(b, e)
   {
     LemmaMulIncreasesAuto();
+    reveal Pow();
     LemmaMulInductionAuto(e, u => 0 <= u ==> 0 < Pow(b, u));
   }
 
@@ -372,6 +373,7 @@ module {:options "-functionSyntax:4"} Dafny.Power {
     requires e1 < e2
     ensures Pow(b, e1) < Pow(b, e2)
   {
+    reveal Pow();
     LemmaPowAuto();
     var f := e => 0 < e ==> Pow(b, e1) < Pow(b, e1 + e);
     forall i {:trigger IsLe(0, i)} | IsLe(0, i) && f(i)
@@ -410,6 +412,7 @@ module {:options "-functionSyntax:4"} Dafny.Power {
     requires e1 <= e2
     ensures Pow(b, e1) <= Pow(b, e2)
   {
+    reveal Pow();
     LemmaPowAuto();
     var f := e => 0 <= e ==> Pow(b, e1) <= Pow(b, e1 + e);
     forall i {:trigger IsLe(0, i)} | IsLe(0, i) && f(i)
