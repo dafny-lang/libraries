@@ -391,6 +391,9 @@ module {:options "-functionSyntax:4"} Dafny.Power {
       }
     }
     LemmaMulInductionAuto(e2 - e1, f);
+    assert Pow(b, e1) < Pow(b, e1 + (e2 - e1)) by {
+      assert 0 < e2 - e1;
+    }
   }
 
   lemma LemmaPowStrictlyIncreasesAuto()
@@ -430,6 +433,9 @@ module {:options "-functionSyntax:4"} Dafny.Power {
       }
     }
     LemmaMulInductionAuto(e2 - e1, f);
+    assert Pow(b, e1) <= Pow(b, e1 + (e2 - e1)) by {
+      assert 0 <= e2 - e1;
+    }
   }
 
   lemma LemmaPowIncreasesAuto()
