@@ -381,19 +381,19 @@ module {:options "-functionSyntax:4"} Dafny.Power {
     {
       assert 0 < i ==> Pow(b, e1) < Pow(b, e1 + i);
       calc {
-        Pow(b, e1 + i);
+         Pow(b, e1 + i);
       <= { LemmaPowPositive(b, e1 + i);
            LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
-        Pow(b, e1 + i) * b;
+         Pow(b, e1 + i) * b;
       == { LemmaPow1(b); }
-        Pow(b, e1 + i) * Pow(b, 1);
+         Pow(b, e1 + i) * Pow(b, 1);
       == { LemmaPowAdds(b, e1 + i, 1); }
-        Pow(b, e1 + i + 1);
+         Pow(b, e1 + i + 1);
       == calc {
-          e1 + i + 1;
-          e1 + (i + 1);
-        }
-        Pow(b, e1 + (i + 1));
+           e1 + i + 1;
+           e1 + (i + 1);
+         }
+         Pow(b, e1 + (i + 1));
       }
       assert f(i+1);
     }
