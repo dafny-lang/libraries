@@ -97,8 +97,9 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
       var ys := ([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
       assert |ToLarge(xs[E()..])| == |xs[E()..]| / E();
       assert |ys| == |xs| / E() by {
-        // To obtain this proof, Mikael Mayer wrote first a detailed proof
-        // Then he removed everything he could that was decreasing the resource count
+        // To obtain a proof like this, first write a detailed proof
+        // as much as you can, not assuming anything about non-linear arithmetic (use only lemmas for that)
+        // Then remove intermediate computation steps and lemma calls if doing so decrease the resource count
         // until arriving at at a minimum
         calc {
           |ys|;
