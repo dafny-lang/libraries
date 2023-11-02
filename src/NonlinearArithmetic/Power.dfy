@@ -372,23 +372,34 @@ module {:options "-functionSyntax:4"} Power {
     requires e1 < e2
     ensures Pow(b, e1) < Pow(b, e2)
   {
+    reveal Pow();
     LemmaPowAuto();
     var f := e => 0 < e ==> Pow(b, e1) < Pow(b, e1 + e);
     forall i {:trigger IsLe(0, i)} | IsLe(0, i) && f(i)
       ensures f(i + 1)
     {
+      assert 0 < i ==> Pow(b, e1) < Pow(b, e1 + i);
       calc {
-        Pow(b, e1 + i);
+         Pow(b, e1 + i);
       <= { LemmaPowPositive(b, e1 + i);
            LemmaMulLeftInequality(Pow(b, e1 + i), 1, b); }
-        Pow(b, e1 + i) * b;
+         Pow(b, e1 + i) * b;
       == { LemmaPow1(b); }
-        Pow(b, e1 + i) * Pow(b, 1);
+         Pow(b, e1 + i) * Pow(b, 1);
       == { LemmaPowAdds(b, e1 + i, 1); }
-        Pow(b, e1 + i + 1);
+         Pow(b, e1 + i + 1);
+      == calc {
+           e1 + i + 1;
+           e1 + (i + 1);
+         }
+         Pow(b, e1 + (i + 1));
       }
+      assert f(i+1);
     }
     LemmaMulInductionAuto(e2 - e1, f);
+    assert Pow(b, e1) < Pow(b, e1 + (e2 - e1)) == Pow(b, e2) by {
+      assert 0 < e2 - e1;
+    }
   }
 
   lemma LemmaPowStrictlyIncreasesAuto()
@@ -410,6 +421,7 @@ module {:options "-functionSyntax:4"} Power {
     requires e1 <= e2
     ensures Pow(b, e1) <= Pow(b, e2)
   {
+    reveal Pow();
     LemmaPowAuto();
     var f := e => 0 <= e ==> Pow(b, e1) <= Pow(b, e1 + e);
     forall i {:trigger IsLe(0, i)} | IsLe(0, i) && f(i)
@@ -427,6 +439,9 @@ module {:options "-functionSyntax:4"} Power {
       }
     }
     LemmaMulInductionAuto(e2 - e1, f);
+    assert Pow(b, e1) <= Pow(b, e1 + (e2 - e1)) by {
+      assert 0 <= e2 - e1;
+    }
   }
 
   lemma LemmaPowIncreasesAuto()

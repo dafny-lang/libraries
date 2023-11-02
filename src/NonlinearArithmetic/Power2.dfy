@@ -60,6 +60,7 @@ module {:options "-functionSyntax:4"} Power2 {
     requires 0 < e
     ensures (Pow2(e) - 1) / 2 == Pow2(e - 1) - 1
   {
+    LemmaPow2Auto();
     LemmaPowAuto();
     var f := e => 0 < e ==> (Pow2(e) - 1) / 2 == Pow2(e - 1) - 1;
     assert forall i {:trigger IsLe(0, i)} :: IsLe(0, i) && f(i) ==> f(i + 1);
@@ -116,6 +117,7 @@ module {:options "-functionSyntax:4"} Power2 {
     ensures Pow2(64) == 0x10000000000000000
   {
     reveal Pow2();
+    reveal Pow();
   }
 
 }
