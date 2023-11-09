@@ -1,12 +1,12 @@
-// RUN: %dafny /compile:0 /noNLarith "%s"
+// RUN: %verify --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) 2020 Secure Foundations Lab
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) 2020 Secure Foundations Lab
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 /* Little endian interpretation of a sequence of numbers with a given base. The
 first element of a sequence is the least significant position; the last
@@ -17,14 +17,14 @@ include "../../NonlinearArithmetic/Mul.dfy"
 include "../../NonlinearArithmetic/Power.dfy"
 include "Seq.dfy"
 
-abstract module LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} LittleEndianNat {
 
   import opened DivMod
   import opened Mul
   import opened Power
   import opened Seq
 
-  function method BASE(): nat
+  function BASE(): nat
     ensures BASE() > 1
 
   type uint = i: int | 0 <= i < BASE()
@@ -36,7 +36,7 @@ abstract module LittleEndianNat {
   //////////////////////////////////////////////////////////////////////////////
 
   /* Converts a sequence to a nat beginning with the least significant position. */
-  function method {:opaque} ToNatRight(xs: seq<uint>): nat
+  function {:opaque} ToNatRight(xs: seq<uint>): nat
   {
     if |xs| == 0 then 0
     else
@@ -45,7 +45,7 @@ abstract module LittleEndianNat {
   }
 
   /* Converts a sequence to a nat beginning with the most significant position. */
-  function method {:opaque} ToNatLeft(xs: seq<uint>): nat
+  function {:opaque} ToNatLeft(xs: seq<uint>): nat
   {
     if |xs| == 0 then 0
     else
@@ -66,33 +66,33 @@ abstract module LittleEndianNat {
         calc {
           ToNatLeft(xs);
           Last(xs) * Pow(BASE(), |xs| - 1);
-            { reveal Pow(); }
+          { reveal Pow(); }
           Last(xs);
           First(xs);
-            { assert ToNatRight(DropFirst(xs)) == 0; }
+          { assert ToNatRight(DropFirst(xs)) == 0; }
           ToNatRight(xs);
         }
       } else {
         calc {
           ToNatLeft(xs);
           ToNatLeft(DropLast(xs)) + Last(xs) * Pow(BASE(), |xs| - 1);
-            { LemmaToNatLeftEqToNatRight(DropLast(xs)); }
+          { LemmaToNatLeftEqToNatRight(DropLast(xs)); }
           ToNatRight(DropLast(xs)) + Last(xs) * Pow(BASE(), |xs| - 1);
           ToNatRight(DropFirst(DropLast(xs))) * BASE() + First(xs) + Last(xs)
-            * Pow(BASE(), |xs| - 1);
-            { LemmaToNatLeftEqToNatRight(DropFirst(DropLast(xs))); }
+          * Pow(BASE(), |xs| - 1);
+          { LemmaToNatLeftEqToNatRight(DropFirst(DropLast(xs))); }
           ToNatLeft(DropFirst(DropLast(xs))) * BASE() + First(xs) + Last(xs)
-            * Pow(BASE(), |xs| - 1);
-            {
-              assert DropFirst(DropLast(xs)) == DropLast(DropFirst(xs));
-              reveal Pow();
-              LemmaMulProperties();
-            }
+          * Pow(BASE(), |xs| - 1);
+          {
+            assert DropFirst(DropLast(xs)) == DropLast(DropFirst(xs));
+            reveal Pow();
+            LemmaMulProperties();
+          }
           ToNatLeft(DropLast(DropFirst(xs))) * BASE() + First(xs) + Last(xs)
-            * Pow(BASE(), |xs| - 2) * BASE();
-            { LemmaMulIsDistributiveAddOtherWayAuto(); }
+          * Pow(BASE(), |xs| - 2) * BASE();
+          { LemmaMulIsDistributiveAddOtherWayAuto(); }
           ToNatLeft(DropFirst(xs)) * BASE() + First(xs);
-            { LemmaToNatLeftEqToNatRight(DropFirst(xs)); }
+          { LemmaToNatLeftEqToNatRight(DropFirst(xs)); }
           ToNatRight(xs);
         }
       }
@@ -131,7 +131,7 @@ abstract module LittleEndianNat {
   }
 
   /* Appending a zero does not change the nat representation of the sequence. */
-  lemma LemmaSeqAppendZero(xs: seq<uint>) 
+  lemma LemmaSeqAppendZero(xs: seq<uint>)
     ensures ToNatRight(xs + [0]) == ToNatRight(xs)
   {
     reveal ToNatLeft();
@@ -140,7 +140,7 @@ abstract module LittleEndianNat {
       ToNatRight(xs + [0]);
       ToNatLeft(xs + [0]);
       ToNatLeft(xs) + 0 * Pow(BASE(), |xs|);
-        { LemmaMulBasicsAuto(); }
+      { LemmaMulBasicsAuto(); }
       ToNatLeft(xs);
       ToNatRight(xs);
     }
@@ -159,21 +159,21 @@ abstract module LittleEndianNat {
       var pow := Pow(BASE(), len');
       calc {
         ToNatRight(xs);
-           { LemmaToNatLeftEqToNatRight(xs); }
+         { LemmaToNatLeftEqToNatRight(xs); }
         ToNatLeft(xs);
-           { reveal ToNatLeft(); }
+         { reveal ToNatLeft(); }
         ToNatLeft(DropLast(xs)) + Last(xs) * pow;
-        <  {
-             LemmaToNatLeftEqToNatRight(DropLast(xs));
-             LemmaSeqNatBound(DropLast(xs));
-           }
+      <  {
+           LemmaToNatLeftEqToNatRight(DropLast(xs));
+           LemmaSeqNatBound(DropLast(xs));
+         }
         pow + Last(xs) * pow;
-        <= {
-            LemmaPowPositiveAuto();
-            LemmaMulInequalityAuto();
-           }
+      <= {
+           LemmaPowPositiveAuto();
+           LemmaMulInequalityAuto();
+         }
         pow + (BASE() - 1) * pow;
-           { LemmaMulIsDistributiveAuto(); }
+         { LemmaMulIsDistributiveAuto(); }
         Pow(BASE(), len' + 1);
       }
     }
@@ -193,14 +193,14 @@ abstract module LittleEndianNat {
       calc {
         ToNatRight(xs[..i]) + ToNatRight(xs[i..]) * Pow(BASE(), i);
         ToNatRight(DropFirst(xs[..i])) * BASE() + First(xs) + ToNatRight(xs[i..]) * Pow(BASE(), i);
-          {
-            assert DropFirst(xs[..i]) == DropFirst(xs)[..i-1];
-            LemmaMulProperties();
-          }
+        {
+          assert DropFirst(xs[..i]) == DropFirst(xs)[..i-1];
+          LemmaMulProperties();
+        }
         ToNatRight(DropFirst(xs)[..i-1]) * BASE() + First(xs) + (ToNatRight(xs[i..]) * Pow(BASE(), i - 1)) * BASE();
-          { LemmaMulIsDistributiveAddOtherWayAuto(); }
+        { LemmaMulIsDistributiveAddOtherWayAuto(); }
         (ToNatRight(DropFirst(xs)[..i-1]) + ToNatRight(DropFirst(xs)[i-1..]) * Pow(BASE(), i - 1)) * BASE() + First(xs);
-          { LemmaSeqPrefix(DropFirst(xs), i - 1); }
+        { LemmaSeqPrefix(DropFirst(xs), i - 1); }
         ToNatRight(xs);
       }
     }
@@ -220,11 +220,11 @@ abstract module LittleEndianNat {
     calc {
       ToNatRight(xs);
       ToNatLeft(xs);
-      <  { LemmaSeqNatBound(DropLast(xs)); }
+    <  { LemmaSeqNatBound(DropLast(xs)); }
       Pow(BASE(), len') + Last(xs) * Pow(BASE(), len');
-      == { LemmaMulIsDistributiveAuto(); }
+    == { LemmaMulIsDistributiveAuto(); }
       (1 + Last(xs)) * Pow(BASE(), len');
-      <= { LemmaPowPositiveAuto(); LemmaMulInequalityAuto(); }
+    <= { LemmaPowPositiveAuto(); LemmaMulInequalityAuto(); }
       ToNatLeft(ys);
       ToNatRight(ys);
     }
@@ -254,6 +254,7 @@ abstract module LittleEndianNat {
       } else {
         LemmaSeqMswInequality(ys[..i+1], xs[..i+1]);
       }
+      reveal ToNatRight();
       LemmaSeqPrefixNeq(xs, ys, i + 1);
     }
   }
@@ -298,7 +299,7 @@ abstract module LittleEndianNat {
   {
     calc ==> {
       xs != ys;
-        { LemmaSeqNeq(xs, ys); }
+      { LemmaSeqNeq(xs, ys); }
       ToNatRight(xs) != ToNatRight(ys);
       false;
     }
@@ -318,9 +319,9 @@ abstract module LittleEndianNat {
         reveal ToNatRight();
         calc ==> {
           true;
-            { LemmaModEquivalenceAuto(); }
+          { LemmaModEquivalence(ToNatRight(xs), ToNatRight(DropFirst(xs)) * BASE() + First(xs), BASE()); }
           IsModEquivalent(ToNatRight(xs), ToNatRight(DropFirst(xs)) * BASE() + First(xs), BASE());
-            { LemmaModMultiplesBasicAuto(); }
+          { LemmaModMultiplesBasicAuto(); }
           IsModEquivalent(ToNatRight(xs), First(xs), BASE());
         }
       }
@@ -334,7 +335,7 @@ abstract module LittleEndianNat {
   //////////////////////////////////////////////////////////////////////////////
 
   /* Converts a nat to a sequence. */
-  function method {:opaque} FromNat(n: nat): (xs: seq<uint>)
+  function {:opaque} FromNat(n: nat): (xs: seq<uint>)
   {
     if n == 0 then []
     else
@@ -354,14 +355,14 @@ abstract module LittleEndianNat {
     } else {
       calc {
         |FromNat(n)|;
-        == { LemmaDivBasicsAuto(); }
+      == { LemmaDivBasicsAuto(); }
         1 + |FromNat(n / BASE())|;
-        <= {
-             LemmaMultiplyDivideLtAuto();
-             LemmaDivDecreasesAuto();
-             reveal Pow();
-             LemmaFromNatLen(n / BASE(), len - 1);
-           }
+      <= {
+           LemmaMultiplyDivideLtAuto();
+           LemmaDivDecreasesAuto();
+           reveal Pow();
+           LemmaFromNatLen(n / BASE(), len - 1);
+         }
         len;
       }
     }
@@ -379,22 +380,22 @@ abstract module LittleEndianNat {
     } else {
       calc {
         ToNatRight(FromNat(n));
-          { LemmaDivBasicsAuto(); }
+        { LemmaDivBasicsAuto(); }
         ToNatRight([n % BASE()] + FromNat(n / BASE()));
         n % BASE() + ToNatRight(FromNat(n / BASE())) * BASE();
-          {
-            LemmaDivDecreasesAuto();
-            LemmaNatSeqNat(n / BASE());
-          }
+        {
+          LemmaDivDecreasesAuto();
+          LemmaNatSeqNat(n / BASE());
+        }
         n % BASE() + n / BASE() * BASE();
-          { LemmaFundamentalDivMod(n, BASE()); }
+        { LemmaFundamentalDivMod(n, BASE()); }
         n;
       }
     }
   }
 
   /* Extends a sequence to a specified length. */
-  function method {:opaque} SeqExtend(xs: seq<uint>, n: nat): (ys: seq<uint>)
+  function {:opaque} SeqExtend(xs: seq<uint>, n: nat): (ys: seq<uint>)
     requires |xs| <= n
     ensures |ys| == n
     ensures ToNatRight(ys) == ToNatRight(xs)
@@ -404,7 +405,7 @@ abstract module LittleEndianNat {
   }
 
   /* Extends a sequence to a length that is a multiple of n. */
-  function method {:opaque} SeqExtendMultiple(xs: seq<uint>, n: nat): (ys: seq<uint>)
+  function {:opaque} SeqExtendMultiple(xs: seq<uint>, n: nat): (ys: seq<uint>)
     requires n > 0
     ensures |ys| % n == 0
     ensures ToNatRight(ys) == ToNatRight(xs)
@@ -420,7 +421,7 @@ abstract module LittleEndianNat {
   }
 
   /* Converts a nat to a sequence of a specified length. */
-  function method {:opaque} FromNatWithLen(n: nat, len: nat): (xs: seq<uint>)
+  function {:opaque} FromNatWithLen(n: nat, len: nat): (xs: seq<uint>)
     requires Pow(BASE(), len) > n
     ensures |xs| == len
     ensures ToNatRight(xs) == n
@@ -448,7 +449,7 @@ abstract module LittleEndianNat {
   }
 
   /* Generates a sequence of zeros of a specified length. */
-  function method {:opaque} SeqZero(len: nat): (xs: seq<uint>)
+  function {:opaque} SeqZero(len: nat): (xs: seq<uint>)
     ensures |xs| == len
     ensures forall i :: 0 <= i < |xs| ==> xs[i] == 0
     ensures ToNatRight(xs) == 0
@@ -472,7 +473,7 @@ abstract module LittleEndianNat {
     if |xs| > 0 {
       calc {
         FromNatWithLen(ToNatRight(xs), |xs|) != xs;
-          { LemmaSeqNeq(FromNatWithLen(ToNatRight(xs), |xs|), xs); }
+        { LemmaSeqNeq(FromNatWithLen(ToNatRight(xs), |xs|), xs); }
         ToNatRight(FromNatWithLen(ToNatRight(xs), |xs|)) != ToNatRight(xs);
         ToNatRight(xs) != ToNatRight(xs);
         false;
@@ -487,10 +488,10 @@ abstract module LittleEndianNat {
   //////////////////////////////////////////////////////////////////////////////
 
   /* Adds two sequences. */
-  function method {:opaque} SeqAdd(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
+  function {:opaque} SeqAdd(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
     requires |xs| == |ys|
     ensures var (zs, cout) := SeqAdd(xs, ys);
-      |zs| == |xs| && 0 <= cout <= 1
+            |zs| == |xs| && 0 <= cout <= 1
     decreases xs
   {
     if |xs| == 0 then ([], 0)
@@ -504,7 +505,7 @@ abstract module LittleEndianNat {
 
   /* SeqAdd returns the same value as converting the sequences to nats, then
   adding them. */
-  lemma LemmaSeqAdd(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
+  lemma {:vcs_split_on_every_assert} LemmaSeqAdd(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
     requires |xs| == |ys|
     requires SeqAdd(xs, ys) == (zs, cout)
     ensures ToNatRight(xs) + ToNatRight(ys) == ToNatRight(zs) + cout * Pow(BASE(), |xs|)
@@ -525,18 +526,18 @@ abstract module LittleEndianNat {
         ToNatRight(zs);
         ToNatLeft(zs);
         ToNatLeft(zs') + z * pow;
-          { LemmaSeqAdd(DropLast(xs), DropLast(ys), zs', cin); }
+        { LemmaSeqAdd(DropLast(xs), DropLast(ys), zs', cin); }
         ToNatLeft(DropLast(xs)) + ToNatLeft(DropLast(ys)) - cin * pow + z * pow;
-          {
-            LemmaMulEqualityAuto();
-            assert sum * pow == (z + cout * BASE()) * pow;
-            LemmaMulIsDistributiveAuto();
-          } 
+        {
+          LemmaMulEquality(sum, z + cout * BASE(), pow);
+          assert sum * pow == (z + cout * BASE()) * pow;
+          LemmaMulIsDistributiveAuto();
+        }
         ToNatLeft(xs) + ToNatLeft(ys) - cout * BASE() * pow;
-          {
-            LemmaMulIsAssociative(cout, BASE(), pow);
-            reveal Pow();
-          }
+        {
+          LemmaMulIsAssociative(cout, BASE(), pow);
+          reveal Pow();
+        }
         ToNatLeft(xs) + ToNatLeft(ys) - cout * Pow(BASE(), |xs|);
         ToNatRight(xs) + ToNatRight(ys) - cout * Pow(BASE(), |xs|);
       }
@@ -544,14 +545,14 @@ abstract module LittleEndianNat {
   }
 
   /* Subtracts two sequences. */
-  function method {:opaque} SeqSub(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
+  function {:opaque} SeqSub(xs: seq<uint>, ys: seq<uint>): (seq<uint>, nat)
     requires |xs| == |ys|
     ensures var (zs, cout) := SeqSub(xs, ys);
-      |zs| == |xs| && 0 <= cout <= 1
+            |zs| == |xs| && 0 <= cout <= 1
     decreases xs
   {
     if |xs| == 0 then ([], 0)
-    else 
+    else
       var (zs, cin) := SeqSub(DropLast(xs), DropLast(ys));
       var (diff_out, cout) := if Last(xs) >= Last(ys) + cin
                               then (Last(xs) - Last(ys) - cin, 0)
@@ -561,7 +562,7 @@ abstract module LittleEndianNat {
 
   /* SeqSub returns the same value as converting the sequences to nats, then
   subtracting them. */
-  lemma LemmaSeqSub(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
+  lemma {:vcs_split_on_every_assert} LemmaSeqSub(xs: seq<uint>, ys: seq<uint>, zs: seq<uint>, cout: nat)
     requires |xs| == |ys|
     requires SeqSub(xs, ys) == (zs, cout)
     ensures ToNatRight(xs) - ToNatRight(ys) + cout * Pow(BASE(), |xs|) == ToNatRight(zs)
@@ -573,8 +574,8 @@ abstract module LittleEndianNat {
       var pow := Pow(BASE(), |xs| - 1);
       var (zs', cin) := SeqSub(DropLast(xs), DropLast(ys));
       var z := if Last(xs) >= Last(ys) + cin
-               then Last(xs) - Last(ys) - cin
-               else BASE() + Last(xs) - Last(ys) - cin;
+      then Last(xs) - Last(ys) - cin
+      else BASE() + Last(xs) - Last(ys) - cin;
       assert cout * BASE() + Last(xs) - cin - Last(ys) == z;
 
       reveal ToNatLeft();
@@ -583,18 +584,18 @@ abstract module LittleEndianNat {
         ToNatRight(zs);
         ToNatLeft(zs);
         ToNatLeft(zs') + z * pow;
-          { LemmaSeqSub(DropLast(xs), DropLast(ys), zs', cin); }
+        { LemmaSeqSub(DropLast(xs), DropLast(ys), zs', cin); }
         ToNatLeft(DropLast(xs)) - ToNatLeft(DropLast(ys)) + cin * pow + z * pow;
-          {
-            LemmaMulEqualityAuto();
-            assert pow * (cout * BASE() + Last(xs) - cin - Last(ys)) == pow * z;
-            LemmaMulIsDistributiveAuto();
-          }
+        {
+          LemmaMulEquality(cout * BASE() + Last(xs) - cin - Last(ys), z, pow);
+          assert pow * (cout * BASE() + Last(xs) - cin - Last(ys)) == pow * z;
+          LemmaMulIsDistributiveAuto();
+        }
         ToNatLeft(xs) - ToNatLeft(ys) + cout * BASE() * pow;
-          {
-            LemmaMulIsAssociative(cout, BASE(), pow);
-            reveal Pow();
-          }
+        {
+          LemmaMulIsAssociative(cout, BASE(), pow);
+          reveal Pow();
+        }
         ToNatLeft(xs) - ToNatLeft(ys) + cout * Pow(BASE(), |xs|);
         ToNatRight(xs) - ToNatRight(ys) + cout * Pow(BASE(), |xs|);
       }

@@ -1,4 +1,4 @@
-// RUN: %dafny /compile:3 "%s" > "%t"
+// RUN: %run "%s" > "%t"
 // RUN: %OutputCheck --file-to-check "%t" "%s"
 // CHECK-L: Hello
 // CHECK-NEXT-L: Error: 'name' was not found
@@ -6,10 +6,10 @@
 // CHECK-NEXT-L: Dafny
 // CHECK-NEXT-L: Test dummy file
 
-include "../src/Wrappers.dfy"
+include "../src/dafny/Wrappers.dfy"
 
-module Demo {
-  import opened Wrappers
+module {:options "--function-syntax:4"} Demo {
+  import opened Dafny.Wrappers
 
   // ------ Demo for Option ----------------------------
   // We use Option when we don't need to pass around a reason for the failure,
@@ -20,12 +20,12 @@ module Demo {
     constructor () {
       m := map[];
     }
-    function method Get(k: K): Option<V>
+    function Get(k: K): Option<V>
       reads this
     {
       if k in m then Some(m[k]) else None()
     }
-    method Put(k: K, v: V) 
+    method Put(k: K, v: V)
       modifies this
     {
       this.m := this.m[k := v];
@@ -60,14 +60,14 @@ module Demo {
   // Sometimes we want to go from Option to Result:
   method FindName(m: MyMap<string, string>) returns (res: Result<string, string>) {
     // Will return a default error message in case of None:
-    res := m.Get("name").ToResult();
+    res := m.Get("name").ToResult("'name' not found");
     // We can also match on the option to write a custom error:
     match m.Get("name")
     case Some(n) => res := Success(n);
     case None => res := Failure("'name' was not found");
   }
 
-  // Propogating failures using :- statements
+  // Propagating failures using :- statements
   method GetGreeting(m: MyMap<string, string>) returns (res: Option<string>) {
     var message: string :- m.Get("message");
     var nameResult := FindName(m);
@@ -118,7 +118,7 @@ module Demo {
     }
   }
 
-  // Propogating failures using :- statements
+  // Propagating failures using :- statements
   method CopyFile(fs: MyFilesystem, fromPath: string, toPath: string) returns (res: Result<(), string>)
     modifies fs
   {
@@ -163,14 +163,33 @@ module Demo {
     // Get a string that we can't reason about statically
     var contents :- fs.ReadFile(fromPath);
 
-    // Dynamically test whether the string is at least 5 characters long, and return a failure if not. 
+    // Dynamically test whether the string is at least 5 characters long, and return a failure if not.
     // If we pass this line, Dafny can now assume that the string is long enough.
-    :- Need(|contents| >= 5, "File contents not long enough.");
+    :- Need<string>(|contents| >= 5, "File contents not long enough.");
 
     // Now we can get the character
     var c := contents[4];
-    
+
     return Success(c);
+  }
+
+  // For a method that returns an Outcome, use Outcome.Need
+  method whatIsCharacterFive'(fs: MyFilesystem, fromPath: string) returns (res: Outcome<string>)
+    modifies fs
+  {
+
+    // Get a string that we can't reason about statically
+    var contents: string := *;
+
+    // Dynamically test whether the string is at least 5 characters long, and return a failure if not.
+    // If we pass this line, Dafny can now assume that the string is long enough.
+    :- Outcome.Need(|contents| >= 5, "File contents not long enough.");
+
+    // Now we can get the character
+    var c := contents[4];
+    // and do other stuff
+
+    return Pass;
   }
 
   method Main() {

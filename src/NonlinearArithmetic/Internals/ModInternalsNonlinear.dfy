@@ -1,15 +1,15 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original: Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT
-*  
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original: Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT
+ *  
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
-module ModInternalsNonlinear {
-  
+module {:options "-functionSyntax:4"} ModInternalsNonlinear {
+
   /* WARNING: Think three times before adding to this file, as nonlinear
   verification is highly unstable! */
 
@@ -17,7 +17,7 @@ module ModInternalsNonlinear {
   lemma LemmaModOfZeroIsZero(m:int)
     requires 0 < m
     ensures 0 % m == 0
-  { 
+  {
   }
 
   /* describes fundementals of the modulus operator */

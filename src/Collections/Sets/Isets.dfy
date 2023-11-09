@@ -1,21 +1,21 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Original Copyright under the following: 
-*  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
-*  ETH Zurich, and University of Washington
-*  SPDX-License-Identifier: BSD-2-Clause 
-* 
-*  Copyright (c) Microsoft Corporation
-*  SPDX-License-Identifier: MIT 
-* 
-*  Modifications and Extensions: Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Original Copyright under the following: 
+ *  Copyright 2018-2021 VMware, Inc., Microsoft Inc., Carnegie Mellon University, 
+ *  ETH Zurich, and University of Washington
+ *  SPDX-License-Identifier: BSD-2-Clause 
+ * 
+ *  Copyright (c) Microsoft Corporation
+ *  SPDX-License-Identifier: MIT 
+ * 
+ *  Modifications and Extensions: Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../Functions.dfy"
 
-module Isets {
+module {:options "-functionSyntax:4"} Isets {
 
   import opened Functions
 
@@ -27,7 +27,7 @@ module Isets {
   }
 
   /* Map an injective function to each element of an iset. */
-  function {:opaque} Map<X(!new), Y>(xs: iset<X>, f: X-->Y): (ys: iset<Y>)
+  ghost function {:opaque} Map<X(!new), Y>(xs: iset<X>, f: X-->Y): (ys: iset<Y>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} :: f.requires(x)
     requires Injective(f)
@@ -39,7 +39,7 @@ module Isets {
 
   /* Construct an iset using elements of another set for which a function
   returns true. */
-  function {:opaque} Filter<X(!new)>(xs: iset<X>, f: X~>bool): (ys: iset<X>)
+  ghost function {:opaque} Filter<X(!new)>(xs: iset<X>, f: X~>bool): (ys: iset<X>)
     reads f.reads
     requires forall x {:trigger f.requires(x)} {:trigger x in xs} :: x in xs ==> f.requires(x)
     ensures forall y {:trigger f(y)}{:trigger y in xs} :: y in ys <==> y in xs && f(y)

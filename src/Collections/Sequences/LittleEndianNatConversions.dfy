@@ -1,9 +1,9 @@
-// RUN: %dafny /compile:0 /noNLarith "%s"
+// RUN: %verify --disable-nonlinear-arithmetic "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../NonlinearArithmetic/DivMod.dfy"
 include "../../NonlinearArithmetic/Mul.dfy"
@@ -12,12 +12,12 @@ include "Seq.dfy"
 include "LittleEndianNat.dfy"
 
 /* Sequence with smaller base. */
-abstract module SmallSeq refines LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} SmallSeq refines LittleEndianNat {
 
-  function method BITS(): nat
+  function BITS(): nat
     ensures BITS() > 1
 
-  function method BASE(): nat
+  function BASE(): nat
   {
     LemmaPowPositive(2, BITS() - 1);
     LemmaPowStrictlyIncreases(2, BITS() - 1, BITS());
@@ -27,14 +27,14 @@ abstract module SmallSeq refines LittleEndianNat {
 }
 
 /* Sequence with larger base. */
-abstract module LargeSeq refines LittleEndianNat {
+abstract module {:options "-functionSyntax:4"} LargeSeq refines LittleEndianNat {
 
   import Small : SmallSeq
 
-  function method BITS(): nat
+  function BITS(): nat
     ensures BITS() > Small.BITS() && BITS() % Small.BITS() == 0
 
-  function method BASE(): nat
+  function BASE(): nat
   {
     LemmaPowPositive(2, BITS() - 1);
     LemmaPowStrictlyIncreases(2, BITS() - 1, BITS());
@@ -43,7 +43,7 @@ abstract module LargeSeq refines LittleEndianNat {
 
 }
 
-abstract module LittleEndianNatConversions {
+abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
 
   import opened DivMod
   import opened Mul
@@ -53,7 +53,7 @@ abstract module LittleEndianNatConversions {
   import opened Large : LargeSeq
 
   /* Small.BASE() to the power of E is Large.BASE(). */
-  function method E(): (E: nat)
+  function E(): (E: nat)
     ensures Pow(Small.BASE(), E) == Large.BASE()
     ensures E > 0
   {
@@ -62,12 +62,12 @@ abstract module LittleEndianNatConversions {
     LemmaPowMultipliesAuto();
     LemmaFundamentalDivMod(Large.BITS(), Small.BITS());
     assert Large.BITS() == Small.BITS() * (Large.BITS() / Small.BITS()) + (Large.BITS() % Small.BITS());
-    assert (Large.BITS() / Small.BITS()) > 0;
+    assert (Large.BITS() / Small.BITS()) != 0;
     Large.BITS() / Small.BITS()
   }
 
   /* Converts a sequence from Large.BASE() to Small.BASE(). */
-  function method {:opaque} ToSmall(xs: seq<Large.uint>): (ys: seq<Small.uint>)
+  function {:opaque} ToSmall(xs: seq<Large.uint>): (ys: seq<Small.uint>)
     ensures |ys| == |xs| * E()
   {
     if |xs| == 0 then []
@@ -77,7 +77,7 @@ abstract module LittleEndianNatConversions {
   }
 
   /* Converts a sequence from Small.BASE() to Large.BASE(). */
-  function method {:opaque} ToLarge(xs: seq<Small.uint>): (ys: seq<Large.uint>)
+  function {:opaque} ToLarge(xs: seq<Small.uint>): (ys: seq<Large.uint>)
     requires |xs| % E() == 0
     ensures |ys| == |xs| / E()
   {
@@ -105,12 +105,12 @@ abstract module LittleEndianNatConversions {
       calc {
         Small.ToNatRight(ToSmall(xs));
         Small.ToNatRight(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
-          {
-            Small.LemmaSeqPrefix(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)), E());
-            LemmaToSmall(DropFirst(xs));
-          }
+        {
+          Small.LemmaSeqPrefix(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)), E());
+          LemmaToSmall(DropFirst(xs));
+        }
         First(xs) + Large.ToNatRight(DropFirst(xs)) * Pow(Small.BASE(), E());
-          { assert Pow(Small.BASE(), E()) == Large.BASE(); }
+        { assert Pow(Small.BASE(), E()) == Large.BASE(); }
         Large.ToNatRight(xs);
       }
     }
@@ -129,15 +129,15 @@ abstract module LittleEndianNatConversions {
     } else {
       calc {
         Large.ToNatRight(ToLarge(xs));
-          {
-            LemmaModIsZero(|xs|, E());
-            LemmaModSubMultiplesVanishAuto();
-            Small.LemmaSeqNatBound(xs[..E()]);
-          }
+        {
+          LemmaModIsZero(|xs|, E());
+          LemmaModSubMultiplesVanishAuto();
+          Small.LemmaSeqNatBound(xs[..E()]);
+        }
         Large.ToNatRight([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
-          { LemmaToLarge(xs[E()..]); }
+        { LemmaToLarge(xs[E()..]); }
         Small.ToNatRight(xs[..E()]) + Small.ToNatRight(xs[E()..]) * Pow(Small.BASE(), E());
-          { Small.LemmaSeqPrefix(xs, E()); }
+        { Small.LemmaSeqPrefix(xs, E()); }
         Small.ToNatRight(xs);
       }
     }
@@ -157,7 +157,7 @@ abstract module LittleEndianNatConversions {
 
   /* ToLarge is injective. */
   lemma LemmaToLargeIsInjective(xs: seq<Small.uint>, ys: seq<Small.uint>)
-    requires |xs| % E() == |ys| % E() == 0 
+    requires |xs| % E() == |ys| % E() == 0
     requires ToLarge(xs) == ToLarge(ys)
     requires |xs| == |ys|
     ensures xs == ys
@@ -180,17 +180,17 @@ abstract module LittleEndianNatConversions {
     } else {
       calc {
         ToSmall(ToLarge(xs));
-          {
-            LemmaModIsZero(|xs|, E());
-            Small.LemmaSeqNatBound(xs[..E()]);
-            LemmaModSubMultiplesVanishAuto();
-          }
+        {
+          LemmaModIsZero(|xs|, E());
+          Small.LemmaSeqNatBound(xs[..E()]);
+          LemmaModSubMultiplesVanishAuto();
+        }
         ToSmall([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
         Small.FromNatWithLen(Small.ToNatRight(xs[..E()]), E()) + ToSmall(ToLarge(xs[E()..]));
-          {
-            Small.LemmaSeqNatSeq(xs[..E()]);
-            LemmaSmallLargeSmall(xs[E()..]);
-          }
+        {
+          Small.LemmaSeqNatSeq(xs[..E()]);
+          LemmaSmallLargeSmall(xs[E()..]);
+        }
         xs;
       }
     }
@@ -212,7 +212,7 @@ abstract module LittleEndianNatConversions {
         ToLarge(Small.FromNatWithLen(First(xs), E()) + ToSmall(DropFirst(xs)));
         [Small.ToNatRight(Small.FromNatWithLen(First(xs), E())) as Large.uint] + ToLarge(ToSmall(DropFirst(xs)));
         [First(xs)] + ToLarge(ToSmall(DropFirst(xs)));
-          { LemmaLargeSmallLarge(DropFirst(xs)); }
+        { LemmaLargeSmallLarge(DropFirst(xs)); }
         [First(xs)] + DropFirst(xs);
         xs;
       }
@@ -222,15 +222,15 @@ abstract module LittleEndianNatConversions {
 }
 
 /* Conversions between sequences of uint8 and uint16. */
-module Uint8_16 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Uint8_16 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
-    function method BITS(): nat { 8 }
+    function BITS(): nat { 8 }
   }
 
   module Uint16Seq refines LargeSeq {
     import Small = Uint8Seq
-    function method BITS(): nat { 16 }
+    function BITS(): nat { 16 }
   }
 
   import opened Large = Uint16Seq
@@ -239,15 +239,15 @@ module Uint8_16 refines LittleEndianNatConversions {
 }
 
 /* Conversions between sequences of uint8 and uint32. */
-module Uint8_32 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Uint8_32 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
-    function method BITS(): nat { 8 }
+    function BITS(): nat { 8 }
   }
 
   module Uint32Seq refines LargeSeq {
     import Small = Uint8Seq
-    function method BITS(): nat { 32 }
+    function BITS(): nat { 32 }
   }
 
   import opened Large = Uint32Seq
@@ -256,15 +256,15 @@ module Uint8_32 refines LittleEndianNatConversions {
 }
 
 /* Conversions between sequences of uint8 and uint64. */
-module Uint8_64 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Uint8_64 refines LittleEndianNatConversions {
 
   module Uint8Seq refines SmallSeq {
-    function method BITS(): nat { 8 }
+    function BITS(): nat { 8 }
   }
 
   module Uint64Seq refines LargeSeq {
     import Small = Uint8Seq
-    function method BITS(): nat { 64 }
+    function BITS(): nat { 64 }
   }
 
   import opened Large = Uint64Seq
@@ -273,15 +273,15 @@ module Uint8_64 refines LittleEndianNatConversions {
 }
 
 /* Conversions between sequences of uint16 and uint32. */
-module Uint16_32 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Uint16_32 refines LittleEndianNatConversions {
 
   module Uint16Seq refines SmallSeq {
-    function method BITS(): nat { 16 }
+    function BITS(): nat { 16 }
   }
 
   module Uint32Seq refines LargeSeq {
     import Small = Uint16Seq
-    function method BITS(): nat { 32 }
+    function BITS(): nat { 32 }
   }
 
   import opened Large = Uint32Seq
@@ -290,15 +290,15 @@ module Uint16_32 refines LittleEndianNatConversions {
 }
 
 /* Conversions between sequences of uint32 and uint64. */
-module Uint32_64 refines LittleEndianNatConversions {
+module {:options "-functionSyntax:4"} Uint32_64 refines LittleEndianNatConversions {
 
   module Uint32Seq refines SmallSeq {
-    function method BITS(): nat { 32 }
+    function BITS(): nat { 32 }
   }
 
   module Uint64Seq refines LargeSeq {
     import Small = Uint32Seq
-    function method BITS(): nat { 64 }
+    function BITS(): nat { 64 }
   }
 
   import opened Large = Uint64Seq

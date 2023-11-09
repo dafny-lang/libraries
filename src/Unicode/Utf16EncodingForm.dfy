@@ -1,9 +1,9 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT
+ *******************************************************************************/
 
 include "../Collections/Sequences/Seq.dfy"
 include "../Functions.dfy"
@@ -12,25 +12,25 @@ include "Unicode.dfy"
 include "UnicodeEncodingForm.dfy"
 
 // Definition of the UTF-16 Unicode Encoding Form, as specified in Section 3.9 D91.
-module Utf16EncodingForm refines UnicodeEncodingForm {
+module {:options "-functionSyntax:4"} Utf16EncodingForm refines UnicodeEncodingForm {
   type CodeUnit = bv16
 
   //
   // Definitions of well-formedness.
   //
 
-  function method IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
+  function IsMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (b: bool)
   {
     if |s| == 1 then IsWellFormedSingleCodeUnitSequence(s)
     else if |s| == 2 then (
-      var b := IsWellFormedDoubleCodeUnitSequence(s);
-      assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
-      b
-    )
+                            var b := IsWellFormedDoubleCodeUnitSequence(s);
+                            assert b ==> forall i | 0 < i < |s| :: !IsMinimalWellFormedCodeUnitSubsequence(s[..i]);
+                            b
+                          )
     else false
   }
 
-  function method IsWellFormedSingleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedSingleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 1
   {
     var firstWord := s[0];
@@ -38,7 +38,7 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
     || 0xE000 <= firstWord <= 0xFFFF
   }
 
-  function method IsWellFormedDoubleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
+  function IsWellFormedDoubleCodeUnitSequence(s: CodeUnitSeq): (b: bool)
     requires |s| == 2
     ensures b ==> !IsWellFormedSingleCodeUnitSequence(s[..1])
   {
@@ -48,15 +48,15 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
     && 0xDC00 <= secondWord <= 0xDFFF
   }
 
-  function method SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (maybePrefix: Option<MinimalWellFormedCodeUnitSeq>)
+  function SplitPrefixMinimalWellFormedCodeUnitSubsequence(s: CodeUnitSeq): (maybePrefix: Option<MinimalWellFormedCodeUnitSeq>)
     ensures |s| == 0 ==> maybePrefix.None?
     ensures (exists i | 0 < i <= |s| :: IsMinimalWellFormedCodeUnitSubsequence(s[..i])) <==>
-      && maybePrefix.Some?
+            && maybePrefix.Some?
     ensures maybePrefix.Some? ==>
-      && var prefix := maybePrefix.Extract();
-      && 0 < |prefix| <= |s|
-      && prefix == s[..|prefix|]
-      && IsMinimalWellFormedCodeUnitSubsequence(prefix)
+              && var prefix := maybePrefix.Extract();
+              && 0 < |prefix| <= |s|
+              && prefix == s[..|prefix|]
+              && IsMinimalWellFormedCodeUnitSubsequence(prefix)
   {
     if |s| >= 1 && IsWellFormedSingleCodeUnitSequence(s[..1]) then Some(s[..1])
     else if |s| >= 2 && IsWellFormedDoubleCodeUnitSequence(s[..2]) then Some(s[..2])
@@ -68,13 +68,13 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
   // See Table 3-5. UTF-16 Bit Distribution.
   //
 
-  function method EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
+  function EncodeScalarValue(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
   {
     if 0x0 <= v <= 0xD7FF || 0xE000 <= v <= 0xFFFF then EncodeScalarValueSingleWord(v)
     else EncodeScalarValueDoubleWord(v)
   }
 
-  function method EncodeScalarValueSingleWord(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
+  function EncodeScalarValueSingleWord(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
     requires
       || 0x0 <= v <= 0xD7FF
       || 0xE000 <= v <= 0xFFFF
@@ -85,7 +85,7 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
     [firstWord]
   }
 
-  function method EncodeScalarValueDoubleWord(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
+  function EncodeScalarValueDoubleWord(v: Unicode.ScalarValue): (m: MinimalWellFormedCodeUnitSeq)
     requires 0x10000 <= v <= 0x10FFFF
     ensures |m| == 2
     ensures IsWellFormedDoubleCodeUnitSequence(m)
@@ -103,13 +103,13 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
     [firstWord, secondWord]
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequence(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequence(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
   {
     if |m| == 1 then DecodeMinimalWellFormedCodeUnitSubsequenceSingleWord(m)
     else assert |m| == 2; DecodeMinimalWellFormedCodeUnitSubsequenceDoubleWord(m)
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequenceSingleWord(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequenceSingleWord(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     requires |m| == 1
     ensures
       || 0x0 <= v <= 0xD7FF
@@ -122,7 +122,7 @@ module Utf16EncodingForm refines UnicodeEncodingForm {
     x as Unicode.ScalarValue
   }
 
-  function method DecodeMinimalWellFormedCodeUnitSubsequenceDoubleWord(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
+  function DecodeMinimalWellFormedCodeUnitSubsequenceDoubleWord(m: MinimalWellFormedCodeUnitSeq): (v: Unicode.ScalarValue)
     requires |m| == 2
     ensures 0x10000 <= v <= 0x10FFFF
     ensures EncodeScalarValueDoubleWord(v) == m

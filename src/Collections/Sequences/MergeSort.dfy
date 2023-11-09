@@ -1,18 +1,18 @@
-// RUN: %dafny /compile:0 "%s"
+// RUN: %verify "%s"
 
 /*******************************************************************************
-*  Copyright by the contributors to the Dafny Project
-*  SPDX-License-Identifier: MIT 
-*******************************************************************************/
+ *  Copyright by the contributors to the Dafny Project
+ *  SPDX-License-Identifier: MIT 
+ *******************************************************************************/
 
 include "../../Relations.dfy"
 
-module Seq.MergeSort {
+module {:options "-functionSyntax:4"} Seq.MergeSort {
 
   import opened Relations
 
   //Splits a sequence in two, sorts the two subsequences using itself, and merge the two sorted sequences using `MergeSortedWith`
-  function method MergeSortBy<T>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
+  function MergeSortBy<T>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
     requires TotalOrdering(lessThanOrEq)
     ensures multiset(a) == multiset(result)
     ensures SortedBy(result, lessThanOrEq)
@@ -31,7 +31,7 @@ module Seq.MergeSort {
       MergeSortedWith(leftSorted, rightSorted, lessThanOrEq)
   }
 
-  function method {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool) : (result :seq<T>)
+  function {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool) : (result :seq<T>)
     requires SortedBy(left, lessThanOrEq)
     requires SortedBy(right, lessThanOrEq)
     requires TotalOrdering(lessThanOrEq)
