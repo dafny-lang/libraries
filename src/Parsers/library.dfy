@@ -1,22 +1,3 @@
-module {:options "/functionSyntax:4"} Library {
-  // Library
-  datatype Option<T> = Some(value: T) | None
-  datatype Result<T> = Success(value: T) | Failure(s: string, pos: int) {
-    predicate IsFailure() {
-      Failure?
-    }
-    function PropagateFailure<U>(): Result<U>
-      requires IsFailure()
-    {
-      Failure(s, pos)
-    }
-    function Extract(): T
-      requires !IsFailure()
-    {
-      value
-    }
-  }
-}
 module {:options "/functionSyntax:4"} Printer {
 
   type stringNat = s: string |
