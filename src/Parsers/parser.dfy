@@ -61,11 +61,25 @@ abstract module Parsers {
   // A parser selector is a function that, given a name that exists,
   // returns a parser associated to this name
 
-  //type ParserMapper<!R> = (ParserSelector<R>, nat) -> ParseResult<R>
-  // A parser mapper is the building block of recursive parser. Given a parser selector and a position,
-  // it returns a parsing result. So it's like a parser, but it can also invoke other parsers.
+  predicate IsRemaining(input: seq<C>, remaining: seq<C>)
+    // Remaining is a suffix of the input
+  {
+    && |remaining| <= |input|
+    && input[|input|-|remaining|..] == remaining
+  }
 
-  // Parser combinators. The following functions make it possible to create and compose parsers
+  opaque ghost predicate NonCrashing<R>(underlying: Parser<R>)
+    // A parser is valid for an input if it never returns a fatal error
+    // and always returns a suffix of its input
+  {
+    forall input: seq<C> ::
+      && (underlying(input).PFailure? ==> underlying(input).level == Recoverable)
+      && IsRemaining(input, underlying(input).remaining)
+  }
+
+  // Parser combinators.
+  // The following functions make it possible to create and compose parsers
+  // All these combinators provide non-crashing parsers if their inputs are noncrashing
 
   opaque function Succeed_<R>(result: R): (p: Parser<R>)
     // A parser that does not consume any input and returns the given value
@@ -74,15 +88,22 @@ abstract module Parsers {
     (input: seq<C>) => PSuccess(result, input)
   }
 
-  lemma AboutSucceed_<R>(result: R, input: seq<C>)
-    ensures
-      var p := Succeed_(result);
-      && p(input).PSuccess?
-      && p(input).remaining == input
-  { reveal Succeed_(); }
+  lemma Succeed_NonCrashing<R>(result: R)
+    ensures NonCrashing(Succeed_(result))
+  { reveal NonCrashing(), Succeed_(); }
+
+  lemma Succeed_NonCrashingAuto<R>()
+    ensures forall result: R :: NonCrashing(Succeed_(result))
+  { reveal NonCrashing(), Succeed_();  }
 
   opaque function Epsilon_(): (p: Parser<()>)
-  { Succeed_(()) }
+  {
+    Succeed_(())
+  }
+
+  lemma Epsilon_NonCrashing()
+    ensures NonCrashing(Epsilon_())
+  { reveal NonCrashing(), Epsilon_(); Succeed_NonCrashing(()); }
 
   lemma AboutEpsilon_(input: seq<C>)
     ensures
@@ -100,32 +121,30 @@ abstract module Parsers {
     (input: seq<C>) => PFailure(level, message, input)
   }
 
-  lemma AboutFail_<R>(message: string, level: FailureLevel, input: seq<C>)
-    ensures
-      var p := Fail_<R>(message, level)(input);
-      && p.PFailure?
-      && p.message == message
-      && p.level == level
-      && p.remaining == input
-  {
-    reveal Fail_();
-  }
+  lemma Fail_NonCrashing<R>(message: string)
+    ensures NonCrashing<R>(Fail_(message, Recoverable))
+  { reveal Fail_(); reveal NonCrashing(); }
 
-  lemma AboutFail_2<R>(message: string, input: seq<C>)
-    ensures
-      var p := Fail_<R>(message)(input);
-      && p.PFailure?
-      && p.message == message
-      && p.level == Recoverable
-      && p.remaining == input
-  {
-    reveal Fail_();
-  }
+  lemma Fail_NonCrashingAuto<R>()
+    ensures forall message :: NonCrashing<R>(Fail_(message, Recoverable))
+  { reveal Fail_(); reveal NonCrashing(); }
 
   opaque function Bind_<L, R>(
     left: Parser<L>,
+    right: L -> Parser<R>
+  ) : (p: Parser<R>)
+  {
+    (input: seq<C>)
+    =>
+      var (leftResult, remaining) :- left(input);
+      right(leftResult)(remaining)
+  }
+
+  opaque function Bind__<L, R>(
+    left: Parser<L>,
     right: (L, seq<C>) -> Parser<R>
   ) : (p: Parser<R>)
+    // Useful for recursive binds
   {
     (input: seq<C>)
     =>
@@ -133,23 +152,46 @@ abstract module Parsers {
       right(leftResult, remaining)(remaining)
   }
 
-  lemma AboutBind_<L, R>(
+  ghost predicate BindRightNonCrashing<L(!new), R>(right: (L, seq<C>) -> Parser<R>) {
+    forall l: L, input: seq<C> :: NonCrashing(right(l, input))
+  }
+
+  lemma Bind_NonCrashing<L, R>(
     left: Parser<L>,
-    right: (L, seq<C>) -> Parser<R>,
-    input: seq<C>
-  )
-    ensures
-      var p := Bind_(left, right)(input);
-      && var leftResult := left(input);
-      && !leftResult.IsFailure()
-      ==> var leftValues := left(input).Extract();
-      && var rightResult := right(leftValues.0, leftValues.1)(leftValues.1);
-      && !rightResult.IsFailure()
-      ==> && !p.IsFailure()
-          && p.remaining == rightResult.remaining
-          && p.result == rightResult.result 
+    right: (L, seq<C>) -> Parser<R>
+  ) 
+    requires NonCrashing(left)
+    requires BindRightNonCrashing(right)
+    ensures NonCrashing(Bind__(left, right))
   {
-    reveal Bind_();
+    reveal Bind__(), NonCrashing();
+    var p := Bind__(left, right);
+    forall input: seq<C> ensures
+      && (p(input).PFailure? ==> p(input).level == Recoverable)
+      && IsRemaining(input, p(input).remaining)
+    {
+
+    }
+  }
+
+  ghost predicate Bind_NonCrashingRight<L(!new), R(!new)>(left: Parser<L>)
+    requires NonCrashing(left)
+  {
+    forall right: (L, seq<C>) -> Parser<R> | BindRightNonCrashing(right) ::
+      NonCrashing(Bind__(left, right))
+  }
+
+  lemma Bind_NonCrashingAuto<L(!new), R(!new)>() 
+  ensures forall left: Parser<L> | NonCrashing(left) ::
+    Bind_NonCrashingRight<L, R>(left)
+  {
+    forall left: Parser<L> | NonCrashing(left),
+           right: (L, seq<C>) -> Parser<R> | BindRightNonCrashing(right)
+    ensures
+      NonCrashing(Bind__(left, right))
+    {
+      Bind_NonCrashing(left, right);
+    }
   }
 
   opaque function Map_<R, U>(underlying: Parser<R>, mappingFunc: R -> U)
@@ -165,33 +207,6 @@ abstract module Parsers {
       PSuccess(u, remaining)
   }
 
-  lemma AboutMap_<R, U>(underlying: Parser<R>, mappingFunc: R -> U, input: seq<C>)
-    ensures var p := Map_(underlying, mappingFunc);
-      && (underlying(input).PSuccess? <==> p(input).PSuccess?)
-      && (p(input).PSuccess? ==>
-            && p(input).remaining == underlying(input).remaining
-            && p(input).result == mappingFunc(underlying(input).result))
-  {
-    reveal Map_();
-    reveal Bind_();
-    reveal Succeed_();
-  }
-
-  function BindMapCallback<R, U>(mappingFunc: R -> U):
-     (R, seq<C>) -> Parser<U>
-   {
-    (result: R, remaining: seq<C>) => Succeed_(mappingFunc(result))
-  }
-
-  lemma AboutMap_Bind_<R, U>(underlying: Parser<R>, mappingFunc: R -> U, input: seq<C>)
-    ensures Map_(underlying, mappingFunc)(input) 
-        == Bind_<R, U>(underlying, BindMapCallback(mappingFunc))(input)
-  {
-    reveal Map_();
-    reveal Bind_();
-    reveal Succeed_();
-  }
-
   opaque function Concat_<L, R>(
     left: Parser<L>,
     right: Parser<R>
@@ -205,41 +220,6 @@ abstract module Parsers {
       PSuccess((l, r), remaining2)
   }
 
-  lemma AboutConcat_<L, R>(
-    left: Parser<L>,
-    right: Parser<R>,
-    input: seq<C>)
-    ensures var p := Concat_(left, right);
-            && (p(input).PSuccess? ==>
-                && left(input).PSuccess?
-                && p(input).result.0 == left(input).result
-                && var input2 := left(input).remaining;
-                && right(input2).PSuccess?
-                && p(input).result.1 == right(input2).result
-                && p(input).remaining == right(input2).remaining)
-  {
-    reveal Concat_();
-  }
-
-  function BindConcatCallback<L, R>(right: Parser<R>): (L, seq<C>) -> Parser<(L, R)>
-  {
-    (l: L, remaining: seq<C>) =>
-      Map_(right, (r: R) => (l, r))
-  }
-  
-  lemma AboutConcat_Bind_<L, R>(
-    left: Parser<L>,
-    right: Parser<R>,
-    input: seq<C>)
-    ensures Concat_(left, right)(input) == Bind_(left, BindConcatCallback(right))(input)
-  {
-    reveal Concat_();
-    reveal Bind_();
-    reveal Succeed_();
-    reveal Map_();
-  }
-
-  
   opaque function ConcatR_<L, R>(
     left: Parser<L>,
     right: Parser<R>
@@ -253,40 +233,6 @@ abstract module Parsers {
       PSuccess(r, remaining2)
   }
 
-  lemma AboutConcatR_<L, R>(
-    left: Parser<L>,
-    right: Parser<R>,
-    input: seq<C>)
-    ensures var p := ConcatR_(left, right);
-            && (p(input).PSuccess? ==>
-                && left(input).PSuccess?
-                && var input2 := left(input).remaining;
-                && right(input2).PSuccess?
-                && p(input).result == right(input2).result
-                && p(input).remaining == right(input2).remaining)
-  {
-    reveal ConcatR_();
-  }
-
-  function first<L, R>(): ((L, R)) -> L {
-    (lr: (L, R)) => lr.0
-  }
-  function second<L, R>(): ((L, R)) -> R {
-    (lr: (L, R)) => lr.1
-  }
-  lemma AboutConcat_ConcatR_<L, R>(
-    left: Parser<L>,
-    right: Parser<R>,
-    input: seq<C>)
-    ensures Map_(Concat_(left, right), second())(input) == ConcatR_(left, right)(input)
-  {
-    reveal Concat_();
-    reveal Succeed_();
-    reveal ConcatR_();
-    reveal Map_();
-  }
-
-  
   opaque function ConcatL_<L, R>(
     left: Parser<L>,
     right: Parser<R>
@@ -298,32 +244,6 @@ abstract module Parsers {
       var (l, remaining) :- left(input);
       var (r, remaining2) :- right(remaining);
       PSuccess(l, remaining2)
-  }
-
-  lemma AboutConcatL_<L, R>(
-    left: Parser<L>,
-    right: Parser<R>,
-    input: seq<C>)
-    ensures var p := ConcatL_(left, right);
-            && (p(input).PSuccess? ==>
-                && left(input).PSuccess?
-                && var input2 := left(input).remaining;
-                && right(input2).PSuccess?
-                && p(input).result == left(input).result
-                && p(input).remaining == right(input2).remaining)
-  {
-    reveal ConcatL_();
-  }
-  lemma AboutConcat_ConcatL_<L, R>(
-    left: Parser<L>,
-    right: Parser<R>,
-    input: seq<C>)
-    ensures Map_(Concat_(left, right), first())(input) == ConcatL_(left, right)(input)
-  {
-    reveal Concat_();
-    reveal Succeed_();
-    reveal ConcatL_();
-    reveal Map_();
   }
 
   opaque function Repeat<R>(
@@ -351,199 +271,81 @@ abstract module Parsers {
       PSuccess(acc, input)
   }
 
-  predicate IsRemaining(input: seq<C>, remaining: seq<C>)
-  {
-    && |remaining| <= |input|
-    && input[|input|-|remaining|..] == remaining
-  }
-
-  predicate ParserStaysWithin<R>(underlying: Parser<R>, input: seq<C>) {
-    forall i | 0 <= i <= |input| ::
-       && var remaining := input[i..];
-       && (assert IsRemaining(input, remaining);
-           underlying(remaining).PFailure? ==> underlying(remaining).level == Recoverable)
-       && (underlying(remaining).PSuccess? ==>
-             IsRemaining(remaining, underlying(remaining).remaining))
-  }
-
-  lemma AboutRepeat_<R>(
-    underlying: Parser<R>,
-    acc: seq<R>,
-    input: seq<C>
-  )
-  // If underlying never throws a fatal error,
-  // returns a remaining that is a suffix of the input,
-  // then Repeat with always return a success
-    decreases |input|
-    requires ParserStaysWithin(underlying, input)
-    ensures Repeat_(underlying, acc, input).PSuccess?
-  {
-    reveal Repeat_();
-    var _ := input[0..];
-  }
-/*
-  predicate AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures<R>(
-    maxPos: nat,
-    underlying: Parser<R>,
-    acc: seq<R>,
-    pos: nat,
-    deltaPos: nat,
-    initPos: nat
-  )
-    requires deltaPos == pos - initPos
-  {
-    var result := Repeat_(maxPos, underlying, acc, pos, deltaPos, initPos);
-    && result.PSuccess?
-    && |acc| <= |result.result|
-    && pos <= initPos + result.deltaPos <= maxPos
-    && (underlying(pos).PSuccess? && 0 < underlying(pos).deltaPos
-    ==> 
-    (|acc| < |result.result| && 0 < result.deltaPos))
-  }
-
-  lemma AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnce<R>(
-    maxPos: nat,
-    underlying: Parser<R>,
-    acc: seq<R>,
-    pos: nat,
-    deltaPos: nat,
-    initPos: nat
-  ) 
-    decreases if pos <= maxPos then 1 + maxPos - pos else 0
-    requires deltaPos == pos - initPos
-    requires pos <= maxPos
-    requires ParserStaysWithin(underlying, maxPos)
-    ensures 
-      AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures
-        (maxPos, underlying, acc, pos, deltaPos, initPos)
-  {
-    var result := Repeat_(maxPos, underlying, acc, pos, deltaPos, initPos);
-    if pos > maxPos {
-        return;
-    }
-    reveal Repeat_();
-    match underlying(pos)
-    case PSuccess(dpos1, head) =>
-      if dpos1 == 0 {
-      } else {
-        AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnce
-        (maxPos, underlying, acc + [head],
-               pos + dpos1, deltaPos + dpos1, initPos);
-      }
-    case PFailure(Error, message, pos', deltaPos') =>
-    case PFailure(Recoverable, message, pos', deltaPos') =>
-  }
-
-  ghost predicate FixSpecInner<R(!new)>(maxPos: nat, callback: Parser<R>, u: nat)
-    // Specificaiton for Fixpoint. In other terms, verifies that the callback parser
-    // accepts all positions between u (exclusive) and size (inclusive)
-  {
-    && u <= maxPos
-    && forall u': nat | u <  u' <= maxPos ::
-      && (callback(u').PSuccess? ==> u' + callback(u').deltaPos <= maxPos)
-  }
-
   opaque function Fixpoint<R(!new)>(
-    maxPos: nat,
-    underlying: (Parser<R>, nat) -> ParseResult<R>
+    underlying: Parser<R> -> Parser<R>
   ): (p: Parser<R>)
     // Given a function that requires a parser and a position to return a parse result,
     // provide this function the Fixpoint() parser itself
     // so that it makes it possible to iteratively parse the result
   {
-    (pos: nat) => Fixpoint_(maxPos, underlying, pos)
+    (input: seq<C>) => Fixpoint_(underlying, input)
   }
 
   opaque function Fixpoint_<R(!new)>(
-    maxPos: nat,
-    underlying: (Parser<R>, nat) -> ParseResult<R>,
-    pos: nat
+    underlying: Parser<R> -> Parser<R>,
+    input: seq<C>
   ): (p: ParseResult<R>)
     // Given a function that combines a (recursive) parser and a position to obtain a parse result,
     // returns the parse result associated to recursively applying the function.
     // If partially applied on "underlying" and "size", it would returns the solution to the equation:
     // f = pos => underlying(f, pos)
-    decreases maxPos - pos
+    decreases |input|
   {
     var callback: Parser<R> :=
-      (pos': nat) =>
-        if pos < pos' <= maxPos then
-          Fixpoint_(maxPos, underlying, pos')
-        else if pos' <= pos then
-          PFailure(Recoverable, "No progress", pos', 0)
+      (remaining: seq<C>) =>
+        if |remaining| < |input| then
+          Fixpoint_(underlying, remaining)
+        else if |remaining| == |input| then
+          PFailure(Recoverable, "No progress", remaining)
         else
-          PFailure(Recoverable, "Parsing extended out of selected size", pos', 0);
-    underlying(callback, pos)
+          PFailure(Error, "Fixpoint called with an increasing remaining sequence", remaining);
+    underlying(callback)(input)
   }
-
-  predicate AboutFixpoint_Ensures<R(!new)>(
-    maxPos: nat,
-    underlying: (Parser<R>, nat) -> ParseResult<R>,
-    pos: nat)
-  {
-    var p := Fixpoint_(maxPos, underlying, pos);
-    p.PSuccess? ==> pos + p.deltaPos <= maxPos
-  }
-  lemma AboutFixpoint_<R(!new)>(
-    maxPos: nat,
-    underlying: (Parser<R>, nat) -> ParseResult<R>,
-    pos: nat)
-    requires
-      forall callback: Parser<R>, u: nat
-        | underlying(callback, u).PSuccess?
-        :: u + underlying(callback, u).deltaPos <= maxPos
-    ensures AboutFixpoint_Ensures(maxPos, underlying, pos)
-  {
-    reveal Fixpoint_();
-  }
-  opaque function FixpointMap<R(!new)>(
+  /*opaque function FixpointMap<R(!new)>(
     maxPos: nat,
     underlying: map<string, (string -> Option<Parser<R>>, nat) -> ParseResult<R>>,
     fun: string): Parser<R>
   {
     (pos: nat) => FixpointMap_(maxPos, underlying, fun, pos)
-  }
-
+  }*/
+  datatype RecursiveDef<!R> = RecursiveDef(
+    order: nat, 
+    definition: (string -> Option<Parser<R>>) -> Parser<R>
+  )
   opaque function FixpointMap_<R(!new)>(
-    maxPos: nat,
-    underlying: map<string, (string -> Option<Parser<R>>, nat) -> ParseResult<R>>,
+    underlying: map<string, RecursiveDef<R>>,
     fun: string,
-    pos: nat
+    input: seq<C>
   ): (p: ParseResult<R>)
     // Given a function that combines a (recursive) parser selector and a position to obtain a parse result,
     // returns the parse result associated to recursively applying the function.
     // If partially applied on "underlying" and "fun", it would return the solution f<"fun"> to the equations:
     // f<name> = pos => underlying[fun](f, pos)
-    decreases maxPos - pos, |fun|
+    decreases |input|, if fun in underlying then underlying[fun].order else 0
   {
-    if fun !in underlying then PFailure(Error, "Parser '"+fun+"' not found", pos, 0) else
+    if fun !in underlying then PFailure(Error, "Parser '"+fun+"' not found", input) else
+    var RecursiveDef(orderFun, definitionFun) := underlying[fun];
     var callback: string -> Option<Parser<R>>
       :=
       (fun': string) =>
         if fun' !in underlying.Keys then
-          None
+          Option.None
         else
-          Some(
-           (pos': nat) =>
-             if pos < pos' <= maxPos || (pos' == pos && |fun'| < |fun|) then
-               FixpointMap_(maxPos, underlying, fun', pos')
-             else if pos' == pos then
-               PFailure(Recoverable, "Non progressing recursive call requires that '"+fun'+"' be shorter than '"+fun+"'", pos', 0)
+          var RecursiveDef(orderFun', definitionFun') := underlying[fun'];
+          Option.Some(
+           (remaining: seq<C>) =>
+             if |remaining| < |input| || (|remaining| == |input| && orderFun' < orderFun) then
+               FixpointMap_(underlying, fun', remaining)
+             else if |remaining| == |input| then
+               PFailure(Recoverable, "Non progressing recursive call requires that order of '"
+                 +fun'+"' ("+Printer.natToString(orderFun')+") is lower than the order of '"+fun+"' ("+Printer.natToString(orderFun)+")", remaining)
             else
-               PFailure(Error, "Parser did something unexpected, jump to position " + Printer.natToString(pos'), pos', 0)
+               PFailure(Error, "Parser did not return a suffix of the input", remaining)
           );
-      underlying[fun](callback, pos)
+      definitionFun(callback)(input)
   }
-  predicate AboutFixpointMap_Ensures<R(!new)>(
-    maxPos: nat,
-    underlying: map<string, (string -> Option<Parser<R>>, nat) -> ParseResult<R>>,
-    fun: string,
-    pos: nat) {
-    var p := FixpointMap_(maxPos, underlying, fun, pos);
-    && (p.PSuccess? ==> pos + p.deltaPos <= maxPos)
-    // Also, need to prove that if underlying never fails, then fixpoint never fails as well
-  }
-  
+
+  /*  
   ghost predicate FixMapSpecInnerInner<R(!new)>(
     fun: string, fun': string, functions: set<string>, maxPos: nat, callback: string -> Option<Parser<R>>, u: nat)
   {
@@ -696,7 +498,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
     ensures forall pos: nat | MapSpec(size, underlying, mappingFunc, pos)
             :: p.requires(pos)
   {
-    var p := Bind_(size, underlying, (result: R, pos': nat) requires mappingFunc.requires(result) => Succeed_(size, mappingFunc(result)));
+    var p := Bind__(size, underlying, (result: R, pos': nat) requires mappingFunc.requires(result) => Succeed_(size, mappingFunc(result)));
     assert forall pos: nat | MapSpec(size, underlying, mappingFunc, pos) ::
         p.requires(pos) by {
       forall pos: nat | MapSpec(size, underlying, mappingFunc, pos)
@@ -718,7 +520,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
   {
     reveal Map_();
     reveal Map__();
-    reveal Bind_();
+    reveal Bind__();
     reveal Succeed_();
   }
 
@@ -728,18 +530,18 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
     ensures forall pos: nat | ConcatSpec_(size, left, right, pos)
             :: p.requires(pos)
   {
-    Bind_(size, left, (result: R, pos': nat) requires right.requires(pos') =>
-           Bind_(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))))
+    Bind__(size, left, (result: R, pos': nat) requires right.requires(pos') =>
+           Bind__(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))))
   }
 
   lemma Concat_Concat2<R, U>(size: nat, left: Parser<R>, right: Parser<U>, pos: nat)
     requires ConcatSpec_(size, left, right, pos)
     ensures BindSpec(size, left, (result: R, pos': nat) requires right.requires(pos') =>
-                       Bind_(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))), pos)
+                       Bind__(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))), pos)
     // TODO: Bug to report. Concat_() should not be needed
     ensures Concat_(size, left, right)(pos) == Concat__(size, left, right)(pos)
   {
-    reveal Bind_();
+    reveal Bind__();
     reveal Concat_();
     reveal Concat__();
     reveal Succeed_();
@@ -819,7 +621,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserBuilders {
                           && apply(pos).PSuccess?
                           && apply(pos).pos <= p.apply(pos).pos <= size)
     {
-      B_(size, Bind_(size, apply, (result: R, pos': nat) requires other.requires(result, pos') => other(result, pos').apply))
+      B_(size, Bind__(size, apply, (result: R, pos': nat) requires other.requires(result, pos') => other(result, pos').apply))
     }
 
     opaque function Repeat(init: R, combine: (R, R) -> R): (p: ParserBuilder<R>)
@@ -862,17 +664,17 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserBuilders {
   }
   datatype FixMapParserBuilder<!R(!new)> = FixMapParserBuilder(ghost size: nat, ghost functions: set<string>, underlying: map<string, ParserMapper<R>> := map[])
   {
-    static function Empty(ghost size: nat, ghost functions: set<string>): (b: FixMapParserBuilder<R>) ensures b.Valid() {
+    static function Empty(ghost size: nat, ghost functions: set<string>): (b: FixMapParserBuilder<R>) ensures b.NonCrashing() {
       FixMapParserBuilder(size, functions, map[])
     }
-    ghost predicate Valid() {
+    ghost predicate NonCrashing() {
       forall fun <- underlying :: FixpointMapSpecOnce(fun, underlying[fun], functions, size)
     }
     opaque function Add(name: string, mapper: ParserMapper<R>): (f: FixMapParserBuilder<R>)
-      requires Valid()
+      requires NonCrashing()
       requires name !in underlying
       requires FixpointMapSpecOnce(name, mapper, functions, size)
-      ensures f.Valid()
+      ensures f.NonCrashing()
       ensures f.functions == functions
       ensures f.size == size
       ensures name in f.underlying
@@ -940,7 +742,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
                       && left(pos).pos <= p(pos).pos <= |input|
                       && p(pos) == right(left(pos).result, left(pos).pos)(left(pos).pos))
     {
-      Bind_(|input|, left, right)
+      Bind__(|input|, left, right)
     }
 
     opaque function Epsilon(pos: nat): (pr: ParseResult<()>)
@@ -1294,7 +1096,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
         )
     }
     opaque function FixMapBuilder<R(!new)>(ghost functions: set<string>): (r: FixMapParserBuilder<R>)
-      ensures r.Valid()
+      ensures r.NonCrashing()
       ensures |r.underlying.Keys| == 0
       ensures r.functions == functions
       ensures r.size == |input|
@@ -1480,4 +1282,257 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
   }
   type DigitNat = d: nat | 0 <= d <= 9
   */
+}
+
+abstract module ParserTests refines Parsers {
+  lemma AboutSucceed_<R>(result: R, input: seq<C>)
+    ensures
+      var p := Succeed_(result);
+      && p(input).PSuccess?
+      && p(input).remaining == input
+  { reveal Succeed_(); }
+
+  lemma AboutFail_<R>(message: string, level: FailureLevel, input: seq<C>)
+    ensures
+      var p := Fail_<R>(message, level)(input);
+      && p.PFailure?
+      && p.message == message
+      && p.level == level
+      && p.remaining == input
+  {
+    reveal Fail_();
+  }
+
+  lemma AboutFail_2<R>(message: string, input: seq<C>)
+    ensures
+      var p := Fail_<R>(message)(input);
+      && p.PFailure?
+      && p.message == message
+      && p.level == Recoverable
+      && p.remaining == input
+  {
+    reveal Fail_();
+  }
+
+  lemma AboutBind_<L, R>(
+    left: Parser<L>,
+    right: (L, seq<C>) -> Parser<R>,
+    input: seq<C>
+  )
+    ensures
+      var p := Bind__(left, right)(input);
+      && var leftResult := left(input);
+      && !leftResult.IsFailure()
+      ==> var leftValues := left(input).Extract();
+      && var rightResult := right(leftValues.0, leftValues.1)(leftValues.1);
+      && !rightResult.IsFailure()
+      ==> && !p.IsFailure()
+          && p.remaining == rightResult.remaining
+          && p.result == rightResult.result 
+  {
+    reveal Bind__();
+  }
+
+  lemma AboutMap_<R, U>(underlying: Parser<R>, mappingFunc: R -> U, input: seq<C>)
+    ensures var p := Map_(underlying, mappingFunc);
+      && (underlying(input).PSuccess? <==> p(input).PSuccess?)
+      && (p(input).PSuccess? ==>
+            && p(input).remaining == underlying(input).remaining
+            && p(input).result == mappingFunc(underlying(input).result))
+  {
+    reveal Map_();
+    reveal Bind__();
+    reveal Succeed_();
+  }
+
+  function BindMapCallback<R, U>(mappingFunc: R -> U):
+     (R, seq<C>) -> Parser<U>
+   {
+    (result: R, remaining: seq<C>) => Succeed_(mappingFunc(result))
+  }
+
+  lemma AboutMap_Bind_<R, U>(underlying: Parser<R>, mappingFunc: R -> U, input: seq<C>)
+    ensures Map_(underlying, mappingFunc)(input) 
+        == Bind__<R, U>(underlying, BindMapCallback(mappingFunc))(input)
+  {
+    reveal Map_();
+    reveal Bind__();
+    reveal Succeed_();
+  }
+
+  lemma AboutConcat_<L, R>(
+    left: Parser<L>,
+    right: Parser<R>,
+    input: seq<C>)
+    ensures var p := Concat_(left, right);
+            && (p(input).PSuccess? ==>
+                && left(input).PSuccess?
+                && p(input).result.0 == left(input).result
+                && var input2 := left(input).remaining;
+                && right(input2).PSuccess?
+                && p(input).result.1 == right(input2).result
+                && p(input).remaining == right(input2).remaining)
+  {
+    reveal Concat_();
+  }
+
+  function BindConcatCallback<L, R>(right: Parser<R>): (L, seq<C>) -> Parser<(L, R)>
+  {
+    (l: L, remaining: seq<C>) =>
+      Map_(right, (r: R) => (l, r))
+  }
+  
+  lemma AboutConcat_Bind_<L, R>(
+    left: Parser<L>,
+    right: Parser<R>,
+    input: seq<C>)
+    ensures Concat_(left, right)(input) == Bind__(left, BindConcatCallback(right))(input)
+  {
+    reveal Concat_();
+    reveal Bind__();
+    reveal Succeed_();
+    reveal Map_();
+  }
+
+  lemma AboutConcatR_<L, R>(
+    left: Parser<L>,
+    right: Parser<R>,
+    input: seq<C>)
+    ensures var p := ConcatR_(left, right);
+            && (p(input).PSuccess? ==>
+                && left(input).PSuccess?
+                && var input2 := left(input).remaining;
+                && right(input2).PSuccess?
+                && p(input).result == right(input2).result
+                && p(input).remaining == right(input2).remaining)
+  {
+    reveal ConcatR_();
+  }
+
+  function first<L, R>(): ((L, R)) -> L {
+    (lr: (L, R)) => lr.0
+  }
+  function second<L, R>(): ((L, R)) -> R {
+    (lr: (L, R)) => lr.1
+  }
+  lemma AboutConcat_ConcatR_<L, R>(
+    left: Parser<L>,
+    right: Parser<R>,
+    input: seq<C>)
+    ensures Map_(Concat_(left, right), second())(input) == ConcatR_(left, right)(input)
+  {
+    reveal Concat_();
+    reveal Succeed_();
+    reveal ConcatR_();
+    reveal Map_();
+  }
+
+
+  lemma AboutConcatL_<L, R>(
+    left: Parser<L>,
+    right: Parser<R>,
+    input: seq<C>)
+    ensures var p := ConcatL_(left, right);
+            && (p(input).PSuccess? ==>
+                && left(input).PSuccess?
+                && var input2 := left(input).remaining;
+                && right(input2).PSuccess?
+                && p(input).result == left(input).result
+                && p(input).remaining == right(input2).remaining)
+  {
+    reveal ConcatL_();
+  }
+  lemma AboutConcat_ConcatL_<L, R>(
+    left: Parser<L>,
+    right: Parser<R>,
+    input: seq<C>)
+    ensures Map_(Concat_(left, right), first())(input) == ConcatL_(left, right)(input)
+  {
+    reveal Concat_();
+    reveal Succeed_();
+    reveal ConcatL_();
+    reveal Map_();
+  }
+
+  lemma AboutRepeat_<R>(
+    underlying: Parser<R>,
+    acc: seq<R>,
+    input: seq<C>
+  )
+  // If underlying never throws a fatal error,
+  // returns a remaining that is a suffix of the input,
+  // then Repeat with always return a success
+    decreases |input|
+    requires NonCrashing(underlying)
+    ensures Repeat_(underlying, acc, input).PSuccess?
+  {
+    reveal Repeat_(), NonCrashing();
+    assert IsRemaining(input, input[0..]);
+  }
+
+  predicate AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures<R>(
+    underlying: Parser<R>,
+    acc: seq<R>,
+    input: seq<C>
+  )
+  {
+    var result := Repeat_(underlying, acc, input);
+    && result.PSuccess?
+    && |acc| <= |result.result|
+    && (underlying(input).PSuccess? && |underlying(input).remaining| < |input|
+    ==> 
+    (|acc| < |result.result| && |result.remaining| < |input|))
+  }
+
+  lemma AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnce<R>(
+    underlying: Parser<R>,
+    acc: seq<R>,
+    input: seq<C>
+  ) 
+    decreases |input|
+    requires NonCrashing(underlying)
+    ensures 
+      AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures
+        (underlying, acc, input)
+  {
+    reveal Repeat_(), NonCrashing();
+    var _ := input[0..];
+    match underlying(input)
+    case PSuccess(result, remaining) =>
+      if |remaining| < |input| {
+        AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnce(underlying, acc + [result], remaining);
+      }
+    case _ =>
+  }
+
+  predicate AboutFixpoint_Ensures<R(!new)>(
+    underlying: Parser<R> -> Parser<R>,
+    input: seq<C>)
+  {
+    var p := Fixpoint_(underlying, input);
+    p.PSuccess? ==> IsRemaining(input, p.remaining)
+  }
+
+  lemma AboutFixpoint_<R(!new)>(
+    underlying: Parser<R> -> Parser<R>,
+    input: seq<C>)
+    requires
+      forall callback: Parser<R>, u: seq<C>
+        | underlying(callback)(u).PSuccess?
+        :: IsRemaining(input, underlying(callback)(input).remaining)
+    ensures AboutFixpoint_Ensures(underlying, input)
+  {
+    reveal Fixpoint_();
+  }
+
+
+  predicate AboutFixpointMap_Ensures<R(!new)>(
+    underlying: map<string, RecursiveDef<R>>,
+    fun: string,
+    input: seq<C>
+  ) {
+    var p := FixpointMap_(underlying, fun, input);
+    && (p.PSuccess? ==> IsRemaining(input, p.remaining))
+  }
+
 }
