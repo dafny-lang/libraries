@@ -7,7 +7,7 @@ abstract module Parsers {
   import Printer
   type Option<T> = Wrappers.Option<T>
 
-  type C(!new) // The character of the sequence being parsed
+  type C(!new, ==) // The character of the sequence being parsed
 
   datatype Either<+L, +R> =
     // Type to return when using the Or parser
@@ -326,67 +326,62 @@ abstract module Parsers {
     reveal Map_();
   }
 
-  /*
-
   opaque function Repeat<R>(
-    maxPos: nat,
     underlying: Parser<R>
   ): Parser<seq<R>> {
-    (pos: nat) => Repeat_(maxPos, underlying, [], pos, 0, pos)
+    (input: seq<C>) => Repeat_(underlying, [], input)
   }
 
   opaque function {:tailrecursion true} Repeat_<R>(
-    maxPos: nat,
     underlying: Parser<R>,
     acc: seq<R>,
-    pos: nat,
-    deltaPos: nat,
-    ghost initPos: nat // it's the invariant
+    input: seq<C>
   ): (p: ParseResult<seq<R>>)
-    requires deltaPos == pos - initPos
-    decreases if pos <= maxPos then 1 + maxPos - pos else 0
-  // Alternative tail-recursive version of Repeat that does not return a parser, but directly the ParseResult
+    decreases |input|
+  // Repeat the underlying parser over the input until a recoverable failure happens
+  // and returns the accumulated results
   {
-    if pos > maxPos then PFailure(Error, "Cannot parse after the provide maximum position", pos, deltaPos) else
-    match underlying(pos)
-    case PSuccess(dpos1, head) =>
-      if dpos1 == 0 then PSuccess(deltaPos, acc + [head]) else
-      Repeat_(maxPos, underlying, acc + [head],
-               pos + dpos1, deltaPos + dpos1, initPos)
-    case PFailure(Error, message, pos', deltaPos') =>
-      PFailure(Error, message, pos', deltaPos')
-    case PFailure(Recoverable, message, pos', deltaPos') =>
-      PSuccess(deltaPos, acc)
+    match underlying(input)
+    case PSuccess(result, remaining) =>
+      if |remaining| >= |input| then PSuccess(acc + [result], input) else
+      Repeat_(underlying, acc + [result], remaining)
+    case PFailure(Error, message, remaining) =>
+      PFailure(Error, message, remaining)
+    case PFailure(Recoverable, message, remaining) =>
+      PSuccess(acc, input)
   }
 
-  predicate ParserStaysWithin<R>(underlying: Parser<R>, maxPos: nat) {
-    forall pos: nat | 0 <= pos <= maxPos ::
-       && (underlying(pos).PFailure? ==> underlying(pos).level == Recoverable)
-       && (underlying(pos).PSuccess? ==>
-             pos + underlying(pos).deltaPos <= maxPos)
+  predicate IsRemaining(input: seq<C>, remaining: seq<C>)
+  {
+    && |remaining| <= |input|
+    && input[|input|-|remaining|..] == remaining
+  }
+
+  predicate ParserStaysWithin<R>(underlying: Parser<R>, input: seq<C>) {
+    forall i | 0 <= i <= |input| ::
+       && var remaining := input[i..];
+       && (assert IsRemaining(input, remaining);
+           underlying(remaining).PFailure? ==> underlying(remaining).level == Recoverable)
+       && (underlying(remaining).PSuccess? ==>
+             IsRemaining(remaining, underlying(remaining).remaining))
   }
 
   lemma AboutRepeat_<R>(
-    maxPos: nat,
     underlying: Parser<R>,
     acc: seq<R>,
-    pos: nat,
-    deltaPos: nat,
-    initPos: nat
+    input: seq<C>
   )
-    requires deltaPos == pos - initPos
   // If underlying never throws a fatal error,
-  // returns a delta position that stays within the limit of maxPos,
-  // then Repeat with alwyas return a success, provided it's called with an adequate pos
-    decreases if pos <= maxPos then 1 + maxPos - pos else 0
-    requires ParserStaysWithin(underlying, maxPos)
-    ensures var p := Repeat_(maxPos, underlying, acc, pos, deltaPos, initPos);
-            && (pos <= maxPos ==> p.PSuccess?)
-            && (p.PFailure? ==> p.level == Error && pos > maxPos)
+  // returns a remaining that is a suffix of the input,
+  // then Repeat with always return a success
+    decreases |input|
+    requires ParserStaysWithin(underlying, input)
+    ensures Repeat_(underlying, acc, input).PSuccess?
   {
     reveal Repeat_();
+    var _ := input[0..];
   }
-
+/*
   predicate AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures<R>(
     maxPos: nat,
     underlying: Parser<R>,
