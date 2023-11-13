@@ -342,6 +342,16 @@ abstract module Parsers {
       succeed(input)
   }
 
+  opaque function Maybe<R>(underlying: Parser<R>): Parser<Option<R>>
+  {
+    (input: seq<C>) =>
+      var u := underlying(input);
+      if u.IsFatalFailure() then u.PropagateFailure()
+      else
+        if u.PSuccess? then u.MapResult(result => Option.Some(result))
+        else PSuccess(Option.None, input)
+  }
+
   opaque function Concat_<L, R>(
     left: Parser<L>,
     right: Parser<R>
@@ -855,8 +865,6 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
   // ConcatR(l, r)    if l and r succeed consecutively, returns the value of r
   // Or(l, r)         Returns the first of l or r which succeeds
   // EitherP(l, r)    Returns the first of l or r which succeeds, wrapped in Either type0
-  // Const("string")  fails with Fatal if "string" is not at the given position.
-  // Const?("string") fails with Recoverable if "string" is not at the given position.
   // Rep(parser)      repeats the parser as much as possible and returns the sequence of results
   // Fix((result, pos) => parseResult)      returns a parser that recursively applies the provided function when needed
   // FixMap((result, pos) => parseResult)   Same as fix but can provide a mapping from string to functions instead of a single function
@@ -1659,11 +1667,40 @@ module StringParsers refines ParserTests {
       else PFailure(Fatal, FailureData("Expected '"+[c]+"'", input, Option.None))
   }
 
-  opaque function Char?(c: char): (p: Parser<char>)
+  opaque function Char?(expectedChar: char): (p: Parser<char>)
+  {
+    CharTest?((c: char) => c == expectedChar, [expectedChar])
+  }
+
+  opaque function CharTest?(test: char -> bool, name: string): (p: Parser<char>)
   {
     (input: string) =>
-      if 0 < |input| && input[0] == c then PSuccess(c, input[1..])
-      else PFailure(Recoverable, FailureData("Expected '"+[c]+"'", input, Option.None))
+      if 0 < |input| && test(input[0]) then PSuccess(input[0], input[1..])
+      else PFailure(Recoverable,
+        FailureData("Expected a "+name+" but got "
+          + (if 0 < |input| then "'"+[input[0]]+"'" else "end of string")
+        , input, Option.None))
+  }
+
+  opaque function Digit(): (p: Parser<char>)
+  {
+    CharTest?(c => c in "0123456789", "digit")
+  }
+
+  opaque function Nat(): (p: Parser<nat>)
+  {
+    Map<string, nat>(Repeat(Digit()),
+      result =>
+        if Printer.IsStringNat(result) then // Should always be true
+          Printer.stringToNat(result)
+        else 0)
+  }
+
+  opaque function Int(): (p: Parser<int>)
+  {
+    Bind(Maybe(Char?('-')),
+      (minusSign: Option<char>) =>
+        Map<nat, int>(Nat(), (result: nat) => if minusSign.Some? then -result else result))
   }
 
   opaque function Const(expected: string): (p: Parser<string>)
@@ -1679,4 +1716,27 @@ module StringParsers refines ParserTests {
       if |expected| <= |input| && input[0..|expected|] == expected then PSuccess(expected, input[|expected|..])
       else PFailure(Recoverable, FailureData("Expected '"+expected+"'", input, Option.None))
   }
+
+
+  function repeat(str: string, n: nat): (r: string)
+    ensures |r| == |str| * n
+  {
+    if n == 0 then ""
+    else str + repeat(str, n-1)
+  }
+  
+  // TODO: Mention the error level, the line number, the column number
+  // TODO: Extract only the line of interest
+  method PrintFailure<R>(input: string, result: ParseResult<R>)
+    requires result.PFailure?
+  {
+    var pos: int := |input| - |result.data.remaining|; // Need the parser to be Valid()
+    if pos < 0 { // Could be proved false if parser is Valid()
+      pos := 0;
+    }
+    print input, "\n";
+    print repeat(" ", pos), "^","\n";
+    print result.data.message;
+  }
+
 }

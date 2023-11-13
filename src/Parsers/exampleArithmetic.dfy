@@ -6,7 +6,7 @@ module ArithmeticParser {
 
   datatype Expression =
     | Binary(op: string, left: Expression, right: Expression)
-    | Number(x: nat)
+    | Number(x: int)
   {
     static function BinaryBuilder(op: string): (Expression, Expression) -> Expression
     {
@@ -20,7 +20,7 @@ module ArithmeticParser {
       requires level <= 2
     {
       match this
-      case Number(x) => Printer.natToString(x)
+      case Number(x) => (if x < 0 then "-" else "") + Printer.natToString(if x < 0 then -x else x)
       case Binary(op, left, right) => 
         (match level case 0 => "(" case 1 => "[" case 2 => "{")
         + left.ToString((level + 1)%3) + op + right.ToString((level + 1) % 3)
@@ -29,15 +29,7 @@ module ArithmeticParser {
   }
 
   const parser: Parser<Expression>
-    := Succeed<Expression>(Number(1))
-  
-  function repeat(str: string, n: nat): (r: string)
-    ensures |r| == |str| * n
-  {
-    if n == 0 then ""
-    else str + repeat(str, n-1)
-  }
-
+    := Map(Int(), (i: int) => Number(i))
 
   method Main(args: seq<string>) {
     if |args| <= 1 {
@@ -51,10 +43,8 @@ module ArithmeticParser {
       match parser(input) {
         case PSuccess(result, _) =>
           print "result:", result.ToString(0), "\n";
-        case PFailure(level, failureData) => print input, "\n";
-          var pos: nat := |input| - |failureData.remaining|; // Need the parser to be Valid()
-          print repeat(" ", pos), "^","\n";
-        print failureData.message;
+        case failure =>
+          PrintFailure(input, failure);
       }
       print "\n";
     }
