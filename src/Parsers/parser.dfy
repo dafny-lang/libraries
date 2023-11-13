@@ -15,11 +15,11 @@ abstract module Parsers {
     
 
   datatype FailureLevel =
-    // PFailure level for parse results. An Error will be propagated to the top
+    // PFailure level for parse results. A Fatal error will be propagated to the top
     // while a Recoverable can be caught by a disjunctive pattern.
     // For example, if the parser Const?() fails, then it returns a Recoverable,
     // but the parser Const() will return an error.
-    Error | Recoverable
+    Fatal | Recoverable
 
   datatype ParseResult<+R> =
       // ParseResult is a failure-compatible type
@@ -30,6 +30,16 @@ abstract module Parsers {
   {
     predicate IsFailure() {
       PFailure?
+    }
+
+    predicate IsFatalFailure() {
+      PFailure? && level == Fatal
+    }
+
+    predicate IsFatal()
+      requires IsFailure()
+    {
+      level == Fatal
     }
 
     function PropagateFailure<U>(): ParseResult<U>
@@ -51,7 +61,15 @@ abstract module Parsers {
       case PFailure(level, message, remaining) =>
         PFailure(level, message, remaining)
     }
+
+    function IfRecoverableFailureNoProgress(input: seq<C>, right: Parser<R>): ParseResult<R> {
+      if PFailure? && level == Recoverable && !Committed(input, remaining) then
+        right(input)
+      else
+        this
+    }
   }
+
   type Parser<+R> = seq<C> -> ParseResult<R>
   // A parser is a total function from a position to a parse result
   // Because it returns a delta pos, it cannot return a position negative from the origing
@@ -60,6 +78,10 @@ abstract module Parsers {
   type ParserSelector<!R> = string -> Option<Parser<R>>
   // A parser selector is a function that, given a name that exists,
   // returns a parser associated to this name
+
+  predicate Committed(input: seq<C>, remaining: seq<C>) {
+    input != remaining
+  }
 
   predicate IsRemaining(input: seq<C>, remaining: seq<C>)
     // Remaining is a suffix of the input
@@ -96,43 +118,47 @@ abstract module Parsers {
     ensures forall result: R :: NonCrashing(Succeed_(result))
   { reveal NonCrashing(), Succeed_();  }
 
-  opaque function Epsilon_(): (p: Parser<()>)
+  opaque function Epsilon(): (p: Parser<()>)
   {
     Succeed_(())
   }
 
   lemma Epsilon_NonCrashing()
-    ensures NonCrashing(Epsilon_())
-  { reveal NonCrashing(), Epsilon_(); Succeed_NonCrashing(()); }
+    ensures NonCrashing(Epsilon())
+  { reveal NonCrashing(), Epsilon(); Succeed_NonCrashing(()); }
 
   lemma AboutEpsilon_(input: seq<C>)
     ensures
-      var p := Epsilon_();
+      var p := Epsilon();
       && p(input).PSuccess?
       && p(input).remaining == input
   {
-    reveal Epsilon_();
+    reveal Epsilon();
     reveal Succeed_();
   }
 
-  opaque function Fail_<R>(message: string, level: FailureLevel := Recoverable): Parser<R>
+  opaque function Fail<R>(message: string, level: FailureLevel := Recoverable): Parser<R>
     // A parser that does not consume any input and returns the given failure
   {
     (input: seq<C>) => PFailure(level, message, input)
   }
 
   lemma Fail_NonCrashing<R>(message: string)
-    ensures NonCrashing<R>(Fail_(message, Recoverable))
-  { reveal Fail_(); reveal NonCrashing(); }
+    ensures NonCrashing<R>(Fail(message, Recoverable))
+  { reveal Fail(); reveal NonCrashing(); }
 
   lemma Fail_NonCrashingAuto<R>()
-    ensures forall message :: NonCrashing<R>(Fail_(message, Recoverable))
-  { reveal Fail_(); reveal NonCrashing(); }
+    ensures forall message :: NonCrashing<R>(Fail(message, Recoverable))
+  { reveal Fail(); reveal NonCrashing(); }
 
-  opaque function Bind_<L, R>(
+  opaque function Bind<L, R>(
     left: Parser<L>,
     right: L -> Parser<R>
   ) : (p: Parser<R>)
+    // Fails if the left parser fails.
+    // If the left parser succeeds, provides its result and its remaining
+    // to the right parser generator and returns its result applied to the remaining
+    // For a more general version, look at BindSucceeds and Bind___
   {
     (input: seq<C>)
     =>
@@ -140,16 +166,31 @@ abstract module Parsers {
       right(leftResult)(remaining)
   }
 
-  opaque function Bind__<L, R>(
+  opaque function BindSucceeds<L, R>(
     left: Parser<L>,
     right: (L, seq<C>) -> Parser<R>
   ) : (p: Parser<R>)
-    // Useful for recursive binds
+    // Fails if the left parser fails.
+    // If the left parser succeeds, provides its result and its remaining
+    // to the right parser generator and returns its result applied to the remaining
+    // For a more general version, look at BindResult
   {
     (input: seq<C>)
     =>
       var (leftResult, remaining) :- left(input);
       right(leftResult, remaining)(remaining)
+  }
+
+  opaque function BindResult<L, R>(
+    left: Parser<L>,
+    right: (ParseResult<L>, seq<C>) -> Parser<R>
+  ) : (p: Parser<R>)
+    // Given a left parser and a parser generator based on the output
+    // of the left parser, returns the result of the second parser
+  {
+    (input: seq<C>)
+    =>
+      right(left(input), input)(input)
   }
 
   ghost predicate BindRightNonCrashing<L(!new), R>(right: (L, seq<C>) -> Parser<R>) {
@@ -162,10 +203,10 @@ abstract module Parsers {
   ) 
     requires NonCrashing(left)
     requires BindRightNonCrashing(right)
-    ensures NonCrashing(Bind__(left, right))
+    ensures NonCrashing(BindSucceeds(left, right))
   {
-    reveal Bind__(), NonCrashing();
-    var p := Bind__(left, right);
+    reveal BindSucceeds(), NonCrashing();
+    var p := BindSucceeds(left, right);
     forall input: seq<C> ensures
       && (p(input).PFailure? ==> p(input).level == Recoverable)
       && IsRemaining(input, p(input).remaining)
@@ -178,7 +219,7 @@ abstract module Parsers {
     requires NonCrashing(left)
   {
     forall right: (L, seq<C>) -> Parser<R> | BindRightNonCrashing(right) ::
-      NonCrashing(Bind__(left, right))
+      NonCrashing(BindSucceeds(left, right))
   }
 
   lemma Bind_NonCrashingAuto<L(!new), R(!new)>() 
@@ -188,13 +229,13 @@ abstract module Parsers {
     forall left: Parser<L> | NonCrashing(left),
            right: (L, seq<C>) -> Parser<R> | BindRightNonCrashing(right)
     ensures
-      NonCrashing(Bind__(left, right))
+      NonCrashing(BindSucceeds(left, right))
     {
       Bind_NonCrashing(left, right);
     }
   }
 
-  opaque function Map_<R, U>(underlying: Parser<R>, mappingFunc: R -> U)
+  opaque function Map<R, U>(underlying: Parser<R>, mappingFunc: R -> U)
     : (p: Parser<U>)
     // A parser combinator that makes it possible to transform the result of a parser in another one
     // The mapping function can be partial
@@ -205,6 +246,70 @@ abstract module Parsers {
       var (result, remaining) :- underlying(input);
       var u := mappingFunc(result);
       PSuccess(u, remaining)
+  }
+
+  opaque function Not<R>(underlying: Parser<R>): Parser<()>
+    // Returns a parser that succeeds if the underlying
+  {
+    (input: seq<C>) =>
+      var l := underlying(input);
+      if l.IsFailure() then
+        if l.IsFatal() then l.PropagateFailure()
+        else PSuccess((), input)
+      else PFailure(Recoverable, "Not failed", input)
+  }
+
+  opaque function And<L, R>(
+    left: Parser<L>,
+    right: Parser<R>
+  ) : (p: Parser<(L, R)>)
+    // Make the two parsers parse the same string, and return
+    // a pair of the two results, with the remaining of the right
+  {
+    (input: seq<C>) => 
+      var (l, remainingLeft) :- left(input);
+      var (r, remainingRight) :- right(input);
+      PSuccess((l, r), remainingRight)
+  }
+  
+  opaque function Or<L, R>(
+    left: Parser<L>,
+    right: Parser<R>
+  ) : (p: Parser<Either<L, R>>)
+    // left parses the string. If left succeeds, returns
+    // if left fails, two cases
+    // - If the error is recoverable and the parser did not consume input,
+    //   then return what right returns
+    // - Otherwise return the first error
+  {
+    (input: seq<C>) =>
+      var p := Map(left, l => Left(l))(input);
+      p.IfRecoverableFailureNoProgress(input,
+         Map(right, r => Right(r)))
+  }
+
+  opaque function Lookahead<R>(underlying: Parser<R>): (p: Parser<R>)
+    // If the underlying parser succeeds, returns its result without committing the input
+    // if the underlying parser fails,
+    // - If the failure is fatal, returns it as-it
+    // - If the failure is recoverable, returns it without comitting the input
+  {
+    (input: seq<C>) =>
+      var p := underlying(input);
+      if p.IsFatalFailure() then p
+      else p.(remaining := input)
+  }
+
+  opaque function If<L, R>(
+    condition: Parser<L>,
+    succeed: Parser<R>
+  ) : (p: Parser<R>)
+    // If the condifition fails, returns a non-committing failure
+    // Suitable to use in Or parsers
+  {
+    (input: seq<C>) =>
+      var (p, remaining) :- Lookahead(condition)(input);
+      succeed(input)
   }
 
   opaque function Concat_<L, R>(
@@ -218,6 +323,23 @@ abstract module Parsers {
       var (l, remaining) :- left(input);
       var (r, remaining2) :- right(remaining);
       PSuccess((l, r), remaining2)
+  }
+
+  opaque function ConcatLeftNonCommitting<L, R>(
+    left: Parser<L>,
+    right: Parser<R>
+  ) : (p: Parser<(L, R)>)
+    // Makes it possible to concatenate two consecutive parsers and return the pair of the results
+  {
+    (input: seq<C>)
+    =>
+      var lResult := left(input);
+      if lResult.PFailure? && lResult.level == Recoverable then
+        PFailure(Recoverable, lResult.message, input)
+      else
+        var (l, remaining) :- left(input);
+        var (r, remaining2) :- right(remaining);
+        PSuccess((l, r), remaining2)
   }
 
   opaque function ConcatR_<L, R>(
@@ -265,8 +387,8 @@ abstract module Parsers {
     case PSuccess(result, remaining) =>
       if |remaining| >= |input| then PSuccess(acc + [result], input) else
       Repeat_(underlying, acc + [result], remaining)
-    case PFailure(Error, message, remaining) =>
-      PFailure(Error, message, remaining)
+    case PFailure(Fatal, message, remaining) =>
+      PFailure(Fatal, message, remaining)
     case PFailure(Recoverable, message, remaining) =>
       PSuccess(acc, input)
   }
@@ -298,19 +420,19 @@ abstract module Parsers {
         else if |remaining| == |input| then
           PFailure(Recoverable, "No progress", remaining)
         else
-          PFailure(Error, "Fixpoint called with an increasing remaining sequence", remaining);
+          PFailure(Fatal, "Fixpoint called with an increasing remaining sequence", remaining);
     underlying(callback)(input)
   }
   /*opaque function FixpointMap<R(!new)>(
     maxPos: nat,
-    underlying: map<string, (string -> Option<Parser<R>>, nat) -> ParseResult<R>>,
+    underlying: map<string, (ParserSelector<R>, nat) -> ParseResult<R>>,
     fun: string): Parser<R>
   {
     (pos: nat) => FixpointMap_(maxPos, underlying, fun, pos)
   }*/
   datatype RecursiveDef<!R> = RecursiveDef(
     order: nat, 
-    definition: (string -> Option<Parser<R>>) -> Parser<R>
+    definition: (ParserSelector<R>) -> Parser<R>
   )
   opaque function FixpointMap_<R(!new)>(
     underlying: map<string, RecursiveDef<R>>,
@@ -323,9 +445,9 @@ abstract module Parsers {
     // f<name> = pos => underlying[fun](f, pos)
     decreases |input|, if fun in underlying then underlying[fun].order else 0
   {
-    if fun !in underlying then PFailure(Error, "Parser '"+fun+"' not found", input) else
+    if fun !in underlying then PFailure(Fatal, "Parser '"+fun+"' not found", input) else
     var RecursiveDef(orderFun, definitionFun) := underlying[fun];
-    var callback: string -> Option<Parser<R>>
+    var callback: ParserSelector<R>
       :=
       (fun': string) =>
         if fun' !in underlying.Keys then
@@ -340,14 +462,14 @@ abstract module Parsers {
                PFailure(Recoverable, "Non progressing recursive call requires that order of '"
                  +fun'+"' ("+Printer.natToString(orderFun')+") is lower than the order of '"+fun+"' ("+Printer.natToString(orderFun)+")", remaining)
             else
-               PFailure(Error, "Parser did not return a suffix of the input", remaining)
+               PFailure(Fatal, "Parser did not return a suffix of the input", remaining)
           );
       definitionFun(callback)(input)
   }
 
   /*  
   ghost predicate FixMapSpecInnerInner<R(!new)>(
-    fun: string, fun': string, functions: set<string>, maxPos: nat, callback: string -> Option<Parser<R>>, u: nat)
+    fun: string, fun': string, functions: set<string>, maxPos: nat, callback: ParserSelector<R>, u: nat)
   {
     forall u': nat | u <  u' <= maxPos || (u == u' && |fun'| < |fun|) ::
       && callback(fun').Some?
@@ -355,7 +477,7 @@ abstract module Parsers {
       && (x.PSuccess? ==> u' + x.deltaPos <= maxPos)
   }
   
-  ghost predicate FixMapSpecInner<R(!new)>(fun: string, functions: set<string>, maxPos: nat, callback: string -> Option<Parser<R>>, u: nat)
+  ghost predicate FixMapSpecInner<R(!new)>(fun: string, functions: set<string>, maxPos: nat, callback: ParserSelector<R>, u: nat)
     // Specification for FixpointMap.
     // Ensures that, for any other function, if this function is in the set of admissible `functions`,
     // then callback should not only accept it, but then accept any position at a second argument if
@@ -377,7 +499,7 @@ abstract module Parsers {
 
   lemma AboutFixpointMap_<R(!new)>(
     maxPos: nat,
-    underlying: map<string, (string -> Option<Parser<R>>, nat) -> ParseResult<R>>,
+    underlying: map<string, (ParserSelector<R>, nat) -> ParseResult<R>>,
     fun: string,
     pos: nat
   )
@@ -391,7 +513,7 @@ abstract module Parsers {
     reveal FixpointMap_();
     var p := FixpointMap_(maxPos, underlying, fun, pos);
 
-    var callback: string -> Option<Parser<R>>
+    var callback: ParserSelector<R>
       :=
       (fun': string) =>
         if fun' !in underlying.Keys then
@@ -404,7 +526,7 @@ abstract module Parsers {
              else if pos' == pos then
                PFailure(Recoverable, "Non progressing recursive call requires that '"+fun'+"' be shorter than '"+fun+"'", pos', 0)
             else
-               PFailure(Error, "Parser did something unexpected, jump to position " + Printer.natToString(pos'), pos', 0)
+               PFailure(Fatal, "Parser did something unexpected, jump to position " + Printer.natToString(pos'), pos', 0)
           );
     if fun in underlying {
       assert {:only} FixMapSpecInner(fun, underlying.Keys, maxPos, callback, pos) by {
@@ -455,7 +577,7 @@ abstract module Parsers {
     =>
       match left(pos)
       case PFailure(Recoverable, message, pos') => right(pos)
-      case PFailure(Error, message, pos') => PFailure(Error, message, pos')
+      case PFailure(Fatal, message, pos') => PFailure(Fatal, message, pos')
       case PSuccess(pos, l) => PSuccess(pos, l)
   }
 
@@ -483,7 +605,7 @@ abstract module Parsers {
     =>
       match left(pos)
       case PFailure(Recoverable, message, pos') => right(pos).MapResult(r => Right(r))
-      case PFailure(Error, message, pos') => PFailure(Error, message, pos')
+      case PFailure(Fatal, message, pos') => PFailure(Fatal, message, pos')
       case PSuccess(pos, l) => PSuccess(pos, Left(l))
   }
 }
@@ -498,7 +620,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
     ensures forall pos: nat | MapSpec(size, underlying, mappingFunc, pos)
             :: p.requires(pos)
   {
-    var p := Bind__(size, underlying, (result: R, pos': nat) requires mappingFunc.requires(result) => Succeed_(size, mappingFunc(result)));
+    var p := BindSucceeds(size, underlying, (result: R, pos': nat) requires mappingFunc.requires(result) => Succeed_(size, mappingFunc(result)));
     assert forall pos: nat | MapSpec(size, underlying, mappingFunc, pos) ::
         p.requires(pos) by {
       forall pos: nat | MapSpec(size, underlying, mappingFunc, pos)
@@ -516,11 +638,11 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
   lemma Map_Map2<R, U>(size: nat, underlying: Parser<R>, mappingFunc: R --> U, pos: nat)
     requires MapSpec(size, underlying, mappingFunc, pos)
     ensures
-      && Map__<R, U>(size, underlying, mappingFunc)(pos) == Map_<R, U>(size, underlying, mappingFunc)(pos)
+      && Map__<R, U>(size, underlying, mappingFunc)(pos) == Map<R, U>(size, underlying, mappingFunc)(pos)
   {
-    reveal Map_();
+    reveal Map();
     reveal Map__();
-    reveal Bind__();
+    reveal BindSucceeds();
     reveal Succeed_();
   }
 
@@ -530,18 +652,18 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
     ensures forall pos: nat | ConcatSpec_(size, left, right, pos)
             :: p.requires(pos)
   {
-    Bind__(size, left, (result: R, pos': nat) requires right.requires(pos') =>
-           Bind__(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))))
+    BindSucceeds(size, left, (result: R, pos': nat) requires right.requires(pos') =>
+           BindSucceeds(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))))
   }
 
   lemma Concat_Concat2<R, U>(size: nat, left: Parser<R>, right: Parser<U>, pos: nat)
     requires ConcatSpec_(size, left, right, pos)
     ensures BindSpec(size, left, (result: R, pos': nat) requires right.requires(pos') =>
-                       Bind__(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))), pos)
+                       BindSucceeds(size, right, (u: U, pos'': nat) => Succeed_(size, (result, u))), pos)
     // TODO: Bug to report. Concat_() should not be needed
     ensures Concat_(size, left, right)(pos) == Concat__(size, left, right)(pos)
   {
-    reveal Bind__();
+    reveal BindSucceeds();
     reveal Concat_();
     reveal Concat__();
     reveal Succeed_();
@@ -598,7 +720,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserBuilders {
               :: p.apply.requires(pos)
                  && (p.apply(pos).PSuccess? ==> pos <= p.apply(pos).pos <= size)
     {
-      B_(size, Map_(size, apply, mappingFunc))
+      B_(size, Map(size, apply, mappingFunc))
     }
     opaque function O(other: ParserBuilder<R>): (p: ParserBuilder<R>)
       requires size == other.size
@@ -621,7 +743,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserBuilders {
                           && apply(pos).PSuccess?
                           && apply(pos).pos <= p.apply(pos).pos <= size)
     {
-      B_(size, Bind__(size, apply, (result: R, pos': nat) requires other.requires(result, pos') => other(result, pos').apply))
+      B_(size, BindSucceeds(size, apply, (result: R, pos': nat) requires other.requires(result, pos') => other(result, pos').apply))
     }
 
     opaque function Repeat(init: R, combine: (R, R) -> R): (p: ParserBuilder<R>)
@@ -703,20 +825,20 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
   // ConcatR(l, r)    if l and r succeed consecutively, returns the value of r
   // Or(l, r)         Returns the first of l or r which succeeds
   // EitherP(l, r)    Returns the first of l or r which succeeds, wrapped in Either type
-  // Char('c')        fails with Error if 'c' is not at the given position.
+  // Char('c')        fails with Fatal if 'c' is not at the given position.
   // Char?('c')       fails with Recoverable if 'c' is not at the given position.
-  // Const("string")  fails with Error if "string" is not at the given position.
+  // Const("string")  fails with Fatal if "string" is not at the given position.
   // Const?("string") fails with Recoverable if "string" is not at the given position.
   // Rep(parser)      repeats the parser as much as possible and returns the sequence of results
   // Fix((result, pos) => parseResult)      returns a parser that recursively applies the provided function when needed
   // FixMap((result, pos) => parseResult)   Same as fix but can provide a mapping from string to functions instead of a single function
-  // EOS              Succeeds if we reached the end of the string, fails with Error otherwise
+  // EOS              Succeeds if we reached the end of the string, fails with Fatal otherwise
   // FirstOf([p*])    returns the first parser which succeeds
   // Maybe(p)         If p succeeds, returns Some(p.result), otherwise returns None if p fails with Recoverable
   // DebugParser(msg, p) Prints the given message and pass through p
   //
   // Engine defines the following parser builders (please avoid them because they are not performant!)
-  // C("string")  fails with Error if "string" is not at the given position.
+  // C("string")  fails with Fatal if "string" is not at the given position.
   // C?("string") fails with Recoverable if "string" is not at the given position.
   // B(p)         wraps a regular parser
   // R(v)         A parser builder that returns the given value
@@ -742,14 +864,14 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
                       && left(pos).pos <= p(pos).pos <= |input|
                       && p(pos) == right(left(pos).result, left(pos).pos)(left(pos).pos))
     {
-      Bind__(|input|, left, right)
+      BindSucceeds(|input|, left, right)
     }
 
     opaque function Epsilon(pos: nat): (pr: ParseResult<()>)
       requires pos <= |input|
       ensures pr.PSuccess? && pr.pos == pos
     {
-      Epsilon_(|input|)(pos)
+      Epsilon(|input|)(pos)
     }
 
     opaque function Map<R, U>(underlying: Parser<R>, mappingFunc: R --> U)
@@ -760,7 +882,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
             :: && p.requires(pos)
                && (p(pos).PSuccess? ==> pos <= p(pos).pos <= |input|)
     {
-      Map_(|input|, underlying, mappingFunc)
+      Map(|input|, underlying, mappingFunc)
     }
 
     ghost predicate MapFailureSpec<R>(pos: nat, underlying: Parser<R>) {
@@ -860,7 +982,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
     {
       (pos: nat) =>
         if pos < |input| && input[pos] == c then PSuccess(pos + 1, c)
-        else PFailure(Error, "Expected '"+[c]+"'", pos)
+        else PFailure(Fatal, "Expected '"+[c]+"'", pos)
     }
 
     opaque function Char?(c: char): (p: Parser<char>)
@@ -930,7 +1052,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
     {
       (pos: nat) =>
         if pos + |expected| <= |input| && input[pos..pos + |expected|] == expected then PSuccess(pos + |expected|, expected)
-        else PFailure(Error, "Expected '"+expected+"'", pos)
+        else PFailure(Fatal, "Expected '"+expected+"'", pos)
     }
 
     opaque function Const?(expected: string): (p: Parser<string>)
@@ -974,7 +1096,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
     {
       var p := Bind(Rep(CharTest?(test)),
           (result: string, pos': nat) =>
-            if result == "" then Fail_("Did not find an non-empty string satisfying test", Recoverable)
+            if result == "" then Fail("Did not find an non-empty string satisfying test", Recoverable)
             else Succeed(result));
       assert forall pos: nat | pos <= |input| :: p.requires(pos)
                   && (p(pos).PSuccess? ==> pos < p(pos).pos <= |input|) by {
@@ -1106,7 +1228,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
     }
 
     const EOS: Parser<()> :=
-      (pos: nat) => if pos >= |input| then PSuccess(pos, ()) else PFailure(Error, "Expected end of string", pos)
+      (pos: nat) => if pos >= |input| then PSuccess(pos, ()) else PFailure(Fatal, "Expected end of string", pos)
     
     opaque function FirstOf<R>(others: seq<ParserBuilder<R>>): (p: ParserBuilder<R>)
       requires |others| > 0
@@ -1140,10 +1262,10 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
                         && p(pos).pos == pos + 1)
     {
       (pos: nat) requires pos <= |input| =>
-        if pos == |input| then PFailure(if test then Recoverable else Error, "Expected a digit", pos) else
+        if pos == |input| then PFailure(if test then Recoverable else Fatal, "Expected a digit", pos) else
         if input[pos] in digitToNat then
           PSuccess(pos + 1, digitToNat[input[pos]])
-        else PFailure(if test then Recoverable else Error, "Expected a digit", pos)
+        else PFailure(if test then Recoverable else Fatal, "Expected a digit", pos)
     }
 
     ghost predicate RecSpec<R(!new)>(fun: string, otherFuns: set<string>, rec: string --> Parser<R>, pos: nat)
@@ -1294,24 +1416,24 @@ abstract module ParserTests refines Parsers {
 
   lemma AboutFail_<R>(message: string, level: FailureLevel, input: seq<C>)
     ensures
-      var p := Fail_<R>(message, level)(input);
+      var p := Fail<R>(message, level)(input);
       && p.PFailure?
       && p.message == message
       && p.level == level
       && p.remaining == input
   {
-    reveal Fail_();
+    reveal Fail();
   }
 
   lemma AboutFail_2<R>(message: string, input: seq<C>)
     ensures
-      var p := Fail_<R>(message)(input);
+      var p := Fail<R>(message)(input);
       && p.PFailure?
       && p.message == message
       && p.level == Recoverable
       && p.remaining == input
   {
-    reveal Fail_();
+    reveal Fail();
   }
 
   lemma AboutBind_<L, R>(
@@ -1320,7 +1442,7 @@ abstract module ParserTests refines Parsers {
     input: seq<C>
   )
     ensures
-      var p := Bind__(left, right)(input);
+      var p := BindSucceeds(left, right)(input);
       && var leftResult := left(input);
       && !leftResult.IsFailure()
       ==> var leftValues := left(input).Extract();
@@ -1330,18 +1452,18 @@ abstract module ParserTests refines Parsers {
           && p.remaining == rightResult.remaining
           && p.result == rightResult.result 
   {
-    reveal Bind__();
+    reveal BindSucceeds();
   }
 
   lemma AboutMap_<R, U>(underlying: Parser<R>, mappingFunc: R -> U, input: seq<C>)
-    ensures var p := Map_(underlying, mappingFunc);
+    ensures var p := Map(underlying, mappingFunc);
       && (underlying(input).PSuccess? <==> p(input).PSuccess?)
       && (p(input).PSuccess? ==>
             && p(input).remaining == underlying(input).remaining
             && p(input).result == mappingFunc(underlying(input).result))
   {
-    reveal Map_();
-    reveal Bind__();
+    reveal Map();
+    reveal BindSucceeds();
     reveal Succeed_();
   }
 
@@ -1352,11 +1474,11 @@ abstract module ParserTests refines Parsers {
   }
 
   lemma AboutMap_Bind_<R, U>(underlying: Parser<R>, mappingFunc: R -> U, input: seq<C>)
-    ensures Map_(underlying, mappingFunc)(input) 
-        == Bind__<R, U>(underlying, BindMapCallback(mappingFunc))(input)
+    ensures Map(underlying, mappingFunc)(input) 
+        == BindSucceeds<R, U>(underlying, BindMapCallback(mappingFunc))(input)
   {
-    reveal Map_();
-    reveal Bind__();
+    reveal Map();
+    reveal BindSucceeds();
     reveal Succeed_();
   }
 
@@ -1379,19 +1501,19 @@ abstract module ParserTests refines Parsers {
   function BindConcatCallback<L, R>(right: Parser<R>): (L, seq<C>) -> Parser<(L, R)>
   {
     (l: L, remaining: seq<C>) =>
-      Map_(right, (r: R) => (l, r))
+      Map(right, (r: R) => (l, r))
   }
   
   lemma AboutConcat_Bind_<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures Concat_(left, right)(input) == Bind__(left, BindConcatCallback(right))(input)
+    ensures Concat_(left, right)(input) == BindSucceeds(left, BindConcatCallback(right))(input)
   {
     reveal Concat_();
-    reveal Bind__();
+    reveal BindSucceeds();
     reveal Succeed_();
-    reveal Map_();
+    reveal Map();
   }
 
   lemma AboutConcatR_<L, R>(
@@ -1419,12 +1541,12 @@ abstract module ParserTests refines Parsers {
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures Map_(Concat_(left, right), second())(input) == ConcatR_(left, right)(input)
+    ensures Map(Concat_(left, right), second())(input) == ConcatR_(left, right)(input)
   {
     reveal Concat_();
     reveal Succeed_();
     reveal ConcatR_();
-    reveal Map_();
+    reveal Map();
   }
 
 
@@ -1446,12 +1568,12 @@ abstract module ParserTests refines Parsers {
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures Map_(Concat_(left, right), first())(input) == ConcatL_(left, right)(input)
+    ensures Map(Concat_(left, right), first())(input) == ConcatL_(left, right)(input)
   {
     reveal Concat_();
     reveal Succeed_();
     reveal ConcatL_();
-    reveal Map_();
+    reveal Map();
   }
 
   lemma AboutRepeat_<R>(
