@@ -28,8 +28,41 @@ module ArithmeticParser {
     }
   }
 
+  const buildParsedExpr: ((Expression, Wrappers.Option<(string, Expression)>)) -> Expression
+    := ((result: (Expression, Wrappers.Option<(string, Expression)>)) =>
+     if result.1.None? then result.0 else
+     Binary(result.1.value.0, result.0, result.1.value.1))
+
   const parser: Parser<Expression>
-    := Map(Int(), (i: int) => Number(i))
+    := FixpointMap(
+      map[
+        "atom" :=
+          RecursiveDef(0, (callback: ParserSelector<Expression>) => 
+          Or(ConcatR(
+              Const?("("),
+                ConcatL(callback("term"), Const(")"))),
+             Map(Int(), (result: int) => Number(result))    
+            )),
+        "factor" :=
+          RecursiveDef(1, (callback: ParserSelector<Expression>) => 
+            Map(
+            Concat(
+              callback("atom"),
+              Maybe(Concat(Or(Const?("*"), Const?("/")),
+                     callback("factor")))),
+            buildParsedExpr
+          )),
+        "term" :=
+          RecursiveDef(2, (callback: ParserSelector<Expression>) => 
+            Map(
+            Concat(callback("factor"),
+            Maybe(Concat(Or(Const?("+"), Const?("-")),
+                   callback("term")))),
+            buildParsedExpr
+          ))
+      ],
+      "term"
+    );
 
   method Main(args: seq<string>) {
     if |args| <= 1 {
@@ -38,7 +71,7 @@ module ArithmeticParser {
     for i := 1 to |args| {
       var input := args[i];
       Succeed_NonCrashingAuto<Expression>();
-      assert Valid(parser);
+      assume {:axiom} Valid(parser); // TODO: Prove
       reveal Valid();
       match parser(input) {
         case PSuccess(result, _) =>

@@ -94,7 +94,7 @@ abstract module Parsers {
   // Because it returns a delta pos, it cannot return a position negative from the origing
   // If the parsing is out of context, it will return a failure.
 
-  type ParserSelector<!R> = string -> Option<Parser<R>>
+  type ParserSelector<!R> = string -> Parser<R>
   // A parser selector is a function that, given a name that exists,
   // returns a parser associated to this name
 
@@ -291,7 +291,7 @@ abstract module Parsers {
       PSuccess((l, r), remainingRight)
   }
   
-  opaque function Or<L, R>(
+  opaque function DisjunctiveOr<L, R>(
     left: Parser<L>,
     right: Parser<R>
   ) : (p: Parser<Either<L, R>>)
@@ -305,6 +305,27 @@ abstract module Parsers {
       var p := Map(left, l => Left(l))(input);
       p.IfRecoverableFailureNoProgress(input,
          Map(right, r => Right(r)))
+       .MapRecoverableError(dataRight =>
+         if p.IsFailure() && p.level.Recoverable? then
+           p.data.Concat(dataRight)
+         else
+           dataRight
+       )
+  }
+
+  opaque function Or<R>(
+    left: Parser<R>,
+    right: Parser<R>
+  ) : (p: Parser<R>)
+    // left parses the string. If left succeeds, returns
+    // if left fails, two cases
+    // - If the error is recoverable and the parser did not consume input,
+    //   then return what right returns
+    // - Otherwise return the first error
+  {
+    (input: seq<C>) =>
+      var p := left(input);
+      p.IfRecoverableFailureNoProgress(input, right)
        .MapRecoverableError(dataRight =>
          if p.IsFailure() && p.level.Recoverable? then
            p.data.Concat(dataRight)
@@ -352,7 +373,7 @@ abstract module Parsers {
         else PSuccess(Option.None, input)
   }
 
-  opaque function Concat_<L, R>(
+  opaque function Concat<L, R>(
     left: Parser<L>,
     right: Parser<R>
   ) : (p: Parser<(L, R)>)
@@ -365,24 +386,7 @@ abstract module Parsers {
       PSuccess((l, r), remaining2)
   }
 
-  opaque function ConcatLeftNonCommitting<L, R>(
-    left: Parser<L>,
-    right: Parser<R>
-  ) : (p: Parser<(L, R)>)
-    // Makes it possible to concatenate two consecutive parsers and return the pair of the results
-  {
-    (input: seq<C>)
-    =>
-      var lResult := left(input);
-      if lResult.PFailure? && lResult.level == Recoverable then
-        PFailure(Recoverable, FailureData(lResult.data.message, input, Option.None))
-      else
-        var (l, remaining) :- left(input);
-        var (r, remaining2) :- right(remaining);
-        PSuccess((l, r), remaining2)
-  }
-
-  opaque function ConcatR_<L, R>(
+  opaque function ConcatR<L, R>(
     left: Parser<L>,
     right: Parser<R>
   ) : (p: Parser<R>)
@@ -395,7 +399,7 @@ abstract module Parsers {
       PSuccess(r, remaining2)
   }
 
-  opaque function ConcatL_<L, R>(
+  opaque function ConcatL<L, R>(
     left: Parser<L>,
     right: Parser<R>
   ) : (p: Parser<L>)
@@ -463,16 +467,16 @@ abstract module Parsers {
           PFailure(Fatal, FailureData("Fixpoint called with an increasing remaining sequence", remaining, Option.None));
     underlying(callback)(input)
   }
-  /*opaque function FixpointMap<R(!new)>(
-    maxPos: nat,
-    underlying: map<string, (ParserSelector<R>, nat) -> ParseResult<R>>,
-    fun: string): Parser<R>
+  opaque function FixpointMap<R(!new)>(
+    underlying: map<string, RecursiveDef<R>>,
+    fun: string): (p: Parser<R>)
   {
-    (pos: nat) => FixpointMap_(maxPos, underlying, fun, pos)
-  }*/
+    (input: seq<C>) => FixpointMap_(underlying, fun, input)
+  }
+
   datatype RecursiveDef<!R> = RecursiveDef(
     order: nat, 
-    definition: (ParserSelector<R>) -> Parser<R>
+    definition: ParserSelector<R> -> Parser<R>
   )
   opaque function FixpointMap_<R(!new)>(
     underlying: map<string, RecursiveDef<R>>,
@@ -491,10 +495,9 @@ abstract module Parsers {
       :=
       (fun': string) =>
         if fun' !in underlying.Keys then
-          Option.None
+          Fail(fun' + " not defined", Fatal)
         else
           var RecursiveDef(orderFun', definitionFun') := underlying[fun'];
-          Option.Some(
            (remaining: seq<C>) =>
              if |remaining| < |input| || (|remaining| == |input| && orderFun' < orderFun) then
                FixpointMap_(underlying, fun', remaining)
@@ -503,7 +506,7 @@ abstract module Parsers {
                  +fun'+"' ("+Printer.natToString(orderFun')+") is lower than the order of '"+fun+"' ("+Printer.natToString(orderFun)+")", remaining, Option.None))
             else
                PFailure(Fatal, FailureData("Parser did not return a suffix of the input", remaining, Option.None))
-          );
+          ;
       definitionFun(callback)(input)
   }
 
@@ -686,7 +689,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
     reveal Succeed();
   }
 
-  opaque function Concat__<R, U>(ghost size: nat, left: Parser<R>, right: Parser<U>)
+  opaque function Concat_<R, U>(ghost size: nat, left: Parser<R>, right: Parser<U>)
     : (p: Parser<(R, U)>)
     // Concat is equivalent to two binds methods
     ensures forall pos: nat | ConcatSpec_(size, left, right, pos)
@@ -696,16 +699,16 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"} ParserTheorems {
            BindSucceeds(size, right, (u: U, pos'': nat) => Succeed(size, (result, u))))
   }
 
-  lemma Concat_Concat2<R, U>(size: nat, left: Parser<R>, right: Parser<U>, pos: nat)
+  lemma ConcatConcat2<R, U>(size: nat, left: Parser<R>, right: Parser<U>, pos: nat)
     requires ConcatSpec_(size, left, right, pos)
     ensures BindSpec(size, left, (result: R, pos': nat) requires right.requires(pos') =>
                        BindSucceeds(size, right, (u: U, pos'': nat) => Succeed(size, (result, u))), pos)
-    // TODO: Bug to report. Concat_() should not be needed
-    ensures Concat_(size, left, right)(pos) == Concat__(size, left, right)(pos)
+    // TODO: Bug to report. Concat() should not be needed
+    ensures Concat(size, left, right)(pos) == Concat_(size, left, right)(pos)
   {
     reveal BindSucceeds();
+    reveal Concat();
     reveal Concat_();
-    reveal Concat__();
     reveal Succeed();
   }
 }
@@ -741,7 +744,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserBuilders {
               :: p.apply.requires(pos)
                  && (p.apply(pos).PSuccess? ==> pos <= p.apply(pos).pos <= size)
     {
-      B_(size, ConcatR_(size, apply, other.apply))
+      B_(size, ConcatR(size, apply, other.apply))
     }
     opaque function I_o<U>(other: ParserBuilder<U>): (p: ParserBuilder<R>)
       requires size == other.size
@@ -751,7 +754,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserBuilders {
               :: p.apply.requires(pos)
                  && (p.apply(pos).PSuccess? ==> pos <= p.apply(pos).pos <= size)
     {
-      B_(size, ConcatL_(size, apply, other.apply))
+      B_(size, ConcatL(size, apply, other.apply))
     }
     opaque function M<U>(mappingFunc: R --> U): (p: ParserBuilder<U>)
       ensures p.size == size
@@ -956,7 +959,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
               :: p.requires(pos)
                  && (p(pos).PSuccess? ==> pos <= p(pos).pos <= |input|)
     {
-      Concat_(|input|, left, right)
+      Concat(|input|, left, right)
     }
 
     opaque function ConcatR<L, R>(
@@ -969,7 +972,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
               :: p.requires(pos)
                  && (p(pos).PSuccess? ==> pos <= p(pos).pos <= |input|)
     {
-      ConcatR_(|input|, left, right)
+      ConcatR(|input|, left, right)
     }
 
     opaque function ConcatL<L, R>(
@@ -982,7 +985,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
               :: p.requires(pos)
                  && (p(pos).PSuccess? ==> pos <= p(pos).pos <= |input|)
     {
-      ConcatL_(|input|, left, right)
+      ConcatL(|input|, left, right)
     }
 
     opaque function Or<R>(
@@ -1480,11 +1483,11 @@ abstract module ParserTests refines Parsers {
     reveal Succeed();
   }
 
-  lemma AboutConcat_<L, R>(
+  lemma AboutConcat<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures var p := Concat_(left, right);
+    ensures var p := Concat(left, right);
             && (p(input).PSuccess? ==>
                 && left(input).PSuccess?
                 && p(input).result.0 == left(input).result
@@ -1493,7 +1496,7 @@ abstract module ParserTests refines Parsers {
                 && p(input).result.1 == right(input2).result
                 && p(input).remaining == right(input2).remaining)
   {
-    reveal Concat_();
+    reveal Concat();
   }
 
   function BindConcatCallback<L, R>(right: Parser<R>): (L, seq<C>) -> Parser<(L, R)>
@@ -1502,23 +1505,23 @@ abstract module ParserTests refines Parsers {
       Map(right, (r: R) => (l, r))
   }
   
-  lemma AboutConcat_Bind_<L, R>(
+  lemma AboutConcatBind_<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures Concat_(left, right)(input) == BindSucceeds(left, BindConcatCallback(right))(input)
+    ensures Concat(left, right)(input) == BindSucceeds(left, BindConcatCallback(right))(input)
   {
-    reveal Concat_();
+    reveal Concat();
     reveal BindSucceeds();
     reveal Succeed();
     reveal Map();
   }
 
-  lemma AboutConcatR_<L, R>(
+  lemma AboutConcatR<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures var p := ConcatR_(left, right);
+    ensures var p := ConcatR(left, right);
             && (p(input).PSuccess? ==>
                 && left(input).PSuccess?
                 && var input2 := left(input).remaining;
@@ -1526,7 +1529,7 @@ abstract module ParserTests refines Parsers {
                 && p(input).result == right(input2).result
                 && p(input).remaining == right(input2).remaining)
   {
-    reveal ConcatR_();
+    reveal ConcatR();
   }
 
   function first<L, R>(): ((L, R)) -> L {
@@ -1535,24 +1538,24 @@ abstract module ParserTests refines Parsers {
   function second<L, R>(): ((L, R)) -> R {
     (lr: (L, R)) => lr.1
   }
-  lemma AboutConcat_ConcatR_<L, R>(
+  lemma AboutConcatConcatR<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures Map(Concat_(left, right), second())(input) == ConcatR_(left, right)(input)
+    ensures Map(Concat(left, right), second())(input) == ConcatR(left, right)(input)
   {
-    reveal Concat_();
+    reveal Concat();
     reveal Succeed();
-    reveal ConcatR_();
+    reveal ConcatR();
     reveal Map();
   }
 
 
-  lemma AboutConcatL_<L, R>(
+  lemma AboutConcatL<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures var p := ConcatL_(left, right);
+    ensures var p := ConcatL(left, right);
             && (p(input).PSuccess? ==>
                 && left(input).PSuccess?
                 && var input2 := left(input).remaining;
@@ -1560,17 +1563,17 @@ abstract module ParserTests refines Parsers {
                 && p(input).result == left(input).result
                 && p(input).remaining == right(input2).remaining)
   {
-    reveal ConcatL_();
+    reveal ConcatL();
   }
-  lemma AboutConcat_ConcatL_<L, R>(
+  lemma AboutConcatConcatL<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
-    ensures Map(Concat_(left, right), first())(input) == ConcatL_(left, right)(input)
+    ensures Map(Concat(left, right), first())(input) == ConcatL(left, right)(input)
   {
-    reveal Concat_();
+    reveal Concat();
     reveal Succeed();
-    reveal ConcatL_();
+    reveal ConcatL();
     reveal Map();
   }
 
