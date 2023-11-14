@@ -1,5 +1,4 @@
-module {:options "/functionSyntax:4"} StringNat {
-
+module StringNat {
   predicate IsStringNat(s: string) {
     |s| > 0 && (|s| > 1 ==> s[0] != '0') &&
     forall i | 0 <= i < |s| :: s[i] in "0123456789"
