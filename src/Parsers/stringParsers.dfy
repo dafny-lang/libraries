@@ -1,6 +1,20 @@
 include "parsers.dfy"
 
 module StringParsers refines Parsers {
+  export StringParsers extends Parsers
+    provides
+      CharTest,
+      Char,
+      Digit,
+      DigitNumber,
+      Nat,
+      Int,
+      String,
+      ExtractLineCol,
+      PrintFailure,
+      Wrappers
+    reveals C
+
   type C = char
 
   // ##################################
@@ -33,10 +47,10 @@ module StringParsers refines Parsers {
     // A parser that returns the current char as a number if it is one
   {
     Map(Digit(), (c: char) =>
-      var n: nat := (if StringNat.IsStringNat([c]) then // Should always be true
-         StringNat.stringToNat([c])
-       else 0); n
-    )
+      var d := digitToInt(c);
+      var n: nat := if d >= 0 then d else 0;
+      n
+     )
   }
 
   opaque function Nat(): (p: Parser<nat>)

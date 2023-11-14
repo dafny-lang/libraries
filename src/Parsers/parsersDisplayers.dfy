@@ -3,7 +3,7 @@ include "parsers.dfy"
 // From these parsers, we can create displayers
 // and prove the roundtrip displayer / parser if we wanted to
 abstract module ParsersDiplayers {
-  import Parsers
+  import Parsers`All
 
   type Parser<R> = Parsers.Parser<R>
   type C = Parsers.C

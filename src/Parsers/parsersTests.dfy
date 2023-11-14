@@ -1,9 +1,6 @@
 include "parsers.dfy"
-//include "../NonLinearArithmetic/DivMod.dfy"
 
 abstract module ParserTests refines Parsers {
-  //import DivMod
-
   lemma AboutSucceed<R>(result: R, input: seq<C>)
     ensures
       var p := Succeed(result);

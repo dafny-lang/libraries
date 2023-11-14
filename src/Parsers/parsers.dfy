@@ -1,11 +1,56 @@
 include "../Wrappers.dfy"
-include "library.dfy"
 
 abstract module Parsers
 // Functional parsers consuming sequences seq<C> from the left to the right.
 // For parsers over strings, please refer to the StringParsers module
 {
   import Wrappers
+
+  export
+    provides C, // The character type
+      Wrappers, // Imported module
+      Valid,
+      Succeed,
+      Epsilon,
+      Fail,
+      EndOfString,
+      Bind,
+      BindSucceeds,
+      BindResult,
+      Map,
+      Not,
+      And,
+      Or,
+      OrSeq,
+      Lookahead,
+      ?,
+      If,
+      Maybe,
+      ConcatMap,
+      Concat,
+      ConcatL,
+      ConcatR,
+      RepSeq,
+      Rep,
+      Recursive,
+      RecursiveMap,
+      Debug,
+      intToString,
+      digitToInt,
+      stringToInt,
+      ParseResult.IsFailure,
+      ParseResult.PropagateFailure,
+      ParseResult.Extract
+    reveals
+      Parser,
+      ParserSelector,
+      Option, // From Wrappers
+      FailureLevel,
+      ParseResult,
+      FailureData,
+      RecursiveDef
+
+  export All reveals *
 
   type C(!new, ==)
   // The character of the sequence being parsed
@@ -509,7 +554,7 @@ abstract module Parsers
     return message;
   }
 
-  opaque function DebugParser<R>(msg: string, other: Parser<R>): (p: Parser<R>)
+  opaque function Debug<R>(msg: string, other: Parser<R>): (p: Parser<R>)
     // A parser that, when invoked, will print a message before applying its underlying parser
     // and also afterwards
   {
@@ -521,6 +566,7 @@ abstract module Parsers
   }
 
   opaque function intToString(n: int): string
+    // Converts an integer to a string
     decreases if n < 0 then 1 - n else n
   {
     if n < 0 then "-" + intToString(-n) else
@@ -534,10 +580,11 @@ abstract module Parsers
     match c
     case '0' => 0 case '1' => 1 case '2' => 2 case '3' => 3 case '4' => 4
     case '5' => 5 case '6' => 6 case '7' => 7 case '8' => 8 case '9' => 9
-    case _ => 0
+    case _ => -1
   }
 
   opaque function stringToInt(s: string): int
+    // Converts a string to a string
     decreases |s|
   {
     if |s| == 0 then 0 else
