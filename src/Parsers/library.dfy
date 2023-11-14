@@ -1,4 +1,4 @@
-module {:options "/functionSyntax:4"} Printer {
+module {:options "/functionSyntax:4"} StringNat {
 
   predicate IsStringNat(s: string) {
     |s| > 0 && (|s| > 1 ==> s[0] != '0') &&

@@ -4,7 +4,7 @@ include "library.dfy"
 // Functional parsers are consuming the string from the left to the right.
 abstract module Parsers {
   import Wrappers
-  import Printer
+  import StringNat
   type Option<T> = Wrappers.Option<T>
 
   type C(!new, ==) // The character of the sequence being parsed
@@ -162,6 +162,13 @@ abstract module Parsers {
     (input: seq<C>) => PFailure(level, FailureData(message, input, Option.None))
   }
 
+  opaque function EndOfString(): Parser<()>
+  {
+    (input: seq<C>) =>
+      if |input| == 0 then PSuccess((), input)
+      else PFailure(Recoverable, FailureData("expected end of string", input, Option.None))
+  }
+
   lemma Fail_NonCrashing<R>(message: string)
     ensures Valid<R>(Fail(message, Recoverable))
   { reveal Fail(); reveal Valid(); }
@@ -275,7 +282,7 @@ abstract module Parsers {
       if l.IsFailure() then
         if l.IsFatal() then l.PropagateFailure()
         else PSuccess((), input)
-      else PFailure(Recoverable, FailureData("Not failed", input, Option.None))
+      else PFailure(Recoverable, FailureData("not failed", input, Option.None))
   }
 
   opaque function And<L, R>(
@@ -349,6 +356,23 @@ abstract module Parsers {
           p.(data := FailureData(p.data.message, input, Option.None))
       else
         p.(remaining := input)
+  }
+
+  opaque function ?<R>(underlying: Parser<R>): (p: Parser<R>)
+    // If the underlying parser succeeds, returns its committed result
+    // if the underlying parser fails,
+    // - If the failure is fatal, returns it as-it
+    // - If the failure is recoverable, returns it without comitting the input
+  {
+    (input: seq<C>) =>
+      var p := underlying(input);
+      if p.IsFailure() then
+        if p.IsFatal() then
+          p
+        else
+          p.(data := FailureData(p.data.message, input, Option.None))
+      else
+        p
   }
 
   opaque function If<L, R>(
@@ -434,7 +458,41 @@ abstract module Parsers {
     case PFailure(Fatal, data) =>
       PFailure(Fatal, data)
     case PFailure(Recoverable, data) =>
-      PSuccess(acc, input)
+      if |data.remaining| == |input| then
+        PSuccess(acc, input)
+      else
+        PFailure(Recoverable, data)
+  }
+
+  opaque function RepeatAcc<A, B>(
+    underlying: Parser<B>,
+    combine: (A, B) -> A,
+    acc: A
+  ): Parser<A> {
+    (input: seq<C>) => RepeatAcc_(underlying, combine, acc, input)
+  }
+
+  opaque function {:tailrecursion true} RepeatAcc_<A, B>(
+    underlying: Parser<B>,
+    combine: (A, B) -> A,
+    acc: A,
+    input: seq<C>
+  ): (p: ParseResult<A>)
+    decreases |input|
+  // Repeat the underlying parser over the input until a recoverable failure happens
+  // and returns the accumulated results
+  {
+    match underlying(input)
+    case PSuccess(result, remaining) =>
+      if |remaining| >= |input| then PSuccess(acc, input) else
+      RepeatAcc_(underlying, combine, combine(acc, result), remaining)
+    case PFailure(Fatal, data) =>
+      PFailure(Fatal, data)
+    case PFailure(Recoverable, data) =>
+      if |data.remaining| == |input| then
+        PSuccess(acc, input)
+      else
+        PFailure(Recoverable, data)
   }
 
   opaque function Fixpoint<R(!new)>(
@@ -462,9 +520,9 @@ abstract module Parsers {
         if |remaining| < |input| then
           Fixpoint_(underlying, remaining)
         else if |remaining| == |input| then
-          PFailure(Recoverable, FailureData("No progress", remaining, Option.None))
+          PFailure(Recoverable, FailureData("no progress", remaining, Option.None))
         else
-          PFailure(Fatal, FailureData("Fixpoint called with an increasing remaining sequence", remaining, Option.None));
+          PFailure(Fatal, FailureData("fixpoint called with an increasing remaining sequence", remaining, Option.None));
     underlying(callback)(input)
   }
   opaque function FixpointMap<R(!new)>(
@@ -489,11 +547,12 @@ abstract module Parsers {
     // f<name> = pos => underlying[fun](f, pos)
     decreases |input|, if fun in underlying then underlying[fun].order else 0
   {
-    if fun !in underlying then PFailure(Fatal, FailureData("Parser '"+fun+"' not found", input, Option.None)) else
+    if fun !in underlying then PFailure(Fatal, FailureData("parser '"+fun+"' not found", input, Option.None)) else
     var RecursiveDef(orderFun, definitionFun) := underlying[fun];
     var callback: ParserSelector<R>
       :=
       (fun': string) =>
+        (var p : Parser<R> :=
         if fun' !in underlying.Keys then
           Fail(fun' + " not defined", Fatal)
         else
@@ -502,11 +561,11 @@ abstract module Parsers {
              if |remaining| < |input| || (|remaining| == |input| && orderFun' < orderFun) then
                FixpointMap_(underlying, fun', remaining)
              else if |remaining| == |input| then
-               PFailure(Recoverable, FailureData("Non progressing recursive call requires that order of '"
-                 +fun'+"' ("+Printer.natToString(orderFun')+") is lower than the order of '"+fun+"' ("+Printer.natToString(orderFun)+")", remaining, Option.None))
+               PFailure(Recoverable, FailureData("non-progressing recursive call requires that order of '"
+                 +fun'+"' ("+StringNat.natToString(orderFun')+") is lower than the order of '"+fun+"' ("+StringNat.natToString(orderFun)+")", remaining, Option.None))
             else
-               PFailure(Fatal, FailureData("Parser did not return a suffix of the input", remaining, Option.None))
-          ;
+               PFailure(Fatal, FailureData("parser did not return a suffix of the input", remaining, Option.None))
+          ; p);
       definitionFun(callback)(input)
   }
 
@@ -569,7 +628,7 @@ abstract module Parsers {
              else if pos' == pos then
                PFailure(Recoverable, "Non progressing recursive call requires that '"+fun'+"' be shorter than '"+fun+"'", pos', 0)
             else
-               PFailure(Fatal, "Parser did something unexpected, jump to position " + Printer.natToString(pos'), pos', 0)
+               PFailure(Fatal, "Parser did something unexpected, jump to position " + StringNat.natToString(pos'), pos', 0)
           );
     if fun in underlying {
       assert {:only} FixMapSpecInner(fun, underlying.Keys, maxPos, callback, pos) by {
@@ -856,7 +915,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
   import opened ParserBuilders
   import opened Parsers
   import opened Wrappers
-  import opened Printer
+  import opened StringNat
 
   // Engine defines the following parsers:
   // Succeed(v)       Always succeeds with the given value
@@ -1038,7 +1097,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
     {
       (pos: nat) requires pos <= |input| =>
         if pos < |input| && test(pos) then PSuccess(pos + 1, input[pos])
-        else PFailure(Recoverable, "Expected a different char but that's ok", pos)
+        else PFailure(Recoverable, "expected a different char but that's ok", pos)
     }
 
     ghost predicate ConstSpec(expected: string, p: Parser<string>) {
@@ -1365,7 +1424,7 @@ module {:options "-functionSyntax:4", "-quantifierSyntax:4"}  ParserEngine {
       requires result.PFailure?
     {
       var (line, lineNumber, charNumber) := LineContainingPos(result.pos);
-      result.message + " at position "+Printer.natToString(result.pos)+" line "+Printer.natToString(lineNumber)+", column "+Printer.natToString(charNumber)+":\n>"+
+      result.message + " at position "+StringNat.natToString(result.pos)+" line "+StringNat.natToString(lineNumber)+", column "+StringNat.natToString(charNumber)+":\n>"+
         line+"\n"+seq(charNumber, i => ' ')+"^\n"
     }
     method ReportError<R>(p: ParseResult<R>)
@@ -1577,22 +1636,6 @@ abstract module ParserTests refines Parsers {
     reveal Map();
   }
 
-  lemma AboutRepeat_<R>(
-    underlying: Parser<R>,
-    acc: seq<R>,
-    input: seq<C>
-  )
-  // If underlying never throws a fatal error,
-  // returns a remaining that is a suffix of the input,
-  // then Repeat with always return a success
-    decreases |input|
-    requires Valid(underlying)
-    ensures Repeat_(underlying, acc, input).PSuccess?
-  {
-    reveal Repeat_(), Valid();
-    assert IsRemaining(input, input[0..]);
-  }
-
   predicate AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures<R>(
     underlying: Parser<R>,
     acc: seq<R>,
@@ -1605,27 +1648,6 @@ abstract module ParserTests refines Parsers {
     && (underlying(input).PSuccess? && |underlying(input).remaining| < |input|
     ==> 
     (|acc| < |result.result| && |result.remaining| < |input|))
-  }
-
-  lemma {:vcs_split_on_every_assert} AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnce<R>(
-    underlying: Parser<R>,
-    acc: seq<R>,
-    input: seq<C>
-  ) 
-    decreases |input|
-    requires Valid(underlying)
-    ensures 
-      AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnceEnsures
-        (underlying, acc, input)
-  {
-    reveal Repeat_(), Valid();
-    var _ := input[0..];
-    match underlying(input)
-    case PSuccess(result, remaining) =>
-      if |remaining| < |input| {
-        AboutRepeatIncreasesPosIfUnderlyingSucceedsAtLeastOnce(underlying, acc + [result], remaining);
-      }
-    case _ =>
   }
 
   predicate AboutFixpoint_Ensures<R(!new)>(
@@ -1663,63 +1685,59 @@ abstract module ParserTests refines Parsers {
 module StringParsers refines ParserTests {
   type C = char
 
-  opaque function Char(c: char): (p: Parser<char>)
-  {
-    (input: string) =>
-      if 0 < |input| && input[0] == c then PSuccess(c, input[1..])
-      else PFailure(Fatal, FailureData("Expected '"+[c]+"'", input, Option.None))
-  }
-
-  opaque function Char?(expectedChar: char): (p: Parser<char>)
-  {
-    CharTest?((c: char) => c == expectedChar, [expectedChar])
-  }
-
-  opaque function CharTest?(test: char -> bool, name: string): (p: Parser<char>)
+  opaque function CharTest(test: char -> bool, name: string): (p: Parser<char>)
   {
     (input: string) =>
       if 0 < |input| && test(input[0]) then PSuccess(input[0], input[1..])
       else PFailure(Recoverable,
-        FailureData("Expected a "+name+" but got "
-          + (if 0 < |input| then "'"+[input[0]]+"'" else "end of string")
+        FailureData("expected a "+name
         , input, Option.None))
+  }
+
+  opaque function Char(expectedChar: char): (p: Parser<char>)
+  {
+    CharTest((c: char) => c == expectedChar, [expectedChar])
   }
 
   opaque function Digit(): (p: Parser<char>)
   {
-    CharTest?(c => c in "0123456789", "digit")
+    CharTest(c => c in "0123456789", "digit")
+  }
+
+  opaque function DigitNumber(): (p: Parser<nat>)
+  {
+    Map(Digit(), (c: char) =>
+      var n: nat := (if StringNat.IsStringNat([c]) then // Should always be true
+         StringNat.stringToNat([c])
+       else 0); n
+    )
   }
 
   opaque function Nat(): (p: Parser<nat>)
   {
-    Map<string, nat>(Repeat(Digit()),
-      result =>
-        if Printer.IsStringNat(result) then // Should always be true
-          Printer.stringToNat(result)
-        else 0)
+    Bind(DigitNumber(),
+      (result: nat) =>
+        RepeatAcc(DigitNumber(),
+          (previous: nat, c: nat) =>
+            var r: nat := previous * 10 + c; r,
+          result          
+        )
+    )
   }
 
   opaque function Int(): (p: Parser<int>)
   {
-    Bind(Maybe(Char?('-')),
+    Bind(Maybe(Char('-')),
       (minusSign: Option<char>) =>
-        Map<nat, int>(Nat(), (result: nat) => if minusSign.Some? then -result else result))
+        Map<nat, int>(Nat(), (result: nat) => if minusSign.Some? then 0-result else result))
   }
 
-  opaque function Const(expected: string): (p: Parser<string>)
+  opaque function String(expected: string): (p: Parser<string>)
   {
     (input: string) =>
       if |expected| <= |input| && input[0..|expected|] == expected then PSuccess(expected, input[|expected|..])
-      else PFailure(Fatal, FailureData("Expected '"+expected+"'", input, Option.None))
+      else PFailure(Recoverable, FailureData("expected '"+expected+"'", input, Option.None))
   }
-
-  opaque function Const?(expected: string): (p: Parser<string>)
-  {
-    (input: string) =>
-      if |expected| <= |input| && input[0..|expected|] == expected then PSuccess(expected, input[|expected|..])
-      else PFailure(Recoverable, FailureData("Expected '"+expected+"'", input, Option.None))
-  }
-
 
   function repeat(str: string, n: nat): (r: string)
     ensures |r| == |str| * n
@@ -1730,16 +1748,75 @@ module StringParsers refines ParserTests {
   
   // TODO: Mention the error level, the line number, the column number
   // TODO: Extract only the line of interest
-  method PrintFailure<R>(input: string, result: ParseResult<R>)
+  method PrintFailure<R>(input: string, result: ParseResult<R>, printPos: int := -1)
     requires result.PFailure?
+    decreases result.data
   {
+    if printPos == -1 {
+      print "Error:\n";
+    }
     var pos: int := |input| - |result.data.remaining|; // Need the parser to be Valid()
     if pos < 0 { // Could be proved false if parser is Valid()
       pos := 0;
     }
-    print input, "\n";
-    print repeat(" ", pos), "^","\n";
+    if printPos != pos {
+      print input, "\n";
+    }
+    if printPos != pos {
+      print repeat(" ", pos), "^","\n";
+    }
     print result.data.message;
+    if result.data.next.Some? {
+      print ", or\n";
+      PrintFailure<R>(input, PFailure(result.level, result.data.next.value), pos);
+    } else {
+      print "\n";
+    }
   }
 
+}
+
+// From these parsers, we can create displayers
+// and prove the roundtrip displayer / parser if we wanted to
+abstract module ParsersDiplayers {
+  import Parsers
+
+  type Parser<R> = Parsers.Parser<R>
+  type C = Parsers.C
+
+  type Displayer<-R> = (R, seq<C>) -> seq<C>
+  
+  function Concat<A, B>(
+    left: Displayer<A>,
+    right: Displayer<B>
+  ): Displayer<(A, B)> {
+    (ab: (A, B), remaining: seq<C>) =>
+      var remaining2 := right(ab.1, remaining);
+      var remaining3 := left(ab.0, remaining2);
+      remaining3
+  }
+
+  ghost predicate Roundtrip<A(!new)>(parse: Parser<A>, display: Displayer<A>)
+    // The parser and the displayer are dual to each other
+    // means that if we parse after printing, we get the same result
+  {
+    forall a: A, remaining: seq<C> ::
+      parse(display(a, remaining)) == Parsers.PSuccess(a, remaining)
+  }
+  
+  lemma {:rlimit 200} ConcatRoundtrip<A(!new), B(!new)>(
+    pA: Parser<A>, ppA: Displayer<A>,
+    pB: Parser<B>, ppB: Displayer<B>
+  )
+    requires Roundtrip(pA, ppA) && Roundtrip(pB, ppB)
+    ensures Roundtrip(Parsers.Concat(pA, pB), Concat(ppA, ppB))
+  {
+    reveal Parsers.Concat();
+    var p := Parsers.Concat(pA, pB);
+    var d := Concat(ppA, ppB);
+    forall ab: (A, B), remaining: seq<C> ensures 
+      p(d(ab, remaining)) == Parsers.PSuccess(ab, remaining)
+    {
+    }
+  }
 }
