@@ -3,7 +3,6 @@ include "parsers.dfy"
 module StringParsers refines Parsers {
   export StringParsers extends Parsers
     provides
-      CharTest,
       Char,
       Digit,
       DigitNumber,
@@ -21,26 +20,16 @@ module StringParsers refines Parsers {
   // String-specific parser combinators
   // ##################################
 
-  opaque function CharTest(test: char -> bool, name: string): (p: Parser<char>)
-    // A parser that returns the current char if it passes the test
-    // Returns a recoverable error based on the name otherwise
-  {
-    (input: string) =>
-      if 0 < |input| && test(input[0]) then Success(input[0], input[1..])
-      else Failure(Recoverable,
-        FailureData("expected a "+name, input, Option.None))
-  }
-
   opaque function Char(expectedChar: char): (p: Parser<char>)
     // A parser that tests if the current char is the given expected char
   {
-    CharTest((c: char) => c == expectedChar, [expectedChar])
+    Any((c: char) => c == expectedChar, [expectedChar])
   }
 
   opaque function Digit(): (p: Parser<char>)
     // A parser that tests if the current char is a digit and returns it
   {
-    CharTest(c => c in "0123456789", "digit")
+    Any(c => c in "0123456789", "digit")
   }
 
   opaque function DigitNumber(): (p: Parser<nat>)

@@ -34,6 +34,8 @@ abstract module Parsers
       Rep,
       Recursive,
       RecursiveMap,
+      Any,
+      Many,
       Debug,
       intToString,
       digitToInt,
@@ -545,6 +547,22 @@ abstract module Parsers
                Failure(Fatal, FailureData("parser did not return a suffix of the input", remaining, Option.None))
           ; p);
       definitionFun(callback)(input)
+  }
+
+  opaque function Any(test: C -> bool, name: string): (p: Parser<C>)
+    // A parser that returns the current char if it passes the test
+    // Returns a recoverable error based on the name otherwise
+  {
+    (input: seq<C>) =>
+      if 0 < |input| && test(input[0]) then Success(input[0], input[1..])
+      else Failure(Recoverable,
+        FailureData("expected a "+name, input, Option.None))
+  }
+
+  opaque function Many(test: C -> bool, name: string): (p: Parser<seq<C>>)
+  {
+    Bind(Any(test, name), (c: C) =>
+      Rep(Any(test, name), (s: seq<C>, c': C) => s + [c'], [c]))
   }
 
   function Debug_(message: string): string {

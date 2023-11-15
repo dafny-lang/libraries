@@ -28,14 +28,15 @@ abstract module ParserBuilders {
     provides B.I_I
     provides B.M
     provides B.Maybe
-    provides B.Then
+    provides B.Bind
     provides B.Rep
     provides End
+    provides Any, Many
     reveals B
-    reveals RecDef, FailureLevel, Sel
+    reveals RecDef, FailureLevel, RecSel
 
   type FailureLevel = P.FailureLevel
-  type Sel<A> = string -> B<A>
+  type RecSel<A> = string -> B<A>
   
   // Wrap the constructor in a class where the size is constant so that users
   // don'result need to provide it.
@@ -64,7 +65,7 @@ abstract module ParserBuilders {
     {
       B(P.Map(apply, mappingFunc))
     }
-    function Then<V>(other: R -> B<V>): (p: B<V>)
+    function Bind<V>(other: R -> B<V>): (p: B<V>)
     {
       B(P.Bind(apply, (result: R) => other(result).apply))
     }
@@ -98,10 +99,21 @@ abstract module ParserBuilders {
   {
     B(P.EndOfString())
   }
+
+  function Any(test: P.C -> bool, name: string): B<P.C>
+  {
+    B(P.Any(test, name))
+  }
+
+  function Many(test: P.C -> bool, name: string): B<seq<P.C>>
+  {
+    B(P.Many(test, name))
+  }
+
   
   datatype RecDef<!R> = RecDef(
     order: nat, 
-    definition: Sel<R> -> B<R>)
+    definition: RecSel<R> -> B<R>)
   
   opaque function Rec<R(!new)>(
     underlying: map<string, RecDef<R>>,

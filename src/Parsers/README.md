@@ -1,84 +1,92 @@
-# Verified Parser Combinator Library in Dafny
+# Verified Parser Combinators
+
+Parser combinators in Dafny, inspired from the model (Meijer 1996).
+
+This library offers two styles of functional parser combinators.
+
+- The first parsers style is a synonym for `seq<character> -> ParseResult<Result>` that supports monadic styles, is straightforward to use, but results in lots of closing parentheses.
+
+- The second parsers style is a datatype wrapper around the first style, which enable to define functions as infix or suffixes, which makes parsers sometimes easier to read and helps decreasing nesting.
+
+## Library usage
+
+The tutorial in [`Tutorial.dfy`](examples/Tutorial.dfy) shows how to import the library call the two parsers style API, apply the parser to a string, and also use the PrintFailure to pretty print the failure along with the line/col where it occurred.
 
 To view a full example of how to use the parser combinator library,
 especially how to define a recursive parser that is guaranteed to terminate,
-please refer to the file `exampleArithmetic.dfy`, which parses
-an arithmetic expression.
+please refer to the files [`polynomialParser.dfy`](examples/polynomialParser.dfy) and [`polynomialParserBuilders.dfy`](examples/polynomialParserBuilder.dfy), which both parse polynomial expressions.
 
-To get started, first you need to import the parser, I recommend:
-
-```
-include "parser.dfy"
-import opened Parsers
-import ParserEngine
-```
-
-
-Then, define a class that extends `ParserEngine.Engine` and defines
-the input string at the same time:
+As a quick walkthrough, here is a test to parse a Tic-tac-toe grid:
 
 ```
-  class MyParserEngine extends ParserEngine.Engine {
-    constructor(input: string) {
-      this.input := input;
-    }
-  }
-```
-
-A parser is a partial function that takes a position and returns a `ParseResult`. Errors have two levels, recoverable or not.
-
-> ```
-> type Parser<+T> = nat --> ParseResult<T>
-> 
-> datatype ParseResult<+T> =
->   | PFailure(level: FailureLevel, message: string, pos: nat)
->   | PSuccess(pos: nat, t: T)
-> 
-> datatype FailureLevel = Error | Recoverable
-> ```
-
-In this class, you can define parsers yourself, or use building blocks.
-For example,
-
-```
-  function method ParseId?(): Parser<ID>
-  {
-    While?((pos: nat) requires pos <= |input| =>
-      pos < |input| && input[pos] in "azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN_7894561230"
-    )
-  }
-  
-  function method ParseId(): Parser<ID>
-  {
-    Or(ParseId?(), Fail("Expected identifier", Error))
-  }
-  
-  function method ParseField(): Parser<FieldDeclaration>
-  {
-    Bind(Concat(ParseId(), ConcatR(Const(":"), ParseId())),
-        (result: (ID, ID), newPos: nat) => Succeed(Field(result.0, result.1)))
-  }
-  // It's the same as using Map() instead of Bind(), and removing the "Succeed(" and the `newPos` parameter)
-  
-  datatype FieldDeclaration = Field(name: ID, value: ID)
-```
-
-To invoke your function, define a main method like this:
-
-```
-
-method Main() {
-  var content = "happy:code";
-  
-  var t := new MyParserEngine(content);
-  var parseResult := t.ParseField()(0);
-  if parseResult.PFailure? {
-    t.ReportError(parseResult); // Nice error reporting message with quoting the line and position of failure, along with the message
-    return;
-  }
-  var result := parseResult.t;
-  print result;
+method {:test} TestTicTacToe() {
+  var x := OrSeq([
+    String("O"), String("X"), String(" ")
+  ]);
+  var v := String("|");
+  var row := Concat(x, ConcatR(v, Concat(x, ConcatR(v, x))));
+  var sep := String("\n-+-+-\n");
+  var grid := 
+    Concat(row, ConcatR(sep, Concat(row, ConcatR(sep, row))));
+  var input := "O|X| \n-+-+-\nX|O| \n-+-+-\nP| |O";
+              // 012345 678901 234567 890123 45678
+  var r := grid(input);
+  expect r.IsFailure();
+  PrintFailure(input, r);
 }
 ```
 
+it displays the following:
 
+```
+Error:
+5: P| |O
+   ^
+expected 'O', or
+expected 'X', or
+expected ' '
+```
+## What is verified?
+
+Despite combinators enabling to define mutually recursive parsers (`RecursiveMap`, `Recursive`), Dafny will always check termination. When using recursive combinators, termination is checked at run-time so it does not prevent quick prototyping and iterations, and error messages about non-termination are always precise (either the ordering, or the progression).
+
+This library offers a predicate on parsers of the first style `Valid()`, which
+indicates that such parsers will never raise a fatal result, and will always return a
+string that is suffix of the string they are given as input. Many combinators have
+a proof that, if their inputs are Valid(), then their result is Valid().
+Checking validity statically could help design parsers that do even less checks at run-time, but it has not been developed in this library.
+
+This library also offers a dual type to parser, named Displayer, which is `(Result, seq<character>) -> seq<character>`. It only defines the dual of the Concat parser combinator and proves the roundtrip to be the identity. Because Dafny does not offer
+compilable predicate to check that a datatype constructor is included in another one,
+writing combinators for this kind of parser dual is difficult.
+
+## Relationship to JSON parsers
+
+The JSON parser is very specialized and the type of the parsers combinators it is using is actually a subset type.
+Subset types are known to be a source of proof brittleness,
+so this library design is not using subset types.
+That said, it is possible to create an adapter around a JSON parser to make it a parser of this library.
+
+# Caveats
+
+- Recursive parsers will consume stack and, in programming languages that have a finite amount of stack, programs can get out of memory. Prefer `Rep` and `RepSeq` as much as possible as they are tail-recursive.
+
+# Implementation notes
+
+The module hierarchy is as follow:
+
+```
+abstract module Parsers {
+  type C
+}
+module StringParsers {
+  type C: Char
+}
+
+abstract module ParsersBuilders {
+  import P: Parsers
+}
+module StringParsersBuilders {
+  import P = StringParsers
+}
+```
