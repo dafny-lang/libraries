@@ -30,12 +30,12 @@ abstract module Parsers
       Concat,
       ConcatL,
       ConcatR,
-      RepSeq,
       Rep,
+      CharTest,
+      ZeroOrMore,
+      OneOrMore,
       Recursive,
       RecursiveMap,
-      Any,
-      Many,
       Debug,
       intToString,
       digitToInt,
@@ -105,7 +105,7 @@ abstract module Parsers
   {
     function Remaining(): seq<C>
       // If Remaining() is the same as the input, the parser is "uncommitted",
-      // which means combinators like Or and RepSeq can try alternatives
+      // which means combinators like Or and ZeroOrMore can try alternatives
     {
       if Success? then remaining else data.remaining
     }
@@ -431,13 +431,21 @@ abstract module Parsers
     ConcatMap(left, right, (l, r) => l)
   }
 
-  opaque function RepSeq<R>(
+  opaque function ZeroOrMore<R>(
     underlying: Parser<R>
   ): Parser<seq<R>>
     // Repeats the underlying parser until the first failure
     // that accepts alternatives, and returns the underlying sequence
   {
     Rep(underlying, (result: seq<R>, r: R) => result + [r], [])
+  }
+
+  opaque function OneOrMore<R>(underlying: Parser<R>): (p: Parser<seq<R>>)
+    // Repeats the underlying parser until the first failure
+    // Will return a failure if there is not at least one match
+  {
+    Bind(underlying, (r: R) =>
+      Rep(underlying, (s: seq<R>, r': R) => s + [r'], [r]))
   }
 
   opaque function Rep<A, B>(
@@ -459,7 +467,7 @@ abstract module Parsers
     input: seq<C>
   ): (p: ParseResult<A>)
     decreases |input|
-  // RepSeq the underlying parser over the input until a recoverable failure happens
+  // ZeroOrMore the underlying parser over the input until a recoverable failure happens
   // and returns the accumulated results
   {
     match underlying(input)
@@ -479,7 +487,7 @@ abstract module Parsers
     // Given a function that requires a parser to return a parser,
     // provide the result of this parser to that function itself.
     // Careful: This function is not tail-recursive and will consume stack.
-    // Prefer using Rep() or RepSeq() for sequences
+    // Prefer using Rep() or ZeroOrMore() for sequences
   {
     (input: seq<C>) => Recursive_(underlying, input)
   }
@@ -549,7 +557,7 @@ abstract module Parsers
       definitionFun(callback)(input)
   }
 
-  opaque function Any(test: C -> bool, name: string): (p: Parser<C>)
+  opaque function CharTest(test: C -> bool, name: string): (p: Parser<C>)
     // A parser that returns the current char if it passes the test
     // Returns a recoverable error based on the name otherwise
   {
@@ -557,12 +565,6 @@ abstract module Parsers
       if 0 < |input| && test(input[0]) then Success(input[0], input[1..])
       else Failure(Recoverable,
         FailureData("expected a "+name, input, Option.None))
-  }
-
-  opaque function Many(test: C -> bool, name: string): (p: Parser<seq<C>>)
-  {
-    Bind(Any(test, name), (c: C) =>
-      Rep(Any(test, name), (s: seq<C>, c': C) => s + [c'], [c]))
   }
 
   function Debug_(message: string): string {

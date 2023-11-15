@@ -11,7 +11,9 @@ module StringParsers refines Parsers {
       String,
       ExtractLineCol,
       PrintFailure,
-      Wrappers
+      Wrappers,
+      Space,
+      WS
     reveals C
 
   type C = char
@@ -23,13 +25,23 @@ module StringParsers refines Parsers {
   opaque function Char(expectedChar: char): (p: Parser<char>)
     // A parser that tests if the current char is the given expected char
   {
-    Any((c: char) => c == expectedChar, [expectedChar])
+    CharTest((c: char) => c == expectedChar, [expectedChar])
+  }
+
+  opaque function Space(): (p: Parser<char>)
+  {
+    CharTest(c => c in " \t\r\n", "space")
+  }
+
+  opaque function WS(): (p: Parser<string>)
+  {
+    ZeroOrMore(Space())
   }
 
   opaque function Digit(): (p: Parser<char>)
     // A parser that tests if the current char is a digit and returns it
   {
-    Any(c => c in "0123456789", "digit")
+    CharTest(c => c in "0123456789", "digit")
   }
 
   opaque function DigitNumber(): (p: Parser<nat>)

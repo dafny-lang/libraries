@@ -97,7 +97,7 @@ abstract module ParserTests refines Parsers {
       Map(right, (r: R) => (l, r))
   }
   
-  lemma AboutConcatBind_<L, R>(
+  lemma AboutConcatBindSucceeds<L, R>(
     left: Parser<L>,
     right: Parser<R>,
     input: seq<C>)
@@ -196,7 +196,7 @@ abstract module ParserTests refines Parsers {
     p.Success? ==> IsRemaining(input, p.remaining)
   }
 
-  lemma {:vcs_split_on_every_assert} AboutFix_<R(!new)>(
+  lemma {:vcs_split_on_every_assert} AboutFix<R(!new)>(
     underlying: Parser<R> -> Parser<R>,
     input: seq<C>)
     requires
@@ -219,19 +219,19 @@ abstract module ParserTests refines Parsers {
   }
 
 
-  lemma Succeed_NonCrashing<R>(result: R)
+  lemma SucceedValid<R>(result: R)
     ensures Valid(Succeed(result))
   { reveal Valid(), Succeed(); }
 
-  lemma Succeed_NonCrashingAuto<R>()
+  lemma SucceedValidAuto<R>()
     ensures forall result: R :: Valid(Succeed(result))
   { reveal Valid(), Succeed();  }
 
-  lemma Epsilon_NonCrashing()
+  lemma EpsilonValid()
     ensures Valid(Epsilon())
-  { reveal Valid(), Epsilon(); Succeed_NonCrashing(()); }
+  { reveal Valid(), Epsilon(); Succeed_Valid(()); }
 
-  lemma AboutEpsilon_(input: seq<C>)
+  lemma AboutEpsilon(input: seq<C>)
     ensures
       var p := Epsilon();
       && p(input).Success?
@@ -241,24 +241,24 @@ abstract module ParserTests refines Parsers {
     reveal Succeed();
   }
 
-  lemma Fail_NonCrashing<R>(message: string)
+  lemma FailValid<R>(message: string)
     ensures Valid<R>(Fail(message, Recoverable))
   { reveal Fail(); reveal Valid(); }
 
-  lemma Fail_NonCrashingAuto<R>()
+  lemma FailValidAuto<R>()
     ensures forall message :: Valid<R>(Fail(message, Recoverable))
   { reveal Fail(); reveal Valid(); }
 
-  ghost predicate BindRightNonCrashing<L(!new), R>(right: (L, seq<C>) -> Parser<R>) {
+  ghost predicate BindRightValid<L(!new), R>(right: (L, seq<C>) -> Parser<R>) {
     forall l: L, input: seq<C> :: Valid(right(l, input))
   }
 
-  lemma Bind_NonCrashing<L, R>(
+  lemma BindSucceedsValid<L, R>(
     left: Parser<L>,
     right: (L, seq<C>) -> Parser<R>
   ) 
     requires Valid(left)
-    requires BindRightNonCrashing(right)
+    requires BindRightValid(right)
     ensures Valid(BindSucceeds(left, right))
   {
     reveal BindSucceeds(), Valid();
@@ -271,23 +271,23 @@ abstract module ParserTests refines Parsers {
     }
   }
 
-  ghost predicate Bind_NonCrashingRight<L(!new), R(!new)>(left: Parser<L>)
+  ghost predicate BindValidRight<L(!new), R(!new)>(left: Parser<L>)
     requires Valid(left)
   {
-    forall right: (L, seq<C>) -> Parser<R> | BindRightNonCrashing(right) ::
+    forall right: (L, seq<C>) -> Parser<R> | BindRightValid(right) ::
       Valid(BindSucceeds(left, right))
   }
 
-  lemma Bind_NonCrashingAuto<L(!new), R(!new)>() 
+  lemma BindValidAuto<L(!new), R(!new)>() 
   ensures forall left: Parser<L> | Valid(left) ::
-    Bind_NonCrashingRight<L, R>(left)
+    BindValidRight<L, R>(left)
   {
     forall left: Parser<L> | Valid(left),
-           right: (L, seq<C>) -> Parser<R> | BindRightNonCrashing(right)
+           right: (L, seq<C>) -> Parser<R> | BindRightValid(right)
     ensures
       Valid(BindSucceeds(left, right))
     {
-      Bind_NonCrashing(left, right);
+      BindValid(left, right);
     }
   }
 
@@ -295,7 +295,7 @@ abstract module ParserTests refines Parsers {
     decreases if n < 0 then 1 - n else n
     ensures 0 <= n ==> 1 <= |intToString(n)| && intToString(n)[0] != '-'
     ensures stringToInt(intToString(n)) == n
-  { // Proof is automatic
+  {
     reveal intToString(), stringToInt(), digitToInt();
     if n < 0 {
       calc {

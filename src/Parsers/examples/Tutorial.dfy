@@ -7,7 +7,7 @@ module Tutorial.Parsers {
   
   method {:test} TestSplit1() {
     var nonComma: Parser<string> :=
-      Many((c: char) => c != ',', "non-comma");
+      OneOrMore(CharTest((c: char) => c != ',', "non-comma"));
     var p :=
       Bind(nonComma, (result: string) =>
         Rep(ConcatR(String(","), nonComma),
@@ -71,10 +71,10 @@ module Tutorial.ParsersBuilders {
   
   method {:test} TestSplit1() {
     var nonComma: B<string> :=
-      Many((c: char) => c != ',', "non-comma");
+      CharTest((c: char) => c != ',', "non-comma").OneOrMore();
     var p :=
       nonComma.Bind((result: string) =>
-        String(",").e_I(nonComma).Rep([result],
+        S(",").e_I(nonComma).Rep([result],
           (acc: seq<string>, elem: string) => acc + [elem]
         ));
 

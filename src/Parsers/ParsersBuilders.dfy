@@ -27,23 +27,30 @@ abstract module ParserBuilders {
     provides B.I_e
     provides B.I_I
     provides B.M
-    provides B.Maybe
+    provides B.?
+    provides B.??
     provides B.Bind
     provides B.Rep
+    provides B.ZeroOrMore
+    provides B.OneOrMore
     provides End
-    provides Any, Many
+    reveals CharTest
     reveals B
-    reveals RecDef, FailureLevel, RecSel
+    reveals Rec, RecMap
+    reveals RecMapDef, FailureLevel, RecMapSel
 
   type FailureLevel = P.FailureLevel
-  type RecSel<A> = string -> B<A>
+  type RecMapSel<A> = string -> B<A>
   
   // Wrap the constructor in a class where the size is constant so that users
   // don'result need to provide it.
   datatype B<R> = B(apply: P.Parser<R>)
   {
-    function Maybe(): B<P.Option<R>> {
+    function ?(): B<P.Option<R>> {
       B(P.Maybe(apply))
+    }
+    function ??(): B<R> {
+      B(P.?(apply))
     }
     function e_I<U>(other: B<U>): (p: B<U>)
       // Excludes the left, includes the right
@@ -74,6 +81,16 @@ abstract module ParserBuilders {
     {
       B(P.Rep(apply, combine, init))
     }
+
+    function ZeroOrMore(): (p: B<seq<R>>)
+    {
+      B(P.ZeroOrMore(apply))
+    }
+
+    function OneOrMore(): (p: B<seq<R>>)
+    {
+      B(P.OneOrMore(apply))
+    }
   }
 
   function Ok<R>(result: R): (p: B<R>)
@@ -100,23 +117,25 @@ abstract module ParserBuilders {
     B(P.EndOfString())
   }
 
-  function Any(test: P.C -> bool, name: string): B<P.C>
+  function CharTest(test: P.C -> bool, name: string): B<P.C>
   {
-    B(P.Any(test, name))
+    B(P.CharTest(test, name))
   }
 
-  function Many(test: P.C -> bool, name: string): B<seq<P.C>>
-  {
-    B(P.Many(test, name))
-  }
-
-  
-  datatype RecDef<!R> = RecDef(
-    order: nat, 
-    definition: RecSel<R> -> B<R>)
-  
   opaque function Rec<R(!new)>(
-    underlying: map<string, RecDef<R>>,
+    underlying: B<R> -> B<R>
+  ): B<R>
+  {
+    B(P.Recursive((p: P.Parser<R>) =>
+      underlying(B(p)).apply))
+  }
+  
+  datatype RecMapDef<!R> = RecMapDef(
+    order: nat, 
+    definition: RecMapSel<R> -> B<R>)
+  
+  opaque function RecMap<R(!new)>(
+    underlying: map<string, RecMapDef<R>>,
     fun: string): (p: B<R>)
   {
     B(P.RecursiveMap(

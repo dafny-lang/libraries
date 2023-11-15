@@ -1,6 +1,6 @@
 # Verified Parser Combinators
 
-Parser combinators in Dafny, inspired from the model (Meijer 1996).
+Parser combinators in Dafny, inspired from the model (Meijer&Hutton 1996).
 
 This library offers two styles of functional parser combinators.
 

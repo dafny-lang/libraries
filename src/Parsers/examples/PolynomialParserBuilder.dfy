@@ -9,24 +9,24 @@ module PolynomialParsersBuilder {
   // PArsers builder style
   const parser: B<Expr>
     := 
-      Rec(map[
-        "atom" := RecDef(0, (c: RecSel<Expr>) =>
+      RecMap(map[
+        "atom" := RecMapDef(0, (c: RecMapSel<Expr>) =>
             O([
-              String("(").e_I(c("term")).I_e(String(")")),
+              S("(").e_I(c("term")).I_e(S(")")),
               Int().M((result: int) => Number(result)),
-              String("x").e_I(String("^").e_I(Int()).Maybe().M(
+              S("x").e_I(S("^").e_I(Int()).?().M(
                 (result: P.Option<int>) =>
                   if result.Some? then Unknown(result.value) else Unknown(1)))
             ])),
 
-        "factor" := RecDef(1, (c: RecSel<Expr>) => 
+        "factor" := RecMapDef(1, (c: RecMapSel<Expr>) => 
           c("atom").Bind((atom: Expr) => // TODO: Finish this one
-            O([String("*"), String("/"), String("%")])
+            O([S("*"), S("/"), S("%")])
             .I_I(c("atom")).Rep(atom, Expr.InfixBuilder()))),
 
-        "term" := RecDef(2, (c: RecSel<Expr>) => 
+        "term" := RecMapDef(2, (c: RecMapSel<Expr>) => 
           c("factor").Bind((atom: Expr) =>
-            O([String("+"), String("-")])
+            O([S("+"), S("-")])
             .I_I(c("factor")).Rep(atom, Expr.InfixBuilder())))
       ], "term")
       .I_e(End())
