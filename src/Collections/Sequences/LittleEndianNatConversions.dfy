@@ -81,15 +81,39 @@ abstract module {:options "-functionSyntax:4"} LittleEndianNatConversions {
     requires |xs| % E() == 0
     ensures |ys| == |xs| / E()
   {
-    if |xs| == 0 then LemmaDivBasicsAuto(); []
+    if |xs| == 0 then
+      var ys := (LemmaDivBasicsAuto(); []);
+      assert |ys| == |xs| / E();
+      ys
+
     else
       LemmaModIsZero(|xs|, E());
       assert |xs| >= E();
-
       Small.LemmaSeqNatBound(xs[..E()]);
-      LemmaModSubMultiplesVanishAuto();
       LemmaDivMinusOne(|xs|, E());
-      [Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..])
+      assert |xs[E()..]| % E() == 0 by {
+        LemmaModSubMultiplesVanishAuto();
+      }
+      var ys := ([Small.ToNatRight(xs[..E()]) as Large.uint] + ToLarge(xs[E()..]));
+      assert |ToLarge(xs[E()..])| == |xs[E()..]| / E();
+      assert |ys| == |xs| / E() by {
+        // To obtain a proof like this, first write a detailed proof
+        // as much as you can, not assuming anything about non-linear arithmetic (use only lemmas for that)
+        // Then remove intermediate computation steps and lemma calls if doing so decrease the resource count
+        // until arriving at at a minimum
+        calc {
+          |ys|;
+          1 + |xs[E()..]| / E();
+          1 + (|xs| - E()) / E();
+          { DivMod.ModINL.LemmaFundamentalDivMod(|xs|, E()); }
+          1 + (E() * (|xs| / E()) + |xs| % E() - E()) / E();
+          1 + (E() * (|xs| / E()) - E()) / E();
+          1 + (E() * (|xs| / E()) + E() * -1) / E();
+          { Mul.LemmaMulIsDistributiveAdd(E(), |xs| / E(), -1); }
+          1 + (E() * (|xs| / E() + -1)) / E();
+        }
+      }
+      ys
   }
 
   /* Sequence conversion from Large.BASE() to Small.BASE() does not
