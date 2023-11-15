@@ -35,6 +35,7 @@ module {:options "-functionSyntax:4"} DivMod {
     requires 0 < d
     ensures DivRecursive(x, d) == x / d
   {
+    reveal DivPos();
     reveal DivRecursive();
     LemmaDivInductionAuto(d, x, u => DivRecursive(u, d) == u / d);
   }
@@ -42,6 +43,7 @@ module {:options "-functionSyntax:4"} DivMod {
   lemma LemmaDivIsDivRecursiveAuto()
     ensures forall x: int, d: int {:trigger x / d} :: d > 0 ==> DivRecursive(x, d) == x / d
   {
+    reveal DivPos();
     reveal DivRecursive();
     forall x: int, d: int | d > 0
       ensures DivRecursive(x, d) == x / d
@@ -136,6 +138,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures x / y >= x / z
     decreases x
   {
+    reveal DivPos();
     reveal DivRecursive();
     LemmaDivIsDivRecursiveAuto();
     assert forall u: int, d: int {:trigger u / d} {:trigger DivRecursive(u, d)}

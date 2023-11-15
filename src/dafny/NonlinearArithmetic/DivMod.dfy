@@ -36,6 +36,7 @@ module {:options "-functionSyntax:4"} Dafny.DivMod {
     requires 0 < d
     ensures DivRecursive(x, d) == x / d
   {
+    reveal DivPos();
     reveal DivRecursive();
     LemmaDivInductionAuto(d, x, u => DivRecursive(u, d) == u / d);
   }
@@ -121,6 +122,7 @@ module {:options "-functionSyntax:4"} Dafny.DivMod {
     ensures x / y >= x / z
     decreases x
   {
+    reveal DivPos();
     reveal DivRecursive();
     LemmaDivIsDivRecursiveAuto();
     assert forall u: int, d: int {:trigger u / d} {:trigger DivRecursive(u, d)}

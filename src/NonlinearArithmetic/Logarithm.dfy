@@ -85,6 +85,7 @@ module {:options "-functionSyntax:4"} Logarithm {
         Log(base, base * Pow(base, n - 1));
         { LemmaPowPositive(base, n - 1);
           LemmaMulIncreases(Pow(base, n - 1), base);
+          LemmaMulIsCommutative(Pow(base, n - 1), base);
           LemmaLogS(base, base * Pow(base, n - 1)); }
         1 + Log(base, (base * Pow(base, n - 1)) / base);
         { LemmaDivMultiplesVanish(Pow(base, n - 1), base); }
