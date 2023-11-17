@@ -4,13 +4,19 @@ include "ParsersBuilders.dfy"
 module StringParsersBuilders refines ParserBuilders {
   import P = StringParsers
   export StringParsersBuilders extends ParserBuilders
-    provides S, Int, WS, Except, ParseTest
+    provides S, Int, WS, Except, ParseTest, Digit, DigitNumber
 
   function S(s: string): B<string> {
     B(P.String(s))
   }
   function Int(): B<int> {
     B(P.Int())
+  }
+  function Digit(): B<char> {
+    B(P.Digit())
+  }
+  function DigitNumber(): B<nat> {
+    B(P.DigitNumber())
   }
   function WS(): B<string> {
     B(P.WS())
@@ -23,7 +29,7 @@ module StringParsersBuilders refines ParserBuilders {
     if result.Failure? {
       P.PrintFailure(input, result);
     } else {
-      print result.result;
+      print result.result, "\n";
     }
   }
 }

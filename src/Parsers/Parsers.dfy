@@ -31,6 +31,7 @@ abstract module Parsers
       ConcatL,
       ConcatR,
       Rep,
+      RepSep,
       CharTest,
       ZeroOrMore,
       OneOrMore,
@@ -458,6 +459,18 @@ abstract module Parsers
     // and return the final accumulator
   {
     (input: seq<C>) => Rep_(underlying, combine, acc, input)
+  }
+
+  opaque function RepSep<A, B>(
+    underlying: Parser<A>,
+    separator: Parser<B>
+  ): Parser<seq<A>>
+    // Repeats the underlying parser interleaved with a separator
+    // Returns a sequence of results
+  {
+    Bind(Maybe(underlying), (result: Option<A>) =>
+      if result.None? then Succeed<seq<A>>([]) else
+      Rep(ConcatR(separator, underlying), (acc: seq<A>, a: A) => acc + [a], [result.value]))
   }
 
   opaque function {:tailrecursion true} Rep_<A, B>(
