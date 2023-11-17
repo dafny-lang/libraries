@@ -180,7 +180,7 @@ abstract module ParserTests refines Parsers {
     input: seq<C>
   )
   {
-    var result := RepSeq(underlying)(input);
+    var result := ZeroOrMore(underlying)(input);
     && result.Success?
     && |acc| <= |result.result|
     && (underlying(input).Success? && |underlying(input).remaining| < |input|
@@ -229,7 +229,7 @@ abstract module ParserTests refines Parsers {
 
   lemma EpsilonValid()
     ensures Valid(Epsilon())
-  { reveal Valid(), Epsilon(); Succeed_Valid(()); }
+  { reveal Valid(), Epsilon(); SucceedValid(()); }
 
   lemma AboutEpsilon(input: seq<C>)
     ensures
@@ -287,7 +287,7 @@ abstract module ParserTests refines Parsers {
     ensures
       Valid(BindSucceeds(left, right))
     {
-      BindValid(left, right);
+      BindSucceedsValid(left, right);
     }
   }
 

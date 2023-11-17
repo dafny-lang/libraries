@@ -27,6 +27,7 @@ abstract module ParserBuilders {
     provides B.I_e
     provides B.I_I
     provides B.M
+    provides B.If
     provides B.?
     provides B.??
     provides B.Bind
@@ -67,6 +68,9 @@ abstract module ParserBuilders {
       // Includes the left, excludes the right
     {
       B(P.Concat(apply, other.apply))
+    }
+    function If<U>(thn: B<U>): (p: B<U>) {
+      B(P.If(apply, thn.apply))
     }
     function M<U>(mappingFunc: R -> U): (p: B<U>)
       // Maps the result
