@@ -90,3 +90,20 @@ module StringParsersBuilders {
   import P = StringParsers
 }
 ```
+
+
+## FAQ: 
+
+### What properties can we use it to prove?
+
+* You get for free that parsers terminate, at worst with a run-time "fatal" parser result "no progress and got back to the same function"
+* You can actually prove the absence of fatal errors. I have several lemmas that propagate this property through parsers combinators. I'm working on a lemma for the recursive case (already done in a previous formalism, need to migrate)
+* You can prove the equivalence between various combinations of parser combinators (e.g. Bind/Succed == Map)
+* You can use these parser combinators as a specification for optimized methods that perform the same task but perhaps with a different representation, e.g. array and position instead of sequences of characters.
+
+### How does it backtrack? Like Parsec (fails if tokens are consumed)?
+
+There are several way parsers can backtrack in the current design.
+* A parser not consuming any input when returning a recoverable error can be ignored for combinators with alternatives like `Or`, `Maybe`, `If` or `ZeroOrMore` (respectively `O([...])`, `.?()`, `.If()` and `.ZeroOrMore()` if using builders)
+* It's possible to transform a parser to not consume any input when it fails (except fatal errors) via the combinator `?(...)` (`.??()` if using builders). This means the failure will have the same input as previously given, making it possible for surrounding combinators to explore alternatives.
+* The combinators `BindResult`, a generalization of the `Bind` combinator when considering parsers as monads, lets the user decides whether to continue on the left parser's remaining input or start from the beginning.
