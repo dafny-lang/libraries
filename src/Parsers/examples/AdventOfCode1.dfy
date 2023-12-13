@@ -2,10 +2,6 @@
 
 include "../stringParsersBuilders.dfy"
 
-// A small regex-like language that can be turned into a straightforward parser
-// So first we parse the parser to ParserSpec, we convert it to a parser
-// and we parse the string using this parser.
-// TODO: Compile this parser and prove it does the same.
 module AdventOfCode1 {
   import opened StringParsersBuilders
 
