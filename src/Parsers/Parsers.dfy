@@ -32,6 +32,8 @@ abstract module Parsers
       ConcatR,
       Rep,
       RepSep,
+      RepMerge,
+      RepSepMerge,
       CharTest,
       ZeroOrMore,
       OneOrMore,
@@ -471,6 +473,31 @@ abstract module Parsers
     Bind(Maybe(underlying), (result: Option<A>) =>
       if result.None? then Succeed<seq<A>>([]) else
       Rep(ConcatR(separator, underlying), (acc: seq<A>, a: A) => acc + [a], [result.value]))
+  }
+
+  opaque function RepMerge<A>(
+    underlying: Parser<A>,
+    merger: (A, A) -> A
+  ): Parser<A>
+    // Repeats the underlying parser interleaved with a separator
+    // Returns a sequence of results
+  {
+    Bind(Maybe(underlying), (result: Option<A>) =>
+      if result.None? then Fail<A>("No first element in RepMerge", Recoverable) else
+      Rep(underlying, (acc: A, a: A) => merger(acc, a), result.value))
+  }
+
+  opaque function RepSepMerge<A, B>(
+    underlying: Parser<A>,
+    separator: Parser<B>,
+    merger: (A, A) -> A
+  ): Parser<A>
+    // Repeats the underlying parser interleaved with a separator
+    // Returns a sequence of results
+  {
+    Bind(Maybe(underlying), (result: Option<A>) =>
+      if result.None? then Fail<A>("No first element in RepSepMerge", Recoverable) else
+      Rep(ConcatR(separator, underlying), (acc: A, a: A) => merger(acc, a), result.value))
   }
 
   opaque function {:tailrecursion true} Rep_<A, B>(

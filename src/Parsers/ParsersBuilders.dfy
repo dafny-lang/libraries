@@ -33,6 +33,8 @@ abstract module ParserBuilders {
     provides B.Bind
     provides B.Rep
     provides B.RepSep
+    provides B.RepMerge
+    provides B.RepSepMerge
     provides B.ZeroOrMore
     provides B.OneOrMore
     provides End
@@ -90,6 +92,17 @@ abstract module ParserBuilders {
     function RepSep<K>(separator: B<K>): (p: B<seq<R>>)
     {
       B(P.RepSep(apply, separator.apply))
+    }
+
+    
+    function RepMerge(merger: (R, R) -> R): (p: B<R>)
+    {
+      B(P.RepMerge(apply, merger))
+    }
+
+    function RepSepMerge<K>(separator: B<K>, merger: (R, R) -> R): (p: B<R>)
+    {
+      B(P.RepSepMerge(apply, separator.apply, merger))
     }
 
     function ZeroOrMore(): (p: B<seq<R>>)
