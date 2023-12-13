@@ -60,5 +60,10 @@ module ParserGenerator {
   method {:test} TestParser() {
     var program := "abc((de|f((g))*))ml";
     ParseTestCallback(parseSpec, program, (result: ParserSpec) => result.ToString());
+    var parser := parseSpec.apply(program);
+    expect parser.Success?;
+    var underlying := parser.result.ToParser();
+    program := "abcdeml";
+    print underlying.apply(program); // Should print true
   }
 }
