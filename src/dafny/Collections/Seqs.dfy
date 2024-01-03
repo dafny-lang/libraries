@@ -611,12 +611,12 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      the transformed sequence.  */
   function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
     ensures result.Success? ==>
               && |result.value| == |xs|
               && (forall i :: 0 <= i < |xs| ==>
                                 && f(xs[i]).Success?
                                 && result.value[i] == f(xs[i]).value)
-    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then Success([])
     else
@@ -652,8 +652,8 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      predicate. */
   function {:opaque} Filter<T>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
-    ensures |result| <= |xs|
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
+    ensures |result| <= |xs|
     ensures forall i: nat :: i < |result| && f.requires(result[i]) ==> f(result[i])
   {
     if |xs| == 0 then []

@@ -27,10 +27,10 @@ module {:options "-functionSyntax:4"} Isets {
   }
 
   /* Map an injective function to each element of an iset. */
-    reads f.reads
   ghost function {:opaque} Map<X(!new), Y>(xs: iset<X>, f: X --> Y): (ys: iset<Y>)
     requires forall x :: f.requires(x)
     requires Injective(f)
+    reads f.reads
     ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
   {
     var ys := iset x | x in xs :: f(x);

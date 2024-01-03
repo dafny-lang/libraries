@@ -139,10 +139,10 @@ module {:options "-functionSyntax:4"} Sets {
   }
 
   /* Map an injective function to each element of a set. */
-    reads f.reads
   function {:opaque} Map<X(!new), Y>(xs: set<X>, f: X --> Y): (ys: set<Y>)
     requires forall x :: f.requires(x)
     requires Injective(f)
+    reads f.reads
     ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
     ensures |xs| == |ys|
   {
