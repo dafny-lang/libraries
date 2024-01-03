@@ -112,12 +112,12 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* Any element in a slice is included in the original sequence. */
-  lemma LemmaElementFromSlice<T>(xs: seq<T>, xs':seq<T>, a: int, b: int, pos: nat)
     requires 0 <= a <= b <= |xs|;
     requires xs' == xs[a..b];
     requires a <= pos < b;
     ensures  pos - a < |xs'|;
     ensures  xs'[pos-a] == xs[pos];
+  lemma LemmaElementFromSlice<T>(xs: seq<T>, xs': seq<T>, a: int, b: int, pos: nat)
   {
   }
 
@@ -245,7 +245,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      once in its conversion to a multiset. */
   lemma LemmaMultisetHasNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
-    ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs):: multiset(xs)[x] == 1
+    ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs) :: multiset(xs)[x] == 1
   {
     if |xs| == 0 {
     } else {

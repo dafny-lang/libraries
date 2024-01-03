@@ -51,8 +51,8 @@ module {:options "-functionSyntax:4"} RelationsExamples {
     ensures !Reflexive((x: int, y: int) => (x < y))
   {
     var f := (x: int, y: int) => (x < y);
-    assert !f(0,0);
-    assert !forall x: int :: f(x,x);
+    assert !f(0, 0);
+    assert !forall x: int :: f(x, x);
     assert !Reflexive(f);
   }
 
@@ -64,7 +64,7 @@ module {:options "-functionSyntax:4"} RelationsExamples {
     ensures !Irreflexive((x: int, y: int) => (x == y))
   {
     var f := (x: int, y: int) => (x == y);
-    assert f(0,0);
+    assert f(0, 0);
     assert !Irreflexive(f);
   }
 
