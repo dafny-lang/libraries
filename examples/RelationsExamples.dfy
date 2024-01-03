@@ -68,11 +68,11 @@ module {:options "-functionSyntax:4"} RelationsExamples {
     assert !Irreflexive(f);
   }
 
-  lemma AsymmetricIsAntiSymmetric<T>(f: (T,T)->bool)
+  lemma AsymmetricIsAntiSymmetric<T(!new)>(f: (T, T) -> bool)
     ensures Asymmetric(f) ==> AntiSymmetric(f)
   {}
 
-  lemma AsymmetricIsIrreflexive<T>(f: (T,T)->bool)
+  lemma AsymmetricIsIrreflexive<T(!new)>(f: (T, T) -> bool)
     ensures Asymmetric(f) ==> Irreflexive(f)
   {}
 }

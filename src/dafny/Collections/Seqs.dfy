@@ -729,11 +729,11 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* inv(b, xs) ==> inv(FoldLeft(f, b, xs), []). */
-  lemma LemmaInvFoldLeft<A,B>(inv: (B, seq<A>) -> bool,
-                              stp: (B, A, B) -> bool,
-                              f: (B, A) -> B,
-                              b: B,
-                              xs: seq<A>)
+  lemma LemmaInvFoldLeft<A(!new), B(!new)>(inv: (B, seq<A>) -> bool,
+                                           stp: (B, A, B) -> bool,
+                                           f: (B, A) -> B,
+                                           b: B,
+                                           xs: seq<A>)
     requires InvFoldLeft(inv, stp)
     requires forall b, a :: stp(b, a, f(b, a))
     requires inv(b, xs)
@@ -787,11 +787,11 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* inv([], b) ==> inv(xs, FoldRight(f, xs, b)) */
-  lemma LemmaInvFoldRight<A,B>(inv: (seq<A>, B) -> bool,
-                               stp: (A, B, B) -> bool,
-                               f: (A, B) -> B,
-                               b: B,
-                               xs: seq<A>)
+  lemma LemmaInvFoldRight<A(!new), B(!new)>(inv: (seq<A>, B) -> bool,
+                                            stp: (A, B, B) -> bool,
+                                            f: (A, B) -> B,
+                                            b: B,
+                                            xs: seq<A>)
     requires InvFoldRight(inv, stp)
     requires forall a, b :: stp(a, b, f(a, b))
     requires inv([], b)
@@ -834,7 +834,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* Proves that any two sequences that are sorted by a total order and that have the same elements are equal. */
-  lemma SortedUnique<T>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
+  lemma SortedUnique<T(!new)>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
     requires SortedBy(xs, R)
     requires SortedBy(ys, R)
     requires TotalOrdering(R)
@@ -854,7 +854,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* Converts a set to a sequence that is ordered w.r.t. a given total order. */
-  function SetToSortedSeq<T>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
+  function SetToSortedSeq<T(!new)>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
     requires TotalOrdering(R)
     ensures multiset(s) == multiset(xs)
     ensures SortedBy(xs, R)
@@ -872,7 +872,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
    ***************************** */
 
   //Splits a sequence in two, sorts the two subsequences (recursively), and merges the two sorted sequences using `MergeSortedWith`
-  function MergeSortBy<T>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
+  function MergeSortBy<T(!new)>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
     requires TotalOrdering(lessThanOrEq)
     ensures multiset(a) == multiset(result)
     ensures SortedBy(result, lessThanOrEq)
@@ -916,7 +916,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
     }
   }
 
-  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
+  lemma LemmaNewFirstElementStillSortedBy<T(!new)>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
     requires SortedBy(s, lessThan)
     requires |s| == 0 || lessThan(x, s[0])
     requires TotalOrdering(lessThan)
@@ -925,7 +925,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
 
   // Helper function for MergeSortBy
-  function {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool) : (result :seq<T>)
+  function {:tailrecursion} MergeSortedWith<T(!new)>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
     requires SortedBy(left, lessThanOrEq)
     requires SortedBy(right, lessThanOrEq)
     requires TotalOrdering(lessThanOrEq)
