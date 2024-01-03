@@ -90,9 +90,9 @@ module {:options "-functionSyntax:4"} JSON.Utils.Views.Writers {
     }
 
     function Then(fn: Writer ~> Writer) : Writer
-      reads fn.reads
       requires Valid?
       requires fn.requires(this)
+      reads fn.reads(this)
     {
       fn(this)
     }

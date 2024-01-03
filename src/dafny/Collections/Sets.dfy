@@ -168,9 +168,9 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
 
   /* Construct a set using elements of another set for which a function returns
   true. */
-    reads f.reads
   function {:opaque} Filter<X(!new)>(xs: set<X>, f: X ~> bool): (ys: set<X>)
     requires forall x :: x in xs ==> f.requires(x)
+    reads set x, o | x in xs && o in f.reads(x) :: o
     ensures forall y {:trigger f(y)}{:trigger y in xs} :: y in ys <==> y in xs && f(y)
     ensures |ys| <= |xs|
   {
