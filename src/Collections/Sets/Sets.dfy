@@ -123,8 +123,8 @@ module {:options "-functionSyntax:4"} Sets {
 
   /* If an injective function is applied to each element of a set to construct
   another set, the two sets have the same size. */
-    requires forall x {:trigger f.requires(x)} :: f.requires(x)
   lemma LemmaMapSize<X(!new), Y>(xs: set<X>, ys: set<Y>, f: X --> Y)
+    requires forall x :: f.requires(x)
     requires Injective(f)
     requires forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
     requires forall y {:trigger y in ys} :: y in ys ==> exists x :: x in xs && y == f(x)
@@ -140,8 +140,8 @@ module {:options "-functionSyntax:4"} Sets {
 
   /* Map an injective function to each element of a set. */
     reads f.reads
-    requires forall x {:trigger f.requires(x)} :: f.requires(x)
   function {:opaque} Map<X(!new), Y>(xs: set<X>, f: X --> Y): (ys: set<Y>)
+    requires forall x :: f.requires(x)
     requires Injective(f)
     ensures forall x {:trigger f(x)} :: x in xs <==> f(x) in ys
     ensures |xs| == |ys|
@@ -154,8 +154,8 @@ module {:options "-functionSyntax:4"} Sets {
   /* If a set ys is constructed using elements of another set xs for which a
   function returns true, the size of ys is less than or equal to the size of
   xs. */
-    requires forall x {:trigger f.requires(x)}{:trigger x in xs} :: x in xs ==> f.requires(x)
   lemma LemmaFilterSize<X>(xs: set<X>, ys: set<X>, f: X ~> bool)
+    requires forall x :: x in xs ==> f.requires(x)
     requires forall y {:trigger f(y)}{:trigger y in xs} :: y in ys ==> y in xs && f(y)
     ensures |ys| <= |xs|
     decreases xs, ys
@@ -171,8 +171,8 @@ module {:options "-functionSyntax:4"} Sets {
   /* Construct a set using elements of another set for which a function returns
   true. */
     reads f.reads
-    requires forall x {:trigger f.requires(x)} {:trigger x in xs} :: x in xs ==> f.requires(x)
   function {:opaque} Filter<X(!new)>(xs: set<X>, f: X ~> bool): (ys: set<X>)
+    requires forall x :: x in xs ==> f.requires(x)
     ensures forall y {:trigger f(y)}{:trigger y in xs} :: y in ys <==> y in xs && f(y)
     ensures |ys| <= |xs|
   {
@@ -206,7 +206,7 @@ module {:options "-functionSyntax:4"} Sets {
   /* Construct a set with all integers in the range [a, b). */
   function {:opaque} SetRange(a: int, b: int): (s: set<int>)
     requires a <= b
-    ensures forall i {:trigger i in s} :: a <= i < b <==> i in s
+    ensures forall i :: a <= i < b <==> i in s
     ensures |s| == b - a
     decreases b - a
   {
@@ -216,7 +216,7 @@ module {:options "-functionSyntax:4"} Sets {
   /* Construct a set with all integers in the range [0, n). */
   function {:opaque} SetRangeZeroBound(n: int): (s: set<int>)
     requires n >= 0
-    ensures forall i {:trigger i in s} :: 0 <= i < n <==> i in s
+    ensures forall i :: 0 <= i < n <==> i in s
     ensures |s| == n
   {
     SetRange(0, n)
@@ -225,7 +225,7 @@ module {:options "-functionSyntax:4"} Sets {
   /* If a set solely contains integers in the range [a, b), then its size is
   bounded by b - a. */
   lemma LemmaBoundedSetSize(x: set<int>, a: int, b: int)
-    requires forall i {:trigger i in x} :: i in x ==> a <= i < b
+    requires forall i :: i in x ==> a <= i < b
     requires a <= b
     ensures |x| <= b - a
   {
