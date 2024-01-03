@@ -308,8 +308,8 @@ abstract module {:options "-functionSyntax:4"} Dafny.Collections.LittleEndianNat
   /* The nat representation of a sequence and its least significant position are
   congruent. */
   lemma LemmaSeqLswModEquivalence(xs: seq<uint>)
-    requires |xs| >= 1;
-    ensures IsModEquivalent(ToNatRight(xs), First(xs), BASE());
+    requires |xs| >= 1
+    ensures IsModEquivalent(ToNatRight(xs), First(xs), BASE())
   {
     if |xs| == 1 {
       LemmaSeqLen1(xs);

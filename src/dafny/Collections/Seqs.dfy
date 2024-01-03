@@ -46,7 +46,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
   /* Returns the last element of a non-empty sequence. */
   function Last<T>(xs: seq<T>): T
-    requires |xs| > 0;
+    requires |xs| > 0
   {
     xs[|xs|-1]
   }
@@ -54,7 +54,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Returns the subsequence of a non-empty sequence obtained by
      dropping the last element. */
   function DropLast<T>(xs: seq<T>): seq<T>
-    requires |xs| > 0;
+    requires |xs| > 0
   {
     xs[..|xs|-1]
   }
@@ -63,8 +63,8 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      from dropping the last element, the second consisting only of the last 
      element, is the original sequence. */
   lemma LemmaLast<T>(xs: seq<T>)
-    requires |xs| > 0;
-    ensures DropLast(xs) + [Last(xs)] == xs;
+    requires |xs| > 0
+    ensures DropLast(xs) + [Last(xs)] == xs
   {
   }
 
@@ -78,7 +78,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
   /* The concatenation of sequences is associative. */
   lemma LemmaConcatIsAssociative<T>(xs: seq<T>, ys: seq<T>, zs: seq<T>)
-    ensures xs + (ys + zs) == (xs + ys) + zs;
+    ensures xs + (ys + zs) == (xs + ys) + zs
   {
   }
 
@@ -106,27 +106,27 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      with that same sequence sliced from the pos-th element, is equal to the 
      original unsliced sequence. */
   lemma LemmaSplitAt<T>(xs: seq<T>, pos: nat)
-    requires pos < |xs|;
-    ensures xs[..pos] + xs[pos..] == xs;
+    requires pos < |xs|
+    ensures xs[..pos] + xs[pos..] == xs
   {
   }
 
   /* Any element in a slice is included in the original sequence. */
-    requires 0 <= a <= b <= |xs|;
-    requires xs' == xs[a..b];
-    requires a <= pos < b;
-    ensures  pos - a < |xs'|;
-    ensures  xs'[pos-a] == xs[pos];
   lemma LemmaElementFromSlice<T>(xs: seq<T>, xs': seq<T>, a: int, b: int, pos: nat)
+    requires 0 <= a <= b <= |xs|
+    requires xs' == xs[a..b]
+    requires a <= pos < b
+    ensures  pos - a < |xs'|
+    ensures  xs'[pos-a] == xs[pos]
   {
   }
 
   /* A slice (from s2..e2) of a slice (from s1..e1) of a sequence is equal to just a 
      slice (s1+s2..s1+e2) of the original sequence. */
   lemma LemmaSliceOfSlice<T>(xs: seq<T>, s1: int, e1: int, s2: int, e2: int)
-    requires 0 <= s1 <= e1 <= |xs|;
-    requires 0 <= s2 <= e2 <= e1 - s1;
-    ensures  xs[s1..e1][s2..e2] == xs[s1+s2..s1+e2];
+    requires 0 <= s1 <= e1 <= |xs|
+    requires 0 <= s2 <= e2 <= e1 - s1
+    ensures  xs[s1..e1][s2..e2] == xs[s1+s2..s1+e2]
   {
     var r1 := xs[s1..e1];
     var r2 := r1[s2..e2];
@@ -186,10 +186,10 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      elements in common between them, then the concatenated sequence xs + ys 
      will not contain duplicates either. */
   lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(xs: seq<T>, ys: seq<T>)
-    requires HasNoDuplicates(xs);
-    requires HasNoDuplicates(ys);
-    requires multiset(xs) !! multiset(ys);
-    ensures HasNoDuplicates(xs+ys);
+    requires HasNoDuplicates(xs)
+    requires HasNoDuplicates(ys)
+    requires multiset(xs) !! multiset(ys)
+    ensures HasNoDuplicates(xs + ys)
   {
     reveal HasNoDuplicates();
     var zs := xs + ys;
