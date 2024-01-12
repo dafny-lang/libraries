@@ -79,6 +79,7 @@ module Actions {
   type IAggregator<T> = Action<T, ()>
   type Aggregator<T(!new)> = a: Action<T, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
 
+  // TODO: Refactor to use DynamicArray
   class ArrayAggregator<T(0)> extends Action<T, ()> {
 
     var storage: array<T>

@@ -77,7 +77,7 @@ module Enumerators {
   {
     TerminatedUndistributes(left, right, None, n);
     TerminatedDefinesEnumerated(left + right, n);
-    
+    EnumeratedDistributesOverConcat(left, right, n);
   }
   
 
