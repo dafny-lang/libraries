@@ -92,14 +92,12 @@ module Enumerators {
       e.CanProduce(consumed, produced) ==> exists n: nat | n <= limit :: Terminated(produced, None, n)
   }
 
-  ghost predicate ConsumesAnything<T(!new), R(!new)>(a: Action<T, R>, ins: seq<T>, outs: seq<R>, nextIn: T) 
-    requires a.CanProduce(ins, outs)
-  {
-    exists nextOut :: a.CanProduce(ins + [nextIn], outs + [nextOut])
+  ghost predicate ConsumesAnything<T(!new)>(a: Action<(), Option<T>>) {
+    forall consumed, produced, next | a.CanProduce(consumed, produced) :: a.CanConsume(consumed, produced, next)
   }
 
   ghost predicate IsEnumerator<T(!new)>(a: Action<(), Option<T>>) {
-    && forall ins, outs, nextIn | a.CanProduce(ins, outs) :: ConsumesAnything(a, ins, outs, nextIn)
+    && ConsumesAnything(a)
     && exists limit :: EnumerationBoundedBy(a, limit)
   }
 
@@ -209,6 +207,11 @@ module Enumerators {
       Repr := {this};
     }
 
+    ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<T>>, next: ()) 
+      decreases height
+    {
+      true
+    }
     ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<T>>) 
       decreases height
     {
@@ -220,7 +223,7 @@ module Enumerators {
 
     method Invoke(t: ()) returns (r: Option<T>) 
       requires Valid()
-      requires exists r :: CanProduce(consumed + [t], produced + [r])
+      requires CanConsume(consumed, produced, t)
       modifies Repr
       decreases height
       ensures Valid()
@@ -282,6 +285,11 @@ module Enumerators {
       Repr := {this};
     }
 
+    ghost predicate CanConsume(consumed: seq<()>, produced: seq<T>, next: ()) 
+      decreases height
+    {
+      |consumed| + 1 <= |elements|
+    }
     ghost predicate CanProduce(consumed: seq<()>, produced: seq<T>) 
       decreases height
     {
@@ -290,7 +298,7 @@ module Enumerators {
 
     method Invoke(t: ()) returns (r: T) 
       requires Valid()
-      requires exists r :: CanProduce(consumed + [t], produced + [r])
+      requires CanConsume(consumed, produced, t)
       modifies Repr
       decreases height
       ensures Valid()
@@ -317,11 +325,6 @@ module Enumerators {
       decreases EnumerationTerminationMetric(e2)
     {
       label beforeLoop: 
-
-      assert IsEnumerator(e2);
-      assert e2.CanProduce(e2.consumed, e2.produced);
-      assert ConsumesAnything(e2, e2.consumed, e2.produced, ());
-      assert exists r :: e2.CanProduce(e2.consumed + [()], e2.produced + [r]);
       var next: Option<int> := e2.Invoke(());
       if next.None? { break; }
       EnumerationTerminationMetricDecreased@beforeLoop(e2, next);

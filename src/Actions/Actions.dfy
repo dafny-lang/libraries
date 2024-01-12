@@ -23,13 +23,12 @@ module Actions {
         && CanProduce(consumed, produced)
       decreases height, 0
 
-    ghost predicate CanProduce(ins: seq<T>, outs: seq<R>)
+    ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
+      requires CanProduce(consumed, produced)
       decreases height
 
-    ghost predicate CanConsume(ins: seq<T>, outs: seq<R>, nextIn: T)
+    ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
       decreases height
-      ensures CanConsume(ins, outs, nextIn)
-        <==> exists nextOut :: CanProduce(ins + [nextIn], outs + [nextOut])
 
     ghost method Update(t: T, r: R) 
       modifies `consumed, `produced
@@ -42,7 +41,7 @@ module Actions {
 
     method Invoke(t: T) returns (r: R) 
       requires Valid()
-      requires exists r :: CanProduce(consumed + [t], produced + [r])
+      requires CanConsume(consumed, produced, t)
       modifies Repr
       decreases height
       ensures Valid()

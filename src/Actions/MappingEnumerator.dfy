@@ -53,6 +53,11 @@ module Mapped {
       assert ValidWrappedProduced(consumed, produced, wrapped.produced);
     }
 
+    ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<R>>, next: ())
+      decreases height
+    {
+      true
+    }
     ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<R>>)
       decreases height
     {
@@ -66,7 +71,7 @@ module Mapped {
 
     method Invoke(t: ()) returns (r: Option<R>) 
       requires Valid()
-      requires exists r :: CanProduce(consumed + [t], produced + [r])
+      requires CanConsume(consumed, produced, t)
       modifies Repr
       decreases height
       ensures Valid()
