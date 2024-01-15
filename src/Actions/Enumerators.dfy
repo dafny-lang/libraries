@@ -213,6 +213,7 @@ module Enumerators {
       true
     }
     ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<T>>) 
+      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
       decreases height
     {
       var index := |consumed|;
@@ -291,6 +292,7 @@ module Enumerators {
       |consumed| + 1 <= |elements|
     }
     ghost predicate CanProduce(consumed: seq<()>, produced: seq<T>) 
+      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
       decreases height
     {
       |consumed| <= |elements| && produced == elements[..|consumed|]

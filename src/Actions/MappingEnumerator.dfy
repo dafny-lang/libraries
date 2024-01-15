@@ -8,6 +8,7 @@ module Mapped {
   import opened Wrappers
   import opened Seq
 
+  // TODO: should be unnecessary with FunctionAction, ComposedAction, and the right lemmas
   class Map<T, R(!new), R'(!new)> extends Action<T, R'> {
 
     const wrapped: Action<T, R>

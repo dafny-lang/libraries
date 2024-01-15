@@ -19,8 +19,7 @@ module Actions {
     ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
-      ensures Valid() ==> 
-        && CanProduce(consumed, produced)
+      ensures Valid() ==> CanProduce(consumed, produced)
       decreases height, 0
 
     // KEY DESIGN POINT: these predicates specifically avoid reading the current
@@ -28,14 +27,19 @@ module Actions {
     // That's so extrisnic properties of an action do NOT depend on their current state.
     // This is key to ensure that you can prove properties of a given action that
     // will continue to hold as the Dafny heap changes.
+    // This approach works because Dafny understands that for a given object,
+    // the implementation of CanConsume/CanProduce cannot change over time.
+    //
     // The downside is that these are then forced to use quantifiers
     // to talk about all possible states of an action.
 
     ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
+      requires |consumed| == |produced|
       requires CanProduce(consumed, produced)
       decreases height
 
     ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
+      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
       decreases height
 
     ghost method Update(t: T, r: R) 
@@ -56,14 +60,13 @@ module Actions {
       ensures fresh(Repr - old(Repr))
       ensures consumed == old(consumed) + [t]
       ensures produced == old(produced) + [r]
-      ensures CanProduce(consumed, produced)
   }
 
   // Common action invariants
 
   ghost predicate OnlyProduces<T(!new), R(!new)>(i: Action<T, R>, c: R) {
-    forall consumed: seq<T>, toProduce: seq<R> :: 
-      i.CanProduce(consumed, toProduce) <==> forall x <- toProduce :: x == c
+    forall consumed: seq<T>, produced: seq<R> | |consumed| == |produced| :: 
+      i.CanProduce(consumed, produced) <==> forall x <- produced :: x == c
   }
 
   ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) {
@@ -80,9 +83,17 @@ module Actions {
   }
 
   ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {
-    forall consumed: seq<T>, produced: seq<R> ::
+    forall consumed: seq<T>, produced: seq<R> | |consumed| == |produced| ::
       i.CanProduce(consumed, produced) ==> exists n: nat | n <= limit :: Terminated(produced, c, n)
   }
+
+  // Class of actions whose precondition doesn't depend on history (probably needs a better name)
+  ghost predicate ContextFree<T(!new), R(!new)>(a: Action<T, R>, p: T -> bool) {
+    forall consumed, produced, next | a.CanProduce(consumed, produced)
+      :: a.CanConsume(consumed, produced, next) <==> p(next)
+  }
+
+  // Aggregators
 
   type IAggregator<T> = Action<T, ()>
   type Aggregator<T(!new)> = a: Action<T, bool> | exists limit :: ProducesTerminatedBy(a, false, limit) witness *
@@ -97,6 +108,7 @@ module Actions {
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       ensures Valid() ==> 
+        && |consumed| == |produced|
         && CanProduce(consumed, produced)
       decreases height, 0
     {
@@ -127,6 +139,7 @@ module Actions {
       true
     }
     ghost predicate CanProduce(consumed: seq<T>, produced: seq<()>)
+      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
       decreases height
     {
       produced == Seq.Repeat((), |consumed|)

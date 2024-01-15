@@ -1,7 +1,7 @@
 
 include "Enumerators.dfy"
 
-module Mapped {
+module Functions {
 
   import opened Actions
   import opened Enumerators

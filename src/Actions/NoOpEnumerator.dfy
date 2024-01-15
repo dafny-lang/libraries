@@ -11,7 +11,7 @@ module NoOp {
   // Useful test case to ensure it's possible to compose Actions in general:
   // if you can't simply wrap an Action and implement the same specification,
   // there's no hope of changing behavior or composing Actions. :)
-  class NoOp<T(!new), R(!new)> extends Action<T, R> {
+  class NoOp<T, R> extends Action<T, R> {
 
     const wrapped: Action<T, R>
       
@@ -19,6 +19,7 @@ module NoOp {
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       ensures Valid() ==> 
+        && |consumed| == |produced|
         && CanProduce(consumed, produced)
       decreases height, 0
     {
@@ -44,6 +45,7 @@ module NoOp {
     }
 
     ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
+      requires |consumed| == |produced|
       requires CanProduce(consumed, produced)
       decreases height
     {
@@ -51,6 +53,7 @@ module NoOp {
     }
 
     ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
+      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
       decreases height
     {
       wrapped.CanProduce(consumed, produced)

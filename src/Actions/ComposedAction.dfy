@@ -1,8 +1,14 @@
 include "Actions.dfy"
+include "Enumerators.dfy"
+include "FunctionAction.dfy"
 
 module Composed {
 
   import opened Actions
+  import opened Enumerators
+  import opened Wrappers
+  import opened Seq
+  import opened Functions
 
   class Compose<T(!new), V(!new), R(!new)> extends Action<T, R> {
 
@@ -12,8 +18,7 @@ module Composed {
     ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
-      ensures Valid() ==> 
-        && CanProduce(consumed, produced)
+      ensures Valid() ==> CanProduce(consumed, produced)
       decreases height, 0
     {
       && this in Repr
@@ -22,6 +27,7 @@ module Composed {
       && first.Repr !! second.Repr
       && CanProduce(consumed, produced)
       && consumed == first.consumed
+      && first.produced == second.consumed
       && produced == second.produced
     }
 
@@ -49,20 +55,24 @@ module Composed {
       requires CanProduce(consumed, produced)
       decreases height
     {
-      forall vs: seq<V> | first.CanProduce(consumed, vs) ::
-        first.CanConsume(consumed, vs, next)
+      forall piped: seq<V> | first.CanProduce(consumed, piped) && second.CanProduce(piped, produced) :: 
+        && first.CanConsume(consumed, piped, next)
+        && forall pipedNext: V | first.CanProduce(consumed + [next], piped + [pipedNext]) ::
+          && second.CanConsume(piped, produced, pipedNext)
 
       // Note that you can't compose any arbitrary first with a second:
       // if you need to read first.produced to know if you can consume another input,
       // that won't work here because this outer CanConsume predicate doesn't take that as input.
-      // (...unless there's a way of inferring what was produced from second.produced??)
+      // (...unless there's a way of inferring what was produced from second.produced)
     }
 
     ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
+      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
       decreases height
     {
-      forall vs: seq<V> | first.CanProduce(consumed, vs) ::
-        second.CanProduce(vs, produced)
+      && |consumed| == |produced|
+      && exists piped: seq<V> | first.CanProduce(consumed, piped) ::
+          second.CanProduce(piped, produced)
     }
 
     method Invoke(t: T) returns (r: R) 
@@ -78,13 +88,27 @@ module Composed {
     {
       assert first.Valid();
       var v := first.Invoke(t);
-      
-      assert second.Valid();
       r := second.Invoke(v);
 
       Update(t, r);
       Repr := {this} + first.Repr + second.Repr;
     }
+  }
 
+  method Example() {
+    var e: SeqEnumerator<int> := new SeqEnumerator([1, 2, 3, 4, 5]);
+    SeqEnumeratorIsEnumerator(e);
+    var f := (x: Option<int>) => match x {
+      case Some(v) => Some(v + v)
+      case None => None
+    };
+    var doubler := new FunctionAction(f);
+    var mapped: Compose<(), Option<int>, Option<int>> := new Compose(doubler, e);
+
+    // TODO: Need some lemmas
+    var x := mapped.Invoke(());
+    assert mapped.produced == [Some(2)];
+    assert [x] == [Some(2)];
+    assert x == Some(2);
   }
 }
