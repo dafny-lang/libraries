@@ -23,6 +23,14 @@ module Actions {
         && CanProduce(consumed, produced)
       decreases height, 0
 
+    // KEY DESIGN POINT: these predicates specifically avoid reading the current
+    // state of the action.
+    // That's so extrisnic properties of an action do NOT depend on their current state.
+    // This is key to ensure that you can prove properties of a given action that
+    // will continue to hold as the Dafny heap changes.
+    // The downside is that these are then forced to use quantifiers
+    // to talk about all possible states of an action.
+
     ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
       requires CanProduce(consumed, produced)
       decreases height

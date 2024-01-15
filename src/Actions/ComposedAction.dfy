@@ -11,7 +11,7 @@ module Composed {
 
     ghost predicate Valid() 
       reads this, Repr 
-      ensures Valid() ==> this in Repr 
+      ensures Valid() ==> this in Repr
       ensures Valid() ==> 
         && CanProduce(consumed, produced)
       decreases height, 0
@@ -21,16 +21,18 @@ module Composed {
       && ValidComponent(second)
       && first.Repr !! second.Repr
       && CanProduce(consumed, produced)
-      && forall ts, vs | first.CanProduce(ts, vs) :: 
-        exists rs :: second.CanProduce(vs, rs)
+      && consumed == first.consumed
+      && produced == second.produced
     }
 
     constructor(second: Action<V, R>, first: Action<T, V>) 
       requires first.Valid()
       requires second.Valid()
       requires first.Repr !! second.Repr
-      requires first.CanProduce([], [])
-      requires second.CanProduce([], [])
+      requires first.consumed == []
+      requires first.produced == []
+      requires second.consumed == []
+      requires second.produced == []
       ensures Valid()
       ensures produced == []
     { 
@@ -44,18 +46,23 @@ module Composed {
     }
 
     ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
+      requires CanProduce(consumed, produced)
       decreases height
     {
-      exists vs: seq<V> :: 
-        && first.CanProduce(consumed, vs)
-        && first.CanConsume(consumed, vs, next)
+      forall vs: seq<V> | first.CanProduce(consumed, vs) ::
+        first.CanConsume(consumed, vs, next)
+
+      // Note that you can't compose any arbitrary first with a second:
+      // if you need to read first.produced to know if you can consume another input,
+      // that won't work here because this outer CanConsume predicate doesn't take that as input.
+      // (...unless there's a way of inferring what was produced from second.produced??)
     }
+
     ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
       decreases height
     {
-      exists vs: seq<V> :: 
-        && first.CanProduce(consumed, vs)
-        && second.CanProduce(vs, produced)
+      forall vs: seq<V> | first.CanProduce(consumed, vs) ::
+        second.CanProduce(vs, produced)
     }
 
     method Invoke(t: T) returns (r: R) 
@@ -69,8 +76,10 @@ module Composed {
       ensures produced == old(produced) + [r]
       ensures CanProduce(consumed, produced)
     {
+      assert first.Valid();
       var v := first.Invoke(t);
       
+      assert second.Valid();
       r := second.Invoke(v);
 
       Update(t, r);

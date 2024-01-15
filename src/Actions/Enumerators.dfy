@@ -88,8 +88,8 @@ module Enumerators {
   }
 
   ghost predicate EnumerationBoundedBy<T(!new)>(e: Action<(), Option<T>>, limit: nat) {
-    forall consumed: seq<()>, produced: seq<Option<T>> ::
-      e.CanProduce(consumed, produced) ==> exists n: nat | n <= limit :: Terminated(produced, None, n)
+    forall consumed: seq<()>, produced: seq<Option<T>> | e.CanProduce(consumed, produced) ::
+      exists n: nat | n <= limit :: Terminated(produced, None, n)
   }
 
   ghost predicate ConsumesAnything<T(!new)>(a: Action<(), Option<T>>) {
