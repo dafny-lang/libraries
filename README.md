@@ -4,6 +4,8 @@ Libraries useful for Dafny programs
 
 ## Status
 
+**This repository is now deprecated:** nearly all of this code is now available directly from the Dafny distribution using the flag `--standard-libraries`. See https://github.com/dafny-lang/dafny/tree/master/Source/DafnyStandardLibraries for details.
+
 At the moment, we're just collecting generally useful Dafny code.
 
 Once we have some amount of code which is used successfully by several projects, we might restructure this repo, informed by the concrete use cases.
