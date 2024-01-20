@@ -628,7 +628,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Applying a function to a sequence  is distributive over concatenation. That is, concatenating 
      two sequences and then applying Map is the same as applying Map to each sequence separately, 
      and then concatenating the two resulting sequences. */
-  lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
+  lemma LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j :: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Map(f, xs + ys) == Map(f, xs) + Map(f, ys)
@@ -663,7 +663,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Filtering a sequence is distributive over concatenation. That is, concatenating two sequences 
      and then using "Filter" is the same as using "Filter" on each sequence separately, and then 
      concatenating the two resulting sequences. */
-  lemma {:opaque} LemmaFilterDistributesOverConcat<T(!new)>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
+  lemma LemmaFilterDistributesOverConcat<T(!new)>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
     requires forall j :: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Filter(f, xs + ys) == Filter(f, xs) + Filter(f, ys)
@@ -695,7 +695,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Folding to the left is distributive over concatenation. That is, concatenating two 
      sequences and then folding them to the left, is the same as folding to the left the 
      first sequence and using the result to fold to the left the second sequence. */
-  lemma {:opaque} LemmaFoldLeftDistributesOverConcat<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, ys: seq<T>)
+  lemma LemmaFoldLeftDistributesOverConcat<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldLeft(f, init, xs + ys) == FoldLeft(f, FoldLeft(f, init, xs), ys)
   {
@@ -756,7 +756,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Folding to the right is (contravariantly) distributive over concatenation. That is, concatenating
      two sequences and then folding them to the right, is the same as folding to the right 
      the second sequence and using the result to fold to the right the first sequence. */
-  lemma {:opaque} LemmaFoldRightDistributesOverConcat<A,T>(f: (T, A) -> A, init: A, xs: seq<T>, ys: seq<T>)
+  lemma LemmaFoldRightDistributesOverConcat<A,T>(f: (T, A) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldRight(f, xs + ys, init) == FoldRight(f, xs, FoldRight(f, ys, init))
   {
