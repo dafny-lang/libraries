@@ -79,7 +79,7 @@ module {:options "-functionSyntax:4"} Dafny.Multiply {
     ensures forall x: int, y: int {:trigger x * y} :: x * y != 0 <==> x != 0 && y != 0
   {
     forall (x: int, y: int)
-      ensures x * y != 0 <==> x != 0 && y != 0;
+      ensures x * y != 0 <==> x != 0 && y != 0
     {
       LemmaMulNonzero(x, y);
     }
@@ -332,7 +332,7 @@ module {:options "-functionSyntax:4"} Dafny.Multiply {
     ensures  forall x: int, y: int, z: int {:trigger x * z, y * z} :: x * z < y * z && z >= 0 ==> x < y
   {
     forall (x: int, y: int, z: int | x * z < y * z && z >= 0)
-      ensures x < y;
+      ensures x < y
     {
       LemmaMulStrictInequalityConverse(x, y, z);
     }
@@ -385,7 +385,7 @@ module {:options "-functionSyntax:4"} Dafny.Multiply {
     ensures forall x: int, y: int, z: int {:trigger x * (y - z)} :: x * (y - z) == x * y - x * z
   {
     forall (x: int, y: int, z: int)
-      ensures x * (y - z) == x * y - x * z;
+      ensures x * (y - z) == x * y - x * z
     {
       LemmaMulIsDistributiveSub(x, y, z);
     }

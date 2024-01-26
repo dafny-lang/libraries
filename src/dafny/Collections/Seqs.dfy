@@ -46,7 +46,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
   /* Returns the last element of a non-empty sequence. */
   function Last<T>(xs: seq<T>): T
-    requires |xs| > 0;
+    requires |xs| > 0
   {
     xs[|xs|-1]
   }
@@ -54,7 +54,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Returns the subsequence of a non-empty sequence obtained by
      dropping the last element. */
   function DropLast<T>(xs: seq<T>): seq<T>
-    requires |xs| > 0;
+    requires |xs| > 0
   {
     xs[..|xs|-1]
   }
@@ -63,8 +63,8 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      from dropping the last element, the second consisting only of the last 
      element, is the original sequence. */
   lemma LemmaLast<T>(xs: seq<T>)
-    requires |xs| > 0;
-    ensures DropLast(xs) + [Last(xs)] == xs;
+    requires |xs| > 0
+    ensures DropLast(xs) + [Last(xs)] == xs
   {
   }
 
@@ -78,7 +78,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
   /* The concatenation of sequences is associative. */
   lemma LemmaConcatIsAssociative<T>(xs: seq<T>, ys: seq<T>, zs: seq<T>)
-    ensures xs + (ys + zs) == (xs + ys) + zs;
+    ensures xs + (ys + zs) == (xs + ys) + zs
   {
   }
 
@@ -106,33 +106,34 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      with that same sequence sliced from the pos-th element, is equal to the 
      original unsliced sequence. */
   lemma LemmaSplitAt<T>(xs: seq<T>, pos: nat)
-    requires pos < |xs|;
-    ensures xs[..pos] + xs[pos..] == xs;
+    requires pos < |xs|
+    ensures xs[..pos] + xs[pos..] == xs
   {
   }
 
   /* Any element in a slice is included in the original sequence. */
-  lemma LemmaElementFromSlice<T>(xs: seq<T>, xs':seq<T>, a: int, b: int, pos: nat)
-    requires 0 <= a <= b <= |xs|;
-    requires xs' == xs[a..b];
-    requires a <= pos < b;
-    ensures  pos - a < |xs'|;
-    ensures  xs'[pos-a] == xs[pos];
+  lemma LemmaElementFromSlice<T>(xs: seq<T>, xs': seq<T>, a: int, b: int, pos: nat)
+    requires 0 <= a <= b <= |xs|
+    requires xs' == xs[a..b]
+    requires a <= pos < b
+    ensures  pos - a < |xs'|
+    ensures  xs'[pos-a] == xs[pos]
   {
   }
 
   /* A slice (from s2..e2) of a slice (from s1..e1) of a sequence is equal to just a 
      slice (s1+s2..s1+e2) of the original sequence. */
   lemma LemmaSliceOfSlice<T>(xs: seq<T>, s1: int, e1: int, s2: int, e2: int)
-    requires 0 <= s1 <= e1 <= |xs|;
-    requires 0 <= s2 <= e2 <= e1 - s1;
-    ensures  xs[s1..e1][s2..e2] == xs[s1+s2..s1+e2];
+    requires 0 <= s1 <= e1 <= |xs|
+    requires 0 <= s2 <= e2 <= e1 - s1
+    ensures  xs[s1..e1][s2..e2] == xs[s1+s2..s1+e2]
   {
     var r1 := xs[s1..e1];
     var r2 := r1[s2..e2];
     var r3 := xs[s1+s2..s1+e2];
     assert |r2| == |r3|;
-    forall i {:trigger r2[i], r3[i]}| 0 <= i < |r2| ensures r2[i] == r3[i];
+    forall i | 0 <= i < |r2|
+      ensures r2[i] == r3[i]
     {
     }
   }
@@ -179,27 +180,24 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Is true if there are no duplicate values in the sequence. */
   ghost predicate {:opaque} HasNoDuplicates<T>(xs: seq<T>)
   {
-    (forall i, j {:trigger xs[i], xs[j]}:: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j])
+    forall i, j :: 0 <= i < |xs| && 0 <= j < |xs| && i != j ==> xs[i] != xs[j]
   }
 
   /* If sequences xs and ys don't have duplicates and there are no 
      elements in common between them, then the concatenated sequence xs + ys 
      will not contain duplicates either. */
   lemma {:timeLimitMultiplier 3} LemmaNoDuplicatesInConcat<T>(xs: seq<T>, ys: seq<T>)
-    requires HasNoDuplicates(xs);
-    requires HasNoDuplicates(ys);
-    requires multiset(xs) !! multiset(ys);
-    ensures HasNoDuplicates(xs+ys);
+    requires HasNoDuplicates(xs)
+    requires HasNoDuplicates(ys)
+    requires multiset(xs) !! multiset(ys)
+    ensures HasNoDuplicates(xs + ys)
   {
     reveal HasNoDuplicates();
     var zs := xs + ys;
     if |zs| > 1 {
-      assert forall i {:trigger zs[i]} :: 0 <= i < |xs| ==>
-                                            zs[i] in multiset(xs);
-      assert forall j {:trigger zs[j]} :: |xs| <= j < |zs| ==>
-                                            zs[j] in multiset(ys);
-      assert forall i, j {:trigger zs[i], zs[j]} :: i != j && 0 <= i < |xs| && |xs| <= j < |zs| ==>
-                                                      zs[i] != zs[j];
+      assert forall i :: 0 <= i < |xs| ==> zs[i] in multiset(xs);
+      assert forall j :: |xs| <= j < |zs| ==> zs[j] in multiset(ys);
+      assert forall i, j :: i != j && 0 <= i < |xs| && |xs| <= j < |zs| ==> zs[i] != zs[j];
     }
   }
 
@@ -245,7 +243,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      once in its conversion to a multiset. */
   lemma LemmaMultisetHasNoDuplicates<T>(xs: seq<T>)
     requires HasNoDuplicates(xs)
-    ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs):: multiset(xs)[x] == 1
+    ensures forall x {:trigger multiset(xs)[x]} | x in multiset(xs) :: multiset(xs)[x] == 1
   {
     if |xs| == 0 {
     } else {
@@ -265,7 +263,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   function {:opaque} IndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
-    ensures forall j {:trigger xs[j]} :: 0 <= j < i ==> xs[j] != v
+    ensures forall j :: 0 <= j < i ==> xs[j] != v
   {
     if xs[0] == v then 0 else 1 + IndexOf(xs[1..], v)
   }
@@ -274,7 +272,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      the index of its first occurrence. Otherwise the return is None. */
   function {:opaque} IndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
-                            forall j {:trigger xs[j]} :: 0 <= j < o.value ==> xs[j] != v
+                            forall j :: 0 <= j < o.value ==> xs[j] != v
             else v !in xs
   {
     if |xs| == 0 then None()
@@ -290,7 +288,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   function {:opaque} LastIndexOf<T(==)>(xs: seq<T>, v: T): (i: nat)
     requires v in xs
     ensures i < |xs| && xs[i] == v
-    ensures forall j {:trigger xs[j]} :: i < j < |xs| ==> xs[j] != v
+    ensures forall j :: i < j < |xs| ==> xs[j] != v
   {
     if xs[|xs|-1] == v then |xs| - 1 else LastIndexOf(xs[..|xs|-1], v)
   }
@@ -299,7 +297,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      the index of its last occurrence. Otherwise the return is None. */
   function {:opaque} LastIndexOfOption<T(==)>(xs: seq<T>, v: T): (o: Option<nat>)
     ensures if o.Some? then o.value < |xs| && xs[o.value] == v &&
-                            forall j {:trigger xs[j]} :: o.value < j < |xs| ==> xs[j] != v
+                            forall j :: o.value < j < |xs| ==> xs[j] != v
             else v !in xs
   {
     if |xs| == 0 then None()
@@ -311,7 +309,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
     requires pos < |xs|
     ensures |ys| == |xs| - 1
     ensures forall i {:trigger ys[i], xs[i]} | 0 <= i < pos :: ys[i] == xs[i]
-    ensures forall i {:trigger ys[i]} | pos <= i < |xs| - 1 :: ys[i] == xs[i+1]
+    ensures forall i | pos <= i < |xs| - 1 :: ys[i] == xs[i+1]
   {
     xs[..pos] + xs[pos+1..]
   }
@@ -338,7 +336,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
     requires pos <= |xs|
     ensures |Insert(xs, a, pos)| == |xs| + 1
     ensures forall i {:trigger Insert(xs, a, pos)[i], xs[i]} :: 0 <= i < pos ==> Insert(xs, a, pos)[i] == xs[i]
-    ensures forall i {:trigger xs[i]} :: pos <= i < |xs| ==> Insert(xs, a, pos)[i+1] == xs[i]
+    ensures forall i :: pos <= i < |xs| ==> Insert(xs, a, pos)[i+1] == xs[i]
     ensures Insert(xs, a, pos)[pos] == a
     ensures multiset(Insert(xs, a, pos)) == multiset(xs) + multiset{a}
   {
@@ -357,7 +355,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Returns a constant sequence of a given length. */
   function {:opaque} Repeat<T>(v: T, length: nat): (xs: seq<T>)
     ensures |xs| == length
-    ensures forall i: nat {:trigger xs[i]} | i < |xs| :: xs[i] == v
+    ensures forall i: nat | i < |xs| :: xs[i] == v
   {
     if length == 0 then
       []
@@ -404,7 +402,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Returns the maximum integer value in a non-empty sequence of integers. */
   function {:opaque} Max(xs: seq<int>): int
     requires 0 < |xs|
-    ensures forall k {:trigger k in xs} :: k in xs ==> Max(xs) >= k
+    ensures forall k :: k in xs ==> Max(xs) >= k
     ensures Max(xs) in xs
   {
     assert xs == [xs[0]] + xs[1..];
@@ -430,7 +428,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Returns the minimum integer value in a non-empty sequence of integers. */
   function {:opaque} Min(xs: seq<int>): int
     requires 0 < |xs|
-    ensures forall k {:trigger k in xs} :: k in xs ==> Min(xs) <= k
+    ensures forall k :: k in xs ==> Min(xs) <= k
     ensures Min(xs) in xs
   {
     assert xs == [xs[0]] + xs[1..];
@@ -579,7 +577,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      to the length of xs multiplied by a number not smaller than the length of the 
      longest sequence in xs. */
   lemma LemmaFlattenLengthLeMul<T>(xs: seq<seq<T>>, j: int)
-    requires forall i {:trigger xs[i]} | 0 <= i < |xs| :: |xs[i]| <= j
+    requires forall i | 0 <= i < |xs| :: |xs[i]| <= j
     ensures |FlattenReverse(xs)| <= |xs| * j
   {
     if |xs| == 0 {
@@ -599,10 +597,10 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Returns the sequence one obtains by applying a function to every element 
      of a sequence. */
   function {:opaque} Map<T,R>(f: (T ~> R), xs: seq<T>): (result: seq<R>)
-    requires forall i {:trigger xs[i]} :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
     ensures |result| == |xs|
-    ensures forall i {:trigger result[i]}:: 0 <= i < |xs| ==> result[i] == f(xs[i]);
-    reads set i, o {:trigger o in f.reads(xs[i])} | 0 <= i < |xs| && o in f.reads(xs[i]):: o
+    ensures forall i {:trigger result[i]} :: 0 <= i < |xs| ==> result[i] == f(xs[i])
   {
     if |xs| == 0 then []
     else [f(xs[0])] + Map(f, xs[1..])
@@ -613,12 +611,12 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      the transformed sequence.  */
   function {:opaque} MapWithResult<T, R, E>(f: (T ~> Result<R,E>), xs: seq<T>): (result: Result<seq<R>, E>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
     ensures result.Success? ==>
               && |result.value| == |xs|
               && (forall i :: 0 <= i < |xs| ==>
                                 && f(xs[i]).Success?
                                 && result.value[i] == f(xs[i]).value)
-    reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
   {
     if |xs| == 0 then Success([])
     else
@@ -630,9 +628,9 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Applying a function to a sequence  is distributive over concatenation. That is, concatenating 
      two sequences and then applying Map is the same as applying Map to each sequence separately, 
      and then concatenating the two resulting sequences. */
-  lemma {:opaque} LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
-    requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
-    requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
+  lemma LemmaMapDistributesOverConcat<T,R>(f: (T ~> R), xs: seq<T>, ys: seq<T>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires forall j :: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Map(f, xs + ys) == Map(f, xs) + Map(f, ys)
   {
     reveal Map();
@@ -654,9 +652,9 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
      predicate. */
   function {:opaque} Filter<T>(f: (T ~> bool), xs: seq<T>): (result: seq<T>)
     requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
-    ensures |result| <= |xs|
-    ensures forall i: nat {:trigger result[i]} :: i < |result| && f.requires(result[i]) ==> f(result[i])
     reads set i, o | 0 <= i < |xs| && o in f.reads(xs[i]) :: o
+    ensures |result| <= |xs|
+    ensures forall i: nat :: i < |result| && f.requires(result[i]) ==> f(result[i])
   {
     if |xs| == 0 then []
     else (if f(xs[0]) then [xs[0]] else []) + Filter(f, xs[1..])
@@ -665,9 +663,9 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Filtering a sequence is distributive over concatenation. That is, concatenating two sequences 
      and then using "Filter" is the same as using "Filter" on each sequence separately, and then 
      concatenating the two resulting sequences. */
-  lemma {:opaque} LemmaFilterDistributesOverConcat<T(!new)>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
-    requires forall i {:trigger xs[i]}:: 0 <= i < |xs| ==> f.requires(xs[i])
-    requires forall j {:trigger ys[j]}:: 0 <= j < |ys| ==> f.requires(ys[j])
+  lemma LemmaFilterDistributesOverConcat<T(!new)>(f: (T ~> bool), xs: seq<T>, ys: seq<T>)
+    requires forall i :: 0 <= i < |xs| ==> f.requires(xs[i])
+    requires forall j :: 0 <= j < |ys| ==> f.requires(ys[j])
     ensures Filter(f, xs + ys) == Filter(f, xs) + Filter(f, ys)
   {
     reveal Filter();
@@ -697,7 +695,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Folding to the left is distributive over concatenation. That is, concatenating two 
      sequences and then folding them to the left, is the same as folding to the left the 
      first sequence and using the result to fold to the left the second sequence. */
-  lemma {:opaque} LemmaFoldLeftDistributesOverConcat<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, ys: seq<T>)
+  lemma LemmaFoldLeftDistributesOverConcat<A,T>(f: (A, T) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldLeft(f, init, xs + ys) == FoldLeft(f, FoldLeft(f, init, xs), ys)
   {
@@ -729,11 +727,11 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* inv(b, xs) ==> inv(FoldLeft(f, b, xs), []). */
-  lemma LemmaInvFoldLeft<A,B>(inv: (B, seq<A>) -> bool,
-                              stp: (B, A, B) -> bool,
-                              f: (B, A) -> B,
-                              b: B,
-                              xs: seq<A>)
+  lemma LemmaInvFoldLeft<A(!new), B(!new)>(inv: (B, seq<A>) -> bool,
+                                           stp: (B, A, B) -> bool,
+                                           f: (B, A) -> B,
+                                           b: B,
+                                           xs: seq<A>)
     requires InvFoldLeft(inv, stp)
     requires forall b, a :: stp(b, a, f(b, a))
     requires inv(b, xs)
@@ -758,7 +756,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   /* Folding to the right is (contravariantly) distributive over concatenation. That is, concatenating
      two sequences and then folding them to the right, is the same as folding to the right 
      the second sequence and using the result to fold to the right the first sequence. */
-  lemma {:opaque} LemmaFoldRightDistributesOverConcat<A,T>(f: (T, A) -> A, init: A, xs: seq<T>, ys: seq<T>)
+  lemma LemmaFoldRightDistributesOverConcat<A,T>(f: (T, A) -> A, init: A, xs: seq<T>, ys: seq<T>)
     requires 0 <= |xs + ys|
     ensures FoldRight(f, xs + ys, init) == FoldRight(f, xs, FoldRight(f, ys, init))
   {
@@ -787,11 +785,11 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* inv([], b) ==> inv(xs, FoldRight(f, xs, b)) */
-  lemma LemmaInvFoldRight<A,B>(inv: (seq<A>, B) -> bool,
-                               stp: (A, B, B) -> bool,
-                               f: (A, B) -> B,
-                               b: B,
-                               xs: seq<A>)
+  lemma LemmaInvFoldRight<A(!new), B(!new)>(inv: (seq<A>, B) -> bool,
+                                            stp: (A, B, B) -> bool,
+                                            f: (A, B) -> B,
+                                            b: B,
+                                            xs: seq<A>)
     requires InvFoldRight(inv, stp)
     requires forall a, b :: stp(a, b, f(a, b))
     requires inv([], b)
@@ -834,7 +832,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* Proves that any two sequences that are sorted by a total order and that have the same elements are equal. */
-  lemma SortedUnique<T>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
+  lemma SortedUnique<T(!new)>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
     requires SortedBy(xs, R)
     requires SortedBy(ys, R)
     requires TotalOrdering(R)
@@ -854,7 +852,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
   }
 
   /* Converts a set to a sequence that is ordered w.r.t. a given total order. */
-  function SetToSortedSeq<T>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
+  function SetToSortedSeq<T(!new)>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
     requires TotalOrdering(R)
     ensures multiset(s) == multiset(xs)
     ensures SortedBy(xs, R)
@@ -872,7 +870,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
    ***************************** */
 
   //Splits a sequence in two, sorts the two subsequences (recursively), and merges the two sorted sequences using `MergeSortedWith`
-  function MergeSortBy<T>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
+  function MergeSortBy<T(!new)>(a: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
     requires TotalOrdering(lessThanOrEq)
     ensures multiset(a) == multiset(result)
     ensures SortedBy(result, lessThanOrEq)
@@ -916,7 +914,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
     }
   }
 
-  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
+  lemma LemmaNewFirstElementStillSortedBy<T(!new)>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
     requires SortedBy(s, lessThan)
     requires |s| == 0 || lessThan(x, s[0])
     requires TotalOrdering(lessThan)
@@ -925,7 +923,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Seq {
 
 
   // Helper function for MergeSortBy
-  function {:tailrecursion} MergeSortedWith<T>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool) : (result :seq<T>)
+  function {:tailrecursion} MergeSortedWith<T(!new)>(left: seq<T>, right: seq<T>, lessThanOrEq: (T, T) -> bool): (result :seq<T>)
     requires SortedBy(left, lessThanOrEq)
     requires SortedBy(right, lessThanOrEq)
     requires TotalOrdering(lessThanOrEq)

@@ -23,19 +23,19 @@ module {:options "-functionSyntax:4"} RelationsExamples {
     requires n >= 1
     ensures EquivalenceRelation(R)
   {
-    (x, y) => (x % n ==  y % n)
+    (x, y) => x % n ==  y % n
   }
 
   lemma BuiltInIntEqIsEquivalenceRelation()
-    ensures EquivalenceRelation((x: int, y: int) => (x == y))
+    ensures EquivalenceRelation((x: int, y: int) => x == y)
   {}
 
   lemma BuiltInIntGeIsAntiSymmetricRelation()
-    ensures AntiSymmetric((x: int, y: int) => (x >= y))
+    ensures AntiSymmetric((x: int, y: int) => x >= y)
   {}
 
   lemma BuiltInIntLtIsAsymmetricRelation()
-    ensures Asymmetric((x: int, y: int) => (x < y))
+    ensures Asymmetric((x: int, y: int) => x < y)
   {
   }
 
@@ -48,31 +48,31 @@ module {:options "-functionSyntax:4"} RelationsExamples {
   }
 
   lemma BuiltInIntLtIsNotReflexiveRelation()
-    ensures !Reflexive((x: int, y: int) => (x < y))
+    ensures !Reflexive((x: int, y: int) => x < y)
   {
-    var f := (x: int, y: int) => (x < y);
-    assert !f(0,0);
-    assert !forall x: int :: f(x,x);
+    var f := (x: int, y: int) => x < y;
+    assert !f(0, 0);
+    assert !forall x: int :: f(x, x);
     assert !Reflexive(f);
   }
 
   lemma BuiltInIntLtIsIrreflexiveRelation()
-    ensures Irreflexive((x: int, y: int) => (x < y))
+    ensures Irreflexive((x: int, y: int) => x < y)
   {}
 
   lemma BuiltInIntEqIsNotIrreflexiveRelation()
-    ensures !Irreflexive((x: int, y: int) => (x == y))
+    ensures !Irreflexive((x: int, y: int) => x == y)
   {
-    var f := (x: int, y: int) => (x == y);
-    assert f(0,0);
+    var f := (x: int, y: int) => x == y;
+    assert f(0, 0);
     assert !Irreflexive(f);
   }
 
-  lemma AsymmetricIsAntiSymmetric<T>(f: (T,T)->bool)
+  lemma AsymmetricIsAntiSymmetric<T(!new)>(f: (T, T) -> bool)
     ensures Asymmetric(f) ==> AntiSymmetric(f)
   {}
 
-  lemma AsymmetricIsIrreflexive<T>(f: (T,T)->bool)
+  lemma AsymmetricIsIrreflexive<T(!new)>(f: (T, T) -> bool)
     ensures Asymmetric(f) ==> Irreflexive(f)
   {}
 }

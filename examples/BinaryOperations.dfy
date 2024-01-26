@@ -161,7 +161,7 @@ module {:options "-functionSyntax:4"} HomomorphismExamples {
   import IntegersExample
   import RealsExample
 
-  lemma IdentityIsHomomorphism<T>(bop: (T, T) -> T)
+  lemma IdentityIsHomomorphism<T(!new)>(bop: (T, T) -> T)
     ensures IsHomomorphism(bop, bop, x => x)
   {}
 
@@ -169,7 +169,7 @@ module {:options "-functionSyntax:4"} HomomorphismExamples {
     ensures IsHomomorphism(IntegersExample.add, RealsExample.add, (x: int) => x as real)
   {}
 
-  lemma ConstUnitIsHomomorphism<S,T>(bop1: (S, S) -> S, bop2: (T, T) -> T, unit: T)
+  lemma ConstUnitIsHomomorphism<S(!new), T(!new)>(bop1: (S, S) -> S, bop2: (T, T) -> T, unit: T)
     requires IsUnital(bop2, unit)
     ensures IsHomomorphism(bop1, bop2, x => unit)
   {}
