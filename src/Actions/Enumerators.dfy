@@ -173,6 +173,10 @@ module Enumerators {
   // Potentially infinite enumerator
   type IEnumerator<T> = Action<(), T> 
 
+  // TODO: There's
+
+  type Enumerator<T(!new)> = e: IEnumerator<Option<T>> | IsEnumerator(e) witness *
+
   class SeqEnumerator<T> extends Action<(), Option<T>> {
 
     const elements: seq<T>
@@ -207,31 +211,29 @@ module Enumerators {
       Repr := {this};
     }
 
-    ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<T>>, next: ()) 
+    ghost predicate CanConsume(history: seq<((), Option<T>)>, next: ()) 
       decreases height
     {
       true
     }
-    ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<T>>) 
-      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
+    ghost predicate CanProduce(history: seq<((), Option<T>)>) 
       decreases height
     {
-      var index := |consumed|;
+      var index := |history|;
       var values := Math.Min(index, |elements|);
       var nones := index - values;
-      produced == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones)
+      Produced(history) == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones)
     }
 
     method Invoke(t: ()) returns (r: Option<T>) 
       requires Valid()
-      requires CanConsume(consumed, produced, t)
+      requires CanConsume(history, t)
       modifies Repr
       decreases height
       ensures Valid()
       ensures Repr <= old(Repr)
-      ensures consumed == old(consumed) + [t]
-      ensures produced == old(produced) + [r]
-      ensures CanProduce(consumed, produced)
+      ensures history == old(history) + [(t, r)]
+      ensures CanProduce(history)
     {
       if index < |elements| {
         r := Some(elements[index]);
@@ -263,51 +265,48 @@ module Enumerators {
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       ensures Valid() ==> 
-        && CanProduce(consumed, produced)
+        && CanProduce(history)
       decreases height, 0
     {
       && this in Repr
       && 0 <= index <= |elements|
-      && |consumed| == index
-      && produced == elements[0..index]
+      && |history| == index
+      && Produced(history) == elements[0..index]
     }
 
     constructor(s: seq<T>) 
       ensures Valid()
       ensures fresh(Repr - {this})
-      ensures produced == []
+      ensures history == []
       ensures elements == s
     {
       elements := s;
       index := 0;
       
-      consumed := [];
-      produced := [];
+      history := [];
       Repr := {this};
     }
 
-    ghost predicate CanConsume(consumed: seq<()>, produced: seq<T>, next: ()) 
+    ghost predicate CanConsume(history: seq<((), T)>, next: ()) 
       decreases height
     {
-      |consumed| + 1 <= |elements|
+      |history| + 1 <= |elements|
     }
-    ghost predicate CanProduce(consumed: seq<()>, produced: seq<T>) 
-      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
+    ghost predicate CanProduce(history: seq<((), T)>) 
       decreases height
     {
-      |consumed| <= |elements| && produced == elements[..|consumed|]
+      |history| <= |elements| && Produced(history) == elements[..|history|]
     }
 
     method Invoke(t: ()) returns (r: T) 
       requires Valid()
-      requires CanConsume(consumed, produced, t)
+      requires CanConsume(history, t)
       modifies Repr
       decreases height
       ensures Valid()
       ensures Repr <= old(Repr)
-      ensures consumed == old(consumed) + [t]
-      ensures produced == old(produced) + [r]
-      ensures CanProduce(consumed, produced)
+      ensures history == old(history) + [(t, r)]
+      ensures CanProduce(history)
     {
       r := elements[index];
       index := index + 1;
@@ -315,6 +314,45 @@ module Enumerators {
       Update((), r);
     }
   }
+
+  // Note that this means "possibly infinite" as opposed to "definitely infinite",
+  // but if a value is finite its enumerator has to communicate
+  trait IEnumerable<T> {
+    method IEnumerator() returns (e: IEnumerator<T>)
+  }
+
+  trait Enumerable<T(!new)> extends IEnumerable<Option<T>> {
+    method Enumerator() returns (e: Enumerator<T>)
+  }
+
+  // method ForEach<T(!new)>(source: Enumerator<T>, sink: Aggregator<T>) 
+  //   requires source.Valid()
+  //   requires sink.Valid()
+  //   requires forall produced 
+  //     | source.CanProduce(Seq.Repeat((), |produced|), produced) 
+  //     :: sink.CanConsume(produced, Seq.Repeat((), |produced|))
+  //   requires source.Repr !! sink.Repr
+  //   modifies source.Repr, sink.Repr
+  // {
+  //   while true 
+  //     invariant source.Valid()
+  //     invariant fresh(source.Repr - old(source.Repr))
+  //     invariant sink.Valid()
+  //     invariant fresh(sink.Repr - old(sink.Repr))
+  //     invariant source.Repr !! sink.Repr
+  //     modifies source.Repr, sink.Repr
+  //     decreases EnumerationTerminationMetric(source)
+  //   {
+  //     label beforeLoop: 
+  //     var next: Option<T> := source.Invoke(());
+  //     if next.None? { break; }
+  //     EnumerationTerminationMetricDecreased@beforeLoop(source, next);
+
+  //     var _ := sink.Invoke(next.value);
+  //   }
+  // }
+
+  // Examples
 
   method EnumeratorExample() {
     var e2: SeqEnumerator<int> := new SeqEnumerator([1, 2, 3, 4, 5]);

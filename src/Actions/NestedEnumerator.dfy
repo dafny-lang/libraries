@@ -1,20 +1,19 @@
 
 include "Enumerators.dfy"
 
-module Filtered {
+module Nested {
 
   import opened Actions
   import opened Enumerators
   import opened Wrappers
   import opened Seq
 
-  class Filter<T(!new)> extends Action<(), Option<T>> {
+  // The equivalent of SelectMany from LINQ
+  class Nested<V(!new), T(!new)> extends Action<(), Option<T>> {
 
-    const wrapped: Action<(), Option<T>>
+    const first: Action<(), V>
+    const secondConstr: Action<V, Action<(), Option<T>>>
       
-    // TODO: Can we support --> or ~>?
-    const filter: T -> bool
-
     ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
@@ -23,7 +22,9 @@ module Filtered {
       decreases height, 0
     {
       && this in Repr
-      && ValidComponent(wrapped)
+      && ValidComponent(first)
+      && ValidComponent(secondConstr)
+      && first.Repr !! secondConstr.Repr
       && IsEnumerator(wrapped)
       && CanProduce(consumed, produced)
       && Enumerated(produced) == Seq.Filter(filter, Enumerated(wrapped.produced))
@@ -62,6 +63,7 @@ module Filtered {
       && Enumerated(produced) == Seq.Filter(filter, Enumerated(producedByWrapped))
     }
 
+    // 
     method {:vcs_split_on_every_assert} Invoke(t: ()) returns (r: Option<T>) 
       requires Valid()
       requires CanConsume(consumed, produced, t)
@@ -72,6 +74,9 @@ module Filtered {
       ensures consumed == old(consumed) + [t]
       ensures produced == old(produced) + [r]
     {
+      // while true:
+      //    if 
+
       while true
         invariant wrapped.Valid()
         invariant fresh(wrapped.Repr - old(wrapped.Repr))
@@ -124,4 +129,7 @@ module Filtered {
       Update(t, r);
     }
   }
+
+  // TODO: Lemma that if first is an enumerator (which requires V == Option<V'> for some V')
+  // then Nested(first, secondConstr) is too
 }
