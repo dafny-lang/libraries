@@ -4,13 +4,16 @@ include "../Frames.dfy"
 include "../Math.dfy"
 include "../Collections/Sequences/Seq.dfy"
 
+include "GenericAction.dfy"
+
 module Actions {
 
   import opened Wrappers
   import opened Frames
   import opened Seq
   import opened Math
-
+  import opened GenericActions
+  import opened Termination
 
   // TODO: NOT a fully general-purpose handle on any arbitrary Dafny method,
   // because gaps in Dafny expressiveness make that impossible for now
@@ -19,7 +22,7 @@ module Actions {
   // Consider naming this something more specific, related to the assumptions:
   //  1. Validatable (and doesn't modify anything not in Repr)
   //  2. Behavior specified only by referring to consumed and produced.
-  trait {:termination false} Action<T, R> extends Validatable {
+  trait {:termination false} Action<T, R> extends GenericAction<T, R>, Validatable {
 
     ghost var history: seq<(T, R)>
 
@@ -50,21 +53,54 @@ module Actions {
     ghost predicate CanProduce(history: seq<(T, R)>)
       decreases height
 
-    ghost method Update(t: T, r: R) 
+    ghost predicate Requires(t: T)
+      reads Reads(t) 
+    {
+      && Valid()
+      && CanConsume(history, t)
+    }
+    ghost function Reads(t: T): set<object> 
+      reads this
+      ensures this in Reads(t)
+    {
+      {this} + Repr
+    }
+    ghost function Modifies(t: T): set<object> 
+      reads Reads(t)
+    {
+      Repr
+    }
+    ghost function Decreases(t: T): TerminationMetric 
+      reads Reads(t)
+    {
+      NatTerminationMetric(height)
+    }
+    ghost predicate Ensures(t: T, r: R) 
+      reads Reads(t)
+    {
+      && Valid()
+      && 0 < |history|
+      && history[|history| - 1] == (t, r)
+    }
+    twostate predicate EnsuresTwostate(t: T) 
+      reads Reads(t)
+    {
+      && 0 < |history|
+      && history[..|history| - 1] == old(history)
+      && CanProduce(history)
+      && fresh(Repr - old(Repr))
+    }
+
+    // Helper method for updating history
+    ghost method Update(t: T, r: R)
+      reads `history
       modifies `history
       ensures history == old(history) + [(t, r)]
     {
       history := history + [(t, r)];
     }
 
-    method Invoke(t: T) returns (r: R) 
-      requires Valid()
-      requires CanConsume(history, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures fresh(Repr - old(Repr))
-      ensures history == old(history) + [(t, r)]
+    
   }
 
   // Common action invariants
@@ -162,19 +198,13 @@ module Actions {
       true
     }
 
-    twostate predicate ValidReprChange(before: set<object>, after: set<object>) {
-      fresh(after - before)
-    }
-
     method Invoke(t: T) returns (r: ()) 
-      requires Valid()
-      requires CanConsume(history, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures fresh(Repr - old(Repr))
-      ensures history == old(history) + [(t, r)]
-      ensures CanProduce(history)
+      requires Requires(t)
+      reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+      ensures EnsuresTwostate(t)
     {
       if index == storage.Length {
         var newStorage := new T[storage.Length * 2];

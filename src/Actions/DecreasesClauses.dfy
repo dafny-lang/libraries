@@ -17,6 +17,18 @@ module Termination {
 
     ghost function {:axiom} Ordinal(): ORDINAL
   }
+  
+  // Convenience constructors
+  function TerminationMetric1(value1: TMValue): TerminationMetric {
+    TerminationMetric(value1, Top)
+  }
+  function TerminationMetric2(value1: TMValue, value2: TMValue): TerminationMetric {
+    TerminationMetric(value1, More(TerminationMetric(value2, Top)))
+  }
+  function NatTerminationMetric(m: nat): TerminationMetric {
+    TerminationMetric1(TMNat(m))
+  }
+  
 
   lemma {:axiom} OrdinalOrdered(left: TerminationMetric, right: TerminationMetric) 
     requires left.IsSmallerThan(right)
