@@ -4,15 +4,15 @@ module Termination {
   datatype ClauseTail = More(next: TerminationMetric) | Top
 
   datatype TerminationMetric = TerminationMetric(first: TMValue, rest: ClauseTail) {
-    predicate IsSmallerThan(other: TerminationMetric) {
+    predicate DecreasesTo(other: TerminationMetric) {
       if first == other.first then
         match (rest, other.rest) {
-          case (Top, _) => false
-          case (More(_), Top) => true
-          case (More(next), More(otherNext)) => next.IsSmallerThan(otherNext)
+          case (_, Top) => false
+          case (Top, More(_)) => true
+          case (More(next), More(otherNext)) => next.DecreasesTo(otherNext)
         }
       else
-        first.IsSmallerThan(other.first)
+        first.DecreasesTo(other.first)
     }
 
     ghost function {:axiom} Ordinal(): ORDINAL
@@ -28,24 +28,45 @@ module Termination {
   function NatTerminationMetric(m: nat): TerminationMetric {
     TerminationMetric1(TMNat(m))
   }
-  
 
+  // Assume a mapping exists from the DecreasesTo ordering onto the ordinals.
+  // This always exists, but is complicated to define concretely
+  // and technically has to be defined for a whole program.
+  // It's sound to just assume it exists to convince Dafny that
+  // `decreases terminationMetric.Ordinal()` is valid.
   lemma {:axiom} OrdinalOrdered(left: TerminationMetric, right: TerminationMetric) 
-    requires left.IsSmallerThan(right)
-    ensures left.Ordinal() < right.Ordinal()
+    requires left.DecreasesTo(right)
+    ensures left.Ordinal() > right.Ordinal()
 
+  // Heterogeneous encoding of the essential features of individual
+  // decreases clause list elements. 
   datatype TMValue = 
     | TMNat(natValue: nat)
     | TMChar(charValue: nat)
     | TMSeq(seqValue: seq<TMValue>) 
-    // TODO: etc
+    | TMDatatype(children: seq<TMValue>)
+    // TODO: All other supported kinds of Dafny values
   {
-    predicate IsSmallerThan(other: TMValue) {
+    predicate DecreasesTo(other: TMValue) {
       match (this, other) {
-        case (TMNat(left), TMNat(right)) => left < right
-        case (TMChar(left), TMChar(right)) => left < right
-        case (TMSeq(left), TMSeq(right)) => left < right // TODO: should be Seq.IsSubsequenceOf
-        // TODO: etc
+        // Simple well-ordered types 
+        case (TMNat(left), TMNat(right)) => left > right
+        case (TMChar(left), TMChar(right)) => left > right
+        // TODO: etc.
+        // Other is a strict subsequence of this
+        case (TMSeq(left), TMSeq(right)) =>
+          || (exists i | 0 <= i < |left| :: left[..i] == right)
+          || (exists i | 0 < i <= |left| :: left[i..] == right)
+        // This is a sequence and other is a datatype and structurally included
+        // (treating a sequence as a datatype with N children)
+        case (TMSeq(leftSeq), TMDatatype(_)) => 
+          || other in leftSeq
+        // Structural inclusion inside a datatype
+        // TODO: Does other have to be a datatype too?
+        case (TMDatatype(leftChildren), _) => 
+          || other in leftChildren
+         
+        // TODO: other cases
         case _ => false
       }
     }
@@ -54,17 +75,25 @@ module Termination {
 
 module Example {
 
-  datatype D = Less(x: nat) | More(x: nat)
+  datatype Tree<T> = Node(children: seq<Tree<T>>) | Nil
 
-  function Foo(d: D): nat 
-    decreases d
-  {
-    if d.More? then
-      Foo(Less(d.x))
+  function Count<T>(t: Tree<T>): nat {
+    match t
+    case Node(children) =>
+      // assert t decreases to children;
+      CountSum(children)
+    case Nil =>
+      0
+  }
+
+  function CountSum<T>(children: seq<Tree<T>>): nat {
+    if |children| == 0 then
+      0
     else
-      if d.x == 0 then  
-        42
-      else
-        Foo(Less(d.x - 1))
+      // assert children decreases to children[0];
+      var firstCount := Count(children[0]);
+      // assert children decreases to children[1..];
+      var restCount := CountSum(children[1..]);
+      firstCount + restCount
   }
 }
