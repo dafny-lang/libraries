@@ -8,15 +8,15 @@ module ActionCombinators {
   import opened Enumerators
 
   method Function<T, R>(f: T --> R)
-    returns (a: SimpleAction<T, R>)
+    returns (a: Action<T, R>)
     ensures fresh(a.Repr)
     ensures forall history: seq<(T, R)> | a.CanProduce(history), e <- history :: 
       f.requires(e.0) && e.1 == f(e.0)
 
   method EnumeratorOfSeq<T(!new)>(s: seq<T>)
     returns (e: Enumerator<T>)
-    ensures forall history: seq<((), Option<T>)> | e.CanProduce(history) :: 
-      Enumerated(Outputs(history)) == 
+    ensures EnumeratesSeq(e, s)
+    ensures e.history == [] 
 
   // a.k.a. Chain(first, second)
   //
@@ -37,7 +37,8 @@ module ActionCombinators {
     requires second.Repr !! first.Repr
 
   // Produces Seq.Filter(what a produces, p)
-  // a has to be an Enumerator to ensure Invoke() eventually terminates
+  // a has to be an Enumerator rather than just an Action
+  // to ensure Invoke() eventually terminates
   method Filter<T(!new)>(e: Enumerator<T>, p: T -> bool)
     returns (filtered: Enumerator<T>)
 
@@ -48,7 +49,13 @@ module ActionCombinators {
     returns (nested: Enumerator<T>)
 
   method ForEach<T(!new)>(source: Enumerator<T>, sink: Aggregator<T>)
+    // Ensures that source is exhausted
+    // and that sink.Consumed() == Enumerated(source.Produced())
 
   method Collect<T(!new)>(source: Enumerator<T>)
     returns (s: seq<T>)
+    // Ensures that source is exhausted
+    // and that s == Enumerated(source.Produced())
+    // Likely implemented by creating an ArrayAggregator sink
+    // and calling ForEach(source, sink)
 }
