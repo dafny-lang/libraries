@@ -15,6 +15,15 @@ module Enumerators {
       [produced[0].value] + Enumerated(produced[1..])
   }
 
+  // TODO: Feels like there should be a cleaner expression of this
+  ghost predicate EnumeratesSeq<T(!new)>(a: Action<(), Option<T>>, s: seq<T>) {
+    forall history | a.CanProduce(history) ::
+      var produced := Outputs(history);
+      var enumerated := Enumerated(produced);
+      && enumerated <= s
+      && (|enumerated| < |produced| ==> enumerated == s)
+  }
+
   lemma TerminatedDefinesEnumerated<T>(s: seq<Option<T>>, n: nat) 
     requires Terminated(s, None, n)
     ensures 
@@ -89,7 +98,7 @@ module Enumerators {
 
   ghost predicate EnumerationBoundedBy<T(!new)>(e: Action<(), Option<T>>, limit: nat) {
     forall history: seq<((), Option<T>)> | e.CanProduce(history) ::
-      exists n: nat | n <= limit :: Terminated(Produced(history), None, n)
+      exists n: nat | n <= limit :: Terminated(Outputs(history), None, n)
   }
 
   ghost predicate ConsumesAnything<T(!new)>(a: Action<(), Option<T>>) {
@@ -115,29 +124,29 @@ module Enumerators {
     requires IsEnumerator(a)
   {
     var limit := EnumerationBound(a);
-    var n: nat :| n <= limit && Terminated(a.produced, None, n);
-    TerminatedDefinesEnumerated(a.produced, n);
-    limit - |Enumerated(a.produced)|
+    var n: nat :| n <= limit && Terminated(Outputs(a.history), None, n);
+    TerminatedDefinesEnumerated(a.Produced(), n);
+    limit - |Enumerated(a.Produced())|
   }
 
   twostate lemma ProducingSomeImpliesTerminated<T(!new)>(a: Action<(), Option<T>>, nextProduced: Option<T>)
     requires old(a.Valid())
-    requires old(a.CanProduce(a.consumed, a.produced))
+    requires old(a.CanProduce(a.history))
     requires a.Valid()
-    requires a.CanProduce(a.consumed, a.produced)
+    requires a.CanProduce(a.history)
     requires IsEnumerator(a)
-    requires a.produced == old(a.produced) + [nextProduced];
+    requires a.Produced() == old(a.Produced()) + [nextProduced]
     requires nextProduced.Some?
-    ensures Terminated(a.produced, None, |a.produced|)
+    ensures Terminated(a.Produced(), None, |a.Produced()|)
   {
-    var before := old(a.produced);
+    var before := old(a.Produced());
     var n: nat :| n <= |before| && Terminated(before, None, n);
-    var m: nat :| Terminated(a.produced, None, m);
+    var m: nat :| Terminated(a.Produced(), None, m);
     if n < |before| {
       assert before[|before| - 1] == None;
-      assert a.produced[|a.produced| - 1] != None;
-      assert |a.produced| <= m;
-      assert a.produced[|before| - 1] != None;
+      assert a.Produced()[|a.Produced()| - 1] != None;
+      assert |a.Produced()| <= m;
+      assert a.Produced()[|before| - 1] != None;
       assert false;
     }
     assert |before| <= n;
@@ -147,18 +156,18 @@ module Enumerators {
     requires old(a.Valid())
     requires a.Valid()
     requires IsEnumerator(a)
-    requires a.produced == old(a.produced) + [nextProduced];
+    requires a.Produced() == old(a.Produced()) + [nextProduced]
     requires nextProduced.Some?
     ensures EnumerationTerminationMetric(a) < old(EnumerationTerminationMetric(a))
   {
-    var before := old(a.produced);
+    var before := old(a.Produced());
     var n: nat :| n <= |before| && Terminated(before, None, n);
-    var m: nat :| Terminated(a.produced, None, m);
+    var m: nat :| Terminated(a.Produced(), None, m);
     if n < |before| {
       assert before[|before| - 1] == None;
-      assert a.produced[|a.produced| - 1] != None;
-      assert |a.produced| <= m;
-      assert a.produced[|before| - 1] != None;
+      assert a.Produced()[|a.Produced()| - 1] != None;
+      assert |a.Produced()| <= m;
+      assert a.Produced()[|before| - 1] != None;
       assert false;
     }
     assert |before| <= n;
@@ -166,14 +175,12 @@ module Enumerators {
     TerminatedDefinesEnumerated(before, n);
     assert |Enumerated(before)| <= n;
     TerminatedDistributesOverConcat(before, [nextProduced], None, 1);
-    assert Terminated(a.produced, None, |a.produced|);
-    TerminatedDefinesEnumerated(a.produced, |a.produced|);
+    assert Terminated(a.Produced(), None, |a.Produced()|);
+    TerminatedDefinesEnumerated(a.Produced(), |a.Produced()|);
   }
 
   // Potentially infinite enumerator
   type IEnumerator<T> = Action<(), T> 
-
-  // TODO: There's
 
   type Enumerator<T(!new)> = e: IEnumerator<Option<T>> | IsEnumerator(e) witness *
 
@@ -189,25 +196,24 @@ module Enumerators {
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       ensures Valid() ==> 
-        && CanProduce(consumed, produced)
+        && CanProduce(history)
       decreases height, 0
     {
       && this in Repr
-      && index == |consumed|
-      && CanProduce(consumed, produced)
+      && index == |history|
+      && CanProduce(history)
     }
 
     constructor(s: seq<T>) 
       ensures Valid()
       ensures fresh(Repr - {this})
-      ensures produced == []
+      ensures history == []
       ensures elements == s
     {
       elements := s;
       index := 0;
       
-      consumed := [];
-      produced := [];
+      history := [];
       Repr := {this};
     }
 
@@ -222,19 +228,18 @@ module Enumerators {
       var index := |history|;
       var values := Math.Min(index, |elements|);
       var nones := index - values;
-      Produced(history) == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones)
+      Outputs(history) == Seq.Map(x => Some(x), elements[..values]) + Seq.Repeat(None, nones)
     }
 
     method Invoke(t: ()) returns (r: Option<T>) 
-      requires Valid()
-      requires CanConsume(history, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures Repr <= old(Repr)
-      ensures history == old(history) + [(t, r)]
-      ensures CanProduce(history)
+      requires Requires(t)
+      reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+      ensures EnsuresTwostate(t)
     {
+      assert Valid();
       if index < |elements| {
         r := Some(elements[index]);
       } else {
@@ -243,14 +248,18 @@ module Enumerators {
 
       index := index + 1;
       Update((), r);
+      assert this in Repr;
+      assert index == |history|;
+      // TODO: Need some resuable lemmas relating Inputs() and Outputs()?
+      assert CanProduce(history);
     }
   }
 
   lemma SeqEnumeratorIsEnumerator<T(!new)>(e: SeqEnumerator<T>) 
     ensures IsEnumerator(e)
   {
-    forall consumed, produced | e.CanProduce(consumed, produced)
-      ensures Terminated(produced, None, |e.elements|)
+    forall history | e.CanProduce(history)
+      ensures Terminated(Outputs(history), None, |e.elements|)
     {
     }
     assert EnumerationBoundedBy(e, |e.elements|);
@@ -271,7 +280,7 @@ module Enumerators {
       && this in Repr
       && 0 <= index <= |elements|
       && |history| == index
-      && Produced(history) == elements[0..index]
+      && Produced() == elements[0..index]
     }
 
     constructor(s: seq<T>) 
@@ -295,19 +304,18 @@ module Enumerators {
     ghost predicate CanProduce(history: seq<((), T)>) 
       decreases height
     {
-      |history| <= |elements| && Produced(history) == elements[..|history|]
+      |history| <= |elements| && Outputs(history) == elements[..|history|]
     }
 
     method Invoke(t: ()) returns (r: T) 
-      requires Valid()
-      requires CanConsume(history, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures Repr <= old(Repr)
-      ensures history == old(history) + [(t, r)]
-      ensures CanProduce(history)
+      requires Requires(t)
+      reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+      ensures EnsuresTwostate(t)
     {
+      assert Valid();
       r := elements[index];
       index := index + 1;
 
@@ -376,15 +384,15 @@ module Enumerators {
   method IEnumeratorExample() {
     var e: Action<(), int> := new SeqIEnumerator([1, 2, 3, 4, 5]);
     var x := e.Invoke(());
-    assert e.produced == [1];
+    assert e.Produced() == [1];
     x := e.Invoke(());
-    assert e.produced == [1, 2];
+    assert e.Produced() == [1, 2];
     x := e.Invoke(());
-    assert e.produced == [1, 2, 3];
+    assert e.Produced() == [1, 2, 3];
     x := e.Invoke(());
-    assert e.produced == [1, 2, 3, 4];
+    assert e.Produced() == [1, 2, 3, 4];
     x := e.Invoke(());
-    assert e.produced == [1, 2, 3, 4, 5];
+    assert e.Produced() == [1, 2, 3, 4, 5];
   }
 
   method Main() {

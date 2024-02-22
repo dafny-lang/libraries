@@ -1,4 +1,3 @@
-
 include "Enumerators.dfy"
 
 module NoOp {
@@ -19,60 +18,55 @@ module NoOp {
       reads this, Repr 
       ensures Valid() ==> this in Repr 
       ensures Valid() ==> 
-        && |consumed| == |produced|
-        && CanProduce(consumed, produced)
+        && CanProduce(history)
       decreases height, 0
     {
       && this in Repr
       && ValidComponent(wrapped)
-      && CanProduce(consumed, produced)
-      && consumed == wrapped.consumed
-      && produced == wrapped.produced
+      && CanProduce(history)
+      && history == wrapped.history
     }
 
     constructor(wrapped: Action<T, R>) 
       requires wrapped.Valid()
-      requires wrapped.consumed == [] && wrapped.produced == []
+      requires wrapped.history == []
       ensures Valid()
     { 
       this.wrapped := wrapped;
 
-      consumed := [];
-      produced := [];
+      history := [];
       Repr := {this} + wrapped.Repr;
       height := wrapped.height + 1;
       new;
     }
 
-    ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
-      requires |consumed| == |produced|
-      requires CanProduce(consumed, produced)
+    ghost predicate CanConsume(history: seq<(T, R)>, next: T)
+      requires CanProduce(history)
       decreases height
     {
-      wrapped.CanConsume(consumed, produced, next)
+      wrapped.CanConsume(history, next)
     }
 
-    ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
-      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
+    ghost predicate CanProduce(history: seq<(T, R)>)
       decreases height
     {
-      wrapped.CanProduce(consumed, produced)
+      wrapped.CanProduce(history)
     }
 
     method Invoke(t: T) returns (r: R) 
-      requires Valid()
-      requires CanConsume(consumed, produced, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures fresh(Repr - old(Repr))
-      ensures consumed == old(consumed) + [t]
-      ensures produced == old(produced) + [r]
+      requires Requires(t)
+      reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+      ensures EnsuresTwostate(t)
     {
+      assert CanConsume(history, t);
       r := wrapped.Invoke(t);
 
       Repr := {this} + wrapped.Repr;
       Update(t, r);
+      assert Valid();
     }
   }
 
@@ -86,13 +80,13 @@ module NoOp {
     // Not sure if there's a more reusable workaround to the problem (which is going to recur frequently in this library)
     var noopAsAction: Action<(), Option<R>> := noop;
 
-    forall consumed, produced, next | noop.CanProduce(consumed, produced) ensures noopAsAction.CanConsume(consumed, produced, next) {
-      assert noop.CanConsume(consumed, produced, next);
+    forall history, next | noop.CanProduce(history) ensures noopAsAction.CanConsume(history, next) {
+      assert noop.CanConsume(history, next);
     }
 
     var limit := EnumerationBound(noop.wrapped);
-    forall consumed: seq<()>, produced: seq<Option<R>> | noopAsAction.CanProduce(consumed, produced) ensures exists n: nat | n <= limit :: Terminated(produced, None, n) {
-      assert noop.CanProduce(consumed, produced);
+    forall history | noopAsAction.CanProduce(history) ensures exists n: nat | n <= limit :: Terminated(Outputs(history), None, n) {
+      assert noop.CanProduce(history);
     }
     assert EnumerationBoundedBy(noop, limit);
   }

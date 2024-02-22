@@ -18,47 +18,46 @@ module Composed {
     ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr
-      ensures Valid() ==> CanProduce(consumed, produced)
+      ensures Valid() ==> CanProduce(history)
       decreases height, 0
     {
       && this in Repr
       && ValidComponent(first)
       && ValidComponent(second)
       && first.Repr !! second.Repr
-      && CanProduce(consumed, produced)
-      && consumed == first.consumed
-      && first.produced == second.consumed
-      && produced == second.produced
+      && CanProduce(history)
+      && Consumed() == first.Consumed()
+      && first.Produced() == second.Consumed()
+      && Produced() == second.Produced()
     }
 
     constructor(second: Action<V, R>, first: Action<T, V>) 
       requires first.Valid()
       requires second.Valid()
       requires first.Repr !! second.Repr
-      requires first.consumed == []
-      requires first.produced == []
-      requires second.consumed == []
-      requires second.produced == []
+      requires first.history == []
+      requires second.history == []
       ensures Valid()
-      ensures produced == []
+      ensures history == []
     { 
       this.first := first;
       this.second := second;
 
-      consumed := [];
-      produced := [];
+      history := [];
       Repr := {this} + first.Repr + second.Repr;
       height := first.height + second.height + 1;
     }
 
-    ghost predicate CanConsume(consumed: seq<T>, produced: seq<R>, next: T)
-      requires CanProduce(consumed, produced)
+    ghost predicate CanConsume(history: seq<(T, R)>, next: T)
+      requires CanProduce(history)
       decreases height
     {
-      forall piped: seq<V> | first.CanProduce(consumed, piped) && second.CanProduce(piped, produced) :: 
-        && first.CanConsume(consumed, piped, next)
-        && forall pipedNext: V | first.CanProduce(consumed + [next], piped + [pipedNext]) ::
-          && second.CanConsume(piped, produced, pipedNext)
+      forall piped: seq<V> | CanPipe(history, piped) :: 
+        && var firstHistory := Seq.Zip(Inputs(history), piped);
+        && var secondHistory := Seq.Zip(piped, Outputs(history));
+        && first.CanConsume(firstHistory, next)
+        && forall pipedNext: V | first.CanProduce(firstHistory + [(next, pipedNext)]) ::
+          && second.CanConsume(secondHistory, pipedNext)
 
       // Note that you can't compose any arbitrary first with a second:
       // if you need to read first.produced to know if you can consume another input,
@@ -66,25 +65,27 @@ module Composed {
       // (...unless there's a way of inferring what was produced from second.produced)
     }
 
-    ghost predicate CanProduce(consumed: seq<T>, produced: seq<R>)
-      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
+    ghost predicate CanProduce(history: seq<(T, R)>)
       decreases height
     {
-      && |consumed| == |produced|
-      && exists piped: seq<V> | first.CanProduce(consumed, piped) ::
-          second.CanProduce(piped, produced)
+      exists piped: seq<V> :: CanPipe(history, piped)
+    }
+
+    ghost predicate CanPipe(history: seq<(T, R)>, piped: seq<V>) 
+      decreases height, 0
+    {
+      && |piped| == |history|
+      && first.CanProduce(Seq.Zip(Inputs(history), piped))
+      && second.CanProduce(Seq.Zip(piped, Outputs(history)))
     }
 
     method Invoke(t: T) returns (r: R) 
-      requires Valid()
-      requires CanConsume(consumed, produced, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures fresh(Repr - old(Repr))
-      ensures consumed == old(consumed) + [t]
-      ensures produced == old(produced) + [r]
-      ensures CanProduce(consumed, produced)
+      requires Requires(t)
+      reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
+      ensures EnsuresTwostate(t)
     {
       assert first.Valid();
       var v := first.Invoke(t);
@@ -107,7 +108,7 @@ module Composed {
 
     // TODO: Need some lemmas
     var x := mapped.Invoke(());
-    assert mapped.produced == [Some(2)];
+    assert mapped.Produced() == [Some(2)];
     assert [x] == [Some(2)];
     assert x == Some(2);
   }

@@ -91,7 +91,8 @@ module Actions {
       && fresh(Repr - old(Repr))
     }
 
-    // Helper method for updating history
+    // Helpers
+
     ghost method Update(t: T, r: R)
       reads `history
       modifies `history
@@ -100,16 +101,26 @@ module Actions {
       history := history + [(t, r)];
     }
 
-    
+    ghost function Consumed(): seq<T> 
+      reads this
+    {
+      Inputs(history)
+    }
+
+    ghost function Produced(): seq<R> 
+      reads this
+    {
+      Outputs(history)
+    }
   }
 
   // Common action invariants
 
-  function Consumed<T, R>(history: seq<(T, R)>): seq<T> {
+  function Inputs<T, R>(history: seq<(T, R)>): seq<T> {
     Seq.Map((e: (T, R)) => e.0, history)
   }
 
-  function Produced<T, R>(history: seq<(T, R)>): seq<R> {
+  function Outputs<T, R>(history: seq<(T, R)>): seq<R> {
     Seq.Map((e: (T, R)) => e.1, history)
   }
 
@@ -122,7 +133,7 @@ module Actions {
     forall i | 0 < i < |input| ::
       var consumed := input[..(i - 1)];
       var next := input[i];
-      forall history | a.CanProduce(history) && Consumed(history) == consumed :: a.CanConsume(history, next)
+      forall history | a.CanProduce(history) && Inputs(history) == consumed :: a.CanConsume(history, next)
   }
 
   ghost predicate Terminated<T>(s: seq<T>, c: T, n: nat) {
@@ -141,7 +152,7 @@ module Actions {
   // TODO: generalize to "EventuallyProducesSequence"?
   ghost predicate ProducesTerminatedBy<T(!new), R(!new)>(i: Action<T, R>, c: R, limit: nat) {
     forall history: seq<(T, R)> | i.CanProduce(history) 
-      :: exists n: nat | n <= limit :: Terminated(Produced(history), c, n)
+      :: exists n: nat | n <= limit :: Terminated(Outputs(history), c, n)
   }
 
   // Class of actions whose precondition doesn't depend on history (probably needs a better name)
@@ -172,7 +183,7 @@ module Actions {
       && storage in Repr
       && 0 < storage.Length
       && 0 <= index <= storage.Length
-      && Consumed(history) == storage[..index]
+      && Consumed() == storage[..index]
     }
 
     constructor() 
@@ -220,12 +231,13 @@ module Actions {
 
       r := ();
       Update(t, r);
+      assert Valid();
     }
 
     function Values(): seq<T>
       requires Valid()
       reads Repr
-      ensures Values() == Consumed(history)
+      ensures Values() == Consumed()
     {
       storage[..index]
     }

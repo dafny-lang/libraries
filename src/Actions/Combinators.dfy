@@ -7,13 +7,16 @@ module ActionCombinators {
   import opened Wrappers
   import opened Enumerators
 
-  // a.produced == Seq.Map(f, a.consumed)
   method Function<T, R>(f: T --> R)
-    returns (a: Action<T, R>)
+    returns (a: SimpleAction<T, R>)
     ensures fresh(a.Repr)
+    ensures forall history: seq<(T, R)> | a.CanProduce(history), e <- history :: 
+      f.requires(e.0) && e.1 == f(e.0)
 
-  method EnumeratorOfSeq(s: seq<T>)
+  method EnumeratorOfSeq<T(!new)>(s: seq<T>)
     returns (e: Enumerator<T>)
+    ensures forall history: seq<((), Option<T>)> | e.CanProduce(history) :: 
+      Enumerated(Outputs(history)) == 
 
   // a.k.a. Chain(first, second)
   //
@@ -35,17 +38,17 @@ module ActionCombinators {
 
   // Produces Seq.Filter(what a produces, p)
   // a has to be an Enumerator to ensure Invoke() eventually terminates
-  method Filter<T>(e: Enumerator<T>, p: T -> bool)
+  method Filter<T(!new)>(e: Enumerator<T>, p: T -> bool)
     returns (filtered: Enumerator<T>)
 
   // Produces Seq.Flatten(Actions.Map(inner, (what outer produces)))
   // inner needs to be an action rather than just a function
   // since enumerators are usually objects that need allocation.
-  method Nested<T, V>(outer: Enumerator<V>, inner: Action<V, Enumerator<T>>)
+  method Nested<T(!new), V(!new)>(outer: Enumerator<V>, inner: Action<V, Enumerator<T>>)
     returns (nested: Enumerator<T>)
 
-  method ForEach(source: Enumerator<T>, sink: Aggregator<T>)
+  method ForEach<T(!new)>(source: Enumerator<T>, sink: Aggregator<T>)
 
-  method Collect(source: Enumerator<T>)
+  method Collect<T(!new)>(source: Enumerator<T>)
     returns (s: seq<T>)
 }
