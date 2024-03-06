@@ -728,7 +728,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* inv(b, xs) ==> inv(FoldLeft(f, b, xs), []). */
-  lemma LemmaInvFoldLeft<A,B>(inv: (B, seq<A>) -> bool,
+  lemma LemmaInvFoldLeft<A(!new),B(!new)>(inv: (B, seq<A>) -> bool,
                               stp: (B, A, B) -> bool,
                               f: (B, A) -> B,
                               b: B,
@@ -786,7 +786,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* inv([], b) ==> inv(xs, FoldRight(f, xs, b)) */
-  lemma LemmaInvFoldRight<A,B>(inv: (seq<A>, B) -> bool,
+  lemma LemmaInvFoldRight<A(!new),B(!new)>(inv: (seq<A>, B) -> bool,
                                stp: (A, B, B) -> bool,
                                f: (A, B) -> B,
                                b: B,
@@ -833,7 +833,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Proves that any two sequences that are sorted by a total order and that have the same elements are equal. */
-  lemma SortedUnique<T>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
+  lemma SortedUnique<T(!new)>(xs: seq<T>, ys: seq<T>, R: (T, T) -> bool)
     requires SortedBy(xs, R)
     requires SortedBy(ys, R)
     requires TotalOrdering(R)
@@ -853,7 +853,7 @@ module {:options "-functionSyntax:4"} Seq {
   }
 
   /* Converts a set to a sequence that is ordered w.r.t. a given total order. */
-  function SetToSortedSeq<T>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
+  function SetToSortedSeq<T(!new)>(s: set<T>, R: (T, T) -> bool): (xs: seq<T>)
     requires TotalOrdering(R)
     ensures multiset(s) == multiset(xs)
     ensures SortedBy(xs, R)

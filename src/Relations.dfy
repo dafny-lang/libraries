@@ -92,7 +92,7 @@ module {:options "-functionSyntax:4"} Relations {
     max in s && forall x | x in s && R(max, x) :: R(x, max)
   }
 
-  lemma LemmaNewFirstElementStillSortedBy<T>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
+  lemma LemmaNewFirstElementStillSortedBy<T(!new)>(x: T, s: seq<T>, lessThan: (T, T) -> bool)
     requires SortedBy(s, lessThan)
     requires |s| == 0 || lessThan(x, s[0])
     requires TotalOrdering(lessThan)
