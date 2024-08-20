@@ -92,16 +92,21 @@ module {:options "-functionSyntax:4"} ModInternals {
   {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x + n, n);
+    assert x + n == n * ((x + n) / n) + ((x + n) % n);
     var zp := (x + n) / n - x / n - 1;
     assert 0 == n * zp + ((x + n) % n) - (x % n) by { LemmaMulDistributes(); }
     if (zp > 0) {
       assert (x + n) / n == x / n + 1 by {
         LemmaMulInequality(1, zp, n);
+        assert n <= zp * n;
+        assert n <= x;
       }
     }
     if (zp < 0) {
       assert (x + n) / n == x / n + 1 by {
         LemmaMulInequality(zp, -1, n);
+        assert zp * n <= -n;
+        assert n <= x;
       }
     }
   }
@@ -112,16 +117,21 @@ module {:options "-functionSyntax:4"} ModInternals {
   {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x - n, n);
+    assert x - n == n * ((x - n) / n) + ((x - n) % n);
     var zm := (x - n) / n - x / n + 1;
     assert 0 == n * zm + ((x - n) % n) - (x % n) by { LemmaMulDistributes(); }
     if (zm > 0) {
       assert (x - n) / n == x / n - 1 by {
         LemmaMulInequality(1, zm, n);
+        assert n <= zm * n;
+        assert n <= x;
       }
     }
     if (zm < 0) {
       assert (x - n) / n == x / n - 1 by {
         LemmaMulInequality(zm, -1, n);
+        assert n <= zm * -n;
+        assert n <= x;
       }
     }
   }
@@ -133,16 +143,21 @@ module {:options "-functionSyntax:4"} ModInternals {
   {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x + n, n);
+    assert x + n == n * ((x + n) / n) + ((x + n) % n);
     var zp := (x + n) / n - x / n - 1;
     assert 0 == n * zp + ((x + n) % n) - (x % n) by { LemmaMulDistributes(); }
     if (zp > 0) {
       assert (x + n) % n == x % n by {
         LemmaMulInequality(1, zp, n);
+        assert n <= zp * n;
+        assert n <= x;
       }
     }
     if (zp < 0) {
       assert (x + n) % n == x % n by {
         LemmaMulInequality(zp, -1, n);
+        assert zp * n <= -n;
+        assert n <= x;
       }
     }
   }
@@ -153,16 +168,21 @@ module {:options "-functionSyntax:4"} ModInternals {
   {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x - n, n);
+    assert x - n == n * ((x - n) / n) + ((x - n) % n);
     var zm := (x - n) / n - x / n + 1;
     assert 0 == n * zm + ((x - n) % n) - (x % n) by { LemmaMulDistributes(); }
     if (zm > 0) {
       assert (x - n) % n == x % n by {
         LemmaMulInequality(1, zm, n);
+        assert n <= zm * n;
+        assert n <= x;
       }
     }
     if (zm < 0) {
       assert (x - n) % n == x % n by {
         LemmaMulInequality(zm, -1, n);
+        assert n <= zm * -n;
+        assert n <= x;
       }
     }
   }
