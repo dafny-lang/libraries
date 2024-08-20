@@ -229,7 +229,7 @@ module {:options "-functionSyntax:4"} Dafny.Collections.Sets {
   {
     var range := SetRange(a, b);
     forall e {:trigger e in range}{:trigger e in x} | e in x
-      ensures e in range;
+      ensures e in range
     {
     }
     assert x <= range;
