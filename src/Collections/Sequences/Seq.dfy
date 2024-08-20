@@ -846,3 +846,4 @@ module {:options "-functionSyntax:4"} Seq {
       result := next + result;
     }
   }
+}
