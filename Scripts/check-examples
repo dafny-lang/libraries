@@ -76,7 +76,7 @@ defaultCommand=
 defaultExit=
 defaultLang=
 useHeadings=0
-defOptions="--function-syntax:4 --use-basename-for-filename --unicode-char:false --allow-warnings"
+defOptions="--function-syntax:4 --use-basename-for-filename --unicode-char:false --allow-warnings --show-snippets=false"
 legacyOptions="-functionSyntax:4 -useBaseNameForFileName"
 
 while getopts 'md:x:l:' opt; do
