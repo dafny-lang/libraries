@@ -89,7 +89,7 @@ module {:options "-functionSyntax:4"} ModInternals {
   lemma LemmaDivAddDenominator(n: int, x: int)
     requires n > 0
     ensures (x + n) / n == x / n + 1
-    {
+  {
     LemmaFundamentalDivMod(x, n);
     LemmaFundamentalDivMod(x + n, n);
     var zp := (x + n) / n - x / n - 1;
