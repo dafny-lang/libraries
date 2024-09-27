@@ -56,13 +56,15 @@ module {:options "-functionSyntax:4"} FileIO {
    * Private API - these are intentionally not exported from the module and should not be used elsewhere
    */
 
+//TODO: Dots in externs doesn't work in Go, dropping it for now to make it work in Go. Find a better solution.
   method
-    {:extern "DafnyLibraries.FileIO", "INTERNAL_ReadBytesFromFile"}
+    {:extern "INTERNAL_ReadBytesFromFile"}
   INTERNAL_ReadBytesFromFile(path: string)
     returns (isError: bool, bytesRead: seq<bv8>, errorMsg: string)
 
+//TODO: Dots in externs doesn't work in Go, dropping it for now to make it work in Go. Find a better solution.
   method
-    {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"}
+    {:extern "INTERNAL_WriteBytesToFile"}
   INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
     returns (isError: bool, errorMsg: string)
 }
