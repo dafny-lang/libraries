@@ -45,7 +45,7 @@ jobs:
       - name: Generate Report
         run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-resource-count 40000000
 
-      - uses: actions/upload-artifact@v2  # upload test results
+      - uses: actions/upload-artifact@v4  # upload test results
         with:
           name: verification-results
           path: '**/TestResults/*.trx'
