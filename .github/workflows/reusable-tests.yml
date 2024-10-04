@@ -47,6 +47,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4  # upload test results
         with:
-          name: verification-results
+          name: verification-results-${{ inputs.dafny-version }}
           path: '**/TestResults/*.trx'
           if-no-files-found: error
