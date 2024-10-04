@@ -724,7 +724,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures forall x: int, a: int, d: int {:trigger a / d, x * d, x * a}
               :: 0 < x && 0 <= a && 0 < d ==> 0 < x * d  &&  a / d == (x * a) / (x * d)
   {
-    forall x: int, a: int, d: int {:trigger a / d, x * d, x * a} | 0 < x && 0 <= a && 0 < d
+    forall x: int, a: int, d: int {:nowarn} | 0 < x && 0 <= a && 0 < d
       ensures 0 < x * d  &&  a / d == (x * a) / (x * d)
     {
       LemmaDivMultiplesVanishQuotient(x, a, d);
@@ -936,7 +936,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures forall a: int, b: int, c: int {:trigger b * (a / b) % (b * c)}
               :: 0 <= a && 0 < b && 0 < c ==> 0 < b * c && (b * (a / b) % (b * c)) <= b * (c - 1)
   {
-    forall a: int, b: int, c: int {:trigger b * (a / b) % (b * c)} | 0 <= a && 0 < b && 0 < c
+    forall a: int, b: int, c: int {:nowarn} | 0 <= a && 0 < b && 0 < c
       ensures 0 < b * c && (b * (a / b) % (b * c)) <= b * (c - 1)
     {
       LemmaPartBound1(a, b, c);
@@ -1306,7 +1306,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures forall x: int, d: int, q: int, r: int {:trigger q * d + r, x % d}
               :: d != 0 && 0 <= r < d && x == q * d + r ==> q == x / d && r == x % d
   {
-    forall x: int, d: int, q: int, r: int {:trigger q * d + r, x % d} | d != 0 && 0 <= r < d && x == q * d + r
+    forall x: int, d: int, q: int, r: int {:nowarn} | d != 0 && 0 <= r < d && x == q * d + r
       ensures q == x / d && r == x % d
     {
       LemmaFundamentalDivModConverse(x, d, q, r);
@@ -1499,7 +1499,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures forall x: int, k: int, d: int {:trigger x % (d * k)}
               :: 1 < d && 0 < k ==> 0 < d * k && x % d <= x % (d * k)
   {
-    forall x: int, k: int, d: int {:trigger x % (d * k)} | 1 < d && 0 < k
+    forall x: int, k: int, d: int {:nowarn} | 1 < d && 0 < k
       ensures d * k > 0 && x % d <= x % (d * k)
     {
       LemmaModOrdering(x, k, d);
@@ -1563,7 +1563,7 @@ module {:options "-functionSyntax:4"} DivMod {
     ensures forall x: int, y: int, z: int {:trigger y * z, x % y}
               :: 0 <= x && 0 < y && 0 < z ==> y * z > 0 && (x % y) % (y * z) < y
   {
-    forall x: int, y: int, z: int {:trigger y * z, x % y} | 0 <= x && 0 < y && 0 < z
+    forall x: int, y: int, z: int {:nowarn} | 0 <= x && 0 < y && 0 < z
       ensures y * z > 0 && (x % y) % (y * z) < y
     {
       LemmaPartBound2(x, y, z);
