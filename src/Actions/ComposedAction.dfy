@@ -85,7 +85,6 @@ module Composed {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
     {
       assert first.Valid();
       var v := first.Invoke(t);

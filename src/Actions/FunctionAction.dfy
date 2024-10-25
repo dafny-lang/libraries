@@ -55,7 +55,6 @@ module Functions {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
     {
       assert Valid();
       r := f(t);

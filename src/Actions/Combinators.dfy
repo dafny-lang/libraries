@@ -7,12 +7,15 @@ module ActionCombinators {
   import opened Wrappers
   import opened Enumerators
 
+  // Wrapping a side-effect free function as an action
   method Function<T, R>(f: T --> R)
     returns (a: Action<T, R>)
     ensures fresh(a.Repr)
     ensures forall history: seq<(T, R)> | a.CanProduce(history), e <- history :: 
       f.requires(e.0) && e.1 == f(e.0)
 
+  // Producing an enumerator for a given sequence.
+  // Explicitly specified to enumerate that sequence.
   method EnumeratorOfSeq<T(!new)>(s: seq<T>)
     returns (e: Enumerator<T>)
     ensures EnumeratesSeq(e, s)

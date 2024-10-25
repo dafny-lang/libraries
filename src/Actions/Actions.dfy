@@ -6,7 +6,7 @@ include "../Collections/Sequences/Seq.dfy"
 
 include "GenericAction.dfy"
 
-module Actions {
+module {:options "--function-syntax:4"} Actions {
 
   import opened Wrappers
   import opened Frames
@@ -22,9 +22,9 @@ module Actions {
   // Consider naming this something more specific, related to the assumptions:
   //  1. Validatable (and doesn't modify anything not in Repr)
   //  2. Behavior specified only by referring to consumed and produced.
-  trait {:termination false} Action<T, R> extends GenericAction<T, R>, Validatable {
+  trait {:termination false} Action<T, T', R, R'> extends GenericAction<T, R>, Validatable {
 
-    ghost var history: seq<(T, R)>
+    ghost var history: seq<(T', R')>
 
     ghost predicate Valid() 
       reads this, Repr 
@@ -47,7 +47,9 @@ module Actions {
     // CanConsume(history, nextIn) ==> exists nextOut :: CanProduce(history + [(nextIn, nextOut)])
     // Does that need to be explicitly part of the spec?
     ghost predicate CanConsume(history: seq<(T, R)>, next: T)
+      requires Valid()
       requires CanProduce(history)
+      reads Repr
       decreases height
 
     ghost predicate CanProduce(history: seq<(T, R)>)
@@ -75,19 +77,11 @@ module Actions {
     {
       NatTerminationMetric(height)
     }
-    ghost predicate Ensures(t: T, r: R) 
+    twostate predicate Ensures(t: T, new r: R) 
       reads Reads(t)
     {
       && Valid()
-      && 0 < |history|
-      && history[|history| - 1] == (t, r)
-    }
-    twostate predicate EnsuresTwostate(t: T) 
-      reads Reads(t)
-    {
-      && 0 < |history|
-      && history[..|history| - 1] == old(history)
-      && CanProduce(history)
+      && history == old(history) + [(t, r)]
       && fresh(Repr - old(Repr))
     }
 
@@ -215,7 +209,6 @@ module Actions {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
     {
       if index == storage.Length {
         var newStorage := new T[storage.Length * 2];
@@ -254,6 +247,7 @@ module Actions {
   }
 
   // Other primitives/examples todo:
+  //  * Promise-like single-use Action<T, ()> to capture a value for reading later
   //  * Eliminate all the (!new) restrictions - look into "older" parameters?
   //    * How to state the invariant that a constructor as an action creates a new object every time?
   //      * Lemma that takes produced as input, instead of forall produced?
@@ -263,5 +257,7 @@ module Actions {
   //    * IsEnumerator(a) == "a eventually produces None" && "a then only produces None"
   //    * Build on that to make CrossProduct(enumerable1, enumerable2)
   //  * Example of adapting an iterator
+  //  * Example of enumerating all possible values of a type (for test generation)
+  //    * Needs to handle infinite types too, hence needs the "eventually produces something" concept
 
 }

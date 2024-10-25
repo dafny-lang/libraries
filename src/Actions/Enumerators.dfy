@@ -1,7 +1,7 @@
 
 include "Actions.dfy"
 
-module Enumerators {
+module {:options "--function-syntax:4"} Enumerators {
 
   import opened Actions
   import opened Wrappers
@@ -237,7 +237,6 @@ module Enumerators {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
     {
       assert Valid();
       if index < |elements| {
@@ -313,7 +312,6 @@ module Enumerators {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
     {
       assert Valid();
       r := elements[index];

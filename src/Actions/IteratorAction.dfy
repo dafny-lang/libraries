@@ -32,7 +32,7 @@ module IteratorActionExample {
     ghost predicate Valid() 
       reads this, Repr 
       ensures Valid() ==> this in Repr 
-      ensures Valid() ==> CanProduce(consumed, produced)
+      ensures Valid() ==> CanProduce(history)
       decreases height, 0
     {
       && this in Repr
@@ -43,7 +43,7 @@ module IteratorActionExample {
       && this !in i._reads
       && this !in i._new
       && (more ==> i.Valid())
-      && CanProduce(consumed, produced)
+      && CanProduce(history)
     }
 
     constructor(i: Iter<T>) 
@@ -54,36 +54,34 @@ module IteratorActionExample {
       this.i := i;
       this.more := true;
 
+      history := [];
       Repr := {this, i} + i._modifies + i._reads + i._new;
+      new;
+      assert (set x | x in Enumerated(Outputs(history))) == {};
     }
 
-    ghost predicate CanConsume(consumed: seq<()>, produced: seq<Option<T>>, next: ())
-      requires |consumed| == |produced|
-      requires CanProduce(consumed, produced)
+    ghost predicate CanConsume(history: seq<((), Option<T>)>, next: ())
+      requires CanProduce(history)
       decreases height
     {
       true
     }
 
-    ghost predicate CanProduce(consumed: seq<()>, produced: seq<Option<T>>)
-      ensures CanProduce(consumed, produced) ==> |consumed| == |produced|
+    ghost predicate CanProduce(history: seq<((), Option<T>)>)
       decreases height
     { 
-      && |consumed| == |produced|
-      && var enumeratedSet := (set x | x in Enumerated(produced));
-      && enumeratedSet < i.s
+      && var enumeratedSet := (set x | x in Enumerated(Outputs(history)));
+      && enumeratedSet <= i.s
     }
 
     method Invoke(t: ()) returns (r: Option<T>) 
-      requires Valid()
-      requires CanConsume(consumed, produced, t)
-      modifies Repr
-      decreases height
-      ensures Valid()
-      ensures fresh(Repr - old(Repr))
-      ensures consumed == old(consumed) + [t]
-      ensures produced == old(produced) + [r]
+      requires Requires(t)
+      reads Reads(t)
+      modifies Modifies(t)
+      decreases Decreases(t).Ordinal()
+      ensures Ensures(t, r)
     {
+      assert Valid();
       assert this !in i._reads;
       if more {
         r := Some(i.x);

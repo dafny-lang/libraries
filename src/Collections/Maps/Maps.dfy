@@ -100,6 +100,13 @@ module {:options "-functionSyntax:4"} Maps {
     map y | y in m.Values :: var x :| x in m.Keys && m[x] == y; x
   }
 
+  function {:opaque} BetterInvert<X(!new), Y(!new)>(m: map<X, Y>): map<Y, X>
+    requires Injective(m)
+  {
+    reveal Injective();
+    map k | k in m :: m[k] := k
+  }
+
   /* Inverted maps are injective. */
   lemma LemmaInvertIsInjective<X, Y>(m: map<X, Y>)
     ensures Injective(Invert(m))

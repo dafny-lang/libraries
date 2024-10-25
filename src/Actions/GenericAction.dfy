@@ -17,21 +17,17 @@ module GenericActions {
     ghost predicate Requires(t: T)
       reads Reads(t)
     ghost function Reads(t: T): set<object>
+      // requires Requires(t)
       reads this
       ensures this in Reads(t)
     ghost function Modifies(t: T): set<object>
       reads Reads(t)
     ghost function Decreases(t: T): TerminationMetric
       reads Reads(t)
-    // These are split in two because we can't pass r
-    // to a twostate predicate (since it might not be allocated
-    // in the previous state)
-    ghost predicate Ensures(t: T, r: R)
-      reads Reads(t)
-    twostate predicate EnsuresTwostate(t: T)
+    twostate predicate Ensures(t: T, new r: R)
       reads Reads(t)
 
-    // Action action implementation
+    // Actual action implementation
 
     method Invoke(t: T) returns (r: R) 
       requires Requires(t)
@@ -39,7 +35,6 @@ module GenericActions {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
   }
 
 }

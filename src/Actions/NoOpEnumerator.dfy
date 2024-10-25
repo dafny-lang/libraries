@@ -59,7 +59,6 @@ module NoOp {
       modifies Modifies(t)
       decreases Decreases(t).Ordinal()
       ensures Ensures(t, r)
-      ensures EnsuresTwostate(t)
     {
       assert CanConsume(history, t);
       r := wrapped.Invoke(t);
