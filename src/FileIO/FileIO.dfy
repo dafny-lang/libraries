@@ -52,7 +52,7 @@ module {:options "-functionSyntax:4"} FileIO {
     return if isError then Failure(errorMsg) else Success(());
   }
 
-/**
+  /**
     * Attempts to append the given bytes to the file at the given file path,
     * creating nonexistent parent directories as necessary.
     * If an error occurs, a `Result.Failure` value is returned containing an implementation-specific
