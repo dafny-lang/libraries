@@ -1,4 +1,5 @@
 // RUN: %run "%s" > "%t"
+// RUN: %OutputCheck --file-to-check "%t" "%s"
 // CHECK-L: [-6, 0, 1, 3, 7, 7, 9]
 // CHECK-NEXT-L: 3
 
