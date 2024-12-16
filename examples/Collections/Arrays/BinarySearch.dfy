@@ -1,4 +1,7 @@
 // RUN: %run "%s" > "%t"
+
+// OutputCheck is broken, see https://github.com/dafny-lang/libraries/issues/164
+// not working: %OutputCheck --file-to-check "%t" "%s"
 // CHECK-L: [-6, 0, 1, 3, 7, 7, 9]
 // CHECK-NEXT-L: 3
 
