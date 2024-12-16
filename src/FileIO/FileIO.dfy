@@ -20,7 +20,7 @@ include "../Wrappers.dfy"
 module {:options "-functionSyntax:4"} FileIO {
   import opened Wrappers
 
-  export provides ReadBytesFromFile, WriteBytesToFile, Wrappers
+  export provides AppendBytesToFile, ReadBytesFromFile, WriteBytesToFile, Wrappers
 
   /*
    * Public API
@@ -52,6 +52,20 @@ module {:options "-functionSyntax:4"} FileIO {
     return if isError then Failure(errorMsg) else Success(());
   }
 
+  /**
+    * Attempts to append the given bytes to the file at the given file path,
+    * creating nonexistent parent directories as necessary.
+    * If an error occurs, a `Result.Failure` value is returned containing an implementation-specific
+    * error message (which may also contain a stack trace).
+    *
+    * NOTE: See the module description for limitations on the path argument.
+    */
+  method AppendBytesToFile(path: string, bytes: seq<bv8>) returns (res: Result<(), string>)
+  {
+    var isError, errorMsg := INTERNAL_AppendBytesToFile(path, bytes);
+    return if isError then Failure(errorMsg) else Success(());
+  }
+
   /*
    * Private API - these are intentionally not exported from the module and should not be used elsewhere
    */
@@ -64,5 +78,10 @@ module {:options "-functionSyntax:4"} FileIO {
   method
     {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"}
   INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
+    returns (isError: bool, errorMsg: string)
+
+  method
+    {:extern "DafnyLibraries.FileIO", "INTERNAL_AppendBytesToFile"}
+  INTERNAL_AppendBytesToFile(path: string, bytes: seq<bv8>)
     returns (isError: bool, errorMsg: string)
 }

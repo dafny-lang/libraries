@@ -1,5 +1,7 @@
 // RUN: %run "%s" > "%t"
-// RUN: %OutputCheck --file-to-check "%t" "%s"
+
+// OutputCheck is broken, see https://github.com/dafny-lang/libraries/issues/164
+// not working: %OutputCheck --file-to-check "%t" "%s"
 // CHECK-L: Hello
 // CHECK-NEXT-L: Error: 'name' was not found
 // CHECK-NEXT-L: Hello
