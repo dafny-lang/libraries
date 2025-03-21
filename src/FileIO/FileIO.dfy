@@ -6,7 +6,7 @@
 // RUN: %verify "%s"
 
 include "../Wrappers.dfy"
-include "../dafny/BoundedInts.dfy"
+include "../BoundedInts.dfy"
 
 /**
   * This module provides basic file I/O operations: reading and writing bytes from/to a file.
@@ -20,7 +20,7 @@ include "../dafny/BoundedInts.dfy"
   */
 module {:options "-functionSyntax:4"} FileIO {
   import opened Wrappers
-  import opened Dafny.BoundedInts
+  import opened BoundedInts
 
   export provides AppendBytesToFile, ReadBytesFromFile, WriteBytesToFile, Wrappers, BoundedInts
 
