@@ -20,8 +20,9 @@ include "../dafny/BoundedInts.dfy"
   */
 module {:options "-functionSyntax:4"} FileIO {
   import opened Wrappers
+  import opened BoundedInts
 
-  export provides AppendBytesToFile, ReadBytesFromFile, WriteBytesToFile, Wrappers
+  export provides AppendBytesToFile, ReadBytesFromFile, WriteBytesToFile, Wrappers, BoundedInts
 
   /*
    * Public API
