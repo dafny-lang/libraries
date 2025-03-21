@@ -6,6 +6,7 @@
 // RUN: %verify "%s"
 
 include "../Wrappers.dfy"
+include "../dafny/BoundedInts.dfy"
 
 /**
   * This module provides basic file I/O operations: reading and writing bytes from/to a file.
@@ -33,7 +34,7 @@ module {:options "-functionSyntax:4"} FileIO {
     *
     * NOTE: See the module description for limitations on the path argument.
     */
-  method ReadBytesFromFile(path: string) returns (res: Result<seq<bv8>, string>) {
+  method ReadBytesFromFile(path: string) returns (res: Result<seq<uint8>, string>) {
     var isError, bytesRead, errorMsg := INTERNAL_ReadBytesFromFile(path);
     return if isError then Failure(errorMsg) else Success(bytesRead);
   }
@@ -46,7 +47,7 @@ module {:options "-functionSyntax:4"} FileIO {
     *
     * NOTE: See the module description for limitations on the path argument.
     */
-  method WriteBytesToFile(path: string, bytes: seq<bv8>) returns (res: Result<(), string>)
+  method WriteBytesToFile(path: string, bytes: seq<uint8>) returns (res: Result<(), string>)
   {
     var isError, errorMsg := INTERNAL_WriteBytesToFile(path, bytes);
     return if isError then Failure(errorMsg) else Success(());
@@ -60,7 +61,7 @@ module {:options "-functionSyntax:4"} FileIO {
     *
     * NOTE: See the module description for limitations on the path argument.
     */
-  method AppendBytesToFile(path: string, bytes: seq<bv8>) returns (res: Result<(), string>)
+  method AppendBytesToFile(path: string, bytes: seq<uint8>) returns (res: Result<(), string>)
   {
     var isError, errorMsg := INTERNAL_AppendBytesToFile(path, bytes);
     return if isError then Failure(errorMsg) else Success(());
@@ -73,15 +74,15 @@ module {:options "-functionSyntax:4"} FileIO {
   method
     {:extern "DafnyLibraries.FileIO", "INTERNAL_ReadBytesFromFile"}
   INTERNAL_ReadBytesFromFile(path: string)
-    returns (isError: bool, bytesRead: seq<bv8>, errorMsg: string)
+    returns (isError: bool, bytesRead: seq<uint8>, errorMsg: string)
 
   method
     {:extern "DafnyLibraries.FileIO", "INTERNAL_WriteBytesToFile"}
-  INTERNAL_WriteBytesToFile(path: string, bytes: seq<bv8>)
+  INTERNAL_WriteBytesToFile(path: string, bytes: seq<uint8>)
     returns (isError: bool, errorMsg: string)
 
   method
     {:extern "DafnyLibraries.FileIO", "INTERNAL_AppendBytesToFile"}
-  INTERNAL_AppendBytesToFile(path: string, bytes: seq<bv8>)
+  INTERNAL_AppendBytesToFile(path: string, bytes: seq<uint8>)
     returns (isError: bool, errorMsg: string)
 }
