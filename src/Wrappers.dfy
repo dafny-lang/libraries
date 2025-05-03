@@ -103,6 +103,11 @@ module {:options "-functionSyntax:4"} Wrappers {
     if condition then Pass else Fail(error)
   }
 
+  // An improvement over Need if the error type is more complex than a static string
+  // Replace
+  // Need(condition, ErrorFunction());
+  // with
+  // FNeed(condition, () => ErrorFunction());
   function  FNeed<E>(condition: bool, error: () --> E): (result: Outcome<E>)
     requires !condition ==> error.requires()
   {
