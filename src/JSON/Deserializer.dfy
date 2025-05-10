@@ -77,7 +77,7 @@ module {:options "-functionSyntax:4"} JSON.Deserializer {
       else
         var c := str[start + 1];
         if c == 'u' as uint16 then
-          if |str| <= start + 6 then
+          if |str| < start + 6 then
             Failure(EscapeAtEOS)
           else
             var code := str[start + 2..start + 6];
