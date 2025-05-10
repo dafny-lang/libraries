@@ -105,7 +105,8 @@ module JSON.Tests.AbstractSyntaxWrapper refines Wrapper {
 module JSON.Tests {
 
   import opened Seq
-  import JSON.Spec
+  import Spec
+  import opened BoundedInts
 
   const VECTORS := [
     "true",
@@ -140,6 +141,6 @@ module JSON.Tests {
   method Main() {
     ZeroCopyWrapper.TestStrings(VECTORS);
     AbstractSyntaxWrapper.TestStrings(VECTORS);
-    expect Spec.EscapeUnicode(7) == "0007";
+    expect Spec.EscapeUnicode(7) == ['0' as uint16, '0' as uint16, '0' as uint16, '7' as uint16];
   }
 }
