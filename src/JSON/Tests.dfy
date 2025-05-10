@@ -140,10 +140,6 @@ module JSON.Tests {
   method Main() {
     ZeroCopyWrapper.TestStrings(VECTORS);
     AbstractSyntaxWrapper.TestStrings(VECTORS);
-  }
-
-  @Test
-  method SpecTest() {
     expect Spec.EscapeUnicode(7) == "0007";
   }
 }
