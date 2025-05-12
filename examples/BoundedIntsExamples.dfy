@@ -1,4 +1,4 @@
-// RUN: %run %s 
+// RUN: %run %s
 
 include "../src/dafny/BoundedInts.dfy"
 
