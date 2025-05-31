@@ -23,7 +23,7 @@ module {:options "-functionSyntax:4"} Seq {
   import opened Wrappers
   import opened MergeSort
   import opened Relations
-  import Math
+  import Dafny.Math
 
   /**********************************************************
    *
