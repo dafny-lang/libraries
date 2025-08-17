@@ -67,6 +67,7 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries 
     ghost const inv: (K, V) -> bool
 
     constructor {:extern} (ghost inv: (K, V) -> bool, bytesKeys: bool := false)
+      ensures 0 == |this.content().Items| 
       ensures this.inv == inv
 
     function {:extern} content(): map<K, V>
