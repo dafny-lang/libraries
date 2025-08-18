@@ -27,7 +27,7 @@ module {:options "-functionSyntax:4"} MutableMapExamples {
   }
 
   method Main() {
-    var m := new MutableMap<string,string>();
+    var m := new MutableMap((k: string, v: string) => true, false);
     AssertAndExpect(m.Keys() == {});
     AssertAndExpect(m.Values() == {});
     AssertAndExpect(m.Items() == {});
