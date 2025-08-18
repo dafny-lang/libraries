@@ -18,9 +18,15 @@ import java.math.BigInteger;
 public class MutableMap<K, V> implements DafnyLibraries.MutableMapTrait<K, V> {
   private ConcurrentHashMap<K,V> m;
 
-  public MutableMap(dafny.TypeDescriptor<K> _td_K, dafny.TypeDescriptor<V> _td_V) {
+  // TODO: remove bytesKeys boolean https://github.com/dafny-lang/dafny/issues/6333
+  public MutableMap(
+    dafny.TypeDescriptor<K> _td_K, 
+    dafny.TypeDescriptor<V> _td_V,
+    boolean bytesKeys) {
     m = new ConcurrentHashMap<K,V>();
   }
+
+  public void __ctor(boolean bytesKeys) {}
 
   @Override 
   public DafnyMap<K,V> content() {
