@@ -62,8 +62,13 @@ module {:extern "DafnyLibraries"} {:options "-functionSyntax:4"} DafnyLibraries 
   }
 
   class {:extern} MutableMap<K(==),V(==)> extends MutableMapTrait<K,V> {
-    constructor {:extern} ()
+
+    // Invariant on key-value pairs this map may hold
+    ghost const inv: (K, V) -> bool
+
+    constructor {:extern} (ghost inv: (K, V) -> bool, bytesKeys: bool := false)
       ensures this.content() == map[]
+      ensures this.inv == inv
 
     function {:extern} content(): map<K, V>
       reads this
