@@ -251,6 +251,8 @@ module {:options "-functionSyntax:4"} Utf8EncodingForm refines UnicodeEncodingFo
     var y := (thirdByte & 0x3F) as bv24;
     var x := (fourthByte & 0x3F) as bv24;
     assert {:split_here} true;
-    (u1 << 18) | (u2 << 16) | (z << 12) | (y << 6) | x as Unicode.ScalarValue
+    var v := (u1 << 18) | (u2 << 16) | (z << 12) | (y << 6) | x as Unicode.ScalarValue;
+    assert EncodeScalarValueQuadrupleByte(v) == m;
+    v
   }
 }
